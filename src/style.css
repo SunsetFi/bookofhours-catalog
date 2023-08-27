@@ -1,0 +1,10 @@
+/*
+This should be kept minimal and only provide globals
+or non-react component styles.
+*/
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
