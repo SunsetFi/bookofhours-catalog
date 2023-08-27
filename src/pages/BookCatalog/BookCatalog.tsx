@@ -8,8 +8,10 @@ import {
   mergeMap,
 } from "rxjs";
 
-import { Box, TableRow, TableCell, Typography } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { DataGrid } from "@mui/x-data-grid/DataGrid";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 import { observeAll } from "@/observables";
 import { useDIDependency } from "@/container";
@@ -31,6 +33,21 @@ interface TableBookItem {
     iconUrl: string;
   } | null;
 }
+
+const renderCellTextWrap = ({ value }: GridRenderCellParams<TableBookItem>) => (
+  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Typography
+      variant="body2"
+      sx={{
+        width: "100%",
+        height: "100%",
+        whiteSpace: "break-spaces",
+      }}
+    >
+      {value}
+    </Typography>
+  </Box>
+);
 
 const columns: GridColDef<TableBookItem>[] = [
   {
@@ -60,11 +77,13 @@ const columns: GridColDef<TableBookItem>[] = [
     field: "label",
     headerName: "Name",
     width: 200,
+    renderCell: renderCellTextWrap,
   },
   {
     field: "location",
     headerName: "Location",
     width: 150,
+    renderCell: renderCellTextWrap,
   },
   {
     field: "mastery",
@@ -117,22 +136,7 @@ const columns: GridColDef<TableBookItem>[] = [
     field: "description",
     headerName: "Description",
     flex: 2,
-    renderCell: ({ value }) => (
-      <Box
-        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-      >
-        <Typography
-          variant="body2"
-          sx={{
-            width: "100%",
-            height: "100%",
-            whiteSpace: "break-spaces",
-          }}
-        >
-          {value}
-        </Typography>
-      </Box>
-    ),
+    renderCell: renderCellTextWrap,
   },
 ];
 
@@ -173,9 +177,7 @@ function elementStackToItem(
   );
 }
 
-function autoRowHeight() {
-  return "auto" as const;
-}
+const pageSizeOptions = [10, 25, 50];
 
 const BookCatalog = () => {
   const api = useDIDependency(API);
@@ -209,80 +211,15 @@ const BookCatalog = () => {
           columns={columns}
           rows={readables}
           rowHeight={100}
-          // getRowHeight={autoRowHeight}
           density="comfortable"
-          pageSizeOptions={[10, 25, 50]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: pageSizeOptions[2] } },
+          }}
+          pageSizeOptions={pageSizeOptions}
+          // Virtualization is causing scrolling to be all kinds of jank.
+          disableVirtualization
         />
       </Box>
-    </Box>
-  );
-};
-
-interface BookRowProps {
-  book: ElementStackModel;
-}
-
-const BookRow = ({ book }: BookRowProps) => {
-  const label = useObservableState(book.label$, null);
-  const description = useObservableState(book.description$, null);
-  const parentTerrain = useObservableState(book.parentTerrain$, null);
-  const terrainLabel = useObservableState(
-    parentTerrain?.label$ ?? observableOf(null),
-    null
-  );
-
-  return (
-    <TableRow>
-      <TableCell>
-        <img src={book.iconUrl} style={{ width: "50px" }} />
-      </TableCell>
-      <TableCell>{label}</TableCell>
-      <TableCell>{terrainLabel ?? "Unknown"}</TableCell>
-      <TableCell>
-        <Mystery elementStack={book} />
-      </TableCell>
-      <TableCell>{description}</TableCell>
-    </TableRow>
-  );
-};
-
-interface MysteryProps {
-  elementStack: ElementStackModel;
-}
-
-const Mystery = ({ elementStack }: MysteryProps) => {
-  const api = useDIDependency(API);
-  const aspects = useObservableState(elementStack.elementAspects$, {});
-
-  const masteryKey = Object.keys(aspects).find((x) => x.startsWith("mystery."));
-
-  if (masteryKey == null) {
-    return null;
-  }
-
-  return (
-    <Box
-      component="span"
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
-      <img
-        style={{ width: "50px" }}
-        src={`${api.baseUrl}/api/compendium/elements/${masteryKey}/icon.png`}
-      />
-      <Typography
-        style={{ whiteSpace: "nowrap" }}
-        component="span"
-        variant="h4"
-        color="text.secondary"
-      >
-        {aspects[masteryKey]}
-      </Typography>
     </Box>
   );
 };
