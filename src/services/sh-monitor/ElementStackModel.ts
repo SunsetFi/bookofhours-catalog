@@ -9,10 +9,18 @@ import {
 import { isEqual } from "lodash";
 
 import { API } from "../sh-api";
+
 import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { GameModel } from "./GameModel";
+import { TokenModel } from "./TokenModel";
 
-export class ElementStackModel {
+export function isElementStackModel(
+  model: TokenModel
+): model is ElementStackModel {
+  return model instanceof ElementStackModel;
+}
+
+export class ElementStackModel extends TokenModel {
   private readonly _elementStackInternal$: BehaviorSubject<IElementStack>;
   private readonly _elementStack$: Observable<IElementStack>;
 
@@ -35,6 +43,8 @@ export class ElementStackModel {
     private readonly _api: API,
     gameModel: GameModel
   ) {
+    super(elementStack);
+
     this._elementStackInternal$ = new BehaviorSubject<IElementStack>(
       elementStack
     );
@@ -59,10 +69,10 @@ export class ElementStackModel {
     this._unique$ = this._elementStack$.pipe(map((e) => e.unique));
     this._parentConnectedTerrain$ = combineLatest([
       this._elementStack$,
-      gameModel.unlockedTerrains,
+      gameModel.unlockedTerrains$,
     ]).pipe(
       map(([elementStack, terrains]) => {
-        const tokenId = extractTokenId(elementStack.path);
+        const tokenId = extractLibraryRoomTokenId(elementStack.path);
         if (tokenId === null) {
           return null;
         }
@@ -151,10 +161,11 @@ export class ElementStackModel {
   }
 }
 
-function extractTokenId(path: string): string | null {
+function extractLibraryRoomTokenId(path: string): string | null {
   if (!path.startsWith("~/library")) {
     return null;
   }
+
   const innerSpherePath = path.substring("~/library".length);
   if (!innerSpherePath.startsWith("!") && !innerSpherePath.startsWith("/!")) {
     return null;

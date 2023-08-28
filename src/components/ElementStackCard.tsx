@@ -4,9 +4,9 @@ import { SxProps } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { useObservableState } from "observable-hooks";
-
 import { formatLabel, formatSeconds } from "@/utils";
+
+import { useObservation } from "@/observables";
 
 import { ElementStackModel } from "@/services/sh-monitor";
 
@@ -16,9 +16,9 @@ export interface ElementStackCardProps {
 }
 
 const ElementStackCard = ({ element }: ElementStackCardProps) => {
-  const label = useObservableState(element.label$) ?? "";
-  const quantity = useObservableState(element.quantity$) ?? 0;
-  const lifetimeRemaining = useObservableState(element.lifetimeRemaining$) ?? 0;
+  const label = useObservation(element.label$) ?? "";
+  const quantity = useObservation(element.quantity$) ?? 0;
+  const lifetimeRemaining = useObservation(element.lifetimeRemaining$) ?? 0;
   return (
     <Box sx={{ width: "250px", height: "250px", position: "relative" }}>
       <img style={{ width: "100%" }} alt={label} src={element.iconUrl} />

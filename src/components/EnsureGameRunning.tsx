@@ -1,19 +1,18 @@
 import * as React from "react";
 import { Navigate } from "react-router-dom";
 
-import { useObservableState } from "observable-hooks";
-
 import { useDIDependency } from "@/container";
+
+import { index as indexPath } from "@/paths";
+import { useObservation } from "@/observables";
 
 import { GameModel } from "@/services/sh-monitor/GameModel";
 
-import { index as indexPath } from "@/paths";
-
 const EnsureGameRunning = () => {
   const monitor = useDIDependency(GameModel);
-  const isRunning = useObservableState(monitor.isRunning$, false);
+  const isRunning = useObservation(monitor.isRunning$) ?? undefined;
 
-  if (!isRunning) {
+  if (isRunning == false) {
     return <Navigate to={indexPath()} />;
   }
 

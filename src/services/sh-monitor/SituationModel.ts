@@ -1,9 +1,10 @@
 import { BehaviorSubject, Observable, map } from "rxjs";
-import { Situation as ISituation, SituationState } from "secrethistories-api";
+import { Situation as ISituation } from "secrethistories-api";
 
 import { API } from "../sh-api";
+import { TokenModel } from "./TokenModel";
 
-export class SituationModel {
+export class SituationModel extends TokenModel {
   private readonly _situation$: BehaviorSubject<ISituation>;
 
   private readonly _timeRemaining$: Observable<number>;
@@ -16,6 +17,7 @@ export class SituationModel {
   private readonly _description$: Observable<string>;
 
   constructor(situation: ISituation, private readonly _api: API) {
+    super(situation);
     this._situation$ = new BehaviorSubject<ISituation>(situation);
 
     this._timeRemaining$ = this._situation$.pipe(map((s) => s.timeRemaining));

@@ -1,10 +1,73 @@
+import * as React from "react";
+
 import {
   combineLatest,
   OperatorFunction,
   Observable,
   Subscription,
-  Subject,
+  map,
 } from "rxjs";
+
+export type ObservableKeys<T> = {
+  [K in keyof T]: T[K] extends Observable<any> ? K : never;
+}[keyof T];
+
+export function useObservation<T>(observable: Observable<T>): T | undefined;
+export function useObservation<T>(
+  factory: () => Observable<T>,
+  deps?: any[]
+): T | undefined;
+export function useObservation<T>(
+  observableOrFactory: Observable<T> | (() => Observable<T>),
+  deps?: any[]
+) {
+  const factory = React.useMemo(
+    () =>
+      typeof observableOrFactory === "function"
+        ? observableOrFactory
+        : () => observableOrFactory,
+    deps ? [...deps] : [observableOrFactory]
+  );
+
+  const [value, setValue] = React.useState<T | undefined>(undefined);
+
+  React.useEffect(() => {
+    const sub = factory().subscribe((value) => setValue(value));
+    return () => sub.unsubscribe();
+  }, [factory]);
+
+  return value;
+}
+
+export function filterItems<T, K extends T>(filter: (item: T) => item is K) {
+  return (source: Observable<readonly T[]>): Observable<K[]> => {
+    return source.pipe(map((items) => items.filter(filter)));
+  };
+}
+
+export function filterItemObservations<T, K extends T>(
+  filter: (item: T) => Observable<boolean>
+) {
+  return (source: Observable<readonly T[]>): Observable<K[]> => {
+    return source.pipe(
+      map((items) =>
+        items.map((item) =>
+          filter(item).pipe(map((isMatch) => ({ item, isMatch })))
+        )
+      ),
+      observeAll(),
+      map((items) =>
+        items.filter(({ isMatch }) => isMatch).map(({ item }) => item as K)
+      )
+    );
+  };
+}
+
+export function mapItems<T, K>(mapping: (item: T) => K) {
+  return (source: Observable<readonly T[]>): Observable<K[]> => {
+    return source.pipe(map((items) => items.map(mapping)));
+  };
+}
 
 // WARN: I have faint memories of memory leaks around this code.  Be careful.
 export function observeAll<K>(): OperatorFunction<Observable<K>[], K[]> {

@@ -1,7 +1,15 @@
 import { BehaviorSubject, Observable, map } from "rxjs";
 import { ConnectedTerrain } from "secrethistories-api";
 
-export class ConnectedTerrainModel {
+import { TokenModel } from "./TokenModel";
+
+export function isConnectedTerrainModel(
+  model: TokenModel
+): model is ConnectedTerrainModel {
+  return model instanceof ConnectedTerrainModel;
+}
+
+export class ConnectedTerrainModel extends TokenModel {
   private readonly _connectedTerrain$: BehaviorSubject<ConnectedTerrain>;
 
   private readonly _label$: Observable<string>;
@@ -9,6 +17,8 @@ export class ConnectedTerrainModel {
   private readonly _shrouded$: Observable<boolean>;
 
   constructor(terrain: ConnectedTerrain) {
+    super(terrain);
+
     this._connectedTerrain$ = new BehaviorSubject(terrain);
 
     this._label$ = this._connectedTerrain$.pipe(map((t) => t.label));

@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useObservableState } from "observable-hooks";
 import {
   Observable,
   combineLatest,
@@ -13,11 +12,12 @@ import Typography from "@mui/material/Typography";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
-import { observeAll } from "@/observables";
+import { mapItems, observeAll, useObservation } from "@/observables";
 import { useDIDependency } from "@/container";
 
 import { ElementStackModel, GameModel } from "@/services/sh-monitor";
 import { API } from "@/services/sh-api";
+import { filterHasAspect } from "@/services/sh-monitor/observables";
 
 import { RequireLegacy } from "@/components/RequireLegacy";
 
@@ -182,11 +182,16 @@ const pageSizeOptions = [10, 25, 50];
 const BookCatalog = () => {
   const api = useDIDependency(API);
   const model = useDIDependency(GameModel);
-  const readables$ = model.visibleReadables$.pipe(
-    map((readables) => readables.map((item) => elementStackToItem(api, item))),
-    observeAll()
-  );
-  const readables = useObservableState(readables$, []);
+  const rows =
+    useObservation(
+      () =>
+        model.visibleElementStacks$.pipe(
+          filterHasAspect("readable"),
+          mapItems((element) => elementStackToItem(api, element)),
+          observeAll()
+        ),
+      []
+    ) ?? [];
 
   return (
     <Box
@@ -209,7 +214,7 @@ const BookCatalog = () => {
       >
         <DataGrid
           columns={columns}
-          rows={readables}
+          rows={rows}
           rowHeight={100}
           density="comfortable"
           initialState={{

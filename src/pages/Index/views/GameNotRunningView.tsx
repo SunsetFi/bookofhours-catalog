@@ -3,11 +3,12 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { useObservableState } from "observable-hooks";
 import { delay, of } from "rxjs";
 
+import { useObservation } from "@/observables";
+
 const GameNotRunningView = () => {
-  const timedOut = useObservableState(of(true).pipe(delay(5000)), false);
+  const timedOut = useObservation(() => of(true).pipe(delay(5000)), []);
 
   return (
     <Box

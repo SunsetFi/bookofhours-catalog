@@ -8,8 +8,7 @@ export const RequireLegacy = () => {
   const path = useLocation().pathname;
   const legacy = useLegacy() ?? undefined;
 
-  if (legacy == null) {
-    console.log("RequireLegacy: no legacy");
+  if (legacy === null) {
     return <Navigate to={`/?redirect=${path}`} />;
   }
 

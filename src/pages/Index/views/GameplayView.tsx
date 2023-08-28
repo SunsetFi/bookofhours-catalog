@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useObservableState } from "observable-hooks";
 import { Navigate, Link as RouterLink } from "react-router-dom";
+import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -8,17 +8,24 @@ import Link from "@mui/material/Link";
 
 import { useDIDependency } from "@/container";
 
+import { useObservation } from "@/observables";
+
 import { useQueryString } from "@/hooks/use-querystring";
 
 import { GameModel } from "@/services/sh-monitor";
+import { filterHasAspect } from "@/services/sh-monitor/observables";
 
 const GameplayView = () => {
   const redirect = useQueryString("redirect");
   const model = useDIDependency(GameModel);
 
-  const legacyLabel = useObservableState(model.legacyLabel$);
-  const connectedTerrains = useObservableState(model.unlockedTerrains, []);
-  const books = useObservableState(model.visibleReadables$, []);
+  const legacyLabel = useObservation(model.legacyLabel$);
+  const connectedTerrains = useObservation(model.unlockedTerrains$) ?? [];
+  const books =
+    useObservation(
+      () => model.visibleElementStacks$.pipe(filterHasAspect("readable")),
+      []
+    ) ?? [];
 
   return (
     <Box

@@ -5,18 +5,24 @@ import {
   combineLatest,
   map,
   distinctUntilChanged,
+  mergeMap,
 } from "rxjs";
 import { ConnectedTerrain, ElementStack, Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
+
+import { filterItemObservations, observeAll } from "@/observables";
 
 import { Initializable } from "../Initializable";
 
 import { API } from "../sh-api";
 
-import { isConnectedTerrain, isElementStack } from "./utils";
-import { ElementStackModel } from "./ElementStackModel";
-import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
-import { observeAll } from "@/observables";
+import { ElementStackModel, isElementStackModel } from "./ElementStackModel";
+import {
+  ConnectedTerrainModel,
+  isConnectedTerrainModel,
+} from "./ConnectedTerrainModel";
+import { TokenModel } from "./TokenModel";
+import { SituationModel } from "./SituationModel";
 
 const pollRate = 1000;
 
@@ -32,16 +38,17 @@ const playerSpherePaths = [
   "~/hand.misc",
 ];
 
+const supportedPayloadTypes = [
+  "ConnectedTerrain",
+  "ElementStack",
+  "Situation",
+  "WorkstationSituation",
+];
+
 @injectable()
 @singleton()
 @provides(Initializable)
 export class GameModel implements Initializable {
-  private readonly _elementStackModels = new Map<string, ElementStackModel>();
-  private readonly _connectedTerrainModels = new Map<
-    string,
-    ConnectedTerrainModel
-  >();
-
   private readonly _isRunning$ = new BehaviorSubject<boolean>(false);
   private readonly _fault$ = new BehaviorSubject<string | null>(null);
 
@@ -50,18 +57,24 @@ export class GameModel implements Initializable {
   private readonly _legacyId$ = new BehaviorSubject<string | null>(null);
   private readonly _legacyLabel$ = new BehaviorSubject<string | null>(null);
 
-  // This is marked as internal use only as we do not distinct its values, and it is constantly changing as we poll.
+  // This is marked as internal use only as we do not distinct its values, and the observable will produce a new value every poll.
   private readonly _tokensInternalUseOnly$ = new BehaviorSubject<
     readonly Token[]
   >([]);
 
-  private readonly _elementStackModels$ = new BehaviorSubject<
-    readonly ElementStackModel[]
+  private readonly _tokenModelMap = new Map<string, TokenModel>();
+  // This is marked as internal use only as we do not distinct its values, and the observable will produce a new value every poll.
+  private readonly _tokenModelsInternalUseOnly = new BehaviorSubject<
+    readonly TokenModel[]
   >([]);
 
-  private readonly _terrainModels$ = new BehaviorSubject<
+  private readonly _elementStackModels$: Observable<
+    readonly ElementStackModel[]
+  >;
+
+  private readonly _terrainModels$: Observable<
     readonly ConnectedTerrainModel[]
-  >([]);
+  >;
 
   private readonly _unlockedTerrains$: Observable<
     readonly ConnectedTerrainModel[]
@@ -70,38 +83,36 @@ export class GameModel implements Initializable {
     readonly ElementStackModel[]
   >;
 
-  private readonly _visibleReadables$: Observable<readonly ElementStackModel[]>;
-
   constructor(@inject(API) private readonly _api: API) {
     this._tokensInternalUseOnly$.subscribe((tokens) => {
-      // Process element stacks.
-      const elementStacks = tokens.filter(isElementStack);
-      const elementModelIds = Array.from(this._elementStackModels.keys());
-      const modelIdsToRemove = difference(
-        elementModelIds,
-        elementStacks.map((x) => x.id)
+      const supportedTokens = tokens.filter((x) =>
+        supportedPayloadTypes.includes(x.payloadType)
       );
-      modelIdsToRemove.forEach((id) => this._elementStackModels.delete(id));
-      const elementStackModels = elementStacks.map((elementStack) =>
-        this._getOrUpdateElementStackModel(elementStack)
-      );
-      this._elementStackModels$.next(sortBy(elementStackModels, "id"));
 
-      // Process terrains.
-      const terrains = tokens.filter(isConnectedTerrain);
-      const terrainModelIds = Array.from(this._connectedTerrainModels.keys());
-      const terrainIdsToRemove = difference(
-        terrainModelIds,
-        terrains.map((x) => x.id)
+      const existingTokenIds = Array.from(this._tokenModelMap.keys());
+      const tokenIdsToRemove = difference(
+        existingTokenIds,
+        supportedTokens.map((x) => x.id)
       );
-      terrainIdsToRemove.forEach((id) =>
-        this._connectedTerrainModels.delete(id)
+      tokenIdsToRemove.forEach((id) => this._tokenModelMap.delete(id));
+      const tokenModels = sortBy(
+        supportedTokens.map((token) => this._getOrUpdateTokenModel(token)),
+        "id"
       );
-      const terrainModels = terrains.map((x) =>
-        this._getOrUpdateConnectedTerrainModel(x)
-      );
-      this._terrainModels$.next(sortBy(terrainModels, "id"));
+
+      // We could do this as a pipe, but the side effect of deleting the old models gives me pause.
+      this._tokenModelsInternalUseOnly.next(tokenModels);
     });
+
+    this._elementStackModels$ = this._tokenModelsInternalUseOnly.pipe(
+      map((models) => models.filter(isElementStackModel)),
+      distinctUntilChanged(arrayShallowEquals)
+    );
+
+    this._terrainModels$ = this._tokenModelsInternalUseOnly.pipe(
+      map((models) => models.filter(isConnectedTerrainModel)),
+      distinctUntilChanged(arrayShallowEquals)
+    );
 
     this._unlockedTerrains$ = this._terrainModels$.pipe(
       map((models) =>
@@ -116,12 +127,13 @@ export class GameModel implements Initializable {
       distinctUntilChanged(arrayShallowEquals)
     );
 
-    const visibleSpherePaths = this._unlockedTerrains$.pipe(
+    const visibleSpherePaths$ = this._unlockedTerrains$.pipe(
       map((terrains) => [...playerSpherePaths, ...terrains.map((t) => t.path)]),
       map((paths) => Array.from(new Set(paths)))
     );
 
     this._visibleElementStacks$ = combineLatest([
+      // Items can move around but keep their model, so we need to observe their paths
       this._elementStackModels$.pipe(
         map((models) =>
           models.map((model) =>
@@ -130,7 +142,7 @@ export class GameModel implements Initializable {
         ),
         observeAll()
       ),
-      visibleSpherePaths,
+      visibleSpherePaths$,
     ]).pipe(
       map(([elementStackModels, visibleSpherePaths]) =>
         elementStackModels
@@ -139,18 +151,6 @@ export class GameModel implements Initializable {
           )
           .map(({ model }) => model)
       ),
-      distinctUntilChanged(arrayShallowEquals)
-    );
-
-    this._visibleReadables$ = this._visibleElementStacks$.pipe(
-      map((stacks) =>
-        stacks.map((stack) =>
-          stack.elementAspects$.pipe(map((aspects) => ({ stack, aspects })))
-        )
-      ),
-      observeAll(),
-      map((items) => items.filter((x) => x.aspects["readable"] > 0)),
-      map((items) => items.map((x) => x.stack)),
       distinctUntilChanged(arrayShallowEquals)
     );
   }
@@ -175,16 +175,12 @@ export class GameModel implements Initializable {
     return this._visibleElementStacks$;
   }
 
-  get unlockedTerrains() {
+  get unlockedTerrains$() {
     return this._unlockedTerrains$;
   }
 
-  get visibleReadables$() {
-    return this._visibleReadables$;
-  }
-
   onInitialize() {
-    this._scheduleNextPoll();
+    this._poll();
   }
 
   private _scheduleNextPoll() {
@@ -226,29 +222,29 @@ export class GameModel implements Initializable {
     this._legacyLabel$.next(null);
   }
 
-  private _getOrUpdateElementStackModel(
-    elementStack: ElementStack
-  ): ElementStackModel {
-    let model = this._elementStackModels.get(elementStack.id);
+  private _getOrUpdateTokenModel(token: Token): TokenModel {
+    let model = this._tokenModelMap.get(token.id);
     if (!model) {
-      model = new ElementStackModel(elementStack, this._api, this);
-      this._elementStackModels.set(elementStack.id, model);
+      switch (token.payloadType) {
+        case "ConnectedTerrain":
+          model = new ConnectedTerrainModel(token as ConnectedTerrain);
+          break;
+        case "ElementStack":
+          model = new ElementStackModel(token as ElementStack, this._api, this);
+          break;
+        case "Situation":
+        case "WorkstationSituation" as any:
+          model = new SituationModel(token as any, this._api);
+          break;
+        default:
+          throw new Error(
+            `Unknown token payload type: ${(token as any).payloadType}`
+          );
+      }
+      this._tokenModelMap.set(token.id, model);
     }
 
-    model._onUpdate(elementStack);
-    return model;
-  }
-
-  private _getOrUpdateConnectedTerrainModel(
-    connectedTerrain: ConnectedTerrain
-  ): ConnectedTerrainModel {
-    let model = this._connectedTerrainModels.get(connectedTerrain.id);
-    if (!model) {
-      model = new ConnectedTerrainModel(connectedTerrain);
-      this._connectedTerrainModels.set(connectedTerrain.id, model);
-    }
-
-    model._onUpdate(connectedTerrain);
+    model._onUpdate(token);
     return model;
   }
 }
