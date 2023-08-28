@@ -5,12 +5,17 @@ import {
   of as observableOf,
   map,
   mergeMap,
-  distinctUntilChanged,
 } from "rxjs";
+import { uniq } from "lodash";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import Checkbox from "@mui/material/Checkbox";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
@@ -29,6 +34,8 @@ import {
   useContextState,
   useContextStateSetter,
 } from "@/hooks/use-context-state";
+import Popover from "@mui/material/Popover";
+import ListItemText from "@mui/material/ListItemText";
 
 interface TableBookItem {
   id: string;
@@ -63,121 +70,6 @@ interface TableBookFilters {
   locations: string[];
 }
 
-const columns: GridColDef<TableBookItem>[] = [
-  {
-    field: "iconUrl",
-    headerName: "Icon",
-    width: 90,
-    sortable: false,
-    disableColumnMenu: true,
-    disableExport: true,
-    disableReorder: true,
-    renderCell: ({ value }) => (
-      <Box
-        sx={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          p: 2,
-        }}
-      >
-        <img src={value} style={{ maxWidth: "75px", maxHeight: "75px" }} />
-      </Box>
-    ),
-  },
-  {
-    field: "label",
-    headerName: "Name",
-    width: 200,
-    renderCell: renderCellTextWrap,
-  },
-  {
-    field: "location",
-    headerName: "Location",
-    width: 170,
-    renderHeader: ({ colDef }) => {
-      const filterSet =
-        useContextStateSetter<TableBookFilters>(TableBookFilters);
-      return (
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography variant="body2" sx={{ mr: 1 }}>
-            {colDef.headerName}
-          </Typography>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              filterSet((value) => ({
-                ...value,
-                locations: [...value.locations, "Map Room"],
-              }));
-            }}
-          >
-            <FilterAlt />
-          </IconButton>
-        </Box>
-      );
-    },
-    renderCell: renderCellTextWrap,
-  },
-  {
-    field: "mastery",
-    headerName: "Mastery",
-    width: 150,
-    sortComparator: (
-      v1: TableBookItem["mastery"],
-      v2: TableBookItem["mastery"]
-    ) => {
-      if (v1 == null) {
-        return -1;
-      }
-
-      if (v2 == null) {
-        return 1;
-      }
-
-      return v1.value - v2.value;
-    },
-    renderCell: ({ value }) => {
-      if (value == null) {
-        return null;
-      }
-
-      return (
-        <Box
-          component="span"
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <img style={{ width: "50px" }} src={value.iconUrl} />
-          <Typography
-            style={{ whiteSpace: "nowrap" }}
-            component="span"
-            variant="h4"
-            color="text.secondary"
-          >
-            {value.value}
-          </Typography>
-        </Box>
-      );
-    },
-  },
-  {
-    field: "description",
-    headerName: "Description",
-    flex: 2,
-    renderCell: renderCellTextWrap,
-  },
-];
-
 function elementStackToItem(
   api: API,
   elementStack: ElementStackModel
@@ -192,7 +84,6 @@ function elementStackToItem(
     elementStack.elementAspects$,
   ]).pipe(
     map(([label, description, location, aspects]) => {
-      console.log("Recomputing elementStackToItem");
       const masteryKey = Object.keys(aspects).find((x) =>
         x.startsWith("mystery.")
       );
@@ -223,10 +114,6 @@ const BookCatalog = () => {
   const api = useDIDependency(API);
   const model = useDIDependency(GameModel);
 
-  React.useEffect(() => {
-    console.log("BC render");
-  }, []);
-
   const [filters, FilterProvider] = useContextState<TableBookFilters>(
     TableBookFilters,
     { locations: [] }
@@ -253,6 +140,121 @@ const BookCatalog = () => {
         return filters.locations.includes(row.location ?? "");
       }),
     [rows, filters]
+  );
+
+  const allRooms = React.useMemo(
+    () => uniq(rows.map((x) => x.location ?? "")).sort(),
+    [rows]
+  );
+
+  const columns = React.useMemo<GridColDef<TableBookItem>[]>(
+    () => [
+      {
+        field: "iconUrl",
+        headerName: "Icon",
+        width: 90,
+        sortable: false,
+        disableColumnMenu: true,
+        disableExport: true,
+        disableReorder: true,
+        renderCell: ({ value }) => (
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 2,
+            }}
+          >
+            <img src={value} style={{ maxWidth: "75px", maxHeight: "75px" }} />
+          </Box>
+        ),
+      },
+      {
+        field: "label",
+        headerName: "Name",
+        width: 200,
+        renderCell: renderCellTextWrap,
+      },
+      {
+        field: "location",
+        headerName: "Location",
+        width: 170,
+        renderHeader: () => (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 2,
+            }}
+          >
+            <Typography variant="body2" component="span">
+              Location
+            </Typography>
+            <FilterListButton filterKey="locations" allowedValues={allRooms} />
+          </Box>
+        ),
+        renderCell: renderCellTextWrap,
+      },
+      {
+        field: "mastery",
+        headerName: "Mastery",
+        width: 150,
+        sortComparator: (
+          v1: TableBookItem["mastery"],
+          v2: TableBookItem["mastery"]
+        ) => {
+          if (v1 == null) {
+            return -1;
+          }
+
+          if (v2 == null) {
+            return 1;
+          }
+
+          return v1.value - v2.value;
+        },
+        renderCell: ({ value }) => {
+          if (value == null) {
+            return null;
+          }
+
+          return (
+            <Box
+              component="span"
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <img style={{ width: "50px" }} src={value.iconUrl} />
+              <Typography
+                style={{ whiteSpace: "nowrap" }}
+                component="span"
+                variant="h4"
+                color="text.secondary"
+              >
+                {value.value}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "description",
+        headerName: "Description",
+        flex: 2,
+        renderCell: renderCellTextWrap,
+      },
+    ],
+    [allRooms]
   );
 
   return (
@@ -290,6 +292,82 @@ const BookCatalog = () => {
         </FilterProvider>
       </Box>
     </Box>
+  );
+};
+
+interface FilterListButtonProps {
+  filterKey: keyof TableBookFilters;
+  allowedValues: string[];
+}
+
+const FilterListButton = ({
+  filterKey,
+  allowedValues,
+}: FilterListButtonProps) => {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [selectedValues, setSelectedValues] = React.useState<string[]>([]);
+  const filterSet = useContextStateSetter<TableBookFilters>(TableBookFilters);
+  return (
+    <>
+      <IconButton
+        size="small"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setAnchorEl(e.currentTarget);
+        }}
+      >
+        <FilterAlt />
+      </IconButton>
+      <Popover
+        open={anchorEl != null}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        onClose={() => {
+          setAnchorEl(null);
+        }}
+      >
+        <List sx={{ maxHeight: "600px" }}>
+          {allowedValues.map((value) => (
+            <ListItem key={value} disablePadding>
+              <ListItemButton
+                dense
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  let newValues = selectedValues;
+                  if (selectedValues.includes(value)) {
+                    newValues = selectedValues.filter((x) => x !== value);
+                  } else {
+                    newValues = [...selectedValues, value];
+                  }
+
+                  setSelectedValues(newValues);
+                  filterSet((f) => ({
+                    ...f,
+                    [filterKey]: newValues,
+                  }));
+                }}
+              >
+                <ListItemIcon>
+                  <Checkbox
+                    edge="start"
+                    checked={selectedValues.includes(value)}
+                    tabIndex={-1}
+                    disableRipple
+                  />
+                </ListItemIcon>
+                <ListItemText primary={value} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Popover>
+    </>
   );
 };
 
