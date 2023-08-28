@@ -6,6 +6,7 @@ import {
   Observable,
   Subscription,
   map,
+  distinctUntilChanged,
 } from "rxjs";
 
 export type ObservableKeys<T> = {
@@ -37,6 +38,20 @@ export function useObservation<T>(
   }, [factory]);
 
   return value;
+}
+
+export function arrayDistinctShallow() {
+  return (source: Observable<readonly any[]>): Observable<readonly any[]> => {
+    return source.pipe(distinctUntilChanged(arrayShallowEquals));
+  };
+}
+
+function arrayShallowEquals<T>(a: readonly T[], b: readonly T[]) {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  return a.every((x, i) => x === b[i]);
 }
 
 export function filterItems<T, K extends T>(filter: (item: T) => item is K) {

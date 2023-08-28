@@ -1,7 +1,8 @@
-import { BehaviorSubject, Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, distinctUntilChanged, map } from "rxjs";
 import { ConnectedTerrain } from "secrethistories-api";
 
 import { TokenModel } from "./TokenModel";
+import { isEqual } from "lodash";
 
 export function isConnectedTerrainModel(
   model: TokenModel
@@ -10,7 +11,8 @@ export function isConnectedTerrainModel(
 }
 
 export class ConnectedTerrainModel extends TokenModel {
-  private readonly _connectedTerrain$: BehaviorSubject<ConnectedTerrain>;
+  private readonly _connectedTerrainInternal$: BehaviorSubject<ConnectedTerrain>;
+  private readonly _connectedTerrain$: Observable<ConnectedTerrain>;
 
   private readonly _label$: Observable<string>;
   private readonly _description$: Observable<string>;
@@ -19,7 +21,11 @@ export class ConnectedTerrainModel extends TokenModel {
   constructor(terrain: ConnectedTerrain) {
     super(terrain);
 
-    this._connectedTerrain$ = new BehaviorSubject(terrain);
+    this._connectedTerrainInternal$ = new BehaviorSubject(terrain);
+
+    this._connectedTerrain$ = this._connectedTerrainInternal$.pipe(
+      distinctUntilChanged(isEqual)
+    );
 
     this._label$ = this._connectedTerrain$.pipe(map((t) => t.label));
     this._description$ = this._connectedTerrain$.pipe(
@@ -30,15 +36,15 @@ export class ConnectedTerrainModel extends TokenModel {
 
   get id() {
     // Game engine is inconsistent about whether it includes the ! or not.
-    if (!this._connectedTerrain$.value.id.startsWith("!")) {
-      return "!" + this._connectedTerrain$.value.id;
+    if (!this._connectedTerrainInternal$.value.id.startsWith("!")) {
+      return "!" + this._connectedTerrainInternal$.value.id;
     }
 
-    return this._connectedTerrain$.value.id;
+    return this._connectedTerrainInternal$.value.id;
   }
 
   get path() {
-    return this._connectedTerrain$.value.path;
+    return this._connectedTerrainInternal$.value.path;
   }
 
   get label$() {
@@ -54,6 +60,6 @@ export class ConnectedTerrainModel extends TokenModel {
   }
 
   _onUpdate(terrain: ConnectedTerrain) {
-    this._connectedTerrain$.next(terrain);
+    this._connectedTerrainInternal$.next(terrain);
   }
 }

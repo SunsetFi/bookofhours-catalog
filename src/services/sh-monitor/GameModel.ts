@@ -10,7 +10,11 @@ import {
 import { ConnectedTerrain, ElementStack, Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
 
-import { filterItemObservations, observeAll } from "@/observables";
+import {
+  arrayDistinctShallow,
+  filterItemObservations,
+  observeAll,
+} from "@/observables";
 
 import { Initializable } from "../Initializable";
 
@@ -95,6 +99,7 @@ export class GameModel implements Initializable {
         supportedTokens.map((x) => x.id)
       );
       tokenIdsToRemove.forEach((id) => this._tokenModelMap.delete(id));
+
       const tokenModels = sortBy(
         supportedTokens.map((token) => this._getOrUpdateTokenModel(token)),
         "id"
@@ -106,12 +111,12 @@ export class GameModel implements Initializable {
 
     this._elementStackModels$ = this._tokenModelsInternalUseOnly.pipe(
       map((models) => models.filter(isElementStackModel)),
-      distinctUntilChanged(arrayShallowEquals)
+      arrayDistinctShallow()
     );
 
     this._terrainModels$ = this._tokenModelsInternalUseOnly.pipe(
       map((models) => models.filter(isConnectedTerrainModel)),
-      distinctUntilChanged(arrayShallowEquals)
+      arrayDistinctShallow()
     );
 
     this._unlockedTerrains$ = this._terrainModels$.pipe(
@@ -124,7 +129,7 @@ export class GameModel implements Initializable {
       map((models) =>
         models.filter((x) => x.shrouded == false).map((x) => x.model)
       ),
-      distinctUntilChanged(arrayShallowEquals)
+      arrayDistinctShallow()
     );
 
     const visibleSpherePaths$ = this._unlockedTerrains$.pipe(
@@ -151,7 +156,7 @@ export class GameModel implements Initializable {
           )
           .map(({ model }) => model)
       ),
-      distinctUntilChanged(arrayShallowEquals)
+      arrayDistinctShallow()
     );
   }
 
@@ -247,12 +252,4 @@ export class GameModel implements Initializable {
     model._onUpdate(token);
     return model;
   }
-}
-
-function arrayShallowEquals<T>(a: T[], b: T[]) {
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  return a.every((x, i) => x === b[i]);
 }

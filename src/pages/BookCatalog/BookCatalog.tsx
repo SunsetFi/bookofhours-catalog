@@ -5,12 +5,17 @@ import {
   of as observableOf,
   map,
   mergeMap,
+  distinctUntilChanged,
 } from "rxjs";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+
+import FilterAlt from "@mui/icons-material/FilterAlt";
 
 import { mapItems, observeAll, useObservation } from "@/observables";
 import { useDIDependency } from "@/container";
@@ -20,6 +25,10 @@ import { API } from "@/services/sh-api";
 import { filterHasAspect } from "@/services/sh-monitor/observables";
 
 import { RequireLegacy } from "@/components/RequireLegacy";
+import {
+  useContextState,
+  useContextStateSetter,
+} from "@/hooks/use-context-state";
 
 interface TableBookItem {
   id: string;
@@ -48,6 +57,11 @@ const renderCellTextWrap = ({ value }: GridRenderCellParams<TableBookItem>) => (
     </Typography>
   </Box>
 );
+
+const TableBookFilters = "tableBookFilters";
+interface TableBookFilters {
+  locations: string[];
+}
 
 const columns: GridColDef<TableBookItem>[] = [
   {
@@ -82,7 +96,31 @@ const columns: GridColDef<TableBookItem>[] = [
   {
     field: "location",
     headerName: "Location",
-    width: 150,
+    width: 170,
+    renderHeader: ({ colDef }) => {
+      const filterSet =
+        useContextStateSetter<TableBookFilters>(TableBookFilters);
+      return (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography variant="body2" sx={{ mr: 1 }}>
+            {colDef.headerName}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              filterSet((value) => ({
+                ...value,
+                locations: [...value.locations, "Map Room"],
+              }));
+            }}
+          >
+            <FilterAlt />
+          </IconButton>
+        </Box>
+      );
+    },
     renderCell: renderCellTextWrap,
   },
   {
@@ -144,15 +182,17 @@ function elementStackToItem(
   api: API,
   elementStack: ElementStackModel
 ): Observable<TableBookItem> {
+  const parentTerrainLabel$ = elementStack.parentTerrain$.pipe(
+    mergeMap((terrain) => terrain?.label$ ?? observableOf(null))
+  );
   return combineLatest([
     elementStack.label$,
     elementStack.description$,
-    elementStack.parentTerrain$.pipe(
-      mergeMap((terrain) => terrain?.label$ ?? observableOf(null))
-    ),
+    parentTerrainLabel$,
     elementStack.elementAspects$,
   ]).pipe(
     map(([label, description, location, aspects]) => {
+      console.log("Recomputing elementStackToItem");
       const masteryKey = Object.keys(aspects).find((x) =>
         x.startsWith("mystery.")
       );
@@ -182,6 +222,16 @@ const pageSizeOptions = [10, 25, 50];
 const BookCatalog = () => {
   const api = useDIDependency(API);
   const model = useDIDependency(GameModel);
+
+  React.useEffect(() => {
+    console.log("BC render");
+  }, []);
+
+  const [filters, FilterProvider] = useContextState<TableBookFilters>(
+    TableBookFilters,
+    { locations: [] }
+  );
+
   const rows =
     useObservation(
       () =>
@@ -192,6 +242,18 @@ const BookCatalog = () => {
         ),
       []
     ) ?? [];
+
+  const filteredRows = React.useMemo(
+    () =>
+      rows.filter((row) => {
+        if (filters.locations.length === 0) {
+          return true;
+        }
+
+        return filters.locations.includes(row.location ?? "");
+      }),
+    [rows, filters]
+  );
 
   return (
     <Box
@@ -212,18 +274,20 @@ const BookCatalog = () => {
       <Box
         sx={{ width: "100%", height: "100%", minHeight: 0, overflow: "hidden" }}
       >
-        <DataGrid
-          columns={columns}
-          rows={rows}
-          rowHeight={100}
-          density="comfortable"
-          initialState={{
-            pagination: { paginationModel: { pageSize: pageSizeOptions[2] } },
-          }}
-          pageSizeOptions={pageSizeOptions}
-          // Virtualization is causing scrolling to be all kinds of jank.
-          disableVirtualization
-        />
+        <FilterProvider>
+          <DataGrid
+            columns={columns}
+            rows={filteredRows}
+            rowHeight={100}
+            density="comfortable"
+            initialState={{
+              pagination: { paginationModel: { pageSize: pageSizeOptions[2] } },
+            }}
+            pageSizeOptions={pageSizeOptions}
+            // Virtualization is causing scrolling to be all kinds of jank.
+            disableVirtualization
+          />
+        </FilterProvider>
       </Box>
     </Box>
   );
