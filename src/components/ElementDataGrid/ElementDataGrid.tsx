@@ -1,5 +1,5 @@
 import * as React from "react";
-
+import { isEqual } from "lodash";
 import { Observable, combineLatest, map, of as observableOf } from "rxjs";
 
 import type { SxProps } from "@mui/material";
@@ -77,7 +77,16 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
                     setAnchorEl(e.currentTarget);
                   }}
                 >
-                  <FilterAlt />
+                  <FilterAlt
+                    opacity={
+                      isEqual(
+                        filterValue[colDef.field],
+                        filter.defaultFilterValue
+                      )
+                        ? 0.5
+                        : 1
+                    }
+                  />
                 </IconButton>
                 <Popover
                   open={anchorEl != null}
