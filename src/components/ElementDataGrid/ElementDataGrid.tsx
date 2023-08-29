@@ -11,10 +11,7 @@ import Popover from "@mui/material/Popover";
 import FilterAlt from "@mui/icons-material/FilterAlt";
 
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
-import type {
-  GridColDef,
-  GridColumnHeaderParams,
-} from "@mui/x-data-grid/models";
+import type { GridColDef } from "@mui/x-data-grid/models";
 
 import { observeAll, useObservation } from "@/observables";
 
@@ -22,7 +19,7 @@ import { ElementStackModel } from "@/services/sh-monitor";
 
 import { renderCellTextWrap } from "./cells/text-wrap";
 
-import { ElementDataGridColumnDef } from "./types";
+import { ElementDataGridColumnDef, FilterDef } from "./types";
 
 export interface ElementDataGridProps {
   sx?: SxProps;
@@ -40,6 +37,92 @@ const FilterContext = React.createContext<
   ]
 >([{}, () => {}]);
 
+interface ElementColumnHeaderProps {
+  filter: FilterDef | undefined;
+  colDef: GridColDef;
+}
+
+const ElementColumnHeader = ({ colDef, filter }: ElementColumnHeaderProps) => {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const FilterComponent = filter?.FilterComponent;
+  const [filterValue, setFilterValue] = React.useContext(FilterContext);
+  return (
+    <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+      <Typography variant="body2">{colDef.headerName}</Typography>
+      {FilterComponent && (
+        <>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setAnchorEl(e.currentTarget);
+            }}
+          >
+            <FilterAlt
+              opacity={
+                isEqual(filterValue[colDef.field], filter.defaultFilterValue)
+                  ? 0.5
+                  : 1
+              }
+            />
+          </IconButton>
+          <Popover
+            open={anchorEl != null}
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            onClose={() => {
+              setAnchorEl(null);
+            }}
+          >
+            <FilterComponent
+              value={filterValue[colDef.field]}
+              onChange={(newValue: any) => {
+                setFilterValue((prevFilters) => ({
+                  ...prevFilters,
+                  [colDef.field]: newValue,
+                }));
+              }}
+            />
+          </Popover>
+        </>
+      )}
+    </Box>
+  );
+};
+
+function elementToRow(
+  element: ElementStackModel,
+  columns: ElementDataGridColumnDef[]
+): Observable<Record<string, any>> {
+  const observables = columns.map((column) => {
+    if (column.field) {
+      return observableOf(element[column.field]);
+    } else if (typeof column.observable === "string") {
+      return element[column.observable];
+    } else if (typeof column.observable === "function") {
+      return column.observable(element);
+    } else {
+      return observableOf(undefined);
+    }
+  });
+
+  return combineLatest(observables).pipe(
+    map((values) => {
+      const value: any = {
+        id: element.id,
+      };
+      values.forEach((v, i) => {
+        value[`column_${i}`] = v;
+      });
+      return value;
+    })
+  );
+}
+
 const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
   const defaultFilters: any = {};
   columns.forEach((column, i) => {
@@ -56,65 +139,6 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
       index: number
     ): GridColDef {
       const { field, observable, filter, ...colDef } = column;
-      const Header = ({ colDef }: GridColumnHeaderParams) => {
-        const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(
-          null
-        );
-        const FilterComponent = filter?.FilterComponent;
-        const [filterValue, setFilterValue] = React.useContext(FilterContext);
-        return (
-          <Box
-            sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
-          >
-            <Typography variant="body2">{colDef.headerName}</Typography>
-            {FilterComponent && (
-              <>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setAnchorEl(e.currentTarget);
-                  }}
-                >
-                  <FilterAlt
-                    opacity={
-                      isEqual(
-                        filterValue[colDef.field],
-                        filter.defaultFilterValue
-                      )
-                        ? 0.5
-                        : 1
-                    }
-                  />
-                </IconButton>
-                <Popover
-                  open={anchorEl != null}
-                  anchorEl={anchorEl}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "center",
-                  }}
-                  onClose={() => {
-                    setAnchorEl(null);
-                  }}
-                >
-                  <FilterComponent
-                    value={filterValue[colDef.field]}
-                    onChange={(newValue: any) => {
-                      setFilterValue((prevFilters) => ({
-                        ...prevFilters,
-                        [colDef.field]: newValue,
-                      }));
-                    }}
-                  />
-                </Popover>
-              </>
-            )}
-          </Box>
-        );
-      };
-
       return {
         renderCell: column.wrap ? renderCellTextWrap : undefined,
         sortable: false,
@@ -122,7 +146,9 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
         disableColumnMenu: true,
         ...colDef,
         field: `column_${index}`,
-        renderHeader: Header,
+        renderHeader: ({ colDef }) => (
+          <ElementColumnHeader filter={filter} colDef={colDef} />
+        ),
       };
     }
 
@@ -134,31 +160,7 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
       () =>
         elements$.pipe(
           map((elements) =>
-            elements.map((element) => {
-              const observables = columns.map((column) => {
-                if (column.field) {
-                  return observableOf(element[column.field]);
-                } else if (typeof column.observable === "string") {
-                  return element[column.observable];
-                } else if (typeof column.observable === "function") {
-                  return column.observable(element);
-                } else {
-                  return observableOf(undefined);
-                }
-              });
-
-              return combineLatest(observables).pipe(
-                map((values) => {
-                  const value: any = {
-                    id: element.id,
-                  };
-                  values.forEach((v, i) => {
-                    value[`column_${i}`] = v;
-                  });
-                  return value;
-                })
-              );
-            })
+            elements.map((element) => elementToRow(element, columns))
           ),
           observeAll()
         ),
@@ -178,6 +180,7 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
         return false;
       }
     }
+
     return true;
   });
 
