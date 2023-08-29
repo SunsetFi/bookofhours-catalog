@@ -43,7 +43,7 @@ const FilterContext = React.createContext<
 const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
   const defaultFilters: any = {};
   columns.forEach((column, i) => {
-    if (column.filter?.defaultFilterValue) {
+    if (column.filter?.defaultFilterValue != null) {
       defaultFilters[`column_${i}`] = column.filter.defaultFilterValue;
     }
   });
@@ -114,8 +114,12 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
           </Box>
         );
       };
+
       return {
         renderCell: column.wrap ? renderCellTextWrap : undefined,
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
         ...colDef,
         field: `column_${index}`,
         renderHeader: Header,

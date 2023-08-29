@@ -1,4 +1,5 @@
 import { ElementDataGridColumnDef } from "../types";
+import { textFilter } from "../filters";
 
 export function descriptionColumnDef(
   additional: Partial<
@@ -9,6 +10,7 @@ export function descriptionColumnDef(
     headerName: "Description",
     flex: 1,
     wrap: true,
+    filter: textFilter(),
     ...additional,
     observable: "description$",
   };

@@ -41,7 +41,8 @@ const MultiselectOptionsFilter = ({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "600px" }}>
       <TextField
-        sx={{ p: 1, mb: 1 }}
+        sx={{ m: 1, mb: 2 }}
+        label="Search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
