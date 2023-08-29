@@ -7,11 +7,14 @@ import {
   Subscription,
   map,
   distinctUntilChanged,
+  mergeMap,
 } from "rxjs";
 
 export type ObservableKeys<T> = {
   [K in keyof T]: T[K] extends Observable<any> ? K : never;
 }[keyof T];
+
+export type Observation<T> = T extends Observable<infer K> ? K : never;
 
 export function useObservation<T>(observable: Observable<T>): T | undefined;
 export function useObservation<T>(
@@ -81,6 +84,12 @@ export function filterItemObservations<T, K extends T>(
 export function mapItems<T, K>(mapping: (item: T) => K) {
   return (source: Observable<readonly T[]>): Observable<K[]> => {
     return source.pipe(map((items) => items.map(mapping)));
+  };
+}
+
+export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
+  return (source: Observable<T>): Observable<Observation<T[K]>> => {
+    return source.pipe(mergeMap((value) => value[key] as any)) as any;
   };
 }
 
