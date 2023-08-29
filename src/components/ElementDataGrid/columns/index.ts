@@ -1,3 +1,4 @@
+export * from "./aspects";
 export * from "./description";
 export * from "./icon";
 export * from "./label";

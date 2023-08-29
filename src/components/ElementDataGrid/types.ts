@@ -6,7 +6,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 
 import { ObservableKeys } from "@/observables";
 
-import { ElementStackModel } from "@/services/sh-monitor";
+import { ElementStackModel } from "@/services/sh-model";
 
 export interface ElementDataGridColumnDef
   extends Pick<

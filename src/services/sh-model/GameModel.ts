@@ -27,6 +27,7 @@ import {
 } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
 import { SituationModel } from "./SituationModel";
+import { AspectModel } from "./AspectModel";
 
 const pollRate = 1000;
 
@@ -60,6 +61,8 @@ export class GameModel implements Initializable {
 
   private readonly _legacyId$ = new BehaviorSubject<string | null>(null);
   private readonly _legacyLabel$ = new BehaviorSubject<string | null>(null);
+
+  private readonly _aspects$ = new BehaviorSubject<readonly AspectModel[]>([]);
 
   // This is marked as internal use only as we do not distinct its values, and the observable will produce a new value every poll.
   private readonly _tokensInternalUseOnly$ = new BehaviorSubject<
@@ -176,6 +179,10 @@ export class GameModel implements Initializable {
     return this._legacyLabel$;
   }
 
+  get aspects$() {
+    return this._aspects$;
+  }
+
   get visibleElementStacks$() {
     return this._visibleElementStacks$;
   }
@@ -200,12 +207,20 @@ export class GameModel implements Initializable {
         return;
       }
 
+      var wasConnected = this._isRunning$.value;
+
       this._isRunning$.next(true);
 
       this._legacyId$.next(legacy.id);
       this._legacyLabel$.next(legacy.label);
 
-      await this._pollTokens();
+      const tasks: Promise<void>[] = [this._pollTokens()];
+
+      if (!wasConnected) {
+        tasks.push(this._onConnected());
+      }
+
+      await Promise.all(tasks);
     } catch (e: any) {
       console.error(e);
       this._clear();
@@ -213,6 +228,17 @@ export class GameModel implements Initializable {
     } finally {
       this._scheduleNextPoll();
     }
+  }
+
+  private async _onConnected() {
+    await Promise.all([this._fetchAspects()]);
+  }
+
+  private async _fetchAspects() {
+    const aspects = await this._api.getAspects({ hidden: false });
+    this._aspects$.next(
+      aspects.map((aspect) => new AspectModel(aspect, this._api))
+    );
   }
 
   private async _pollTokens() {

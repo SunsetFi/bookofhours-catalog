@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { Navigate, useLocation, useMatch } from "react-router";
 
-import { useLegacy } from "@/services/sh-monitor/hooks";
+import { useLegacy } from "@/services/sh-model/hooks";
 
 export const RequireLegacy = () => {
   const path = useLocation().pathname;

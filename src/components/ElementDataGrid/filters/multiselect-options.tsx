@@ -2,6 +2,7 @@ import * as React from "react";
 
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -84,6 +85,12 @@ const MultiselectOptionsFilter = ({
             </ListItem>
           ))}
       </List>
+      <Box sx={{ display: "flex", flexDirection: "row" }}>
+        <Button onClick={() => onChange(allowedValues)}>Select All</Button>
+        <Button sx={{ ml: "auto" }} onClick={() => onChange([])}>
+          Clear
+        </Button>
+      </Box>
     </Box>
   );
 };

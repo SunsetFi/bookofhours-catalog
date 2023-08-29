@@ -8,7 +8,7 @@ import { formatLabel, formatSeconds } from "@/utils";
 
 import { useObservation } from "@/observables";
 
-import { ElementStackModel } from "@/services/sh-monitor";
+import { ElementStackModel } from "@/services/sh-model";
 
 export interface ElementStackCardProps {
   sx?: SxProps;

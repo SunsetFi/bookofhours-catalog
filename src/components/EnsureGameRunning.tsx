@@ -6,7 +6,7 @@ import { useDIDependency } from "@/container";
 import { index as indexPath } from "@/paths";
 import { useObservation } from "@/observables";
 
-import { GameModel } from "@/services/sh-monitor/GameModel";
+import { GameModel } from "@/services/sh-model/GameModel";
 
 const EnsureGameRunning = () => {
   const monitor = useDIDependency(GameModel);

@@ -6,24 +6,30 @@ import { filterItemObservations, useObservation } from "@/observables";
 
 import { GameModel } from "./GameModel";
 import { ElementStackModel } from "./ElementStackModel";
+import { AspectModel } from "./AspectModel";
 
 export function useLegacy(): string | null {
-  const monitor = useDIDependency(GameModel);
-  return useObservation(monitor.legacyId$) ?? null;
+  const model = useDIDependency(GameModel);
+  return useObservation(model.legacyId$) ?? null;
 }
 
 export function useVisibleElementStacks(
   filter?: (item: ElementStackModel) => Observable<boolean>,
   deps?: any[]
 ): readonly ElementStackModel[] {
-  const monitor = useDIDependency(GameModel);
+  const model = useDIDependency(GameModel);
   return (
     useObservation(
       () =>
         filter
-          ? monitor.visibleElementStacks$.pipe(filterItemObservations(filter))
-          : monitor.visibleElementStacks$,
-      [monitor, deps ? [...deps] : filter]
+          ? model.visibleElementStacks$.pipe(filterItemObservations(filter))
+          : model.visibleElementStacks$,
+      [model, deps ? [...deps] : filter]
     ) ?? []
   );
+}
+
+export function useAspects(): readonly AspectModel[] {
+  const model = useDIDependency(GameModel);
+  return useObservation(model.aspects$) ?? [];
 }

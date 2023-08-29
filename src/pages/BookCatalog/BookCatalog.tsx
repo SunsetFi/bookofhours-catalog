@@ -1,6 +1,5 @@
 import * as React from "react";
-import { map, mergeMap, of as observableOf } from "rxjs";
-import { uniq } from "lodash";
+import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -9,9 +8,9 @@ import { useDIDependency } from "@/container";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { GameModel } from "@/services/sh-monitor";
+import { GameModel } from "@/services/sh-model";
 import { API } from "@/services/sh-api";
-import { filterHasAspect } from "@/services/sh-monitor/observables";
+import { filterHasAspect } from "@/services/sh-model/observables";
 
 import { RequireLegacy } from "@/components/RequireLegacy";
 import ElementDataGrid, {
@@ -28,7 +27,7 @@ const BookCatalog = () => {
 
   const elements$ = React.useMemo(
     () => model.visibleElementStacks$.pipe(filterHasAspect("readable")),
-    [model, api]
+    [model]
   );
 
   const locations =
@@ -118,7 +117,7 @@ const BookCatalog = () => {
         variant="h4"
         sx={{ py: 2, width: "100%", textAlign: "center" }}
       >
-        The Collected Works of Hush House
+        The Hush House Bibliographical Collection
       </Typography>
       <Box
         sx={{ width: "100%", height: "100%", minHeight: 0, overflow: "hidden" }}

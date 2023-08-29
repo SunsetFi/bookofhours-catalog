@@ -15,7 +15,7 @@ import type { GridColDef } from "@mui/x-data-grid/models";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { ElementStackModel } from "@/services/sh-monitor";
+import { ElementStackModel } from "@/services/sh-model";
 
 import { renderCellTextWrap } from "./cells/text-wrap";
 

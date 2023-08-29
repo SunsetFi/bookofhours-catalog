@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { useLegacy } from "@/services/sh-monitor/hooks";
+import { useLegacy } from "@/services/sh-model/hooks";
 
 import GameNotRunningView from "./views/GameNotRunningView";
 import GameplayView from "./views/GameplayView";

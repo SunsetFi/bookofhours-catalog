@@ -3,7 +3,7 @@ import { Observable, mergeMap } from "rxjs";
 import { Element } from "secrethistories-api";
 
 import { API } from "../sh-api";
-import { GameModel } from "../sh-monitor";
+import { GameModel } from "../sh-model";
 
 @injectable()
 @singleton()
