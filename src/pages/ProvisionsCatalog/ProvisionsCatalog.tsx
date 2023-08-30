@@ -22,6 +22,7 @@ import ElementDataGrid, {
   multiselectOptionsFilter,
   aspectsColumnDef,
 } from "@/components/ElementDataGrid";
+import PageContainer from "@/components/PageContainer";
 
 const ProvisionsCatalog = () => {
   const model = useDIDependency(GameModel);
@@ -58,27 +59,19 @@ const ProvisionsCatalog = () => {
   );
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      <RequireRunning />
-      <Typography
-        variant="h4"
-        sx={{ py: 2, width: "100%", textAlign: "center" }}
-      >
-        Hush House Stores and Provisions
-      </Typography>
+    <PageContainer title="Stores and Provisions" backTo="/">
       <Box
-        sx={{ width: "100%", height: "100%", minHeight: 0, overflow: "hidden" }}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          height: "100%",
+        }}
       >
+        <RequireRunning />
         <ElementDataGrid columns={columns} elements$={elements$} />
       </Box>
-    </Box>
+    </PageContainer>
   );
 };
 

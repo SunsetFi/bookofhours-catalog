@@ -2,14 +2,12 @@ import * as React from "react";
 import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 
 import { useDIDependency } from "@/container";
 
 import { observeAll, useObservation } from "@/observables";
 
 import { GameModel } from "@/services/sh-model";
-import { API } from "@/services/sh-api";
 import { filterHasAspect } from "@/services/sh-model/observables";
 
 import { RequireRunning } from "@/components/RequireLegacy";
@@ -21,6 +19,7 @@ import ElementDataGrid, {
   locationColumnDef,
   multiselectOptionsFilter,
 } from "@/components/ElementDataGrid";
+import PageContainer from "@/components/PageContainer";
 
 const BookCatalog = () => {
   const model = useDIDependency(GameModel);
@@ -73,27 +72,19 @@ const BookCatalog = () => {
   );
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <PageContainer title="Bibliographical Collection" backTo="/">
       <RequireRunning />
-      <Typography
-        variant="h4"
-        sx={{ py: 2, width: "100%", textAlign: "center" }}
-      >
-        The Hush House Bibliographical Collection
-      </Typography>
       <Box
-        sx={{ width: "100%", height: "100%", minHeight: 0, overflow: "hidden" }}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          height: "100%",
+        }}
       >
         <ElementDataGrid columns={columns} elements$={elements$} />
       </Box>
-    </Box>
+    </PageContainer>
   );
 };
 

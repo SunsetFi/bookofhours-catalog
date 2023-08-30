@@ -2,6 +2,7 @@ import React from "react";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
+const headerFontFamily = "'Tangerine', cursive";
 const theme = createTheme({
   palette: {
     mode: "dark",
@@ -9,10 +10,22 @@ const theme = createTheme({
   typography: {
     fontFamily: "'Edu SA Beginner', cursive",
     h1: {
-      fontFamily: "'Tangerine', cursive",
+      fontFamily: headerFontFamily,
     },
     h2: {
-      fontFamily: "'Tangerine', cursive",
+      fontFamily: headerFontFamily,
+    },
+    h3: {
+      fontFamily: headerFontFamily,
+    },
+    h4: {
+      fontFamily: headerFontFamily,
+    },
+    h5: {
+      fontFamily: headerFontFamily,
+    },
+    h6: {
+      fontFamily: headerFontFamily,
     },
     body1: {
       fontSize: "1.5rem",

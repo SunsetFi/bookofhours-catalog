@@ -8,9 +8,9 @@ import { GameModel } from "./GameModel";
 import { ElementStackModel } from "./ElementStackModel";
 import { AspectModel } from "./AspectModel";
 
-export function useIsRunning(): boolean {
+export function useIsRunning(): boolean | undefined {
   const model = useDIDependency(GameModel);
-  return useObservation(model.isRunning$) ?? false;
+  return useObservation(model.isRunning$);
 }
 
 export function useVisibleElementStacks(

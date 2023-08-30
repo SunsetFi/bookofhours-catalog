@@ -8,8 +8,8 @@ export const RequireRunning = () => {
   const path = useLocation().pathname;
 
   const isRunning = useIsRunning();
-
-  if (!isRunning) {
+  if (isRunning === false) {
+    console.log("Not running");
     return <Navigate to={`/?redirect=${path}`} />;
   }
 

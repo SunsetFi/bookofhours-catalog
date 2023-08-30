@@ -185,21 +185,24 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
   });
 
   return (
-    <FilterContext.Provider value={filterStatePair}>
-      <DataGrid
-        sx={sx}
-        columns={colDefs}
-        rows={filteredRows}
-        rowHeight={100}
-        density="comfortable"
-        initialState={{
-          pagination: { paginationModel: { pageSize: pageSizeOptions[2] } },
-        }}
-        pageSizeOptions={pageSizeOptions}
-        // Virtualization is causing scrolling to be all kinds of jank.
-        disableVirtualization
-      />
-    </FilterContext.Provider>
+    // Stupid box because stupid datagrid expands bigger than its 100% size.
+    <Box sx={{ overflow: "hidden" }}>
+      <FilterContext.Provider value={filterStatePair}>
+        <DataGrid
+          sx={sx}
+          columns={colDefs}
+          rows={filteredRows}
+          rowHeight={100}
+          density="comfortable"
+          initialState={{
+            pagination: { paginationModel: { pageSize: pageSizeOptions[2] } },
+          }}
+          pageSizeOptions={pageSizeOptions}
+          // Virtualization is causing scrolling to be all kinds of jank.
+          disableVirtualization
+        />
+      </FilterContext.Provider>
+    </Box>
   );
 };
 
