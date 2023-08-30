@@ -1,20 +1,13 @@
 import { inject, injectable, singleton, provides } from "microinject";
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  map,
-  distinctUntilChanged,
-  mergeMap,
-} from "rxjs";
+import { BehaviorSubject, Observable, combineLatest, map } from "rxjs";
 import { ConnectedTerrain, ElementStack, Token } from "secrethistories-api";
-import { difference, sortBy } from "lodash";
+import { difference, isEqual, sortBy } from "lodash";
+import { DateTime } from "luxon";
 
-import {
-  arrayDistinctShallow,
-  filterItemObservations,
-  observeAll,
-} from "@/observables";
+// The date of first arrival, according to the legacy name.
+const startDate = DateTime.fromISO("1936-03-07T00:00:00.000Z");
+
+import { arrayDistinctShallow, observeAll } from "@/observables";
 
 import { Initializable } from "../Initializable";
 
@@ -59,10 +52,14 @@ export class GameModel implements Initializable {
 
   private readonly _isGameLoaded$ = new BehaviorSubject<boolean>(false);
 
-  private readonly _legacyId$ = new BehaviorSubject<string | null>(null);
-  private readonly _legacyLabel$ = new BehaviorSubject<string | null>(null);
-
   private readonly _aspects$ = new BehaviorSubject<readonly AspectModel[]>([]);
+
+  private readonly _uniqueElementIdsManfiested$ = new BehaviorSubject<
+    readonly string[]
+  >([]);
+  private readonly _recipeExecutions$ = new BehaviorSubject<
+    Readonly<Record<string, number>>
+  >({});
 
   // This is marked as internal use only as we do not distinct its values, and the observable will produce a new value every poll.
   private readonly _tokensInternalUseOnly$ = new BehaviorSubject<
@@ -71,7 +68,7 @@ export class GameModel implements Initializable {
 
   private readonly _tokenModelMap = new Map<string, TokenModel>();
   // This is marked as internal use only as we do not distinct its values, and the observable will produce a new value every poll.
-  private readonly _tokenModelsInternalUseOnly = new BehaviorSubject<
+  private readonly _tokenModelsInternalUseOnly$ = new BehaviorSubject<
     readonly TokenModel[]
   >([]);
 
@@ -86,9 +83,12 @@ export class GameModel implements Initializable {
   private readonly _unlockedTerrains$: Observable<
     readonly ConnectedTerrainModel[]
   >;
+
   private readonly _visibleElementStacks$: Observable<
     readonly ElementStackModel[]
   >;
+
+  private readonly _date$: Observable<DateTime>;
 
   constructor(@inject(API) private readonly _api: API) {
     this._tokensInternalUseOnly$.subscribe((tokens) => {
@@ -109,15 +109,15 @@ export class GameModel implements Initializable {
       );
 
       // We could do this as a pipe, but the side effect of deleting the old models gives me pause.
-      this._tokenModelsInternalUseOnly.next(tokenModels);
+      this._tokenModelsInternalUseOnly$.next(tokenModels);
     });
 
-    this._elementStackModels$ = this._tokenModelsInternalUseOnly.pipe(
+    this._elementStackModels$ = this._tokenModelsInternalUseOnly$.pipe(
       map((models) => models.filter(isElementStackModel)),
       arrayDistinctShallow()
     );
 
-    this._terrainModels$ = this._tokenModelsInternalUseOnly.pipe(
+    this._terrainModels$ = this._tokenModelsInternalUseOnly$.pipe(
       map((models) => models.filter(isConnectedTerrainModel)),
       arrayDistinctShallow()
     );
@@ -161,6 +161,13 @@ export class GameModel implements Initializable {
       ),
       arrayDistinctShallow()
     );
+
+    this._date$ = this._recipeExecutions$.pipe(
+      map((recipeExecutions) => {
+        const daysPassed = recipeExecutions["day.dawn"] ?? 0;
+        return startDate.plus({ days: daysPassed });
+      })
+    );
   }
 
   get isRunning$() {
@@ -171,12 +178,8 @@ export class GameModel implements Initializable {
     return this._isGameLoaded$;
   }
 
-  get legacyId$() {
-    return this._legacyId$;
-  }
-
-  get legacyLabel$() {
-    return this._legacyLabel$;
+  get date$() {
+    return this._date$;
   }
 
   get aspects$() {
@@ -211,16 +214,14 @@ export class GameModel implements Initializable {
 
       this._isRunning$.next(true);
 
-      this._legacyId$.next(legacy.id);
-      this._legacyLabel$.next(legacy.label);
-
-      const tasks: Promise<void>[] = [this._pollTokens()];
-
+      // ceen httpd has a single read thread, and we keepalive, so its better to do this sequentially.
       if (!wasConnected) {
-        tasks.push(this._onConnected());
+        await this._onConnected();
       }
 
-      await Promise.all(tasks);
+      await this._pollTokens();
+      await this._pollManifestations();
+      await this._pollRecipeExecutions();
     } catch (e: any) {
       console.error(e);
       this._clear();
@@ -246,11 +247,23 @@ export class GameModel implements Initializable {
     this._tokensInternalUseOnly$.next(tokens);
   }
 
+  private async _pollManifestations() {
+    const manifestations = await this._api.getUniqueManifestedElements();
+    if (!isEqual(manifestations, this._uniqueElementIdsManfiested$.value)) {
+      this._uniqueElementIdsManfiested$.next(manifestations);
+    }
+  }
+
+  private async _pollRecipeExecutions() {
+    const recipeExecutions = await this._api.getRecipeExecutions();
+    if (!isEqual(recipeExecutions, this._recipeExecutions$.value)) {
+      this._recipeExecutions$.next(recipeExecutions);
+    }
+  }
+
   private async _clear() {
     this._isRunning$.next(false);
     this._fault$.next(null);
-    this._legacyId$.next(null);
-    this._legacyLabel$.next(null);
   }
 
   private _getOrUpdateTokenModel(token: Token): TokenModel {

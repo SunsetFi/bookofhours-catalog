@@ -1,14 +1,15 @@
 import * as React from "react";
 
-import { Navigate, useLocation, useMatch } from "react-router";
+import { Navigate, useLocation } from "react-router";
 
-import { useLegacy } from "@/services/sh-model/hooks";
+import { useIsRunning } from "@/services/sh-model/hooks";
 
-export const RequireLegacy = () => {
+export const RequireRunning = () => {
   const path = useLocation().pathname;
-  const legacy = useLegacy() ?? undefined;
 
-  if (legacy === null) {
+  const isRunning = useIsRunning();
+
+  if (!isRunning) {
     return <Navigate to={`/?redirect=${path}`} />;
   }
 

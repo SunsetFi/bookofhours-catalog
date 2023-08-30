@@ -22,6 +22,8 @@ const GameplayView = () => {
   const redirect = useQueryString("redirect");
   const model = useDIDependency(GameModel);
 
+  const date = useObservation(model.date$) ?? null;
+
   const connectedTerrains = useObservation(model.unlockedTerrains$) ?? [];
   const books =
     useObservation(
@@ -51,6 +53,11 @@ const GameplayView = () => {
       <Typography variant="h1" sx={{ width: "100%", textAlign: "center" }}>
         Inventory of Hush House
       </Typography>
+      {date && (
+        <Typography variant="h2" sx={{ width: "100%", textAlign: "center" }}>
+          {date.toFormat("MMMM d, yyyy")}
+        </Typography>
+      )}
       <Typography variant="h3" sx={{ width: "100%", textAlign: "center" }}>
         {connectedTerrains.length} locations restored.
       </Typography>

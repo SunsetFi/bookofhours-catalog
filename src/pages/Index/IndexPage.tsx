@@ -1,17 +1,17 @@
 import * as React from "react";
 
-import { useLegacy } from "@/services/sh-model/hooks";
+import { useIsRunning } from "@/services/sh-model/hooks";
 
 import GameNotRunningView from "./views/GameNotRunningView";
 import GameplayView from "./views/GameplayView";
 
 const IndexPage = () => {
-  const legacyId = useLegacy();
+  const isRunning = useIsRunning();
 
   return (
     <>
-      {legacyId == null && <GameNotRunningView />}
-      {legacyId != null && <GameplayView />}
+      {isRunning == false && <GameNotRunningView />}
+      {isRunning && <GameplayView />}
     </>
   );
 };

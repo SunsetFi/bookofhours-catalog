@@ -12,7 +12,7 @@ import { GameModel } from "@/services/sh-model";
 import { API } from "@/services/sh-api";
 import { filterHasAspect } from "@/services/sh-model/observables";
 
-import { RequireLegacy } from "@/components/RequireLegacy";
+import { RequireRunning } from "@/components/RequireLegacy";
 import ElementDataGrid, {
   aspectPresenceColumnDef,
   descriptionColumnDef,
@@ -81,7 +81,7 @@ const BookCatalog = () => {
         height: "100%",
       }}
     >
-      <RequireLegacy />
+      <RequireRunning />
       <Typography
         variant="h4"
         sx={{ py: 2, width: "100%", textAlign: "center" }}
