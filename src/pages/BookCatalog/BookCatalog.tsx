@@ -14,6 +14,7 @@ import { filterHasAspect } from "@/services/sh-model/observables";
 
 import { RequireLegacy } from "@/components/RequireLegacy";
 import ElementDataGrid, {
+  aspectPresenceColumnDef,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
@@ -22,7 +23,6 @@ import ElementDataGrid, {
 } from "@/components/ElementDataGrid";
 
 const BookCatalog = () => {
-  const api = useDIDependency(API);
   const model = useDIDependency(GameModel);
 
   const elements$ = React.useMemo(
@@ -47,57 +47,26 @@ const BookCatalog = () => {
       locationColumnDef({
         filter: multiselectOptionsFilter(locations),
       }),
-      {
-        // FIXME: Make an aspect column def using a value of {aspect, value}, load the aspect icon from the model.
-        headerName: "Mastery",
-        width: 150,
-        observable: (elementStack) =>
-          elementStack.elementAspects$.pipe(
-            map((aspects) => {
-              const masteryKey = Object.keys(aspects).find((x) =>
-                x.startsWith("mystery.")
-              );
-              if (masteryKey == null) {
-                return null;
-              }
-
-              return {
-                aspect: masteryKey,
-                value: aspects[masteryKey],
-                // FIXME: Get this from a model.
-                iconUrl: `${api.baseUrl}/api/compendium/elements/${masteryKey}/icon.png`,
-              };
-            })
-          ),
-        renderCell: ({ value }) => {
-          if (value == null) {
-            return null;
-          }
-
-          return (
-            <Box
-              component="span"
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <img style={{ width: "50px" }} src={value.iconUrl} />
-              <Typography
-                style={{ whiteSpace: "nowrap" }}
-                component="span"
-                variant="h4"
-                color="text.secondary"
-              >
-                {value.value}
-              </Typography>
-            </Box>
-          );
-        },
-      },
+      aspectPresenceColumnDef(
+        (aspectId) => aspectId.startsWith("mastery."),
+        { display: "none" },
+        { headerName: "Mastered", width: 100 }
+      ),
+      aspectPresenceColumnDef(
+        (aspectId) => aspectId.startsWith("mystery."),
+        {},
+        { headerName: "Mystery" }
+      ),
+      aspectPresenceColumnDef(
+        (aspectId) => aspectId.startsWith("w."),
+        { display: "none" },
+        { headerName: "Language", width: 100 }
+      ),
+      aspectPresenceColumnDef(
+        ["film", "record.phonograph"],
+        { display: "none" },
+        { headerName: "Type", width: 100 }
+      ),
       descriptionColumnDef(),
     ],
     [locations]

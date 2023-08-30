@@ -9,7 +9,7 @@ export function filterHasAspect(aspect: string) {
   return (source: Observable<readonly ElementStackModel[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
-        element.elementAspects$.pipe(map((aspects) => aspects[aspect] > 0))
+        element.aspects$.pipe(map((aspects) => aspects[aspect] > 0))
       )
     );
   };
@@ -19,9 +19,7 @@ export function filterHasAspects(match: Aspects) {
   return (source: Observable<readonly ElementStackModel[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
-        element.elementAspects$.pipe(
-          map((aspects) => aspectsMatch(aspects, match))
-        )
+        element.aspects$.pipe(map((aspects) => aspectsMatch(aspects, match)))
       )
     );
   };
@@ -31,7 +29,7 @@ export function filterHasAnyAspect(match: string[]) {
   return (source: Observable<readonly ElementStackModel[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
-        element.elementAspects$.pipe(
+        element.aspects$.pipe(
           map((aspects) => match.some((item) => aspects[item] > 0))
         )
       )

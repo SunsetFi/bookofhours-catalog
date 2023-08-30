@@ -1,4 +1,8 @@
-import { Aspects, ElementStack as IElementStack } from "secrethistories-api";
+import {
+  Aspects,
+  ElementStack as IElementStack,
+  combineAspects,
+} from "secrethistories-api";
 import {
   BehaviorSubject,
   Observable,
@@ -30,6 +34,7 @@ export class ElementStackModel extends TokenModel {
   private readonly _lifetimeRemaining$: Observable<number>;
   private readonly _elementAspects$: Observable<Aspects>;
   private readonly _mutations$: Observable<Aspects>;
+  private readonly _aspects$: Observable<Aspects>;
   private readonly _shrouded$: Observable<boolean>;
   private readonly _label$: Observable<string>;
   private readonly _description$: Observable<string>;
@@ -60,6 +65,9 @@ export class ElementStackModel extends TokenModel {
     );
     this._elementAspects$ = this._elementStack$.pipe(
       map((e) => e.elementAspects)
+    );
+    this._aspects$ = this._elementStack$.pipe(
+      map((e) => combineAspects(e.elementAspects, e.mutations))
     );
     this._mutations$ = this._elementStack$.pipe(map((e) => e.mutations));
     this._shrouded$ = this._elementStack$.pipe(map((e) => e.shrouded));
@@ -130,6 +138,10 @@ export class ElementStackModel extends TokenModel {
 
   get mutations$() {
     return this._mutations$;
+  }
+
+  get aspects$() {
+    return this._aspects$;
   }
 
   get shrouded$() {

@@ -42,7 +42,7 @@ export function renderAspects({
           key={label}
           sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
         >
-          <img src={iconUrl} alt={label} width={40} height={40} />
+          <img src={iconUrl} alt={label} title={label} width={40} height={40} />
           <Typography variant="body2" sx={{ pl: 1 }}>
             {level}
           </Typography>

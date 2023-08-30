@@ -20,8 +20,6 @@ export function aspectsColumnDef(
     filter: aspectsFilter(pickAspects),
     ...additional,
     observable: (element) =>
-      element.elementAspects$.pipe(
-        map((aspects) => pick(aspects, pickAspects))
-      ),
+      element.aspects$.pipe(map((aspects) => pick(aspects, pickAspects))),
   };
 }
