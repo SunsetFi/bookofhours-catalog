@@ -2,7 +2,6 @@ import * as React from "react";
 import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 
 import { useDIDependency } from "@/container";
 
@@ -10,18 +9,19 @@ import { powerAspects } from "@/aspects";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { GameModel } from "@/services/sh-model";
+import { ElementStackModel, GameModel } from "@/services/sh-model";
 import { filterHasAnyAspect } from "@/services/sh-model/observables";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-import ElementDataGrid, {
+import ElementStackDataGrid from "@/components/ElementStackDataGrid";
+import {
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
   locationColumnDef,
   multiselectOptionsFilter,
   aspectsColumnDef,
-} from "@/components/ElementDataGrid";
+} from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 
 const ProvisionsCatalog = () => {
@@ -47,13 +47,13 @@ const ProvisionsCatalog = () => {
 
   const columns = React.useMemo(
     () => [
-      iconColumnDef(),
-      labelColumnDef(),
-      locationColumnDef({
+      iconColumnDef<ElementStackModel>(),
+      labelColumnDef<ElementStackModel>(),
+      locationColumnDef<ElementStackModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      aspectsColumnDef(powerAspects),
-      descriptionColumnDef(),
+      aspectsColumnDef<ElementStackModel>(powerAspects),
+      descriptionColumnDef<ElementStackModel>(),
     ],
     [locations]
   );
@@ -69,7 +69,11 @@ const ProvisionsCatalog = () => {
         }}
       >
         <RequireRunning />
-        <ElementDataGrid columns={columns} elements$={elements$} />
+        <ElementStackDataGrid
+          sx={{ height: "100%" }}
+          columns={columns}
+          items$={elements$}
+        />
       </Box>
     </PageContainer>
   );

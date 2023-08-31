@@ -2,13 +2,15 @@ import * as React from "react";
 
 import Box from "@mui/material/Box";
 
-import { ElementDataGridColumnDef } from "../types";
+import { ModelWithIconUrl } from "@/services/sh-model/types";
 
-export function iconColumnDef(
+import { ObservableDataGridColumnDef } from "../types";
+
+export function iconColumnDef<T extends ModelWithIconUrl>(
   additional: Partial<
-    Omit<ElementDataGridColumnDef, "field" | "observable">
+    Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
   > = {}
-): ElementDataGridColumnDef {
+): ObservableDataGridColumnDef<T> {
   return {
     headerName: "",
     width: 90,

@@ -56,8 +56,8 @@ export class GameModel implements Initializable {
     readonly string[]
   >([]);
   private readonly _recipeExecutions$ = new BehaviorSubject<
-    Readonly<Record<string, number>>
-  >({});
+    Readonly<Record<string, number>> | undefined
+  >(undefined);
 
   // This is marked as internal use only as we do not distinct its values, and the observable will produce a new value every poll.
   private readonly _tokensInternalUseOnly$ = new BehaviorSubject<
@@ -166,6 +166,10 @@ export class GameModel implements Initializable {
 
     this._date$ = this._recipeExecutions$.pipe(
       map((recipeExecutions) => {
+        if (!recipeExecutions) {
+          return DateTime.invalid("No recipe executions");
+        }
+
         const daysPassed = recipeExecutions["day.dawn"] ?? 0;
         return startDate.plus({ days: daysPassed });
       })
@@ -216,8 +220,6 @@ export class GameModel implements Initializable {
         this._clear();
         return;
       }
-
-      var wasConnected = this._isRunning$.value;
 
       this._isRunning$.next(true);
 

@@ -15,16 +15,14 @@ import type { GridColDef } from "@mui/x-data-grid/models";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { ElementStackModel } from "@/services/sh-model";
-
 import { renderCellTextWrap } from "./cells/text-wrap";
 
-import { ElementDataGridColumnDef, FilterDef } from "./types";
+import { ObservableDataGridColumnDef, FilterDef } from "./types";
 
-export interface ElementDataGridProps {
+export interface ObservableDataGridProps<T> {
   sx?: SxProps;
-  columns: ElementDataGridColumnDef[];
-  elements$: Observable<readonly ElementStackModel[]>;
+  columns: ObservableDataGridColumnDef<T>[];
+  items$: Observable<readonly T[]>;
 }
 
 const pageSizeOptions = [10, 25, 50];
@@ -94,26 +92,28 @@ const ElementColumnHeader = ({ colDef, filter }: ElementColumnHeaderProps) => {
   );
 };
 
-function elementToRow(
-  element: ElementStackModel,
-  columns: ElementDataGridColumnDef[]
+function itemToRow(
+  item: any,
+  columns: ObservableDataGridColumnDef<any>[]
 ): Observable<Record<string, any>> {
   const observables = columns.map((column) => {
     if (column.field) {
-      return observableOf(element[column.field]);
+      return observableOf(item[column.field]);
     } else if (typeof column.observable === "string") {
-      return element[column.observable];
+      return item[column.observable];
     } else if (typeof column.observable === "function") {
-      return column.observable(element);
+      return column.observable(item);
     } else {
       return observableOf(undefined);
     }
   });
 
+  // This claims it is deprecacted.  It lies.  We are passing an array, but typescript gets fooled into thinking
+  // we are passing an arbitrary number of arguments.
   return combineLatest(observables).pipe(
     map((values) => {
       const value: any = {
-        id: element.id,
+        id: item.id,
       };
       values.forEach((v, i) => {
         value[`column_${i}`] = v;
@@ -123,7 +123,11 @@ function elementToRow(
   );
 }
 
-const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
+function ObservableDataGrid<T>({
+  sx,
+  columns,
+  items$,
+}: ObservableDataGridProps<T>) {
   const defaultFilters: any = {};
   columns.forEach((column, i) => {
     if (column.filter?.defaultFilterValue != null) {
@@ -135,7 +139,7 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
 
   const colDefs = React.useMemo(() => {
     function getColDef(
-      column: ElementDataGridColumnDef,
+      column: ObservableDataGridColumnDef<T>,
       index: number
     ): GridColDef {
       const { field, observable, filter, ...colDef } = column;
@@ -158,13 +162,13 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
   const rows =
     useObservation(
       () =>
-        elements$.pipe(
+        items$.pipe(
           map((elements) =>
-            elements.map((element) => elementToRow(element, columns))
+            elements.map((element) => itemToRow(element, columns))
           ),
           observeAll()
         ),
-      [elements$, columns]
+      [items$, columns]
     ) ?? [];
 
   const filteredRows = rows.filter((element) => {
@@ -204,6 +208,6 @@ const ElementDataGrid = ({ sx, columns, elements$ }: ElementDataGridProps) => {
       </FilterContext.Provider>
     </Box>
   );
-};
+}
 
-export default ElementDataGrid;
+export default ObservableDataGrid;

@@ -21,7 +21,11 @@ const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
       }}
     >
       <PageHeader title={title} backTo={backTo} />
-      <Box sx={{ flexGrow: 1, overflow: "auto" }}>{children}</Box>
+      <Box
+        sx={{ flexGrow: 1, width: "100%", height: "100%", overflow: "auto" }}
+      >
+        {children}
+      </Box>
     </Box>
   );
 };

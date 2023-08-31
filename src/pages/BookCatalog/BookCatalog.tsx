@@ -7,18 +7,20 @@ import { useDIDependency } from "@/container";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { GameModel } from "@/services/sh-model";
+import { ElementStackModel, GameModel } from "@/services/sh-model";
 import { filterHasAspect } from "@/services/sh-model/observables";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-import ElementDataGrid, {
+
+import ElementStackDataGrid from "@/components/ElementStackDataGrid";
+import {
   aspectPresenceColumnDef,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
   locationColumnDef,
   multiselectOptionsFilter,
-} from "@/components/ElementDataGrid";
+} from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 
 const BookCatalog = () => {
@@ -41,32 +43,32 @@ const BookCatalog = () => {
 
   const columns = React.useMemo(
     () => [
-      iconColumnDef(),
-      labelColumnDef(),
-      locationColumnDef({
+      iconColumnDef<ElementStackModel>(),
+      labelColumnDef<ElementStackModel>(),
+      locationColumnDef<ElementStackModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      aspectPresenceColumnDef(
+      aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("mastery."),
         { display: "none" },
         { headerName: "Mastered", width: 100 }
       ),
-      aspectPresenceColumnDef(
+      aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("mystery."),
         {},
         { headerName: "Mystery" }
       ),
-      aspectPresenceColumnDef(
+      aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("w."),
         { display: "none" },
         { headerName: "Language", width: 100 }
       ),
-      aspectPresenceColumnDef(
+      aspectPresenceColumnDef<ElementStackModel>(
         ["film", "record.phonograph"],
         { display: "none" },
         { headerName: "Type", width: 100 }
       ),
-      descriptionColumnDef(),
+      descriptionColumnDef<ElementStackModel>(),
     ],
     [locations]
   );
@@ -82,7 +84,11 @@ const BookCatalog = () => {
           height: "100%",
         }}
       >
-        <ElementDataGrid columns={columns} elements$={elements$} />
+        <ElementStackDataGrid
+          sx={{ height: "100%" }}
+          columns={columns}
+          items$={elements$}
+        />
       </Box>
     </PageContainer>
   );

@@ -8,10 +8,12 @@ import type { GridRenderCellParams } from "@mui/x-data-grid/models";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { useAspect } from "@/services/sh-compendium/hooks";
-
-import { ElementDataGridColumnDef } from "../types";
 import { useObservation } from "@/observables";
+
+import { useAspect } from "@/services/sh-compendium/hooks";
+import { ModelWithAspects } from "@/services/sh-model/types";
+
+import { ObservableDataGridColumnDef } from "../types";
 
 type AspectFilter = readonly string[] | ((aspectId: string) => boolean);
 function includeAspect(aspectId: string, filter: AspectFilter) {
@@ -26,13 +28,13 @@ export interface AspectPresenseOpts {
   display?: "label" | "level" | "none";
 }
 
-export function aspectPresenceColumnDef(
+export function aspectPresenceColumnDef<T extends ModelWithAspects>(
   allowedAspects: AspectFilter,
   { display = "level" }: AspectPresenseOpts = {},
   additional: Partial<
-    Omit<ElementDataGridColumnDef, "field" | "observable">
+    Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
   > = {}
-): ElementDataGridColumnDef {
+): ObservableDataGridColumnDef<T> {
   return {
     headerName: "Aspects",
     width: 120,

@@ -18,26 +18,42 @@ import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { GameModel } from "./GameModel";
 import { TokenModel } from "./TokenModel";
 
+import {
+  ModelWithLabel,
+  ModelWithDescription,
+  ModelWithAspects,
+  ModelWithIconUrl,
+  ModelWithParentTerrain,
+} from "./types";
+
 export function isElementStackModel(
   model: TokenModel
 ): model is ElementStackModel {
   return model instanceof ElementStackModel;
 }
 
-export class ElementStackModel extends TokenModel {
+export class ElementStackModel
+  extends TokenModel
+  implements
+    ModelWithLabel,
+    ModelWithDescription,
+    ModelWithAspects,
+    ModelWithIconUrl,
+    ModelWithParentTerrain
+{
   private readonly _elementStackInternal$: BehaviorSubject<IElementStack>;
   private readonly _elementStack$: Observable<IElementStack>;
 
   private readonly _elementId$: Observable<string>;
   private readonly _path$: Observable<string>;
+  private readonly _label$: Observable<string | null>;
+  private readonly _description$: Observable<string | null>;
   private readonly _quantity$: Observable<number>;
   private readonly _lifetimeRemaining$: Observable<number>;
   private readonly _elementAspects$: Observable<Aspects>;
   private readonly _mutations$: Observable<Aspects>;
   private readonly _aspects$: Observable<Aspects>;
   private readonly _shrouded$: Observable<boolean>;
-  private readonly _label$: Observable<string>;
-  private readonly _description$: Observable<string>;
   private readonly _decays$: Observable<boolean>;
   private readonly _unique$: Observable<boolean>;
 
@@ -116,6 +132,14 @@ export class ElementStackModel extends TokenModel {
     return this._path$;
   }
 
+  get label$() {
+    return this._label$;
+  }
+
+  get description$() {
+    return this._description$;
+  }
+
   get parentTerrain$() {
     return this._parentConnectedTerrain$;
   }
@@ -146,14 +170,6 @@ export class ElementStackModel extends TokenModel {
 
   get shrouded$() {
     return this._shrouded$;
-  }
-
-  get label$() {
-    return this._label$;
-  }
-
-  get description$() {
-    return this._description$;
   }
 
   get decays$() {

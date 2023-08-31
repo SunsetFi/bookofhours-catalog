@@ -6,9 +6,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 
 import { ObservableKeys } from "@/observables";
 
-import { ElementStackModel } from "@/services/sh-model";
-
-export interface ElementDataGridColumnDef
+export interface ObservableDataGridColumnDef<TItem>
   extends Pick<
     GridColDef,
     | "headerName"
@@ -19,11 +17,9 @@ export interface ElementDataGridColumnDef
     | "renderHeader"
     | "renderCell"
   > {
-  field?: keyof ElementStackModel;
+  field?: keyof TItem;
   wrap?: boolean;
-  observable?:
-    | ObservableKeys<ElementStackModel>
-    | ((element: ElementStackModel) => Observable<any>);
+  observable?: ObservableKeys<TItem> | ((element: TItem) => Observable<any>);
   filter?: FilterDef;
 }
 

@@ -1,17 +1,19 @@
 import { map } from "rxjs";
 import { pick } from "lodash";
 
+import { ModelWithAspects } from "@/services/sh-model/types";
+
 import { renderAspects } from "../cells/aspects-list";
 import { aspectsFilter } from "../filters/aspects";
 
-import { ElementDataGridColumnDef } from "../types";
+import { ObservableDataGridColumnDef } from "../types";
 
-export function aspectsColumnDef(
+export function aspectsColumnDef<T extends ModelWithAspects>(
   pickAspects: readonly string[],
   additional: Partial<
-    Omit<ElementDataGridColumnDef, "field" | "observable">
+    Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
   > = {}
-): ElementDataGridColumnDef {
+): ObservableDataGridColumnDef<T> {
   return {
     headerName: "Aspects",
     width: 300,

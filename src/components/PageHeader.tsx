@@ -62,7 +62,7 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
             <ArrowBack />
           </IconButton>
         )}
-        {date && (
+        {date && date.isValid && (
           <Typography variant="body2" sx={{ ml: 2 }}>
             {date.toFormat("MMMM d, yyyy")}
           </Typography>
