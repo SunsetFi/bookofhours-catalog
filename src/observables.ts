@@ -8,6 +8,9 @@ import {
   map,
   distinctUntilChanged,
   mergeMap,
+  defer,
+  from,
+  shareReplay,
 } from "rxjs";
 
 export type ObservableKeys<T> = {
@@ -41,6 +44,12 @@ export function useObservation<T>(
   }, [factory]);
 
   return value;
+}
+
+export function promiseFuncToObservable<T>(
+  func: () => Promise<T>
+): Observable<T> {
+  return defer(() => from(func())).pipe(shareReplay(1));
 }
 
 export function arrayDistinctShallow() {

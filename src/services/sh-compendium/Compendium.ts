@@ -1,41 +1,28 @@
 import { inject, injectable, singleton } from "microinject";
-import { Observable, distinctUntilChanged, mergeMap } from "rxjs";
+import { Observable } from "rxjs";
 import { Element } from "secrethistories-api";
 
+import { promiseFuncToObservable } from "@/observables";
+
 import { API } from "../sh-api";
-import { GameModel } from "../sh-model";
+
 import { AspectModel } from "./AspectModel";
 import { ElementModel } from "./ElementModel";
 
 @injectable()
 @singleton()
 export class Compendium {
-  private readonly _aspects$: Observable<Record<string, AspectModel>>;
-  private readonly _elements$: Observable<Record<string, ElementModel>>;
+  private readonly _aspectModels = new Map<string, AspectModel>();
+  private readonly _aspects$: Observable<readonly AspectModel[]>;
 
-  constructor(@inject(GameModel) cultsim: GameModel, @inject(API) api: API) {
-    this._aspects$ = cultsim.isRunning$.pipe(
-      distinctUntilChanged(),
-      mergeMap(async (value) => {
-        if (!value) {
-          return {};
-        }
+  private readonly _elementModels = new Map<string, ElementModel>();
+  private readonly _elements$: Observable<readonly ElementModel[]>;
 
-        const aspects = await api.getAspects({ hidden: false });
-        return aspects.map((aspect) => new AspectModel(aspect, api));
-      })
-    );
+  constructor(@inject(API) private readonly _api: API) {
+    this._aspects$ = promiseFuncToObservable(() => this._getAllAspectModels());
 
-    this._elements$ = cultsim.isRunning$.pipe(
-      distinctUntilChanged(),
-      mergeMap(async (value) => {
-        if (!value) {
-          return {};
-        }
-
-        const aspects = await api.getCards({ hidden: false });
-        return aspects.map((aspect) => new ElementModel(aspect, api));
-      })
+    this._elements$ = promiseFuncToObservable(() =>
+      this._getAllElementModels()
     );
   }
 
@@ -45,5 +32,69 @@ export class Compendium {
 
   get elements$() {
     return this._elements$;
+  }
+
+  getElementById(id: string): ElementModel {
+    if (!this._elementModels.has(id)) {
+      const model = new ElementModel(
+        id,
+        () => this._resolveElementById(id),
+        this._api
+      );
+      this._elementModels.set(id, model);
+    }
+
+    return this._elementModels.get(id)!;
+  }
+
+  getAspectById(id: string): AspectModel {
+    if (!this._aspectModels.has(id)) {
+      const model = new AspectModel(
+        id,
+        () => this._resolveAspectById(id),
+        this._api
+      );
+      this._aspectModels.set(id, model);
+    }
+
+    return this._aspectModels.get(id)!;
+  }
+
+  private async _getAllElementModels(): Promise<readonly ElementModel[]> {
+    const elements = await this._api.getElements({ hidden: false });
+    const models = elements.map(
+      (element) =>
+        new ElementModel(element.id, () => Promise.resolve(element), this._api)
+    );
+    models.forEach((model) => this._elementModels.set(model.id, model));
+    return models;
+  }
+
+  private async _getAllAspectModels(): Promise<readonly AspectModel[]> {
+    const aspects = await this._api.getAspects({ hidden: false });
+    const models = aspects.map(
+      (element) =>
+        new AspectModel(element.id, () => Promise.resolve(element), this._api)
+    );
+    models.forEach((model) => this._aspectModels.set(model.id, model));
+    return models;
+  }
+
+  private async _resolveAspectById(id: string): Promise<Element | null> {
+    const element = await this._api.getElement(id);
+    if (!element || !element.isAspect) {
+      return null;
+    }
+
+    return element;
+  }
+
+  private async _resolveElementById(id: string): Promise<Element | null> {
+    const element = await this._api.getElement(id);
+    if (!element || element.isAspect) {
+      return null;
+    }
+
+    return element;
   }
 }

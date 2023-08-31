@@ -86,7 +86,7 @@ const AspectsFilter = ({
     >
       <AspectSelectionGrid
         sx={{ m: 1 }}
-        availableAspectIds={allowedAspectIds}
+        items={allowedAspectIds}
         value={aspects}
         onChange={onAspectsChanged}
       />

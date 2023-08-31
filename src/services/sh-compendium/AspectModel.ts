@@ -1,20 +1,52 @@
 import { Element } from "secrethistories-api";
+import { Observable, map } from "rxjs";
+
+import { promiseFuncToObservable } from "@/observables";
 
 import { API } from "../sh-api";
 
 export class AspectModel {
-  constructor(private readonly _element: Element, private readonly _api: API) {}
+  private readonly _element$: Observable<Element | null>;
+
+  constructor(
+    private readonly _id: string,
+    resolve: (id: string) => Promise<Element | null>,
+    private readonly _api: API
+  ) {
+    this._element$ = promiseFuncToObservable(() => resolve(_id));
+  }
 
   get id() {
-    return this._element.id;
+    return this._id;
   }
 
-  get label() {
-    return this._element.label;
+  private _exists$: Observable<boolean> | null = null;
+  get exists$() {
+    if (this._exists$ == null) {
+      this._exists$ = this._element$.pipe(map((e) => e != null));
+    }
+
+    return this._exists$;
   }
 
+  private _label$: Observable<string | null> | null = null;
+  get label$() {
+    if (this._label$ == null) {
+      this._label$ = this._element$.pipe(map((e) => e?.label ?? null));
+    }
+
+    return this._label$;
+  }
+
+  private _description$: Observable<string | null> | null = null;
   get description() {
-    return this._element.description;
+    if (this._description$ == null) {
+      this._description$ = this._element$.pipe(
+        map((e) => e?.description ?? null)
+      );
+    }
+
+    return this._description$;
   }
 
   get iconUrl() {

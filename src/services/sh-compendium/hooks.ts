@@ -4,14 +4,12 @@ import { useObservation } from "@/observables";
 import { Compendium } from "./Compendium";
 import { AspectModel } from "./AspectModel";
 
-export function useAspect(aspectId: string): AspectModel | null {
+export function useAspects(): readonly AspectModel[] {
   const compendium = useDIDependency(Compendium);
-  const aspects = useObservation(compendium.aspects$) ?? {};
-  return aspects[aspectId] ?? null;
+  return useObservation(compendium.aspects$) ?? [];
 }
 
-export function useAspects(): AspectModel[] {
+export function useAspect(aspectId: string): AspectModel {
   const compendium = useDIDependency(Compendium);
-  const aspects = useObservation(compendium.aspects$) ?? {};
-  return Object.values(aspects);
+  return compendium.getAspectById(aspectId);
 }

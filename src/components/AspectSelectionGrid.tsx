@@ -3,27 +3,21 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import type { SxProps } from "@mui/material";
 
-import { useAspects } from "@/services/sh-compendium/hooks";
+import AspectIcon from "./AspectIcon";
 
 export interface AspectSelectionGridProps {
   sx?: SxProps;
-  availableAspectIds?: readonly string[];
+  items: readonly string[];
   value: string[];
   onChange(value: string[]): void;
 }
 
 const AspectSelectionGrid = ({
   sx,
-  availableAspectIds,
+  items,
   value,
   onChange,
 }: AspectSelectionGridProps) => {
-  const aspects = useAspects();
-  const availableAspects = availableAspectIds
-    ? aspects.filter((a) => availableAspectIds.includes(a.id))
-    : aspects;
-
-  console.log("value", value);
   return (
     <Box
       sx={{
@@ -35,23 +29,22 @@ const AspectSelectionGrid = ({
         ...sx,
       }}
     >
-      {availableAspects.map((aspect) => (
-        <Box
-          key={aspect.id}
+      {items.map((aspectId) => (
+        <AspectIcon
+          key={aspectId}
+          aspectId={aspectId}
+          size={40}
           sx={{
-            cursor: "pointer",
-            filter: value.includes(aspect.id) ? undefined : "grayscale(1)",
+            filter: value.includes(aspectId) ? undefined : "grayscale(1)",
           }}
           onClick={() => {
-            if (value.includes(aspect.id)) {
-              onChange(value.filter((a) => a !== aspect.id));
+            if (value.includes(aspectId)) {
+              onChange(value.filter((a) => a !== aspectId));
             } else {
-              onChange([...value, aspect.id]);
+              onChange([...value, aspectId]);
             }
           }}
-        >
-          <img src={aspect.iconUrl} alt={aspect.label} width={40} height={40} />
-        </Box>
+        />
       ))}
     </Box>
   );
