@@ -4,8 +4,20 @@ import { Observable, map } from "rxjs";
 import { promiseFuncToObservable } from "@/observables";
 
 import { API } from "../sh-api";
+import {
+  ModelWithAspects,
+  ModelWithDescription,
+  ModelWithIconUrl,
+  ModelWithLabel,
+} from "../sh-model/types";
 
-export class ElementModel {
+export class ElementModel
+  implements
+    ModelWithLabel,
+    ModelWithDescription,
+    ModelWithAspects,
+    ModelWithIconUrl
+{
   private readonly _element$: Observable<Element | null>;
 
   constructor(
@@ -39,7 +51,7 @@ export class ElementModel {
   }
 
   private _description$: Observable<string | null> | null = null;
-  get description() {
+  get description$() {
     if (this._description$ == null) {
       this._description$ = this._element$.pipe(
         map((e) => e?.description ?? null)
@@ -54,7 +66,7 @@ export class ElementModel {
   }
 
   private _aspects$: Observable<Readonly<Aspects>> | null = null;
-  get aspects() {
+  get aspects$() {
     if (this._aspects$ == null) {
       this._aspects$ = this._element$.pipe(
         map((e) => Object.freeze({ ...e?.aspects }))

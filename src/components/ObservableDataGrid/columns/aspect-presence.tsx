@@ -112,7 +112,7 @@ const AspectPresenseItem = ({
           {label}
         </Typography>
       )}
-      {display === "level" && <Typography variant="h4">{level}</Typography>}
+      {display === "level" && <Typography variant="body2">{level}</Typography>}
     </Box>
   );
 };

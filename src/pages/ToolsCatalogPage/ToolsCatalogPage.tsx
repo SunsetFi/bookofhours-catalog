@@ -7,6 +7,8 @@ import { useDIDependency } from "@/container";
 
 import { observeAll, useObservation } from "@/observables";
 
+import { powerAspects } from "@/aspects";
+
 import { ElementStackModel, GameModel } from "@/services/sh-model";
 import { filterHasAspect } from "@/services/sh-model/observables";
 
@@ -14,6 +16,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 
 import ElementStackDataGrid from "@/components/ElementStackDataGrid";
 import {
+  aspectsColumnDef,
   aspectPresenceColumnDef,
   descriptionColumnDef,
   iconColumnDef,
@@ -23,11 +26,11 @@ import {
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 
-const BookCatalog = () => {
+const ToolsCatalogPage = () => {
   const model = useDIDependency(GameModel);
 
   const elements$ = React.useMemo(
-    () => model.visibleElementStacks$.pipe(filterHasAspect("readable")),
+    () => model.visibleElementStacks$.pipe(filterHasAspect("tool")),
     [model]
   );
 
@@ -48,30 +51,11 @@ const BookCatalog = () => {
       locationColumnDef<ElementStackModel>({
         filter: multiselectOptionsFilter(locations),
       }),
+      aspectsColumnDef<ElementStackModel>(powerAspects),
       aspectPresenceColumnDef<ElementStackModel>(
-        (aspectId) => aspectId.startsWith("mastery."),
+        ["device"],
         { display: "none" },
-        { headerName: "Mastered", width: 100 }
-      ),
-      aspectPresenceColumnDef<ElementStackModel>(
-        (aspectId) => aspectId.startsWith("mystery."),
-        {},
-        { headerName: "Mystery" }
-      ),
-      aspectPresenceColumnDef<ElementStackModel>(
-        (aspectId) => aspectId.startsWith("contamination."),
-        { display: "none" },
-        { headerName: "Contamination", width: 200 }
-      ),
-      aspectPresenceColumnDef<ElementStackModel>(
-        (aspectId) => aspectId.startsWith("w."),
-        { display: "none" },
-        { headerName: "Language", width: 100 }
-      ),
-      aspectPresenceColumnDef<ElementStackModel>(
-        ["film", "record.phonograph"],
-        { display: "none" },
-        { headerName: "Type", width: 100 }
+        { headerName: "Consumable", width: 200 }
       ),
       descriptionColumnDef<ElementStackModel>(),
     ],
@@ -79,7 +63,7 @@ const BookCatalog = () => {
   );
 
   return (
-    <PageContainer title="Bibliographical Collection" backTo="/">
+    <PageContainer title="Toolshed" backTo="/">
       <RequireRunning />
       <Box
         sx={{
@@ -99,4 +83,4 @@ const BookCatalog = () => {
   );
 };
 
-export default BookCatalog;
+export default ToolsCatalogPage;

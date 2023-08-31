@@ -27,6 +27,7 @@ const AspectIcon = ({ aspectId, size = 40, sx, onClick }: AspectIconProps) => {
         cursor: onClick ? "pointer" : undefined,
         ...sx,
       }}
+      onClick={onClick}
     >
       <img src={aspect.iconUrl} alt={label} width={size} height={size} />
     </Box>

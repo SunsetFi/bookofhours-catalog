@@ -21,6 +21,7 @@ import {
 import { TokenModel } from "./TokenModel";
 import { SituationModel } from "./SituationModel";
 import { ElementModel } from "../sh-compendium/ElementModel";
+import { Compendium } from "../sh-compendium/Compendium";
 
 const pollRate = 1000;
 
@@ -92,7 +93,10 @@ export class GameModel implements Initializable {
 
   private readonly _date$: Observable<DateTime>;
 
-  constructor(@inject(API) private readonly _api: API) {
+  constructor(
+    @inject(API) private readonly _api: API,
+    @inject(Compendium) compendium: Compendium
+  ) {
     this._tokensInternalUseOnly$.subscribe((tokens) => {
       const supportedTokens = tokens.filter((x) =>
         supportedPayloadTypes.includes(x.payloadType)
@@ -176,7 +180,7 @@ export class GameModel implements Initializable {
     );
 
     this._uniqueElementsManifested$ = this._uniqueElementIdsManfiested$.pipe(
-      map((ids) => ids.map((id) => this._api.getElement(id))),
+      map((ids) => ids.map((id) => compendium.getElementById(id))),
       arrayDistinctShallow()
     );
   }

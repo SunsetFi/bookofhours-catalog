@@ -11,7 +11,10 @@ import AspectSelectionGrid from "@/components/AspectSelectionGrid";
 
 import { FilterComponentProps, FilterDef } from "../types";
 
-type FilterValue = { [key: string]: string | number; $mode: "any" | "all" };
+type FilterValue = {
+  [key: string]: string | number;
+  $mode: "any" | "all" | "none";
+};
 
 export function aspectsFilter(
   allowedAspectIds: readonly string[]
@@ -34,14 +37,18 @@ export function aspectsFilter(
           if (value[aspect] == null || value[aspect] < required) {
             return false;
           }
-        } else {
+        } else if (mode === "any") {
           if (value[aspect] != null && value[aspect] >= required) {
             return true;
+          }
+        } else if (mode === "none") {
+          if (value[aspect] != null && value[aspect] >= required) {
+            return false;
           }
         }
       }
 
-      return mode === "all" ? true : false;
+      return mode === "all" || mode === "none";
     },
     defaultFilterValue: { $mode: "any" } as any,
   };
@@ -58,9 +65,10 @@ const AspectsFilter = ({
   const aspects = Object.keys(value).filter((k) => k !== "$mode");
 
   const onAspectsChanged = React.useCallback(
-    (aspects: readonly string[]) => {
+    (selectedAspects: readonly string[]) => {
+      console.log("aspects changed", selectedAspects);
       onChange({
-        ...aspects.reduce((obj, key) => {
+        ...selectedAspects.reduce((obj, key) => {
           obj[key] = 1;
           return obj;
         }, {} as Aspects),
@@ -71,7 +79,7 @@ const AspectsFilter = ({
   );
 
   const onModeChanged = React.useCallback(
-    (mode: "any" | "all") => {
+    (mode: "any" | "all" | "none") => {
       onChange({
         ...value,
         $mode: mode,
@@ -97,6 +105,7 @@ const AspectsFilter = ({
       >
         <FormControlLabel value="any" control={<Radio />} label="Any" />
         <FormControlLabel value="all" control={<Radio />} label="All" />
+        <FormControlLabel value="none" control={<Radio />} label="None" />
       </RadioGroup>
       <Box sx={{ m: 1, display: "flex", flexDirection: "row", width: "100%" }}>
         <Button
