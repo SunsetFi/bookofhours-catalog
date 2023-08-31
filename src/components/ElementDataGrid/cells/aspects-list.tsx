@@ -7,8 +7,9 @@ import type { GridRenderCellParams } from "@mui/x-data-grid/models";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { useAspects } from "@/services/sh-model/hooks";
 import { isNotNull } from "@/utils";
+
+import { useAspects } from "@/services/sh-compendium/hooks";
 
 export function renderAspects({
   value = {},

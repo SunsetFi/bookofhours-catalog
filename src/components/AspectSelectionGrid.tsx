@@ -3,7 +3,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import type { SxProps } from "@mui/material";
 
-import { useAspects } from "@/services/sh-model/hooks";
+import { useAspects } from "@/services/sh-compendium/hooks";
 
 export interface AspectSelectionGridProps {
   sx?: SxProps;

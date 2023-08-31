@@ -9,7 +9,7 @@ import type { GridRenderCellParams } from "@mui/x-data-grid/models";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { useAspects } from "@/services/sh-model/hooks";
+import { useAspects } from "@/services/sh-compendium/hooks";
 import { isNotNull } from "@/utils";
 
 import { ElementDataGridColumnDef } from "../types";

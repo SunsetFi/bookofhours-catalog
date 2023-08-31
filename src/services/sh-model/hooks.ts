@@ -6,7 +6,6 @@ import { filterItemObservations, useObservation } from "@/observables";
 
 import { GameModel } from "./GameModel";
 import { ElementStackModel } from "./ElementStackModel";
-import { AspectModel } from "./AspectModel";
 
 export function useIsRunning(): boolean | undefined {
   const model = useDIDependency(GameModel);
@@ -27,9 +26,4 @@ export function useVisibleElementStacks(
       [model, deps ? [...deps] : filter]
     ) ?? []
   );
-}
-
-export function useAspects(): readonly AspectModel[] {
-  const model = useDIDependency(GameModel);
-  return useObservation(model.aspects$) ?? [];
 }

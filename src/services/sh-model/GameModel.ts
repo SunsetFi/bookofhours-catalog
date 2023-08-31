@@ -20,7 +20,6 @@ import {
 } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
 import { SituationModel } from "./SituationModel";
-import { AspectModel } from "./AspectModel";
 
 const pollRate = 1000;
 
@@ -51,8 +50,6 @@ export class GameModel implements Initializable {
   private readonly _fault$ = new BehaviorSubject<string | null>(null);
 
   private readonly _isGameLoaded$ = new BehaviorSubject<boolean>(false);
-
-  private readonly _aspects$ = new BehaviorSubject<readonly AspectModel[]>([]);
 
   private readonly _uniqueElementIdsManfiested$ = new BehaviorSubject<
     readonly string[]
@@ -182,10 +179,6 @@ export class GameModel implements Initializable {
     return this._date$;
   }
 
-  get aspects$() {
-    return this._aspects$;
-  }
-
   get visibleElementStacks$() {
     return this._visibleElementStacks$;
   }
@@ -214,11 +207,6 @@ export class GameModel implements Initializable {
 
       this._isRunning$.next(true);
 
-      // ceen httpd has a single read thread, and we keepalive, so its better to do this sequentially.
-      if (!wasConnected) {
-        await this._onConnected();
-      }
-
       await this._pollTokens();
       await this._pollManifestations();
       await this._pollRecipeExecutions();
@@ -229,17 +217,6 @@ export class GameModel implements Initializable {
     } finally {
       this._scheduleNextPoll();
     }
-  }
-
-  private async _onConnected() {
-    await Promise.all([this._fetchAspects()]);
-  }
-
-  private async _fetchAspects() {
-    const aspects = await this._api.getAspects({ hidden: false });
-    this._aspects$.next(
-      aspects.map((aspect) => new AspectModel(aspect, this._api))
-    );
   }
 
   private async _pollTokens() {
