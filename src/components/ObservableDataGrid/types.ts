@@ -24,6 +24,7 @@ export interface ObservableDataGridColumnDef<TItem>
 }
 
 export interface FilterComponentProps<T = any> {
+  columnValues: T[];
   value: T;
   onChange(value: T): void;
 }

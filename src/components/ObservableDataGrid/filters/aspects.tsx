@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Aspects } from "secrethistories-api";
+import { uniq, flatten } from "lodash";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -17,7 +18,7 @@ type FilterValue = {
 };
 
 export function aspectsFilter(
-  allowedAspectIds: readonly string[]
+  allowedAspectIds: readonly string[] | "auto"
 ): FilterDef<Aspects, FilterValue> {
   return {
     FilterComponent: (props) => (
@@ -56,13 +57,21 @@ export function aspectsFilter(
 
 const AspectsFilter = ({
   allowedAspectIds,
+  columnValues,
   value,
   onChange,
 }: FilterComponentProps<FilterValue> & {
-  allowedAspectIds: readonly string[];
+  allowedAspectIds: readonly string[] | "auto";
 }) => {
   const matchMode = (value as any)["$mode"];
   const aspects = Object.keys(value).filter((k) => k !== "$mode");
+
+  let choices: readonly string[] = [];
+  if (allowedAspectIds === "auto") {
+    choices = uniq(flatten(columnValues.map((x) => Object.keys(x))));
+  } else {
+    choices = allowedAspectIds;
+  }
 
   const onAspectsChanged = React.useCallback(
     (selectedAspects: readonly string[]) => {
@@ -94,7 +103,7 @@ const AspectsFilter = ({
     >
       <AspectSelectionGrid
         sx={{ m: 1 }}
-        items={allowedAspectIds}
+        items={choices}
         value={aspects}
         onChange={onAspectsChanged}
       />
@@ -111,7 +120,7 @@ const AspectsFilter = ({
         <Button
           size="small"
           sx={{ pl: 1, mr: "auto" }}
-          onClick={() => onAspectsChanged(allowedAspectIds)}
+          onClick={() => onAspectsChanged(choices)}
         >
           Select All
         </Button>

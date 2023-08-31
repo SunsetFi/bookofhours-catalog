@@ -37,10 +37,15 @@ const FilterContext = React.createContext<
 
 interface ElementColumnHeaderProps {
   filter: FilterDef | undefined;
+  columnValues: any[];
   colDef: GridColDef;
 }
 
-const ElementColumnHeader = ({ colDef, filter }: ElementColumnHeaderProps) => {
+const ElementColumnHeader = ({
+  colDef,
+  filter,
+  columnValues,
+}: ElementColumnHeaderProps) => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const FilterComponent = filter?.FilterComponent;
   const [filterValue, setFilterValue] = React.useContext(FilterContext);
@@ -77,6 +82,7 @@ const ElementColumnHeader = ({ colDef, filter }: ElementColumnHeaderProps) => {
             }}
           >
             <FilterComponent
+              columnValues={columnValues}
               value={filterValue[colDef.field]}
               onChange={(newValue: any) => {
                 setFilterValue((prevFilters) => ({
@@ -137,28 +143,6 @@ function ObservableDataGrid<T>({
   const filterStatePair = React.useState<Record<string, any>>(defaultFilters);
   const filterValue = filterStatePair[0];
 
-  const colDefs = React.useMemo(() => {
-    function getColDef(
-      column: ObservableDataGridColumnDef<T>,
-      index: number
-    ): GridColDef {
-      const { field, observable, filter, ...colDef } = column;
-      return {
-        renderCell: column.wrap ? renderCellTextWrap : undefined,
-        sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        ...colDef,
-        field: `column_${index}`,
-        renderHeader: ({ colDef }) => (
-          <ElementColumnHeader filter={filter} colDef={colDef} />
-        ),
-      };
-    }
-
-    return columns.map(getColDef);
-  }, [columns]);
-
   const rows =
     useObservation(
       () =>
@@ -170,6 +154,33 @@ function ObservableDataGrid<T>({
         ),
       [items$, columns]
     ) ?? [];
+
+  const colDefs = React.useMemo(() => {
+    function getColDef(
+      column: ObservableDataGridColumnDef<T>,
+      index: number
+    ): GridColDef {
+      const { field, observable, filter, ...colDef } = column;
+      const columnValues = rows.map((row) => row[`column_${index}`]);
+      return {
+        renderCell: column.wrap ? renderCellTextWrap : undefined,
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        ...colDef,
+        field: `column_${index}`,
+        renderHeader: ({ colDef }) => (
+          <ElementColumnHeader
+            columnValues={columnValues}
+            filter={filter}
+            colDef={colDef}
+          />
+        ),
+      };
+    }
+
+    return columns.map(getColDef);
+  }, [columns, rows]);
 
   const filteredRows = rows.filter((element) => {
     for (let i = 0; i < columns.length; i++) {
@@ -190,10 +201,9 @@ function ObservableDataGrid<T>({
 
   return (
     // Stupid box because stupid datagrid expands bigger than its 100% size.
-    <Box sx={{ overflow: "hidden" }}>
+    <Box sx={{ overflow: "hidden", ...sx }}>
       <FilterContext.Provider value={filterStatePair}>
         <DataGrid
-          sx={sx}
           columns={colDefs}
           rows={filteredRows}
           rowHeight={100}

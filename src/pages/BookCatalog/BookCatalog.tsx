@@ -22,6 +22,7 @@ import {
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
+import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 
 const BookCatalog = () => {
   const model = useDIDependency(GameModel);
@@ -51,7 +52,7 @@ const BookCatalog = () => {
       aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("mastery."),
         { display: "none" },
-        { headerName: "Mastered", width: 100 }
+        { headerName: "Mastered", width: 125, filter: aspectsFilter("auto") }
       ),
       aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("mystery."),
