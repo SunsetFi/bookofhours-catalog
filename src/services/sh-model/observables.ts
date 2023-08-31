@@ -3,10 +3,12 @@ import { Aspects, aspectsMatch } from "secrethistories-api";
 
 import { filterItemObservations } from "@/observables";
 
-import { ElementStackModel } from "./ElementStackModel";
+interface HasAspectsObservable {
+  aspects$: Observable<Aspects>;
+}
 
 export function filterHasAspect(aspect: string) {
-  return (source: Observable<readonly ElementStackModel[]>) => {
+  return <T extends HasAspectsObservable>(source: Observable<readonly T[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
         element.aspects$.pipe(map((aspects) => aspects[aspect] > 0))
@@ -16,7 +18,7 @@ export function filterHasAspect(aspect: string) {
 }
 
 export function filterHasAspects(match: Aspects) {
-  return (source: Observable<readonly ElementStackModel[]>) => {
+  return <T extends HasAspectsObservable>(source: Observable<readonly T[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
         element.aspects$.pipe(map((aspects) => aspectsMatch(aspects, match)))
@@ -26,7 +28,7 @@ export function filterHasAspects(match: Aspects) {
 }
 
 export function filterHasAnyAspect(match: string[]) {
-  return (source: Observable<readonly ElementStackModel[]>) => {
+  return <T extends HasAspectsObservable>(source: Observable<readonly T[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
         element.aspects$.pipe(

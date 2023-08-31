@@ -20,6 +20,7 @@ import {
 } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
 import { SituationModel } from "./SituationModel";
+import { ElementModel } from "../sh-compendium/ElementModel";
 
 const pollRate = 1000;
 
@@ -83,6 +84,10 @@ export class GameModel implements Initializable {
 
   private readonly _visibleElementStacks$: Observable<
     readonly ElementStackModel[]
+  >;
+
+  private readonly _uniqueElementsManifested$: Observable<
+    readonly ElementModel[]
   >;
 
   private readonly _date$: Observable<DateTime>;
@@ -165,6 +170,11 @@ export class GameModel implements Initializable {
         return startDate.plus({ days: daysPassed });
       })
     );
+
+    this._uniqueElementsManifested$ = this._uniqueElementIdsManfiested$.pipe(
+      map((ids) => ids.map((id) => this._api.getElement(id))),
+      arrayDistinctShallow()
+    );
   }
 
   get isRunning$() {
@@ -185,6 +195,10 @@ export class GameModel implements Initializable {
 
   get unlockedTerrains$() {
     return this._unlockedTerrains$;
+  }
+
+  get uniqueElementsManifested$() {
+    return this._uniqueElementsManifested$;
   }
 
   onInitialize() {
