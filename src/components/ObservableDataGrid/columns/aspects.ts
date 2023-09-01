@@ -5,7 +5,7 @@ import { aspectsMagnitude } from "@/aspects";
 
 import { ModelWithAspects } from "@/services/sh-model/types";
 
-import { renderAspects } from "../cells/aspects-list";
+import { AspectsCell } from "../cells/aspects-list";
 import { aspectsFilter } from "../filters/aspects";
 
 import { ObservableDataGridColumnDef } from "../types";
@@ -20,7 +20,7 @@ export function aspectsColumnDef<T extends ModelWithAspects>(
     headerName: "Aspects",
     width: 300,
     wrap: true,
-    renderCell: renderAspects,
+    renderCell: AspectsCell,
     filter: aspectsFilter(pickAspects),
     sortable: (a, b) => aspectsMagnitude(a) - aspectsMagnitude(b),
     ...additional,

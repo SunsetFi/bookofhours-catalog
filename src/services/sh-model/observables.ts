@@ -5,11 +5,23 @@ import { filterItemObservations } from "@/observables";
 
 import { ModelWithAspects } from "./types";
 
-export function filterHasAspect(aspect: string) {
+export function filterHasAspect(
+  aspect: string | ((aspectId: string) => boolean)
+) {
   return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
-        element.aspects$.pipe(map((aspects) => aspects[aspect] > 0))
+        element.aspects$.pipe(
+          map((aspects) => {
+            if (typeof aspect === "string") {
+              return aspects[aspect] > 0;
+            } else if (typeof aspect === "function") {
+              return Object.keys(aspects).some((item) => aspect(item));
+            }
+
+            return false;
+          })
+        )
       )
     );
   };

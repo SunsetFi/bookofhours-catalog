@@ -12,11 +12,11 @@ import {
 } from "rxjs";
 import { isEqual } from "lodash";
 
-import { API } from "../sh-api";
+import { Compendium } from "@/services/sh-compendium/Compendium";
+import { ElementModel } from "@/services/sh-compendium/ElementModel";
+import { API } from "@/services/sh-api";
 
-import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
-import { GameModel } from "./GameModel";
-import { TokenModel } from "./TokenModel";
+import { GameModel } from "../GameModel";
 
 import {
   ModelWithLabel,
@@ -24,7 +24,10 @@ import {
   ModelWithAspects,
   ModelWithIconUrl,
   ModelWithParentTerrain,
-} from "./types";
+} from "../types";
+
+import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
+import { TokenModel } from "./TokenModel";
 
 export function isElementStackModel(
   model: TokenModel
@@ -45,6 +48,7 @@ export class ElementStackModel
   private readonly _elementStack$: Observable<IElementStack>;
 
   private readonly _elementId$: Observable<string>;
+  private readonly _element$: Observable<ElementModel>;
   private readonly _path$: Observable<string>;
   private readonly _label$: Observable<string | null>;
   private readonly _description$: Observable<string | null>;
@@ -62,7 +66,8 @@ export class ElementStackModel
   constructor(
     elementStack: IElementStack,
     private readonly _api: API,
-    gameModel: GameModel
+    gameModel: GameModel,
+    compendium: Compendium
   ) {
     super(elementStack);
 
@@ -74,6 +79,10 @@ export class ElementStackModel
     );
 
     this._elementId$ = this._elementStack$.pipe(map((e) => e.elementId));
+    this._element$ = this._elementId$.pipe(
+      map((elementId) => compendium.getElementById(elementId))
+    );
+
     this._path$ = this._elementStack$.pipe(map((e) => e.path));
     this._quantity$ = this._elementStack$.pipe(map((e) => e.quantity));
     this._lifetimeRemaining$ = this._elementStack$.pipe(
@@ -126,6 +135,10 @@ export class ElementStackModel
 
   get elementId$() {
     return this._elementId$;
+  }
+
+  get element$() {
+    return this._element$;
   }
 
   get path$() {

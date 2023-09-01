@@ -1,7 +1,8 @@
 import { BehaviorSubject, Observable, map } from "rxjs";
 import { Situation as ISituation } from "secrethistories-api";
 
-import { API } from "../sh-api";
+import { API } from "../../sh-api";
+
 import { TokenModel } from "./TokenModel";
 
 export class SituationModel extends TokenModel {

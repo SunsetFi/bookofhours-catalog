@@ -13,15 +13,19 @@ import { Initializable } from "../Initializable";
 
 import { API } from "../sh-api";
 
-import { ElementStackModel, isElementStackModel } from "./ElementStackModel";
+import { ElementModel } from "../sh-compendium/ElementModel";
+import { Compendium } from "../sh-compendium/Compendium";
+
+import {
+  ElementStackModel,
+  isElementStackModel,
+} from "./models/ElementStackModel";
 import {
   ConnectedTerrainModel,
   isConnectedTerrainModel,
-} from "./ConnectedTerrainModel";
-import { TokenModel } from "./TokenModel";
-import { SituationModel } from "./SituationModel";
-import { ElementModel } from "../sh-compendium/ElementModel";
-import { Compendium } from "../sh-compendium/Compendium";
+} from "./models/ConnectedTerrainModel";
+import { TokenModel } from "./models/TokenModel";
+import { SituationModel } from "./models/SituationModel";
 
 const pollRate = 1000;
 
@@ -95,7 +99,7 @@ export class GameModel implements Initializable {
 
   constructor(
     @inject(API) private readonly _api: API,
-    @inject(Compendium) compendium: Compendium
+    @inject(Compendium) private readonly _compendium: Compendium
   ) {
     this._tokensInternalUseOnly$.subscribe((tokens) => {
       const supportedTokens = tokens.filter((x) =>
@@ -180,7 +184,7 @@ export class GameModel implements Initializable {
     );
 
     this._uniqueElementsManifested$ = this._uniqueElementIdsManfiested$.pipe(
-      map((ids) => ids.map((id) => compendium.getElementById(id))),
+      map((ids) => ids.map((id) => _compendium.getElementById(id))),
       arrayDistinctShallow()
     );
   }
@@ -271,7 +275,12 @@ export class GameModel implements Initializable {
           model = new ConnectedTerrainModel(token as ConnectedTerrain);
           break;
         case "ElementStack":
-          model = new ElementStackModel(token as ElementStack, this._api, this);
+          model = new ElementStackModel(
+            token as ElementStack,
+            this._api,
+            this,
+            this._compendium
+          );
           break;
         case "Situation":
         case "WorkstationSituation" as any:

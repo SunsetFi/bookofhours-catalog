@@ -1,4 +1,4 @@
-import { Aspects, Element } from "secrethistories-api";
+import { Aspects, Element, XTrigger } from "secrethistories-api";
 import { Observable, map } from "rxjs";
 
 import { promiseFuncToObservable } from "@/observables";
@@ -74,5 +74,17 @@ export class ElementModel
     }
 
     return this._aspects$;
+  }
+
+  private _xtriggers$: Observable<Record<string, XTrigger[]>> | null = null;
+  get xtriggers$() {
+    if (this._xtriggers$ == null) {
+      this._xtriggers$ = this._element$.pipe(
+        // TODO: Deep freeze
+        map((e) => Object.freeze({ ...e?.xtriggers }))
+      );
+    }
+
+    return this._xtriggers$;
   }
 }

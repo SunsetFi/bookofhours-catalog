@@ -1,4 +1,4 @@
-export * from "./ConnectedTerrainModel";
-export * from "./ElementStackModel";
+export * from "./models/ConnectedTerrainModel";
+export * from "./models/ElementStackModel";
+export * from "./models/SituationModel";
 export * from "./GameModel";
-export * from "./SituationModel";
