@@ -40,14 +40,20 @@ const MultiselectOptionsFilter = ({
 }: MultiselectOptionsFilterProps) => {
   const [search, setSearch] = React.useState<string>("");
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "600px" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      }}
+    >
       <TextField
-        sx={{ m: 1, mb: 2 }}
+        sx={{ mx: 1, mt: 1 }}
         label="Search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <List sx={{ overflow: "auto" }}>
+      <List sx={{ maxHeight: "600px", minHeight: 0, overflow: "auto" }}>
         {allowedValues
           .filter(
             (item) =>
@@ -85,7 +91,7 @@ const MultiselectOptionsFilter = ({
             </ListItem>
           ))}
       </List>
-      <Box sx={{ display: "flex", flexDirection: "row" }}>
+      <Box sx={{ display: "flex", flexDirection: "row", px: 1, pb: 1 }}>
         <Button onClick={() => onChange(allowedValues)}>Select All</Button>
         <Button sx={{ ml: "auto" }} onClick={() => onChange([])}>
           Clear

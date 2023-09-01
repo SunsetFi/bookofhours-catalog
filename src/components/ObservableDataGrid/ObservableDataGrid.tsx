@@ -160,14 +160,15 @@ function ObservableDataGrid<T>({
       column: ObservableDataGridColumnDef<T>,
       index: number
     ): GridColDef {
-      const { field, observable, filter, ...colDef } = column;
+      const { field, observable, filter, sortable, ...colDef } = column;
       const columnValues = rows.map((row) => row[`column_${index}`]);
       return {
         renderCell: column.wrap ? renderCellTextWrap : undefined,
-        sortable: false,
         filterable: false,
         disableColumnMenu: true,
         ...colDef,
+        sortable: Boolean(sortable),
+        sortComparator: typeof sortable === "function" ? sortable : undefined,
         field: `column_${index}`,
         renderHeader: ({ colDef }) => (
           <ElementColumnHeader

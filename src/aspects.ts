@@ -1,3 +1,5 @@
+import { Aspects } from "secrethistories-api";
+
 export const powerAspects = [
   "edge",
   "forge",
@@ -13,3 +15,9 @@ export const powerAspects = [
   "sky",
   "winter",
 ] as const;
+
+export function aspectsMagnitude(aspects: Aspects): number {
+  return Math.sqrt(
+    Object.values(aspects).reduce((sum, value) => sum + value * value, 0)
+  );
+}

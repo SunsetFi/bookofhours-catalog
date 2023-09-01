@@ -21,6 +21,7 @@ export interface ObservableDataGridColumnDef<TItem>
   wrap?: boolean;
   observable?: ObservableKeys<TItem> | ((element: TItem) => Observable<any>);
   filter?: FilterDef;
+  sortable?: SortDef;
 }
 
 export interface FilterComponentProps<T = any> {
@@ -34,3 +35,7 @@ export interface FilterDef<TValue = any, TFilter = any> {
   filterValue(value: TValue, filter: TFilter): boolean;
   defaultFilterValue?: TFilter;
 }
+
+export type SortDef<TValue = any> =
+  | boolean
+  | ((a: TValue, b: TValue) => number);

@@ -36,6 +36,17 @@ const theme = createTheme({
       fontWeight: "bold",
     },
   },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          // TODO: Only for text buttons?
+          fontSize: "0.6em",
+          fontWeight: "bold",
+        },
+      },
+    },
+  },
 });
 
 const AppThemeProvider = ({ children }: { children: React.ReactNode }) => {

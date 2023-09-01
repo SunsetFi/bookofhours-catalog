@@ -75,7 +75,6 @@ const AspectsFilter = ({
 
   const onAspectsChanged = React.useCallback(
     (selectedAspects: readonly string[]) => {
-      console.log("aspects changed", selectedAspects);
       onChange({
         ...selectedAspects.reduce((obj, key) => {
           obj[key] = 1;
@@ -99,15 +98,21 @@ const AspectsFilter = ({
 
   return (
     <Box
-      sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        p: 1,
+      }}
     >
       <AspectSelectionGrid
-        sx={{ m: 1 }}
+        sx={{ justifyContent: "center" }}
         items={choices}
         value={aspects}
         onChange={onAspectsChanged}
       />
       <RadioGroup
+        sx={{ mt: 1, px: 1 }}
         row
         value={matchMode}
         onChange={(e) => onModeChanged(e.target.value as any)}
@@ -116,7 +121,15 @@ const AspectsFilter = ({
         <FormControlLabel value="all" control={<Radio />} label="All" />
         <FormControlLabel value="none" control={<Radio />} label="None" />
       </RadioGroup>
-      <Box sx={{ m: 1, display: "flex", flexDirection: "row", width: "100%" }}>
+      <Box
+        sx={{
+          mt: 1,
+          px: 1,
+          display: "flex",
+          flexDirection: "row",
+          width: "100%",
+        }}
+      >
         <Button
           size="small"
           sx={{ pl: 1, mr: "auto" }}

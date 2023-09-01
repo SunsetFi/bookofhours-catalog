@@ -52,12 +52,17 @@ const BookCatalog = () => {
       aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("mastery."),
         { display: "none" },
-        { headerName: "Mastered", width: 125, filter: aspectsFilter("auto") }
+        {
+          headerName: "Mastered",
+          sortable: false,
+          width: 125,
+          filter: aspectsFilter("auto"),
+        }
       ),
       aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("mystery."),
         {},
-        { headerName: "Mystery" }
+        { headerName: "Mystery", filter: aspectsFilter("auto") }
       ),
       aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("contamination."),
@@ -67,12 +72,16 @@ const BookCatalog = () => {
       aspectPresenceColumnDef<ElementStackModel>(
         (aspectId) => aspectId.startsWith("w."),
         { display: "none" },
-        { headerName: "Language", width: 100 }
+        { headerName: "Language", width: 125, filter: aspectsFilter("auto") }
       ),
       aspectPresenceColumnDef<ElementStackModel>(
         ["film", "record.phonograph"],
         { display: "none" },
-        { headerName: "Type", width: 100 }
+        {
+          headerName: "Type",
+          width: 125,
+          filter: aspectsFilter(["film", "record.phonograph"]),
+        }
       ),
       descriptionColumnDef<ElementStackModel>(),
     ],

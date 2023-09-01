@@ -15,7 +15,12 @@ export function renderAspects({
 }: GridRenderCellParams<any, Aspects>) {
   return (
     <Box
-      sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 2 }}
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 2,
+      }}
     >
       {Object.keys(value).map((aspectId) => (
         <AspectListItem
