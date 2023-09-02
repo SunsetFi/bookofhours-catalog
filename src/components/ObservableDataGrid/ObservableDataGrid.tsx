@@ -1,6 +1,7 @@
 import * as React from "react";
 import { isEqual } from "lodash";
 import { Observable, combineLatest, map, of as observableOf } from "rxjs";
+import { createContext, useContextSelector } from "use-context-selector";
 
 import type { SxProps } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -18,6 +19,8 @@ import { observeAll, useObservation } from "@/observables";
 import { renderCellTextWrap } from "./cells/text-wrap";
 
 import { ObservableDataGridColumnDef, FilterDef } from "./types";
+import { DateTime } from "luxon";
+import { DataGridProps } from "@mui/x-data-grid";
 
 export interface ObservableDataGridProps<T> {
   sx?: SxProps;
@@ -26,14 +29,15 @@ export interface ObservableDataGridProps<T> {
 }
 
 const pageSizeOptions = [10, 25, 50];
+const initialState = {
+  pagination: { paginationModel: { pageSize: pageSizeOptions[2] } },
+};
 
 // We need to tunnel filter values into the headers, and invalidating all col defs takes a heavy toll.  Use context instead
-const FilterContext = React.createContext<
-  [
-    Record<string, any>,
-    React.Dispatch<React.SetStateAction<Record<string, any>>>
-  ]
->([{}, () => {}]);
+const FilterValueContext = createContext<Record<string, any>>({});
+const FilterDispatchContext = React.createContext<
+  React.Dispatch<React.SetStateAction<Record<string, any>>>
+>(() => {});
 
 interface ElementColumnHeaderProps {
   filter: FilterDef | undefined;
@@ -46,28 +50,38 @@ const ElementColumnHeader = ({
   filter,
   columnValues,
 }: ElementColumnHeaderProps) => {
+  const setFilterValue = React.useContext(FilterDispatchContext);
+
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const FilterComponent = filter?.FilterComponent;
-  const [filterValue, setFilterValue] = React.useContext(FilterContext);
+
+  // Im not sure about the safty of using props for this selector, and its not documented.
+  const value = useContextSelector(
+    FilterValueContext,
+    (filterValue) => filterValue[colDef.field]
+  );
+
+  const onOpen = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setAnchorEl(e.currentTarget);
+  }, []);
+
+  const onFilterChange = React.useCallback((newValue: any) => {
+    setFilterValue((prevFilters) => ({
+      ...prevFilters,
+      [colDef.field]: newValue,
+    }));
+  }, []);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
       <Typography variant="body2">{colDef.headerName}</Typography>
       {FilterComponent && (
         <>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setAnchorEl(e.currentTarget);
-            }}
-          >
+          <IconButton size="small" onClick={onOpen}>
             <FilterAlt
-              opacity={
-                isEqual(filterValue[colDef.field], filter.defaultFilterValue)
-                  ? 0.5
-                  : 1
-              }
+              opacity={isEqual(value, filter.defaultFilterValue) ? 0.5 : 1}
             />
           </IconButton>
           <Popover
@@ -83,13 +97,8 @@ const ElementColumnHeader = ({
           >
             <FilterComponent
               columnValues={columnValues}
-              value={filterValue[colDef.field]}
-              onChange={(newValue: any) => {
-                setFilterValue((prevFilters) => ({
-                  ...prevFilters,
-                  [colDef.field]: newValue,
-                }));
-              }}
+              value={value}
+              onChange={onFilterChange}
             />
           </Popover>
         </>
@@ -140,8 +149,8 @@ function ObservableDataGrid<T>({
       defaultFilters[`column_${i}`] = column.filter.defaultFilterValue;
     }
   });
-  const filterStatePair = React.useState<Record<string, any>>(defaultFilters);
-  const filterValue = filterStatePair[0];
+  const [filterValue, filterDispatch] =
+    React.useState<Record<string, any>>(defaultFilters);
 
   const rows =
     useObservation(
@@ -183,42 +192,64 @@ function ObservableDataGrid<T>({
     return columns.map(getColDef);
   }, [columns, rows]);
 
-  const filteredRows = rows.filter((element) => {
-    for (let i = 0; i < columns.length; i++) {
-      const { filter } = columns[i];
-      if (!filter) {
-        continue;
-      }
+  const filteredRows = React.useMemo(
+    () =>
+      rows.filter((element) => {
+        for (let i = 0; i < columns.length; i++) {
+          const { filter } = columns[i];
+          if (!filter) {
+            continue;
+          }
 
-      if (
-        !filter.filterValue(element[`column_${i}`], filterValue[`column_${i}`])
-      ) {
-        return false;
-      }
-    }
+          if (
+            !filter.filterValue(
+              element[`column_${i}`],
+              filterValue[`column_${i}`]
+            )
+          ) {
+            return false;
+          }
+        }
 
-    return true;
-  });
+        return true;
+      }),
+    [columns, rows, filterValue]
+  );
 
   return (
     // Stupid box because stupid datagrid expands bigger than its 100% size.
     <Box sx={{ overflow: "hidden", ...sx }}>
-      <FilterContext.Provider value={filterStatePair}>
-        <DataGrid
-          columns={colDefs}
-          rows={filteredRows}
-          rowHeight={100}
-          density="comfortable"
-          initialState={{
-            pagination: { paginationModel: { pageSize: pageSizeOptions[2] } },
-          }}
-          pageSizeOptions={pageSizeOptions}
-          // Virtualization is causing scrolling to be all kinds of jank.
-          disableVirtualization
-        />
-      </FilterContext.Provider>
+      <FilterDispatchContext.Provider value={filterDispatch}>
+        <FilterValueContext.Provider value={filterValue}>
+          <DeferredDataGrid
+            sx={{ width: "100%", height: "100%" }}
+            columns={colDefs}
+            rows={filteredRows}
+            rowHeight={100}
+            density="comfortable"
+            initialState={initialState}
+            pageSizeOptions={pageSizeOptions}
+            // Virtualization is causing scrolling to be all kinds of jank.
+            // disableVirtualization
+          />
+        </FilterValueContext.Provider>
+      </FilterDispatchContext.Provider>
     </Box>
   );
 }
+
+const DeferredDataGrid = ({ sx, ...props }: DataGridProps) => {
+  const deferredColumns = React.useDeferredValue(props.columns);
+  const deferredRows = React.useDeferredValue(props.rows);
+  const isStale =
+    deferredColumns !== props.columns || deferredRows !== props.rows;
+  return (
+    <Box sx={{ ...sx, filter: isStale ? "grayscale(1)" : undefined }}>
+      <MemoDataGrid {...props} columns={deferredColumns} rows={deferredRows} />
+    </Box>
+  );
+};
+
+const MemoDataGrid = React.memo(DataGrid);
 
 export default ObservableDataGrid;
