@@ -1,4 +1,4 @@
-import { map } from "rxjs";
+import { Observable, map } from "rxjs";
 import { pick } from "lodash";
 
 import { aspectsMagnitude } from "@/aspects";
@@ -9,12 +9,23 @@ import { AspectsCell } from "../cells/aspects-list";
 import { aspectsFilter } from "../filters/aspects";
 
 import { ObservableDataGridColumnDef } from "../types";
+import { Aspects } from "secrethistories-api";
 
 export function aspectsColumnDef<T extends ModelWithAspects>(
   pickAspects: readonly string[],
-  additional: Partial<
-    Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
-  > = {}
+  additional: Partial<ObservableDataGridColumnDef<T>> = {}
+): ObservableDataGridColumnDef<T> {
+  return aspectsObservableColumnDef(
+    (element) => element.aspects$,
+    pickAspects,
+    additional
+  );
+}
+
+export function aspectsObservableColumnDef<T>(
+  source: (target: T) => Observable<Aspects>,
+  pickAspects: readonly string[],
+  additional: Partial<ObservableDataGridColumnDef<T>> = {}
 ): ObservableDataGridColumnDef<T> {
   return {
     headerName: "Aspects",
@@ -23,8 +34,8 @@ export function aspectsColumnDef<T extends ModelWithAspects>(
     renderCell: AspectsCell,
     filter: aspectsFilter(pickAspects),
     sortable: (a, b) => aspectsMagnitude(a) - aspectsMagnitude(b),
-    ...additional,
     observable: (element) =>
-      element.aspects$.pipe(map((aspects) => pick(aspects, pickAspects))),
+      source(element).pipe(map((aspects) => pick(aspects, pickAspects))),
+    ...additional,
   };
 }

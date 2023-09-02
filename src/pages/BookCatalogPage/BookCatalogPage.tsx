@@ -34,6 +34,8 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
   aspectPresenceColumnDef,
+  aspectsColumnDef,
+  aspectsObservableColumnDef,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
@@ -186,14 +188,14 @@ const BookCatalogPage = () => {
         observable: "memoryLabel$",
         sortable: true,
       },
-      {
-        headerName: "Memory Aspects",
-        width: 200,
-        observable: "memoryAspects$",
-        sortable: true,
-        filter: aspectsFilter(powerAspects),
-        renderCell: AspectsCell,
-      },
+      aspectsObservableColumnDef<BookModel>(
+        (element) => element.memoryAspects$,
+        powerAspects,
+        {
+          headerName: "Memory Aspects",
+          width: 200,
+        }
+      ),
       aspectPresenceColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("w."),
         { display: "none" },

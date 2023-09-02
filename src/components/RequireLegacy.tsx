@@ -9,7 +9,6 @@ export const RequireRunning = () => {
 
   const isRunning = useIsRunning();
   if (isRunning === false) {
-    console.log("Not running");
     return <Navigate to={`/?redirect=${path}`} />;
   }
 
