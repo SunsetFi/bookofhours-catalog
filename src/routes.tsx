@@ -11,13 +11,13 @@ import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
 
 const AppRoutes = () => (
   <Routes>
-    <Route index element={<IndexPage />} />
-    <Route path="/book-catalog" element={<BookCatalogPage />} />
-    <Route path="/provisions-catalog" element={<ProvisionsCatalog />} />
-    <Route path="/memories" element={<MemoriesCompendiumPage />} />
-    <Route path="/tools-catalog" element={<ToolsCatalogPage />} />
-    <Route path="/materials-catalog" element={<MaterialsCatalogPage />} />
-    <Route path="/furnishings-catalog" element={<FurnishingsCatalogPage />} />
+    <Route index Component={IndexPage} />
+    <Route path="/book-catalog" Component={BookCatalogPage} />
+    <Route path="/provisions-catalog" Component={ProvisionsCatalog} />
+    <Route path="/memories" Component={MemoriesCompendiumPage} />
+    <Route path="/tools-catalog" Component={ToolsCatalogPage} />
+    <Route path="/materials-catalog" Component={MaterialsCatalogPage} />
+    <Route path="/furnishings-catalog" Component={FurnishingsCatalogPage} />
   </Routes>
 );
 

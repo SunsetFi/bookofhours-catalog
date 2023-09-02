@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import type { DataGridProps } from "@mui/x-data-grid";
 
@@ -162,15 +163,18 @@ function ObservableDataGrid<T>({
           observeAll()
         ),
       [items$, columns]
-    ) ?? [];
+    ) ?? undefined;
 
   const colDefs = React.useMemo(() => {
+    if (!rows) {
+      return undefined;
+    }
     function getColDef(
       column: ObservableDataGridColumnDef<T>,
       index: number
     ): GridColDef {
       const { field, observable, filter, sortable, ...colDef } = column;
-      const columnValues = rows.map((row) => row[`column_${index}`]);
+      const columnValues = rows!.map((row) => row[`column_${index}`]);
       return {
         renderCell: column.wrap ? renderCellTextWrap : undefined,
         filterable: false,
@@ -194,7 +198,7 @@ function ObservableDataGrid<T>({
 
   const filteredRows = React.useMemo(
     () =>
-      rows.filter((element) => {
+      rows?.filter((element) => {
         for (let i = 0; i < columns.length; i++) {
           const { filter } = columns[i];
           if (!filter) {
@@ -221,17 +225,30 @@ function ObservableDataGrid<T>({
     <Box sx={{ overflow: "hidden", ...sx }}>
       <FilterDispatchContext.Provider value={filterDispatch}>
         <FilterValueContext.Provider value={filterValue}>
-          <DeferredDataGrid
-            sx={{ width: "100%", height: "100%" }}
-            columns={colDefs}
-            rows={filteredRows}
-            rowHeight={100}
-            density="comfortable"
-            initialState={initialState}
-            pageSizeOptions={pageSizeOptions}
-            // Virtualization is causing scrolling to be all kinds of jank.
-            // disableVirtualization
-          />
+          {!filteredRows && (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
+          {filteredRows && colDefs && (
+            <DeferredDataGrid
+              sx={{ width: "100%", height: "100%" }}
+              columns={colDefs}
+              rows={filteredRows}
+              rowHeight={100}
+              density="comfortable"
+              initialState={initialState}
+              pageSizeOptions={pageSizeOptions}
+            />
+          )}
         </FilterValueContext.Provider>
       </FilterDispatchContext.Provider>
     </Box>

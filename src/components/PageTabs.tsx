@@ -42,11 +42,15 @@ const tabData = [
 const PageTabs = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const value = firstPathPart(pathname);
+  React.useEffect(() => {
+    console.log("PageTabs mount");
+  }, []);
   return (
     <Tabs
       sx={{ height: "100%" }}
       orientation="vertical"
-      value={firstPathPart(pathname)}
+      value={value}
       onChange={(_, value) => {
         navigate(value);
       }}
@@ -56,7 +60,16 @@ const PageTabs = () => {
           key={label}
           value={path}
           title={label}
-          icon={<AspectIcon aspectId={aspectIcon} size={40} />}
+          icon={
+            <AspectIcon
+              sx={{
+                filter:
+                  path !== value ? "brightness(75%) grayscale(0.9)" : undefined,
+              }}
+              aspectId={aspectIcon}
+              size={40}
+            />
+          }
         />
       ))}
     </Tabs>

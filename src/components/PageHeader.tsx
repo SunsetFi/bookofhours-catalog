@@ -9,11 +9,7 @@ import IconButton from "@mui/material/IconButton";
 
 import ArrowBack from "@mui/icons-material/ArrowBack";
 
-import { useDIDependency } from "@/container";
-
-import { useObservation } from "@/observables";
-
-import { GameModel } from "@/services/sh-model";
+import { useSeason, useYear } from "@/services/sh-model/hooks";
 
 import HandOverviewIcons from "./HandOverviewIcons";
 
@@ -23,9 +19,8 @@ export interface PageHeaderProps {
 }
 
 const PageHeader = ({ title, backTo }: PageHeaderProps) => {
-  const model = useDIDependency(GameModel);
-  const year = useObservation(model.year$) ?? 1;
-  const season = useObservation(model.season$) ?? "spring";
+  const year = useYear();
+  const season = useSeason();
 
   const navigate = useNavigate();
   const onBackClicked = React.useCallback(() => {

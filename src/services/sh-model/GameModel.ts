@@ -24,7 +24,7 @@ import {
 import { TokenModel } from "./models/TokenModel";
 import { SituationModel } from "./models/SituationModel";
 
-const pollRate = 1000;
+const pollRate = 5000;
 
 const playerSpherePaths = [
   "~/portage1",
@@ -172,40 +172,9 @@ export class GameModel implements Initializable {
       arrayDistinctShallow()
     );
 
-    this._year$ = this._recipeExecutions$.pipe(
-      map((recipeExecutions) => {
-        if (!recipeExecutions) {
-          return 0;
-        }
+    this._year$ = this._recipeExecutions$.pipe(map(yearFromExecutions));
 
-        return (recipeExecutions["year.season.spring"] ?? 1) - 1;
-      })
-    );
-
-    this._season$ = this._recipeExecutions$.pipe(
-      map((recipeExecutions) => {
-        if (!recipeExecutions) {
-          return "spring";
-        }
-
-        const springCount = recipeExecutions["year.season.spring"] ?? 0;
-        const summerCount = recipeExecutions["year.season.summer"] ?? 0;
-        const autumCount = recipeExecutions["year.season.autum"] ?? 0;
-        const winterCount = recipeExecutions["year.season.winter"] ?? 0;
-
-        // The lesser is the one we are at.
-        if (springCount > summerCount) {
-          return "summer";
-        }
-        if (summerCount > autumCount) {
-          return "autum";
-        }
-        if (autumCount > winterCount) {
-          return "winter";
-        }
-        return "spring";
-      })
-    );
+    this._season$ = this._recipeExecutions$.pipe(map(seasonFromExecutions));
 
     this._uniqueElementsManifested$ = this._uniqueElementIdsManfiested$.pipe(
       map((ids) => ids.map((id) => _compendium.getElementById(id))),
@@ -217,6 +186,10 @@ export class GameModel implements Initializable {
     return this._isRunning$;
   }
 
+  get isRunning() {
+    return this._isRunning$.value;
+  }
+
   get isGameLoaded$() {
     return this._isGameLoaded$;
   }
@@ -225,8 +198,16 @@ export class GameModel implements Initializable {
     return this._year$;
   }
 
+  get year() {
+    return yearFromExecutions(this._recipeExecutions$.value);
+  }
+
   get season$() {
     return this._season$;
+  }
+
+  get season() {
+    return seasonFromExecutions(this._recipeExecutions$.value);
   }
 
   get visibleElementStacks$() {
@@ -325,4 +306,39 @@ export class GameModel implements Initializable {
     model._onUpdate(token);
     return model;
   }
+}
+
+function yearFromExecutions(
+  recipeExecutions: Record<string, number> | undefined
+) {
+  if (!recipeExecutions) {
+    return 0;
+  }
+
+  return (recipeExecutions["year.season.spring"] ?? 1) - 1;
+}
+
+function seasonFromExecutions(
+  recipeExecutions: Record<string, number> | undefined
+) {
+  if (!recipeExecutions) {
+    return "spring";
+  }
+
+  const springCount = recipeExecutions["year.season.spring"] ?? 0;
+  const summerCount = recipeExecutions["year.season.summer"] ?? 0;
+  const autumCount = recipeExecutions["year.season.autum"] ?? 0;
+  const winterCount = recipeExecutions["year.season.winter"] ?? 0;
+
+  // The lesser is the one we are at.
+  if (springCount > summerCount) {
+    return "summer";
+  }
+  if (summerCount > autumCount) {
+    return "autum";
+  }
+  if (autumCount > winterCount) {
+    return "winter";
+  }
+  return "spring";
 }

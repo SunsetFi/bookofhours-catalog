@@ -1,9 +1,11 @@
 import * as React from "react";
+import { delay, of } from "rxjs";
 
 import Box from "@mui/material/Box";
 
 import PageHeader from "./PageHeader";
 import PageTabs from "./PageTabs";
+import { useObservation } from "@/observables";
 
 export interface PageContainerProps {
   title: string;
@@ -12,6 +14,10 @@ export interface PageContainerProps {
 }
 
 const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
+  // HACK: Defer rendering the children until the next tick, so that our navigation can rerender immediately.
+  // This helps the feel of the page immensely.
+  // Instead of this, we should have PageContainer be outside of the route.
+  const renderDelay = useObservation(() => of(true).pipe(delay(1)), []);
   return (
     <Box
       sx={{
@@ -34,7 +40,7 @@ const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
       >
         <PageTabs />
         <Box sx={{ flexGrow: 1, width: "100%", height: "100%" }}>
-          {children}
+          {renderDelay && children}
         </Box>
       </Box>
     </Box>

@@ -17,10 +17,6 @@ const AspectIcon = ({ aspectId, size = 40, sx, onClick }: AspectIconProps) => {
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$);
 
-  if (!label) {
-    return null;
-  }
-
   return (
     <Box
       sx={{
@@ -31,8 +27,8 @@ const AspectIcon = ({ aspectId, size = 40, sx, onClick }: AspectIconProps) => {
     >
       <img
         src={aspect.iconUrl}
-        alt={label}
-        title={label}
+        alt={label ?? ""}
+        title={label ?? ""}
         width={size}
         height={size}
       />

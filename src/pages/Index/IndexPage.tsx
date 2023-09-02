@@ -10,8 +10,8 @@ const IndexPage = () => {
 
   return (
     <>
-      {isRunning == false && <GameNotRunningView />}
-      {isRunning && <GameplayView />}
+      {isRunning === false && <GameNotRunningView />}
+      {isRunning !== false && <GameplayView />}
     </>
   );
 };
