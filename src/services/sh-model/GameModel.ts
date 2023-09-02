@@ -4,9 +4,6 @@ import { ConnectedTerrain, ElementStack, Token } from "secrethistories-api";
 import { difference, isEqual, sortBy } from "lodash";
 import { DateTime } from "luxon";
 
-// The date of first arrival, according to the legacy name.
-const startDate = DateTime.fromISO("1936-03-07T00:00:00.000Z");
-
 import { arrayDistinctShallow, observeAll } from "@/observables";
 
 import { Initializable } from "../Initializable";
@@ -95,7 +92,10 @@ export class GameModel implements Initializable {
     readonly ElementModel[]
   >;
 
-  private readonly _date$: Observable<DateTime>;
+  private readonly _year$: Observable<number>;
+  private readonly _season$: Observable<
+    "spring" | "summer" | "autum" | "winter"
+  >;
 
   constructor(
     @inject(API) private readonly _api: API,
@@ -172,14 +172,38 @@ export class GameModel implements Initializable {
       arrayDistinctShallow()
     );
 
-    this._date$ = this._recipeExecutions$.pipe(
+    this._year$ = this._recipeExecutions$.pipe(
       map((recipeExecutions) => {
         if (!recipeExecutions) {
-          return DateTime.invalid("No recipe executions");
+          return 0;
         }
 
-        const daysPassed = recipeExecutions["day.dawn"] ?? 0;
-        return startDate.plus({ days: daysPassed });
+        return (recipeExecutions["year.season.spring"] ?? 1) - 1;
+      })
+    );
+
+    this._season$ = this._recipeExecutions$.pipe(
+      map((recipeExecutions) => {
+        if (!recipeExecutions) {
+          return "spring";
+        }
+
+        const springCount = recipeExecutions["year.season.spring"] ?? 0;
+        const summerCount = recipeExecutions["year.season.summer"] ?? 0;
+        const autumCount = recipeExecutions["year.season.autum"] ?? 0;
+        const winterCount = recipeExecutions["year.season.winter"] ?? 0;
+
+        // The lesser is the one we are at.
+        if (springCount > summerCount) {
+          return "summer";
+        }
+        if (summerCount > autumCount) {
+          return "autum";
+        }
+        if (autumCount > winterCount) {
+          return "winter";
+        }
+        return "spring";
       })
     );
 
@@ -197,8 +221,12 @@ export class GameModel implements Initializable {
     return this._isGameLoaded$;
   }
 
-  get date$() {
-    return this._date$;
+  get year$() {
+    return this._year$;
+  }
+
+  get season$() {
+    return this._season$;
   }
 
   get visibleElementStacks$() {

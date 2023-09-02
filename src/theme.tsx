@@ -8,7 +8,7 @@ const theme = createTheme({
     mode: "dark",
   },
   typography: {
-    fontFamily: "'Edu SA Beginner', cursive",
+    fontFamily: "'Tinos', serif",
     h1: {
       fontFamily: headerFontFamily,
     },
@@ -28,12 +28,10 @@ const theme = createTheme({
       fontFamily: headerFontFamily,
     },
     body1: {
-      fontSize: "1.5rem",
-      fontWeight: "bold",
+      fontSize: "1.2rem",
     },
     body2: {
       fontSize: "1.2rem",
-      fontWeight: "bold",
     },
   },
   components: {

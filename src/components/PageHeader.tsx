@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router";
+import { capitalize } from "lodash";
 
 import Typography from "@mui/material/Typography";
 import AppBar from "@mui/material/AppBar";
@@ -23,7 +24,8 @@ export interface PageHeaderProps {
 
 const PageHeader = ({ title, backTo }: PageHeaderProps) => {
   const model = useDIDependency(GameModel);
-  const date = useObservation(model.date$) ?? null;
+  const year = useObservation(model.year$) ?? 1;
+  const season = useObservation(model.season$) ?? "spring";
 
   const navigate = useNavigate();
   const onBackClicked = React.useCallback(() => {
@@ -62,11 +64,11 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
             <ArrowBack />
           </IconButton>
         )}
-        {date && date.isValid && (
+        {
           <Typography variant="body2" sx={{ ml: 2 }}>
-            {date.toFormat("MMMM d, yyyy")}
+            {capitalize(season)}, Year {year}
           </Typography>
-        )}
+        }
         <HandOverviewIcons sx={{ ml: 2 }} />
       </Toolbar>
     </AppBar>

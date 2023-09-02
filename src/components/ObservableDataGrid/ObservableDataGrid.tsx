@@ -76,7 +76,7 @@ const ElementColumnHeader = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-      <Typography variant="body2">{colDef.headerName}</Typography>
+      <Typography variant="body1">{colDef.headerName}</Typography>
       {FilterComponent && (
         <>
           <IconButton size="small" onClick={onOpen}>

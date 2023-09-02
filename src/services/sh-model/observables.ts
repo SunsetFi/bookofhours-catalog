@@ -43,7 +43,7 @@ export function filterHasAspects(match: Aspects) {
   };
 }
 
-export function filterHasAnyAspect(match: string[]) {
+export function filterHasAnyAspect(match: readonly string[]) {
   return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
     return source.pipe(
       filterItemObservations((element) =>

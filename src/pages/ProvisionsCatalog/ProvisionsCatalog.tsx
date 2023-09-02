@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
 
-import { powerAspects } from "@/aspects";
+import { powerAspects, provisionsAspects } from "@/aspects";
 
 import { observeAll, useObservation } from "@/observables";
 
@@ -21,6 +21,7 @@ import {
   locationColumnDef,
   multiselectOptionsFilter,
   aspectsColumnDef,
+  aspectPresenceColumnDef,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 
@@ -29,9 +30,7 @@ const ProvisionsCatalog = () => {
 
   const elements$ = React.useMemo(
     () =>
-      model.visibleElementStacks$.pipe(
-        filterHasAnyAspect(["beverage", "brewable", "sustanance"])
-      ),
+      model.visibleElementStacks$.pipe(filterHasAnyAspect(provisionsAspects)),
     [model]
   );
 
@@ -52,6 +51,11 @@ const ProvisionsCatalog = () => {
       locationColumnDef<ElementStackModel>({
         filter: multiselectOptionsFilter(locations),
       }),
+      aspectPresenceColumnDef<ElementStackModel>(
+        provisionsAspects,
+        { display: "none" },
+        { headerName: "Type" }
+      ),
       aspectsColumnDef<ElementStackModel>(powerAspects),
       descriptionColumnDef<ElementStackModel>(),
     ],

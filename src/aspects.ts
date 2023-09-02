@@ -29,6 +29,12 @@ export const materialAspects = [
   "fabric",
 ] as const;
 
+export const provisionsAspects = [
+  "beverage",
+  "brewable",
+  "sustanance",
+] as const;
+
 export const furnishingAspects = ["comfort", "wallart"] as const;
 
 export function aspectsMagnitude(aspects: Aspects): number {
