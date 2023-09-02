@@ -49,6 +49,7 @@ const MultiselectOptionsFilter = ({
     >
       <TextField
         sx={{ mx: 1, mt: 1 }}
+        autoFocus
         label="Search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}

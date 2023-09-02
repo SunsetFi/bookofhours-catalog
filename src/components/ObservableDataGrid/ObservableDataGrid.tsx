@@ -9,6 +9,8 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 
+import type { DataGridProps } from "@mui/x-data-grid";
+
 import FilterAlt from "@mui/icons-material/FilterAlt";
 
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
@@ -19,8 +21,6 @@ import { observeAll, useObservation } from "@/observables";
 import { renderCellTextWrap } from "./cells/text-wrap";
 
 import { ObservableDataGridColumnDef, FilterDef } from "./types";
-import { DateTime } from "luxon";
-import { DataGridProps } from "@mui/x-data-grid";
 
 export interface ObservableDataGridProps<T> {
   sx?: SxProps;

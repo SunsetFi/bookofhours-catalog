@@ -25,6 +25,7 @@ const TextSearchFilter = ({
   return (
     <TextField
       sx={{ m: 1 }}
+      autoFocus
       label="Search"
       value={value}
       onChange={(e) => onChange(e.target.value)}

@@ -35,7 +35,9 @@ const AspectSelectionGrid = ({
           aspectId={aspectId}
           size={40}
           sx={{
-            filter: value.includes(aspectId) ? undefined : "grayscale(1)",
+            filter: value.includes(aspectId)
+              ? undefined
+              : "brightness(45%) grayscale(0.5)",
           }}
           onClick={() => {
             if (value.includes(aspectId)) {

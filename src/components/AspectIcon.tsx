@@ -29,7 +29,13 @@ const AspectIcon = ({ aspectId, size = 40, sx, onClick }: AspectIconProps) => {
       }}
       onClick={onClick}
     >
-      <img src={aspect.iconUrl} alt={label} width={size} height={size} />
+      <img
+        src={aspect.iconUrl}
+        alt={label}
+        title={label}
+        width={size}
+        height={size}
+      />
     </Box>
   );
 };
