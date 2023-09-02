@@ -66,7 +66,7 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
         )}
         {
           <Typography variant="body2" sx={{ ml: 2 }}>
-            {capitalize(season)}, Year {year}
+            {capitalize(season)}, Year {1936 + year}
           </Typography>
         }
         <HandOverviewIcons sx={{ ml: 2 }} />
