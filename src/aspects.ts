@@ -16,6 +16,21 @@ export const powerAspects = [
   "winter",
 ] as const;
 
+export const materialAspects = [
+  "material",
+  "leaf",
+  "flower",
+  "liquid",
+  "pigment",
+  "metal",
+  "fuel",
+  "remains",
+  "gem",
+  "fabric",
+] as const;
+
+export const furnishingAspects = ["comfort", "wallart"] as const;
+
 export function aspectsMagnitude(aspects: Aspects): number {
   return Math.sqrt(
     Object.values(aspects).reduce((sum, value) => sum + value * value, 0)

@@ -8,10 +8,9 @@ import {
 } from "rxjs";
 
 import { Aspects } from "secrethistories-api";
-import { pick } from "lodash";
+import { pick, first } from "lodash";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 
 import { powerAspects } from "@/aspects";
 
@@ -22,7 +21,6 @@ import { observeAll, useObservation } from "@/observables";
 import { ElementStackModel, GameModel } from "@/services/sh-model";
 import { filterHasAspect } from "@/services/sh-model/observables";
 import { Compendium } from "@/services/sh-compendium/Compendium";
-import { ElementModel } from "@/services/sh-compendium/ElementModel";
 import {
   ModelWithAspects,
   ModelWithDescription,
@@ -44,7 +42,6 @@ import ObservableDataGrid, {
 } from "@/components/ObservableDataGrid";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
-import { AspectsList } from "@/components/AspectsList";
 import { AspectsCell } from "@/components/ObservableDataGrid/cells/aspects-list";
 
 interface BookModel
@@ -79,11 +76,7 @@ function elementStackToBook(
           for (var key of Object.keys(xtriggers).filter((x) =>
             x.startsWith("reading.")
           )) {
-            for (const trigger of xtriggers[key]) {
-              if (trigger.id.startsWith("mem.")) {
-                return trigger.id;
-              }
-            }
+            return first(xtriggers[key])?.id ?? null;
           }
 
           return null;
@@ -218,7 +211,11 @@ const BookCatalogPage = () => {
       aspectPresenceColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("contamination."),
         { display: "none" },
-        { headerName: "Contamination", width: 200 }
+        {
+          headerName: "Contamination",
+          width: 200,
+          filter: aspectsFilter("auto"),
+        }
       ),
       descriptionColumnDef<BookModel>(),
     ],
