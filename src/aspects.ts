@@ -32,7 +32,8 @@ export const materialAspects = [
 export const provisionsAspects = [
   "beverage",
   "brewable",
-  "sustanance",
+  "sustenance",
+  "distributable",
 ] as const;
 
 export const furnishingAspects = ["comfort", "wallart"] as const;

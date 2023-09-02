@@ -24,6 +24,7 @@ import {
   aspectPresenceColumnDef,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
+import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 
 const ProvisionsCatalog = () => {
   const model = useDIDependency(GameModel);
@@ -54,7 +55,7 @@ const ProvisionsCatalog = () => {
       aspectPresenceColumnDef<ElementStackModel>(
         provisionsAspects,
         { display: "none" },
-        { headerName: "Type" }
+        { headerName: "Type", filter: aspectsFilter(provisionsAspects) }
       ),
       aspectsColumnDef<ElementStackModel>(powerAspects),
       descriptionColumnDef<ElementStackModel>(),
