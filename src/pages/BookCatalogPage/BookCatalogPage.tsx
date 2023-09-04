@@ -18,23 +18,24 @@ import { useDIDependency } from "@/container";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { ElementStackModel, GameModel } from "@/services/sh-model";
-import { filterHasAspect } from "@/services/sh-model/observables";
-import { Compendium } from "@/services/sh-compendium/Compendium";
+import { Compendium } from "@/services/sh-compendium";
+
 import {
+  ElementStackModel,
+  GameModel,
+  filterHasAspect,
   ModelWithAspects,
   ModelWithDescription,
   ModelWithIconUrl,
   ModelWithLabel,
   ModelWithParentTerrain,
-} from "@/services/sh-model/types";
+} from "@/services/sh-model";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
   aspectPresenceColumnDef,
-  aspectsColumnDef,
   aspectsObservableColumnDef,
   descriptionColumnDef,
   iconColumnDef,
@@ -44,7 +45,6 @@ import ObservableDataGrid, {
 } from "@/components/ObservableDataGrid";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
-import { AspectsCell } from "@/components/ObservableDataGrid/cells/aspects-list";
 
 interface BookModel
   extends ModelWithAspects,

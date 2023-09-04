@@ -7,7 +7,7 @@ import {
   ModelWithAspects,
   ModelWithDescription,
   ModelWithLabel,
-} from "../sh-model/types";
+} from "../../sh-model";
 
 export class RecipeModel
   implements ModelWithLabel, ModelWithDescription, ModelWithAspects

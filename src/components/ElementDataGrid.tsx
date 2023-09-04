@@ -1,4 +1,4 @@
-import { ElementModel } from "@/services/sh-compendium/ElementModel";
+import { ElementModel } from "@/services/sh-compendium";
 
 import ObservableDataGrid from "./ObservableDataGrid";
 

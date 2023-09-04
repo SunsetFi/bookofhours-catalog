@@ -8,16 +8,18 @@ import MemoriesCompendiumPage from "./pages/MemoriesCompendiumPage";
 import ToolsCatalogPage from "./pages/ToolsCatalogPage";
 import MaterialsCatalogPage from "./pages/MaterialsCatalogPage";
 import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
+import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 
 const AppRoutes = () => (
   <Routes>
     <Route index Component={IndexPage} />
-    <Route path="/book-catalog" Component={BookCatalogPage} />
+    <Route path="/books-catalog" Component={BookCatalogPage} />
     <Route path="/provisions-catalog" Component={ProvisionsCatalog} />
     <Route path="/memories" Component={MemoriesCompendiumPage} />
     <Route path="/tools-catalog" Component={ToolsCatalogPage} />
     <Route path="/materials-catalog" Component={MaterialsCatalogPage} />
     <Route path="/furnishings-catalog" Component={FurnishingsCatalogPage} />
+    <Route path="/workstations-catalog" Component={WorkstationCatalogPage} />
   </Routes>
 );
 

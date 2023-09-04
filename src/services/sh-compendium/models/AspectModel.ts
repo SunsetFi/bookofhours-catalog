@@ -1,23 +1,11 @@
-import { Aspects, Element, XTrigger } from "secrethistories-api";
+import { Element } from "secrethistories-api";
 import { Observable, map } from "rxjs";
 
 import { promiseFuncToObservable } from "@/observables";
 
-import { API } from "../sh-api";
-import {
-  ModelWithAspects,
-  ModelWithDescription,
-  ModelWithIconUrl,
-  ModelWithLabel,
-} from "../sh-model/types";
+import { API } from "../../sh-api";
 
-export class ElementModel
-  implements
-    ModelWithLabel,
-    ModelWithDescription,
-    ModelWithAspects,
-    ModelWithIconUrl
-{
+export class AspectModel {
   private readonly _element$: Observable<Element | null>;
 
   constructor(
@@ -51,7 +39,7 @@ export class ElementModel
   }
 
   private _description$: Observable<string | null> | null = null;
-  get description$() {
+  get description() {
     if (this._description$ == null) {
       this._description$ = this._element$.pipe(
         map((e) => e?.description ?? null)
@@ -63,28 +51,5 @@ export class ElementModel
 
   get iconUrl() {
     return `${this._api.baseUrl}/api/compendium/elements/${this.id}/icon.png`;
-  }
-
-  private _aspects$: Observable<Readonly<Aspects>> | null = null;
-  get aspects$() {
-    if (this._aspects$ == null) {
-      this._aspects$ = this._element$.pipe(
-        map((e) => Object.freeze({ ...e?.aspects }))
-      );
-    }
-
-    return this._aspects$;
-  }
-
-  private _xtriggers$: Observable<Record<string, XTrigger[]>> | null = null;
-  get xtriggers$() {
-    if (this._xtriggers$ == null) {
-      this._xtriggers$ = this._element$.pipe(
-        // TODO: Deep freeze
-        map((e) => Object.freeze({ ...e?.xtriggers }))
-      );
-    }
-
-    return this._xtriggers$;
   }
 }

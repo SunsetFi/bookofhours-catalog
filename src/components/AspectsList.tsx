@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 
 import { useObservation } from "@/observables";
 
-import { useAspect } from "@/services/sh-compendium/hooks";
+import { useAspect } from "@/services/sh-compendium";
 
 export interface AspectsListProps {
   aspects: Aspects;

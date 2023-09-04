@@ -9,7 +9,7 @@ import IconButton from "@mui/material/IconButton";
 
 import ArrowBack from "@mui/icons-material/ArrowBack";
 
-import { useSeason, useYear } from "@/services/sh-model/hooks";
+import { useSeason, useYear } from "@/services/sh-model";
 
 import HandOverviewIcons from "./HandOverviewIcons";
 

@@ -4,7 +4,7 @@ import { pickBy } from "lodash";
 
 import { aspectsMagnitude } from "@/aspects";
 
-import { ModelWithAspects } from "@/services/sh-model/types";
+import { ModelWithAspects } from "@/services/sh-model";
 
 import { ObservableDataGridColumnDef } from "../types";
 import AspectPresenceCell from "../cells/aspects-presence";

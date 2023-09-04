@@ -12,8 +12,7 @@ import {
 } from "rxjs";
 import { isEqual } from "lodash";
 
-import { Compendium } from "@/services/sh-compendium/Compendium";
-import { ElementModel } from "@/services/sh-compendium/ElementModel";
+import { Compendium, ElementModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
 
 import { GameModel } from "../GameModel";
@@ -25,6 +24,7 @@ import {
   ModelWithIconUrl,
   ModelWithParentTerrain,
 } from "../types";
+import { extractLibraryRoomTokenIdFromPath } from "../utils";
 
 import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
@@ -105,7 +105,7 @@ export class ElementStackModel
       gameModel.unlockedTerrains$,
     ]).pipe(
       map(([elementStack, terrains]) => {
-        const tokenId = extractLibraryRoomTokenId(elementStack.path);
+        const tokenId = extractLibraryRoomTokenIdFromPath(elementStack.path);
         if (tokenId === null) {
           return null;
         }
@@ -200,23 +200,4 @@ export class ElementStackModel
 
     this._elementStackInternal$.next(element);
   }
-}
-
-function extractLibraryRoomTokenId(path: string): string | null {
-  if (!path.startsWith("~/library")) {
-    return null;
-  }
-
-  const innerSpherePath = path.substring("~/library".length);
-  if (!innerSpherePath.startsWith("!") && !innerSpherePath.startsWith("/!")) {
-    return null;
-  }
-
-  let endIndex = innerSpherePath.indexOf("/", 1);
-  if (endIndex === -1) {
-    endIndex = innerSpherePath.length - 1;
-  }
-
-  const token = innerSpherePath.substring(0, endIndex);
-  return token;
 }

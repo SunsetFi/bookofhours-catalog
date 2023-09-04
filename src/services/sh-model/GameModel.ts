@@ -1,6 +1,17 @@
 import { inject, injectable, singleton, provides } from "microinject";
-import { BehaviorSubject, Observable, combineLatest, map } from "rxjs";
-import { ConnectedTerrain, ElementStack, Token } from "secrethistories-api";
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  map,
+  mergeMap,
+} from "rxjs";
+import {
+  ConnectedTerrain,
+  ElementStack,
+  Situation,
+  Token,
+} from "secrethistories-api";
 import { difference, isEqual, sortBy } from "lodash";
 
 import { arrayDistinctShallow, observeAll } from "@/observables";
@@ -9,8 +20,7 @@ import { Initializable } from "../Initializable";
 
 import { API } from "../sh-api";
 
-import { ElementModel } from "../sh-compendium/ElementModel";
-import { Compendium } from "../sh-compendium/Compendium";
+import { Compendium, ElementModel } from "../sh-compendium";
 
 import {
   ElementStackModel,
@@ -83,6 +93,10 @@ export class GameModel implements Initializable {
     readonly ConnectedTerrainModel[]
   >;
 
+  private readonly _unlockedWorkstations$: Observable<
+    readonly SituationModel[]
+  >;
+
   private readonly _visibleElementStacks$: Observable<
     readonly ElementStackModel[]
   >;
@@ -142,6 +156,21 @@ export class GameModel implements Initializable {
         models.filter((x) => x.shrouded == false).map((x) => x.model)
       ),
       arrayDistinctShallow()
+    );
+
+    this._unlockedWorkstations$ = this._unlockedTerrains$.pipe(
+      mergeMap(async (terrains) => {
+        const paths = terrains.map((x) => x.path);
+        const workstations = (await this._api.getAllTokens({
+          spherePrefix: paths,
+          payloadType: "WorkstationSituation",
+        })) as Situation[];
+        // FIXME: These models are never, ever updated, and are recreated whenever we unlock something.
+        // We should use some sort of situation model tracking system to update them.
+        return workstations.map(
+          (workstation) => new SituationModel(workstation, this, this._api)
+        );
+      })
     );
 
     const visibleSpherePaths$ = this._unlockedTerrains$.pipe(
@@ -215,6 +244,10 @@ export class GameModel implements Initializable {
 
   get unlockedTerrains$() {
     return this._unlockedTerrains$;
+  }
+
+  get unlockedWorkstations$() {
+    return this._unlockedWorkstations$;
   }
 
   get uniqueElementsManifested$() {

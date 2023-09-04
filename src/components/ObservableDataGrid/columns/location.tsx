@@ -1,6 +1,6 @@
 import { mergeMap, of as observableOf } from "rxjs";
 
-import { ModelWithParentTerrain } from "@/services/sh-model/types";
+import { ModelWithParentTerrain } from "@/services/sh-model";
 
 import { ObservableDataGridColumnDef } from "../types";
 

@@ -9,8 +9,11 @@ import { powerAspects, provisionsAspects } from "@/aspects";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { ElementStackModel, GameModel } from "@/services/sh-model";
-import { filterHasAnyAspect } from "@/services/sh-model/observables";
+import {
+  ElementStackModel,
+  GameModel,
+  filterHasAnyAspect,
+} from "@/services/sh-model";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import ElementStackDataGrid from "@/components/ElementStackDataGrid";

@@ -1,13 +1,18 @@
-import { BehaviorSubject, Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, combineLatest, map } from "rxjs";
 import { Situation as ISituation } from "secrethistories-api";
 
 import { API } from "../../sh-api";
+
+import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
+import { GameModel } from "../GameModel";
+import { extractLibraryRoomTokenIdFromPath } from "../utils";
 
 import { TokenModel } from "./TokenModel";
 
 export class SituationModel extends TokenModel {
   private readonly _situation$: BehaviorSubject<ISituation>;
 
+  private readonly _parentConnectedTerrain$: Observable<ConnectedTerrainModel | null>;
   private readonly _timeRemaining$: Observable<number>;
   private readonly _recipeId$: Observable<string | null>;
   private readonly _recipeLabel$: Observable<string | null>;
@@ -17,7 +22,11 @@ export class SituationModel extends TokenModel {
   private readonly _label$: Observable<string>;
   private readonly _description$: Observable<string>;
 
-  constructor(situation: ISituation, private readonly _api: API) {
+  constructor(
+    situation: ISituation,
+    gameModel: GameModel,
+    private readonly _api: API
+  ) {
     super(situation);
     this._situation$ = new BehaviorSubject<ISituation>(situation);
 
@@ -33,6 +42,25 @@ export class SituationModel extends TokenModel {
     this._state$ = this._situation$.pipe(map((s) => s.state));
     this._label$ = this._situation$.pipe(map((s) => s.label));
     this._description$ = this._situation$.pipe(map((s) => s.description));
+
+    this._parentConnectedTerrain$ = combineLatest([
+      this._situation$,
+      gameModel.unlockedTerrains$,
+    ]).pipe(
+      map(([situation, terrains]) => {
+        const tokenId = extractLibraryRoomTokenIdFromPath(situation.path);
+        if (tokenId === null) {
+          return null;
+        }
+
+        const terrain = terrains.find((t) => t.id === tokenId);
+        if (terrain === undefined) {
+          return null;
+        }
+
+        return terrain;
+      })
+    );
   }
 
   get id(): string {
@@ -41,6 +69,10 @@ export class SituationModel extends TokenModel {
 
   get payloadType(): "Situation" {
     return "Situation";
+  }
+
+  get parentTerrain$() {
+    return this._parentConnectedTerrain$;
   }
 
   get timeRemaining$() {

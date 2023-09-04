@@ -11,11 +11,11 @@ import { useObservation } from "@/observables";
 
 import { useQueryString } from "@/hooks/use-querystring";
 
-import { GameModel } from "@/services/sh-model";
 import {
+  GameModel,
   filterHasAnyAspect,
   filterHasAspect,
-} from "@/services/sh-model/observables";
+} from "@/services/sh-model";
 
 import PageContainer from "@/components/PageContainer";
 

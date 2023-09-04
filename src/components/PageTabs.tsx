@@ -10,7 +10,7 @@ const tabData = [
   {
     label: "Books",
     aspectIcon: "readable",
-    path: "/book-catalog",
+    path: "/books-catalog",
   },
   {
     label: "Provisions",
@@ -62,7 +62,7 @@ const PageTabs = () => {
       }}
     >
       {tabData.map(({ label, aspectIcon, path }) => (
-        <Link to={path}>
+        <Link key={path} to={path}>
           <AspectIcon
             sx={{
               filter:

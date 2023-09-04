@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { useIsRunning } from "@/services/sh-model/hooks";
+import { useIsRunning } from "@/services/sh-model";
 
 import GameNotRunningView from "./views/GameNotRunningView";
 import GameplayView from "./views/GameplayView";

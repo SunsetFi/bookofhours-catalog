@@ -3,8 +3,10 @@ import * as React from "react";
 import type { SxProps } from "@mui/material/styles";
 
 import Box from "@mui/material/Box";
+
 import { useObservation } from "@/observables";
-import { useAspect } from "@/services/sh-compendium/hooks";
+
+import { useAspect } from "@/services/sh-compendium";
 
 export interface AspectIconProps {
   aspectId: string;

@@ -1,15 +1,15 @@
 import { Observable, map } from "rxjs";
 import { pick } from "lodash";
+import { Aspects } from "secrethistories-api";
 
 import { aspectsMagnitude } from "@/aspects";
 
-import { ModelWithAspects } from "@/services/sh-model/types";
+import { ModelWithAspects } from "@/services/sh-model";
 
 import { AspectsCell } from "../cells/aspects-list";
 import { aspectsFilter } from "../filters/aspects";
 
 import { ObservableDataGridColumnDef } from "../types";
-import { Aspects } from "secrethistories-api";
 
 export function aspectsColumnDef<T extends ModelWithAspects>(
   pickAspects: readonly string[],

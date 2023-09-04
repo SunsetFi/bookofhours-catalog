@@ -8,8 +8,7 @@ import { useDIDependency } from "@/container";
 
 import { useObservation } from "@/observables";
 
-import { GameModel } from "@/services/sh-model";
-import { filterHasAnyAspect } from "@/services/sh-model/observables";
+import { GameModel, filterHasAnyAspect } from "@/services/sh-model";
 
 import ElementStackIcon from "./ElementStackIcon";
 

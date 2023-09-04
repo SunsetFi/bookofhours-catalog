@@ -9,9 +9,8 @@ import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
-import { GameModel } from "@/services/sh-model";
-import { filterHasAnyAspect } from "@/services/sh-model/observables";
-import { ElementModel } from "@/services/sh-compendium/ElementModel";
+import { GameModel, filterHasAnyAspect } from "@/services/sh-model";
+import { ElementModel } from "@/services/sh-compendium";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import ElementDataGrid from "@/components/ElementDataGrid";

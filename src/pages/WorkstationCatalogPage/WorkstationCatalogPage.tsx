@@ -7,18 +7,17 @@ import { useDIDependency } from "@/container";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { materialAspects, powerAspects } from "@/aspects";
+import { powerAspects } from "@/aspects";
 
 import {
-  GameModel,
   ElementStackModel,
-  filterHasAspect,
+  GameModel,
+  SituationModel,
 } from "@/services/sh-model";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 
-import ElementStackDataGrid from "@/components/ElementStackDataGrid";
-import {
+import ObservableDataGrid, {
   aspectsColumnDef,
   aspectPresenceColumnDef,
   descriptionColumnDef,
@@ -28,16 +27,11 @@ import {
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
-import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 
-const MaterialsCatalogPage = () => {
+const WorkstationCatalogPage = () => {
   const model = useDIDependency(GameModel);
 
-  const elements$ = React.useMemo(
-    // Much more than just materials.  This is whatever I find useful to Make Things With
-    () => model.visibleElementStacks$.pipe(filterHasAspect(materialAspects)),
-    [model]
-  );
+  const elements$ = React.useMemo(() => model.unlockedWorkstations$, [model]);
 
   const locations =
     useObservation(
@@ -51,28 +45,18 @@ const MaterialsCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
-      iconColumnDef<ElementStackModel>(),
-      labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>({
+      labelColumnDef<SituationModel>(),
+      locationColumnDef<SituationModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      aspectsColumnDef<ElementStackModel>(powerAspects),
-      aspectPresenceColumnDef<ElementStackModel>(
-        materialAspects,
-        { display: "none" },
-        {
-          headerName: "Type",
-          width: 150,
-          filter: aspectsFilter(materialAspects),
-        }
-      ),
-      descriptionColumnDef<ElementStackModel>(),
+      // aspectsColumnDef<ElementStackModel>(powerAspects),
+      descriptionColumnDef<SituationModel>(),
     ],
     [locations]
   );
 
   return (
-    <PageContainer title="Malleary Shelf" backTo="/">
+    <PageContainer title="Workstations" backTo="/">
       <RequireRunning />
       <Box
         sx={{
@@ -82,7 +66,7 @@ const MaterialsCatalogPage = () => {
           height: "100%",
         }}
       >
-        <ElementStackDataGrid
+        <ObservableDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
@@ -92,4 +76,4 @@ const MaterialsCatalogPage = () => {
   );
 };
 
-export default MaterialsCatalogPage;
+export default WorkstationCatalogPage;

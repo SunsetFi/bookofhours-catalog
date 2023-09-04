@@ -3,9 +3,9 @@ import { Element, Recipe } from "secrethistories-api";
 
 import { API } from "../sh-api";
 
-import { AspectModel } from "./AspectModel";
-import { ElementModel } from "./ElementModel";
-import { RecipeModel } from "./RecipeModel";
+import { AspectModel } from "./models/AspectModel";
+import { ElementModel } from "./models/ElementModel";
+import { RecipeModel } from "./models/RecipeModel";
 
 @injectable()
 @singleton()

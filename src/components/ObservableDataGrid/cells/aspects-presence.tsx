@@ -8,7 +8,7 @@ import { GridRenderCellParams } from "@mui/x-data-grid";
 
 import { useObservation } from "@/observables";
 
-import { useAspect } from "@/services/sh-compendium/hooks";
+import { useAspect } from "@/services/sh-compendium";
 
 interface AspectPresenceProps extends GridRenderCellParams<any, Aspects> {
   display: "label" | "level" | "none";
