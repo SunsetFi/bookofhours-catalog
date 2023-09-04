@@ -30,14 +30,15 @@ export function multiselectOptionsFilter<TValue>(
   };
 }
 
-interface MultiselectOptionsFilterProps extends FilterComponentProps<any[]> {
+interface MultiselectOptionsFilterProps<T>
+  extends FilterComponentProps<T[], T> {
   allowedValues: any[];
 }
-const MultiselectOptionsFilter = ({
+function MultiselectOptionsFilter<T>({
   allowedValues,
   value: selectedValues,
   onChange,
-}: MultiselectOptionsFilterProps) => {
+}: MultiselectOptionsFilterProps<T>) {
   const [search, setSearch] = React.useState<string>("");
   return (
     <Box
@@ -100,4 +101,4 @@ const MultiselectOptionsFilter = ({
       </Box>
     </Box>
   );
-};
+}

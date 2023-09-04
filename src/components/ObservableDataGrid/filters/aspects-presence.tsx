@@ -30,8 +30,6 @@ export function aspectsPresenceFilter(
         return true;
       }
 
-      console.log("Filtering", value, "against", aspects, "with mode", mode);
-
       for (const aspect of aspects) {
         if (mode === "all") {
           if (!value.includes(aspect)) {

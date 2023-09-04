@@ -17,8 +17,7 @@ import {
 
 import { RequireRunning } from "@/components/RequireLegacy";
 
-import ElementStackDataGrid from "@/components/ElementStackDataGrid";
-import {
+import ObservableDataGrid, {
   aspectsColumnDef,
   aspectPresenceColumnDef,
   descriptionColumnDef,
@@ -81,7 +80,7 @@ const FurnishingsCatalogPage = () => {
           height: "100%",
         }}
       >
-        <ElementStackDataGrid
+        <ObservableDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}

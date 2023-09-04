@@ -18,6 +18,7 @@ import {
   TerrainsSource,
   TokensSource,
 } from "./sources";
+import { Compendium, ElementModel } from "../sh-compendium";
 
 const playerSpherePaths = [
   "~/portage1",
@@ -45,6 +46,7 @@ export class GameModel {
   constructor(
     @inject(RunningSource)
     private readonly _runningSource: RunningSource,
+    @inject(Compendium) private readonly _compendium: Compendium,
     @inject(CharacterSource) private readonly _characterSource: CharacterSource,
     @inject(TokensSource) tokensSource: TokensSource,
     @inject(TerrainsSource) private readonly _terrainsSource: TerrainsSource
@@ -148,8 +150,18 @@ export class GameModel {
     return this._unlockedWorkstations$;
   }
 
+  private _uniqueElementsManfiested$: Observable<
+    readonly ElementModel[]
+  > | null = null;
   get uniqueElementsManifested$() {
-    return this._characterSource.uniqueElementIdsManifested$;
+    if (!this._uniqueElementsManfiested$) {
+      this._uniqueElementsManfiested$ =
+        this._characterSource.uniqueElementIdsManifested$.pipe(
+          map((ids) => ids.map((id) => this._compendium.getElementById(id)))
+        );
+    }
+
+    return this._uniqueElementsManfiested$;
   }
 }
 

@@ -60,7 +60,7 @@ const AspectsFilter = ({
   columnValues,
   value,
   onChange,
-}: FilterComponentProps<FilterValue> & {
+}: FilterComponentProps<FilterValue, Aspects> & {
   allowedAspectIds: readonly string[] | "auto";
 }) => {
   const matchMode = (value as any)["$mode"];

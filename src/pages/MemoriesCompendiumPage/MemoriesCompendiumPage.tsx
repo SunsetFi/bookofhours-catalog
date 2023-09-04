@@ -13,8 +13,7 @@ import { GameModel, filterHasAnyAspect } from "@/services/sh-game";
 import { ElementModel } from "@/services/sh-compendium";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-import ElementDataGrid from "@/components/ElementDataGrid";
-import {
+import ObservableDataGrid, {
   aspectsColumnDef,
   descriptionColumnDef,
   iconColumnDef,
@@ -61,7 +60,7 @@ const MemoriesCompendiumPage = () => {
         }}
       >
         <RequireRunning />
-        <ElementDataGrid
+        <ObservableDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}

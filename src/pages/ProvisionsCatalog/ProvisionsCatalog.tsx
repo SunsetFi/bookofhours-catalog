@@ -16,8 +16,7 @@ import {
 } from "@/services/sh-game";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-import ElementStackDataGrid from "@/components/ElementStackDataGrid";
-import {
+import ObservableDataGrid, {
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
@@ -77,7 +76,7 @@ const ProvisionsCatalog = () => {
         }}
       >
         <RequireRunning />
-        <ElementStackDataGrid
+        <ObservableDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
