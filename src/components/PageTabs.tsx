@@ -1,8 +1,8 @@
 import * as React from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation } from "react-router";
+import { Link } from "react-router-dom";
 
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import Box from "@mui/material/Box";
 
 import AspectIcon from "./AspectIcon";
 
@@ -33,6 +33,11 @@ const tabData = [
     path: "/furnishings-catalog",
   },
   {
+    label: "Workstations",
+    aspectIcon: "forge",
+    path: "/workstations-catalog",
+  },
+  {
     label: "Memories",
     aspectIcon: "memory",
     path: "/memories",
@@ -40,39 +45,36 @@ const tabData = [
 ];
 
 const PageTabs = () => {
-  const navigate = useNavigate();
   const { pathname } = useLocation();
   const value = firstPathPart(pathname);
-  React.useEffect(() => {
-    console.log("PageTabs mount");
-  }, []);
   return (
-    <Tabs
-      sx={{ height: "100%" }}
-      orientation="vertical"
-      value={value}
-      onChange={(_, value) => {
-        navigate(value);
+    <Box
+      sx={{
+        // This is stupid, but its what the titlebar does. and probably what tabs do too.
+        backgroundImage:
+          "linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04))",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        p: 2,
+        gap: 1,
       }}
     >
       {tabData.map(({ label, aspectIcon, path }) => (
-        <Tab
-          key={label}
-          value={path}
-          title={label}
-          icon={
-            <AspectIcon
-              sx={{
-                filter:
-                  path !== value ? "brightness(75%) grayscale(0.9)" : undefined,
-              }}
-              aspectId={aspectIcon}
-              size={40}
-            />
-          }
-        />
+        <Link to={path}>
+          <AspectIcon
+            sx={{
+              filter:
+                path !== value ? "brightness(75%) grayscale(0.9)" : undefined,
+            }}
+            title={label}
+            aspectId={aspectIcon}
+            size={40}
+          />
+        </Link>
       ))}
-    </Tabs>
+    </Box>
   );
 };
 

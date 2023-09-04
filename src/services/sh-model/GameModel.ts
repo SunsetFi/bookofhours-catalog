@@ -2,7 +2,6 @@ import { inject, injectable, singleton, provides } from "microinject";
 import { BehaviorSubject, Observable, combineLatest, map } from "rxjs";
 import { ConnectedTerrain, ElementStack, Token } from "secrethistories-api";
 import { difference, isEqual, sortBy } from "lodash";
-import { DateTime } from "luxon";
 
 import { arrayDistinctShallow, observeAll } from "@/observables";
 

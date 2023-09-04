@@ -8,12 +8,19 @@ import { useAspect } from "@/services/sh-compendium/hooks";
 
 export interface AspectIconProps {
   aspectId: string;
+  title?: string;
   size?: number;
   sx?: SxProps;
   onClick?(e: React.MouseEvent<HTMLElement>): void;
 }
 
-const AspectIcon = ({ aspectId, size = 40, sx, onClick }: AspectIconProps) => {
+const AspectIcon = ({
+  title,
+  aspectId,
+  size = 40,
+  sx,
+  onClick,
+}: AspectIconProps) => {
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$);
 
@@ -26,9 +33,10 @@ const AspectIcon = ({ aspectId, size = 40, sx, onClick }: AspectIconProps) => {
       onClick={onClick}
     >
       <img
+        style={{ display: "block" }}
         src={aspect.iconUrl}
-        alt={label ?? ""}
-        title={label ?? ""}
+        alt={title ?? label ?? ""}
+        title={title ?? label ?? ""}
         width={size}
         height={size}
       />

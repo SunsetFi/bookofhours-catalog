@@ -1,38 +1,20 @@
 import { inject, injectable, singleton } from "microinject";
-import { Observable } from "rxjs";
-import { Element } from "secrethistories-api";
-
-import { promiseFuncToObservable } from "@/observables";
+import { Element, Recipe } from "secrethistories-api";
 
 import { API } from "../sh-api";
 
 import { AspectModel } from "./AspectModel";
 import { ElementModel } from "./ElementModel";
+import { RecipeModel } from "./RecipeModel";
 
 @injectable()
 @singleton()
 export class Compendium {
   private readonly _aspectModels = new Map<string, AspectModel>();
-  private readonly _aspects$: Observable<readonly AspectModel[]>;
-
   private readonly _elementModels = new Map<string, ElementModel>();
-  private readonly _elements$: Observable<readonly ElementModel[]>;
+  private readonly _recipeModels = new Map<string, RecipeModel>();
 
-  constructor(@inject(API) private readonly _api: API) {
-    this._aspects$ = promiseFuncToObservable(() => this._getAllAspectModels());
-
-    this._elements$ = promiseFuncToObservable(() =>
-      this._getAllElementModels()
-    );
-  }
-
-  get aspects$() {
-    return this._aspects$;
-  }
-
-  get elements$() {
-    return this._elements$;
-  }
+  constructor(@inject(API) private readonly _api: API) {}
 
   getElementById(id: string): ElementModel {
     if (!this._elementModels.has(id)) {
@@ -60,24 +42,13 @@ export class Compendium {
     return this._aspectModels.get(id)!;
   }
 
-  private async _getAllElementModels(): Promise<readonly ElementModel[]> {
-    const elements = await this._api.getElements({ hidden: false });
-    const models = elements.map(
-      (element) =>
-        new ElementModel(element.id, () => Promise.resolve(element), this._api)
-    );
-    models.forEach((model) => this._elementModels.set(model.id, model));
-    return models;
-  }
+  getRecipeById(id: string): RecipeModel {
+    if (!this._recipeModels.has(id)) {
+      const model = new RecipeModel(id, () => this._resolveRecipeById(id));
+      this._recipeModels.set(id, model);
+    }
 
-  private async _getAllAspectModels(): Promise<readonly AspectModel[]> {
-    const aspects = await this._api.getAspects({ hidden: false });
-    const models = aspects.map(
-      (element) =>
-        new AspectModel(element.id, () => Promise.resolve(element), this._api)
-    );
-    models.forEach((model) => this._aspectModels.set(model.id, model));
-    return models;
+    return this._recipeModels.get(id)!;
   }
 
   private async _resolveAspectById(id: string): Promise<Element | null> {
@@ -96,5 +67,14 @@ export class Compendium {
     }
 
     return element;
+  }
+
+  private async _resolveRecipeById(id: string): Promise<Recipe | null> {
+    const recipe = await this._api.getRecipeById(id);
+    if (!recipe) {
+      return null;
+    }
+
+    return recipe;
   }
 }
