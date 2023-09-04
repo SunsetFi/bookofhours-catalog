@@ -2,6 +2,7 @@ import * as React from "react";
 import { isEqual } from "lodash";
 import { Observable, combineLatest, map, of as observableOf } from "rxjs";
 import { createContext, useContextSelector } from "use-context-selector";
+import { operators as spy } from "rxjs-spy";
 
 import type { SxProps } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -17,7 +18,12 @@ import FilterAlt from "@mui/icons-material/FilterAlt";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import type { GridColDef } from "@mui/x-data-grid/models";
 
-import { observeAll, useObservation } from "@/observables";
+import {
+  mapArrayItemsCached,
+  observeAll,
+  profile,
+  useObservation,
+} from "@/observables";
 
 import { renderCellTextWrap } from "./cells/text-wrap";
 
@@ -135,7 +141,8 @@ function itemToRow(
         value[`column_${i}`] = v;
       });
       return value;
-    })
+    }),
+    spy.tag("ObservableDataGrid.itemToRow " + item.id)
   );
 }
 
@@ -155,12 +162,16 @@ function ObservableDataGrid<T>({
 
   const rows =
     useObservation(
+      `ObservableDataGrid rows`,
       () =>
         items$.pipe(
-          map((elements) =>
-            elements.map((element) => itemToRow(element, columns))
+          profile("ObservableDataGrid rows pre-map"),
+          mapArrayItemsCached("ObservableDataGrid itemToRow", (element) =>
+            itemToRow(element, columns)
           ),
-          observeAll()
+          profile("ObservableDataGrid rows pre-observe"),
+          observeAll("ObservableDataGrid.rows"),
+          profile("ObservableDataGrid rows post-map")
         ),
       [items$, columns]
     ) ?? undefined;

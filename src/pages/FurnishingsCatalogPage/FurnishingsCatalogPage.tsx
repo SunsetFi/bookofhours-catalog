@@ -19,7 +19,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
   aspectsColumnDef,
-  aspectPresenceColumnDef,
+  aspectsPresenceColumnDef,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
@@ -39,10 +39,11 @@ const FurnishingsCatalogPage = () => {
 
   const locations =
     useObservation(
+      `FurnishingsCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
+          observeAll("FurnishingsCatalogPage.locations")
         ),
       [model]
     ) ?? [];
@@ -55,7 +56,7 @@ const FurnishingsCatalogPage = () => {
         filter: multiselectOptionsFilter(locations),
       }),
       aspectsColumnDef<ElementStackModel>(powerAspects),
-      aspectPresenceColumnDef<ElementStackModel>(
+      aspectsPresenceColumnDef<ElementStackModel>(
         furnishingAspects,
         { display: "none" },
         {

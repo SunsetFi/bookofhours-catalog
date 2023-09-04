@@ -10,9 +10,10 @@ import { useAspect } from "@/services/sh-compendium";
 
 export interface AspectsListProps {
   aspects: Aspects;
+  iconSize?: number;
 }
 
-export const AspectsList = ({ aspects }: AspectsListProps) => {
+export const AspectsList = ({ aspects, iconSize }: AspectsListProps) => {
   return (
     <Box
       sx={{
@@ -26,6 +27,7 @@ export const AspectsList = ({ aspects }: AspectsListProps) => {
         <AspectListItem
           key={aspectId}
           aspectId={aspectId}
+          size={iconSize}
           level={aspects[aspectId] ?? 0}
         />
       ))}
@@ -36,11 +38,15 @@ export const AspectsList = ({ aspects }: AspectsListProps) => {
 interface AspectListItemProps {
   aspectId: string;
   level: number;
+  size?: number;
 }
 
-const AspectListItem = ({ aspectId, level }: AspectListItemProps) => {
+const AspectListItem = ({ aspectId, level, size }: AspectListItemProps) => {
   const aspect = useAspect(aspectId);
-  const label = useObservation(aspect.label$);
+  const label = useObservation(
+    `AspectListItem ${aspectId} label`,
+    aspect.label$
+  );
 
   if (!label) {
     return null;
@@ -55,8 +61,8 @@ const AspectListItem = ({ aspectId, level }: AspectListItemProps) => {
         src={aspect.iconUrl}
         alt={label}
         title={label}
-        width={40}
-        height={40}
+        width={size ?? 40}
+        height={size ?? 40}
       />
       <Typography variant="body2" sx={{ pl: 1 }}>
         {level}

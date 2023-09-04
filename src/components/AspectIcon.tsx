@@ -24,7 +24,7 @@ const AspectIcon = ({
   onClick,
 }: AspectIconProps) => {
   const aspect = useAspect(aspectId);
-  const label = useObservation(aspect.label$);
+  const label = useObservation(`AspectIcon ${aspectId} label`, aspect.label$);
 
   return (
     <Box

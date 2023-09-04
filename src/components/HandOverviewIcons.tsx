@@ -20,6 +20,7 @@ const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
   const model = useDIDependency(GameModel);
   const elements =
     useObservation(
+      `HandOverviewIcons elements`,
       () =>
         model.visibleElementStacks$.pipe(
           filterHasAnyAspect(["memory", "weather", "assistance"])

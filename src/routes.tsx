@@ -20,6 +20,10 @@ const AppRoutes = () => (
     <Route path="/materials-catalog" Component={MaterialsCatalogPage} />
     <Route path="/furnishings-catalog" Component={FurnishingsCatalogPage} />
     <Route path="/workstations-catalog" Component={WorkstationCatalogPage} />
+    <Route
+      path="/blank"
+      element={<div>This is blank, there should be few subscribers here.</div>}
+    />
   </Routes>
 );
 

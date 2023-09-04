@@ -11,7 +11,7 @@ import { CharacterSource, RunningSource } from "./services";
 @singleton()
 @provides(CharacterSource)
 export class CharacterSourceImpl implements CharacterSource {
-  private _taskSubscription: TaskUnsubscriber | null = null;
+  private _characterTaskSubscription: TaskUnsubscriber | null = null;
   private readonly _uniqueElementIdsManfiested$ = new BehaviorSubject<
     readonly string[]
   >([]);
@@ -27,18 +27,14 @@ export class CharacterSourceImpl implements CharacterSource {
   ) {
     runningSource.isRunning$.subscribe((isRunning) => {
       if (!isRunning) {
-        if (this._taskSubscription) {
-          this._taskSubscription();
-          this._taskSubscription = null;
+        if (this._characterTaskSubscription) {
+          this._characterTaskSubscription();
+          this._characterTaskSubscription = null;
         }
       } else {
-        if (!this._taskSubscription) {
-          this._taskSubscription = scheduler.addTask(
-            () =>
-              Promise.all([
-                this._pollManifestations(),
-                this._pollRecipeExecutions(),
-              ]) as any
+        if (!this._characterTaskSubscription) {
+          this._characterTaskSubscription = scheduler.addTask(() =>
+            this._pollCharacter()
           );
         }
       }
@@ -73,5 +69,12 @@ export class CharacterSourceImpl implements CharacterSource {
     if (!isEqual(recipeExecutions, this._recipeExecutions$.value)) {
       this._recipeExecutions$.next(recipeExecutions);
     }
+  }
+
+  private async _pollCharacter(): Promise<void> {
+    await Promise.all([
+      this._pollManifestations(),
+      this._pollRecipeExecutions(),
+    ]);
   }
 }

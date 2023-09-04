@@ -1,10 +1,10 @@
+import { startTransition } from "react";
 import { BehaviorSubject, Observable } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
-import { startTransition } from "react";
 
-import { distinctUntilShallowArrayChanged } from "@/observables";
+import { arrayShallowEquals } from "@/utils";
 
 import { Scheduler, TaskUnsubscriber } from "../../scheduler";
 import { API } from "../../sh-api";
@@ -25,7 +25,7 @@ const supportedPayloadTypes = [
 @singleton()
 @provides(TokensSource)
 export class TokensSourceImpl implements TokensSource {
-  private _taskSubsciption: TaskUnsubscriber | null = null;
+  private _tokensTaskSubsciption: TaskUnsubscriber | null = null;
   private readonly _tokenModels: Map<string, TokenModel> = new Map();
   private readonly _tokensInternal$ = new BehaviorSubject<
     readonly TokenModel[]
@@ -40,25 +40,22 @@ export class TokensSourceImpl implements TokensSource {
   ) {
     runningSource.isRunning$.subscribe((isRunning) => {
       if (!isRunning) {
-        if (this._taskSubsciption) {
-          this._taskSubsciption();
-          this._taskSubsciption = null;
+        if (this._tokensTaskSubsciption) {
+          this._tokensTaskSubsciption();
+          this._tokensTaskSubsciption = null;
         }
       } else {
-        if (!this._taskSubsciption) {
-          this._taskSubsciption = scheduler.addTask(() =>
+        if (!this._tokensTaskSubsciption) {
+          this._tokensTaskSubsciption = scheduler.addTask(() =>
             this._pollTokens()
-          ) as any;
+          );
         }
       }
     });
   }
 
-  private readonly _tokens$ = this._tokensInternal$.pipe(
-    distinctUntilShallowArrayChanged()
-  );
   get tokens$(): Observable<readonly TokenModel[]> {
-    return this._tokens$;
+    return this._tokensInternal$;
   }
 
   private async _pollTokens() {
@@ -82,18 +79,32 @@ export class TokensSourceImpl implements TokensSource {
         "id"
       );
 
-      this._tokensInternal$.next(tokenModels);
+      if (!arrayShallowEquals(this._tokensInternal$.value, tokenModels)) {
+        const start = Date.now();
+        this._tokensInternal$.next(tokenModels);
+        console.log("Updated token array in", Date.now() - start, "ms");
+      }
     });
   }
 
   private _getOrUpdateTokenModel(token: Token): TokenModel {
     let model: TokenModel;
     if (!this._tokenModels.has(token.id)) {
+      const start = Date.now();
       model = this._tokenModelFactory.create(token);
       this._tokenModels.set(token.id, model);
+      const elapsed = Date.now() - start;
+      if (elapsed > 5) {
+        console.log("Created token", token.id, "in", elapsed, "ms");
+      }
     } else {
+      const start = Date.now();
       model = this._tokenModels.get(token.id)!;
       model.update(token);
+      const elapsed = Date.now() - start;
+      if (elapsed > 5) {
+        console.log("Updated token", token.id, "in", elapsed, "ms");
+      }
     }
 
     return model;

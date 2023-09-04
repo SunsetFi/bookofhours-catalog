@@ -9,7 +9,11 @@ export interface ElementStackIconProps {
 
 const ElementStackIcon = ({ elementStack }: ElementStackIconProps) => {
   const iconUrl = elementStack.iconUrl;
-  const label = useObservation(elementStack.label$) ?? "";
+  const label =
+    useObservation(
+      `ElementStackIcon ${elementStack.id} label`,
+      elementStack.label$
+    ) ?? "";
 
   return (
     <img

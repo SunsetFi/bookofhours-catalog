@@ -5,8 +5,11 @@ import type { GridRenderCellParams } from "@mui/x-data-grid/models";
 
 import { AspectsList } from "@/components/AspectsList";
 
-export function AspectsCell({
-  value = {},
-}: GridRenderCellParams<any, Aspects>) {
-  return <AspectsList aspects={value} />;
+export interface AspectListCellProps
+  extends GridRenderCellParams<any, Aspects> {
+  iconSize?: number;
+}
+
+export function AspectsCell({ iconSize, value = {} }: AspectListCellProps) {
+  return <AspectsList iconSize={iconSize} aspects={value} />;
 }

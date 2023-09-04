@@ -23,14 +23,18 @@ const GameplayView = () => {
   const redirect = useQueryString("redirect");
   const model = useDIDependency(GameModel);
 
-  const connectedTerrains = useObservation(model.unlockedTerrains$) ?? [];
+  const connectedTerrains =
+    useObservation(`GameplayView unlocked terrains`, model.unlockedTerrains$) ??
+    [];
   const books =
     useObservation(
+      `GameplayView readables`,
       () => model.visibleElementStacks$.pipe(filterHasAspect("readable")),
       [model]
     ) ?? [];
   const elements =
     useObservation(
+      `GameplayView consumables`,
       () =>
         model.visibleElementStacks$.pipe(
           filterHasAnyAspect(["beverage", "brewable", "sustanance"])

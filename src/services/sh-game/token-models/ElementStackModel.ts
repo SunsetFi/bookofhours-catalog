@@ -46,7 +46,8 @@ export class ElementStackModel
     ModelWithIconUrl,
     ModelWithParentTerrain
 {
-  private readonly _elementStack$: BehaviorSubject<IElementStack>;
+  private readonly _elementStackInternal$: BehaviorSubject<IElementStack>;
+  private readonly _elementStack$: Observable<IElementStack>;
 
   constructor(
     elementStack: IElementStack,
@@ -55,20 +56,20 @@ export class ElementStackModel
     private readonly _compendium: Compendium
   ) {
     super(elementStack);
-    this._elementStack$ = new BehaviorSubject<IElementStack>(elementStack);
+    this._elementStackInternal$ = new BehaviorSubject<IElementStack>(
+      elementStack
+    );
+    this._elementStack$ = this._elementStackInternal$.pipe(
+      distinctUntilChanged(isEqual)
+    );
   }
 
   get id(): string {
-    return this._elementStack$.value.id;
+    return this._elementStackInternal$.value.id;
   }
 
   get payloadType(): "ElementStack" {
     return "ElementStack";
-  }
-
-  // Shame we have to use this, but data grid doesnt place nice with observables.
-  get elementStack$() {
-    return this._elementStack$;
   }
 
   private _elementId$: Observable<string> | null = null;
@@ -157,7 +158,7 @@ export class ElementStackModel
   }
 
   get iconUrl(): string {
-    return `${this._api.baseUrl}/api/by-path/${this._elementStack$.value.path}/icon.png`;
+    return `${this._api.baseUrl}/api/by-path/${this.path}/icon.png`;
   }
 
   private _lifetimeRemaining$: Observable<number> | null = null;
@@ -246,6 +247,6 @@ export class ElementStackModel
       throw new Error("Invalid situation update: Wrong ID.");
     }
 
-    this._elementStack$.next(element);
+    this._elementStackInternal$.next(element);
   }
 }

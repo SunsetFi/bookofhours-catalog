@@ -29,16 +29,6 @@ const MemoriesCompendiumPage = () => {
     [model]
   );
 
-  const locations =
-    useObservation(
-      () =>
-        model.unlockedTerrains$.pipe(
-          map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
-        ),
-      [model]
-    ) ?? [];
-
   const columns = React.useMemo(
     () => [
       iconColumnDef<ElementModel>(),
@@ -46,7 +36,7 @@ const MemoriesCompendiumPage = () => {
       aspectsColumnDef<ElementModel>(powerAspects),
       descriptionColumnDef<ElementModel>(),
     ],
-    [locations]
+    []
   );
 
   return (

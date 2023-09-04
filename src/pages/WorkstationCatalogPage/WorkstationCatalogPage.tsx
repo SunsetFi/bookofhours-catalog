@@ -14,7 +14,7 @@ import { GameModel, SituationModel } from "@/services/sh-game";
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
-  aspectPresenceColumnDef,
+  aspectsPresenceColumnDef,
   aspectsPresenceFilter,
   descriptionColumnDef,
   labelColumnDef,
@@ -30,10 +30,11 @@ const WorkstationCatalogPage = () => {
 
   const locations =
     useObservation(
+      `WorkstationCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
+          observeAll("WorkstationCatalogPage.locations")
         ),
       [model]
     ) ?? [];
@@ -44,7 +45,7 @@ const WorkstationCatalogPage = () => {
       locationColumnDef<SituationModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      aspectPresenceColumnDef<SituationModel>(
+      aspectsPresenceColumnDef<SituationModel>(
         powerAspects,
         { display: "none", orientation: "horizontal" },
         {
@@ -54,7 +55,7 @@ const WorkstationCatalogPage = () => {
           width: 275,
         }
       ),
-      aspectPresenceColumnDef<SituationModel>(
+      aspectsPresenceColumnDef<SituationModel>(
         (aspect) => aspect.startsWith("e."),
         { display: "none" },
         // TODO: Dont use auto, find all possible evolutions

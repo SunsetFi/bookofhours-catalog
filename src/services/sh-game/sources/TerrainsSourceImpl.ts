@@ -1,5 +1,5 @@
 import { inject, injectable, provides, singleton } from "microinject";
-import { Observable, map } from "rxjs";
+import { Observable, map, shareReplay } from "rxjs";
 
 import { distinctUntilShallowArrayChanged, observeAll } from "@/observables";
 
@@ -26,11 +26,12 @@ export class TerrainsSourceImpl implements TerrainsSource {
           terrain.shrouded$.pipe(map((shrouded) => ({ terrain, shrouded })))
         )
       ),
-      observeAll(),
+      observeAll("TerrainsSourceImpl._unlockedTerrains$"),
       map((data) =>
         data.filter(({ shrouded }) => !shrouded).map(({ terrain }) => terrain)
       ),
-      distinctUntilShallowArrayChanged()
+      distinctUntilShallowArrayChanged(),
+      shareReplay(1)
     );
   }
 

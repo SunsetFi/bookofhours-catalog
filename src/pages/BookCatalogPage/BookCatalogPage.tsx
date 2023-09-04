@@ -16,7 +16,7 @@ import { powerAspects } from "@/aspects";
 
 import { useDIDependency } from "@/container";
 
-import { observeAll, useObservation } from "@/observables";
+import { mapArrayItemsCached, observeAll, useObservation } from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
 
@@ -35,13 +35,15 @@ import { RequireRunning } from "@/components/RequireLegacy";
 
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
-  aspectPresenceColumnDef,
+  aspectsPresenceColumnDef,
   aspectsObservableColumnDef,
+  aspectsPresenceFilter,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
   locationColumnDef,
   multiselectOptionsFilter,
+  aspectsColumnDef,
 } from "@/components/ObservableDataGrid";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
@@ -107,7 +109,6 @@ function elementStackToBook(
     )
   );
 
-  // FIXME: This is quite messy.  Find a better way to extend these.
   return {
     get id() {
       return elementStack.id;
@@ -141,8 +142,8 @@ const BookCatalogPage = () => {
     () =>
       model.visibleElementStacks$.pipe(
         filterHasAspect("readable"),
-        map((items) =>
-          items.map((item) => elementStackToBook(item, compendium))
+        mapArrayItemsCached("BookCatalogPage items", (item) =>
+          elementStackToBook(item, compendium)
         )
       ),
     [model]
@@ -152,10 +153,11 @@ const BookCatalogPage = () => {
   // the locations the user has unlocked, so they can confirm there is nothing in it.
   const locations =
     useObservation(
+      `BookCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
+          observeAll("BookCatalogPage.locations")
         ),
       [model]
     ) ?? [];
@@ -167,19 +169,22 @@ const BookCatalogPage = () => {
       locationColumnDef<BookModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      aspectPresenceColumnDef<BookModel>(
+      aspectsColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("mystery."),
-        {},
-        { headerName: "Mystery", filter: aspectsFilter("auto") }
+        {
+          headerName: "Mystery",
+          filter: aspectsFilter("auto"),
+          aspectIconSize: 50,
+        }
       ),
-      aspectPresenceColumnDef<BookModel>(
+      aspectsPresenceColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("mastery."),
         { display: "none" },
         {
           headerName: "Mastered",
           sortable: false,
           width: 125,
-          filter: aspectsFilter("auto"),
+          filter: aspectsPresenceFilter("auto"),
         }
       ),
       {
@@ -196,12 +201,12 @@ const BookCatalogPage = () => {
           width: 200,
         }
       ),
-      aspectPresenceColumnDef<BookModel>(
+      aspectsPresenceColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("w."),
         { display: "none" },
         { headerName: "Language", width: 125, filter: aspectsFilter("auto") }
       ),
-      aspectPresenceColumnDef<BookModel>(
+      aspectsPresenceColumnDef<BookModel>(
         ["film", "record.phonograph"],
         { display: "none" },
         {
@@ -210,7 +215,7 @@ const BookCatalogPage = () => {
           filter: aspectsFilter(["film", "record.phonograph"]),
         }
       ),
-      aspectPresenceColumnDef<BookModel>(
+      aspectsPresenceColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("contamination."),
         { display: "none" },
         {

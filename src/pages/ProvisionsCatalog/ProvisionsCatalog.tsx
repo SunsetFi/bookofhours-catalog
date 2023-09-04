@@ -7,7 +7,7 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects, provisionsAspects } from "@/aspects";
 
-import { observeAll, useObservation } from "@/observables";
+import { observeAll, profile, useObservation } from "@/observables";
 
 import {
   ElementStackModel,
@@ -23,7 +23,7 @@ import ObservableDataGrid, {
   locationColumnDef,
   multiselectOptionsFilter,
   aspectsColumnDef,
-  aspectPresenceColumnDef,
+  aspectsPresenceColumnDef,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
@@ -33,16 +33,21 @@ const ProvisionsCatalog = () => {
 
   const elements$ = React.useMemo(
     () =>
-      model.visibleElementStacks$.pipe(filterHasAnyAspect(provisionsAspects)),
+      model.visibleElementStacks$.pipe(
+        filterHasAnyAspect(provisionsAspects),
+        profile("ProvisionsCatalog elements")
+      ),
     [model]
   );
 
   const locations =
     useObservation(
+      `ProvisionsCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
+          observeAll("ProvisionsCatalogPage.locations"),
+          profile("ProvisionsCatalog locations")
         ),
       [model]
     ) ?? [];
@@ -54,9 +59,9 @@ const ProvisionsCatalog = () => {
       locationColumnDef<ElementStackModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      aspectPresenceColumnDef<ElementStackModel>(
+      aspectsPresenceColumnDef<ElementStackModel>(
         provisionsAspects,
-        { display: "none" },
+        { display: "none", orientation: "horizontal" },
         { headerName: "Type", filter: aspectsFilter(provisionsAspects) }
       ),
       aspectsColumnDef<ElementStackModel>(powerAspects),

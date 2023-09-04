@@ -19,7 +19,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
   aspectsColumnDef,
-  aspectPresenceColumnDef,
+  aspectsPresenceColumnDef,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
@@ -38,10 +38,11 @@ const ToolsCatalogPage = () => {
 
   const locations =
     useObservation(
+      `ToolsCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
+          observeAll("ToolsCatalogPage.locations")
         ),
       [model]
     ) ?? [];
@@ -54,7 +55,7 @@ const ToolsCatalogPage = () => {
         filter: multiselectOptionsFilter(locations),
       }),
       aspectsColumnDef<ElementStackModel>(powerAspects),
-      aspectPresenceColumnDef<ElementStackModel>(
+      aspectsPresenceColumnDef<ElementStackModel>(
         ["device"],
         { display: "none" },
         { headerName: "Consumable", width: 200 }
