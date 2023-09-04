@@ -24,5 +24,7 @@
     },
 
     "sourceMap": true
-  }
+  },
+
+  "include": ["src/**/*"]
 }

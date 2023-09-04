@@ -1,4 +1,10 @@
-import { BehaviorSubject, Observable, distinctUntilChanged, map } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+} from "rxjs";
 import { Token } from "secrethistories-api";
 
 export abstract class TokenModel {
@@ -26,7 +32,8 @@ export abstract class TokenModel {
     if (!this._path$) {
       this._path$ = this._token$.pipe(
         map((t) => t.path),
-        distinctUntilChanged()
+        distinctUntilChanged(),
+        shareReplay(1)
       );
     }
 
