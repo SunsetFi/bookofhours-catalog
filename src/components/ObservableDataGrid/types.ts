@@ -24,14 +24,17 @@ export interface ObservableDataGridColumnDef<TItem>
   sortable?: SortDef;
 }
 
-export interface FilterComponentProps<T = any> {
-  columnValues: T[];
-  value: T;
-  onChange(value: T): void;
+export interface FilterComponentProps<
+  TFilterValue = any,
+  TItemValue = TFilterValue
+> {
+  columnValues: TItemValue[];
+  value: TFilterValue;
+  onChange(value: TFilterValue): void;
 }
 
 export interface FilterDef<TValue = any, TFilter = any> {
-  FilterComponent: React.ComponentType<FilterComponentProps<TFilter>>;
+  FilterComponent: React.ComponentType<FilterComponentProps<TFilter, TValue>>;
   filterValue(value: TValue, filter: TFilter): boolean;
   defaultFilterValue?: TFilter;
 }

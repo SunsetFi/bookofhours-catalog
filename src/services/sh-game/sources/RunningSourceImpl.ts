@@ -31,7 +31,6 @@ export class RunningSourceImpl implements RunningSource {
   }
 
   private async _pollRunning() {
-    console.log("Polling running state");
     try {
       const legacy = await this._api.getLegacy();
       this._isRunningInternal$.next(legacy !== null);

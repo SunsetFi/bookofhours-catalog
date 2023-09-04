@@ -10,32 +10,32 @@ import { useObservation } from "@/observables";
 
 import { useAspect } from "@/services/sh-compendium";
 
-interface AspectPresenceProps extends GridRenderCellParams<any, Aspects> {
-  display: "label" | "level" | "none";
-  allowedAspects: readonly string[] | ((aspectId: string) => boolean);
+interface AspectPresenceProps
+  extends GridRenderCellParams<any, readonly string[]> {
+  display: "label" | "none";
+  orientation: "horizontal" | "vertical";
 }
 
 const AspectPresenceCell = ({
   display,
-  allowedAspects,
-  value = {},
+  orientation,
+  value = [],
 }: AspectPresenceProps) => {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-      {Object.keys(value)
-        .filter((aspectId) =>
-          Array.isArray(allowedAspects)
-            ? allowedAspects.includes(aspectId)
-            : (allowedAspects as any)(aspectId)
-        )
-        .map((aspectId) => (
-          <AspectPresenseItem
-            key={aspectId}
-            aspectId={aspectId}
-            level={value[aspectId] ?? 0}
-            display={display}
-          />
-        ))}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: orientation === "vertical" ? "column" : "row",
+        gap: 1,
+      }}
+    >
+      {value.map((aspectId) => (
+        <AspectPresenseItem
+          key={aspectId}
+          aspectId={aspectId}
+          display={display}
+        />
+      ))}
     </Box>
   );
 };
@@ -44,15 +44,10 @@ export default AspectPresenceCell;
 
 interface AspectPresenceItemProps {
   aspectId: string;
-  level: number;
   display: AspectPresenceProps["display"];
 }
 
-const AspectPresenseItem = ({
-  aspectId,
-  level,
-  display,
-}: AspectPresenceItemProps) => {
+const AspectPresenseItem = ({ aspectId, display }: AspectPresenceItemProps) => {
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$);
 
@@ -84,7 +79,6 @@ const AspectPresenseItem = ({
           {label}
         </Typography>
       )}
-      {display === "level" && <Typography variant="body2">{level}</Typography>}
     </Box>
   );
 };

@@ -9,19 +9,14 @@ import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
-import {
-  ElementStackModel,
-  GameModel,
-  SituationModel,
-} from "@/services/sh-game";
+import { GameModel, SituationModel } from "@/services/sh-game";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
-  aspectsColumnDef,
   aspectPresenceColumnDef,
+  aspectsPresenceFilter,
   descriptionColumnDef,
-  iconColumnDef,
   labelColumnDef,
   locationColumnDef,
   multiselectOptionsFilter,
@@ -49,7 +44,22 @@ const WorkstationCatalogPage = () => {
       locationColumnDef<SituationModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      // aspectsColumnDef<ElementStackModel>(powerAspects),
+      aspectPresenceColumnDef<SituationModel>(
+        powerAspects,
+        { display: "none", orientation: "horizontal" },
+        {
+          headerName: "Attunement",
+          observable: "hints$",
+          filter: aspectsPresenceFilter(powerAspects),
+          width: 275,
+        }
+      ),
+      aspectPresenceColumnDef<SituationModel>(
+        (aspect) => aspect.startsWith("e."),
+        { display: "none" },
+        // TODO: Dont use auto, find all possible evolutions
+        { headerName: "Evolves", filter: aspectsPresenceFilter("auto") }
+      ),
       descriptionColumnDef<SituationModel>(),
     ],
     [locations]

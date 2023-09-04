@@ -2,6 +2,7 @@ import { BehaviorSubject, Observable } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
+import { startTransition } from "react";
 
 import { distinctUntilShallowArrayChanged } from "@/observables";
 
@@ -61,28 +62,28 @@ export class TokensSourceImpl implements TokensSource {
   }
 
   private async _pollTokens() {
-    // I suppose pulling every single token is ok.  It seems to not be that big of a hit performance wise that I can tell.
-    const start = Date.now();
+    // I suppose pulling every single token is ok.  This could be better, but its workable for now.
     const tokens = await this._api.getAllTokens();
-    const end = Date.now();
 
-    const supportedTokens = tokens.filter((x) =>
-      supportedPayloadTypes.includes(x.payloadType)
-    );
+    startTransition(() => {
+      const supportedTokens = tokens.filter((x) =>
+        supportedPayloadTypes.includes(x.payloadType)
+      );
 
-    const existingTokenIds = Array.from(this._tokenModels.keys());
-    const tokenIdsToRemove = difference(
-      existingTokenIds,
-      supportedTokens.map((x) => x.id)
-    );
-    tokenIdsToRemove.forEach((id) => this._tokenModels.delete(id));
+      const existingTokenIds = Array.from(this._tokenModels.keys());
+      const tokenIdsToRemove = difference(
+        existingTokenIds,
+        supportedTokens.map((x) => x.id)
+      );
+      tokenIdsToRemove.forEach((id) => this._tokenModels.delete(id));
 
-    const tokenModels = sortBy(
-      supportedTokens.map((token) => this._getOrUpdateTokenModel(token)),
-      "id"
-    );
+      const tokenModels = sortBy(
+        supportedTokens.map((token) => this._getOrUpdateTokenModel(token)),
+        "id"
+      );
 
-    this._tokensInternal$.next(tokenModels);
+      this._tokensInternal$.next(tokenModels);
+    });
   }
 
   private _getOrUpdateTokenModel(token: Token): TokenModel {

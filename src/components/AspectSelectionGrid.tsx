@@ -8,7 +8,7 @@ import AspectIcon from "./AspectIcon";
 export interface AspectSelectionGridProps {
   sx?: SxProps;
   items: readonly string[];
-  value: string[];
+  value: readonly string[];
   onChange(value: string[]): void;
 }
 

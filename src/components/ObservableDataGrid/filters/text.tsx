@@ -12,7 +12,7 @@ export function textFilter(): FilterDef<string, string> {
         return true;
       }
 
-      return value.toLowerCase().includes(filter.toLowerCase());
+      return (value ?? "").toLowerCase().includes(filter.toLowerCase());
     },
     defaultFilterValue: "",
   };

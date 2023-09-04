@@ -2,7 +2,7 @@ import { injectable, provides, singleton } from "microinject";
 
 import { Initializable } from "../Initializable";
 
-const pollingPeriod = 5000;
+const pollingPeriod = 2000;
 
 export type TaskUnsubscriber = () => void;
 
@@ -36,12 +36,10 @@ export class Scheduler implements Initializable {
     let timeToWait = pollingPeriod / this._tasks.length;
     // Reduce by the time spent on the last poll, but dont go too low.
     timeToWait = Math.max(10, timeToWait - reduceBy);
-    console.log("Scheduling next poll for", timeToWait, "ms");
     setTimeout(() => this._poll(), timeToWait);
   }
 
   private async _poll() {
-    console.log("Polling task", this.currentTask);
     if (this.currentTask >= this._tasks.length) {
       this.currentTask = 0;
     }

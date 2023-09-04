@@ -1,13 +1,16 @@
 import * as React from "react";
-import { map } from "rxjs";
-import { pickBy } from "lodash";
+import { Observable, map } from "rxjs";
+import { Aspects } from "secrethistories-api";
 
 import { aspectsMagnitude } from "@/aspects";
 
-import { ModelWithAspects } from "@/services/sh-game";
-
 import { ObservableDataGridColumnDef } from "../types";
+
 import AspectPresenceCell from "../cells/aspects-presence";
+
+interface AspectPresenceElement {
+  aspects$: Observable<Aspects> | Observable<readonly string[]>;
+}
 
 type AspectFilter = readonly string[] | ((aspectId: string) => boolean);
 function includeAspect(aspectId: string, filter: AspectFilter) {
@@ -19,16 +22,43 @@ function includeAspect(aspectId: string, filter: AspectFilter) {
 }
 
 export interface AspectPresenseOpts {
-  display?: "label" | "level" | "none";
+  display?: "label" | "none";
+  orientation?: "horizontal" | "vertical";
 }
 
-export function aspectPresenceColumnDef<T extends ModelWithAspects>(
+export function aspectPresenceColumnDef<T extends AspectPresenceElement>(
   allowedAspects: AspectFilter,
-  { display = "level" }: AspectPresenseOpts = {},
-  additional: Partial<
-    Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
-  > = {}
+  { display = "label", orientation = "vertical" }: AspectPresenseOpts = {},
+  additional: Partial<Omit<ObservableDataGridColumnDef<T>, "field">> = {}
 ): ObservableDataGridColumnDef<T> {
+  let observable$ = (element: T) => {
+    let root: Observable<Aspects | readonly string[]>;
+    if (typeof additional.observable === "function") {
+      root = additional.observable(element);
+    } else if (typeof additional.observable === "string") {
+      root = (element as any)[additional.observable];
+    } else {
+      root = (element as any).aspects$;
+    }
+    if (!root) {
+      console.error("Failed to find observable for", additional);
+    }
+
+    return root.pipe(
+      map((value) => {
+        if (Array.isArray(value)) {
+          return value.filter((aspectId) =>
+            includeAspect(aspectId, allowedAspects)
+          );
+        } else if (value && typeof value === "object") {
+          return Object.keys(value)
+            .filter((x) => (value as any)[x] > 0)
+            .filter((aspectId) => includeAspect(aspectId, allowedAspects));
+        }
+      })
+    );
+  };
+
   return {
     headerName: "Aspects",
     width: 145,
@@ -37,16 +67,11 @@ export function aspectPresenceColumnDef<T extends ModelWithAspects>(
     renderCell: (props) => (
       <AspectPresenceCell
         {...props}
-        allowedAspects={allowedAspects}
+        orientation={orientation}
         display={display}
       />
     ),
     ...additional,
-    observable: (element) =>
-      element.aspects$.pipe(
-        map((aspects) =>
-          pickBy(aspects, (_, key) => includeAspect(key, allowedAspects))
-        )
-      ),
+    observable: observable$,
   };
 }
