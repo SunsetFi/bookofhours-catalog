@@ -2,7 +2,7 @@ import { Observable } from "rxjs";
 
 import { Aspects } from "secrethistories-api";
 
-import { ConnectedTerrainModel } from "./models/ConnectedTerrainModel";
+import { ConnectedTerrainModel } from "./token-models/ConnectedTerrainModel";
 
 export interface ModelWithLabel {
   label$: Observable<string | null>;

@@ -2,7 +2,7 @@ import * as React from "react";
 
 import Box from "@mui/material/Box";
 
-import { ModelWithIconUrl } from "@/services/sh-model";
+import { ModelWithIconUrl } from "@/services/sh-game";
 
 import { ObservableDataGridColumnDef } from "../types";
 

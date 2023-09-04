@@ -9,7 +9,7 @@ import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
-import { GameModel, filterHasAnyAspect } from "@/services/sh-model";
+import { GameModel, filterHasAnyAspect } from "@/services/sh-game";
 import { ElementModel } from "@/services/sh-compendium";
 
 import { RequireRunning } from "@/components/RequireLegacy";

@@ -15,7 +15,7 @@ import {
   GameModel,
   filterHasAnyAspect,
   filterHasAspect,
-} from "@/services/sh-model";
+} from "@/services/sh-game";
 
 import PageContainer from "@/components/PageContainer";
 

@@ -13,7 +13,7 @@ import {
   ElementStackModel,
   GameModel,
   filterHasAspect,
-} from "@/services/sh-model";
+} from "@/services/sh-game";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 

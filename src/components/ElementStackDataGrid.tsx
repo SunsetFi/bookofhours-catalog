@@ -1,4 +1,4 @@
-import { ElementStackModel } from "@/services/sh-model";
+import { ElementStackModel } from "@/services/sh-game";
 
 import ObservableDataGrid from "./ObservableDataGrid";
 

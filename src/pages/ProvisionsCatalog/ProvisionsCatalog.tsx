@@ -13,7 +13,7 @@ import {
   ElementStackModel,
   GameModel,
   filterHasAnyAspect,
-} from "@/services/sh-model";
+} from "@/services/sh-game";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import ElementStackDataGrid from "@/components/ElementStackDataGrid";

@@ -52,7 +52,7 @@ export function promiseFuncToObservable<T>(
   return defer(() => from(func())).pipe(shareReplay(1));
 }
 
-export function arrayDistinctShallow() {
+export function distinctUntilShallowArrayChanged() {
   return (source: Observable<readonly any[]>): Observable<readonly any[]> => {
     return source.pipe(distinctUntilChanged(arrayShallowEquals));
   };

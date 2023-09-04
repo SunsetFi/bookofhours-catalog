@@ -9,13 +9,12 @@ import {
   map,
   combineLatest,
   distinctUntilChanged,
+  shareReplay,
 } from "rxjs";
 import { isEqual } from "lodash";
 
 import { Compendium, ElementModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
-
-import { GameModel } from "../GameModel";
 
 import {
   ModelWithLabel,
@@ -24,7 +23,10 @@ import {
   ModelWithIconUrl,
   ModelWithParentTerrain,
 } from "../types";
+
 import { extractLibraryRoomTokenIdFromPath } from "../utils";
+
+import { TerrainsSource } from "../sources";
 
 import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
@@ -49,7 +51,6 @@ export class ElementStackModel
 
   private readonly _elementId$: Observable<string>;
   private readonly _element$: Observable<ElementModel>;
-  private readonly _path$: Observable<string>;
   private readonly _label$: Observable<string | null>;
   private readonly _description$: Observable<string | null>;
   private readonly _quantity$: Observable<number>;
@@ -66,7 +67,7 @@ export class ElementStackModel
   constructor(
     elementStack: IElementStack,
     private readonly _api: API,
-    gameModel: GameModel,
+    terrainsSource: TerrainsSource,
     compendium: Compendium
   ) {
     super(elementStack);
@@ -75,34 +76,74 @@ export class ElementStackModel
       elementStack
     );
     this._elementStack$ = this._elementStackInternal$.pipe(
-      distinctUntilChanged(isEqual)
+      distinctUntilChanged(isEqual),
+      shareReplay(1)
     );
 
-    this._elementId$ = this._elementStack$.pipe(map((e) => e.elementId));
+    this._elementId$ = this._elementStack$.pipe(
+      map((e) => e.elementId),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
     this._element$ = this._elementId$.pipe(
-      map((elementId) => compendium.getElementById(elementId))
+      map((elementId) => compendium.getElementById(elementId)),
+      distinctUntilChanged(),
+      shareReplay(1)
     );
 
-    this._path$ = this._elementStack$.pipe(map((e) => e.path));
-    this._quantity$ = this._elementStack$.pipe(map((e) => e.quantity));
+    this._quantity$ = this._elementStack$.pipe(
+      map((e) => e.quantity),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
     this._lifetimeRemaining$ = this._elementStack$.pipe(
-      map((e) => e.lifetimeRemaining)
+      map((e) => e.lifetimeRemaining),
+      distinctUntilChanged(),
+      shareReplay(1)
     );
     this._elementAspects$ = this._elementStack$.pipe(
-      map((e) => e.elementAspects)
+      map((e) => e.elementAspects),
+      distinctUntilChanged(),
+      shareReplay(1)
     );
     this._aspects$ = this._elementStack$.pipe(
-      map((e) => combineAspects(e.elementAspects, e.mutations))
+      map((e) => combineAspects(e.elementAspects, e.mutations)),
+      distinctUntilChanged(isEqual),
+      shareReplay(1)
     );
-    this._mutations$ = this._elementStack$.pipe(map((e) => e.mutations));
-    this._shrouded$ = this._elementStack$.pipe(map((e) => e.shrouded));
-    this._label$ = this._elementStack$.pipe(map((e) => e.label));
-    this._description$ = this._elementStack$.pipe(map((e) => e.description));
-    this._decays$ = this._elementStack$.pipe(map((e) => e.decays));
-    this._unique$ = this._elementStack$.pipe(map((e) => e.unique));
+    this._mutations$ = this._elementStack$.pipe(
+      map((e) => e.mutations),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._shrouded$ = this._elementStack$.pipe(
+      map((e) => e.shrouded),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._label$ = this._elementStack$.pipe(
+      map((e) => e.label),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._description$ = this._elementStack$.pipe(
+      map((e) => e.description),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._decays$ = this._elementStack$.pipe(
+      map((e) => e.decays),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._unique$ = this._elementStack$.pipe(
+      map((e) => e.unique),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
     this._parentConnectedTerrain$ = combineLatest([
       this._elementStack$,
-      gameModel.unlockedTerrains$,
+      terrainsSource.unlockedTerrains$,
     ]).pipe(
       map(([elementStack, terrains]) => {
         const tokenId = extractLibraryRoomTokenIdFromPath(elementStack.path);
@@ -116,7 +157,9 @@ export class ElementStackModel
         }
 
         return terrain;
-      })
+      }),
+      distinctUntilChanged(),
+      shareReplay(1)
     );
   }
 
@@ -139,10 +182,6 @@ export class ElementStackModel
 
   get element$() {
     return this._element$;
-  }
-
-  get path$() {
-    return this._path$;
   }
 
   get label$() {

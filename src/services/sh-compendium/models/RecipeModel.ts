@@ -7,7 +7,7 @@ import {
   ModelWithAspects,
   ModelWithDescription,
   ModelWithLabel,
-} from "../../sh-model";
+} from "../../sh-game";
 
 export class RecipeModel
   implements ModelWithLabel, ModelWithDescription, ModelWithAspects

@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { Navigate, useLocation } from "react-router";
 
-import { useIsRunning } from "@/services/sh-model";
+import { useIsRunning } from "@/services/sh-game";
 
 export const RequireRunning = () => {
   const path = useLocation().pathname;

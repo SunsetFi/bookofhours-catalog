@@ -1,4 +1,10 @@
-import { BehaviorSubject, Observable, distinctUntilChanged, map } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+} from "rxjs";
 import { ConnectedTerrain } from "secrethistories-api";
 
 import { TokenModel } from "./TokenModel";
@@ -29,9 +35,13 @@ export class ConnectedTerrainModel extends TokenModel {
 
     this._label$ = this._connectedTerrain$.pipe(map((t) => t.label));
     this._description$ = this._connectedTerrain$.pipe(
-      map((t) => t.description)
+      map((t) => t.description),
+      shareReplay(1)
     );
-    this._shrouded$ = this._connectedTerrain$.pipe(map((t) => t.shrouded));
+    this._shrouded$ = this._connectedTerrain$.pipe(
+      map((t) => t.shrouded),
+      shareReplay(1)
+    );
   }
 
   get id() {
@@ -41,10 +51,6 @@ export class ConnectedTerrainModel extends TokenModel {
     }
 
     return this._connectedTerrainInternal$.value.id;
-  }
-
-  get path() {
-    return this._connectedTerrainInternal$.value.path;
   }
 
   get label$() {

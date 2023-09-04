@@ -9,7 +9,7 @@ import {
   ModelWithDescription,
   ModelWithIconUrl,
   ModelWithLabel,
-} from "../../sh-model";
+} from "../../sh-game";
 
 export class ElementModel
   implements

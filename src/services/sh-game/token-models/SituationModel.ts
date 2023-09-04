@@ -1,13 +1,25 @@
-import { BehaviorSubject, Observable, combineLatest, map } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+} from "rxjs";
 import { Situation as ISituation } from "secrethistories-api";
 
 import { API } from "../../sh-api";
 
-import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
-import { GameModel } from "../GameModel";
 import { extractLibraryRoomTokenIdFromPath } from "../utils";
 
+import { TerrainsSource } from "../sources";
+
+import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
+
+export function isSituationModel(model: TokenModel): model is SituationModel {
+  return model instanceof SituationModel;
+}
 
 export class SituationModel extends TokenModel {
   private readonly _situation$: BehaviorSubject<ISituation>;
@@ -24,28 +36,56 @@ export class SituationModel extends TokenModel {
 
   constructor(
     situation: ISituation,
-    gameModel: GameModel,
+    terrainsSource: TerrainsSource,
     private readonly _api: API
   ) {
     super(situation);
     this._situation$ = new BehaviorSubject<ISituation>(situation);
 
-    this._timeRemaining$ = this._situation$.pipe(map((s) => s.timeRemaining));
-    this._recipeId$ = this._situation$.pipe(map((s) => s.recipeId));
-    this._recipeLabel$ = this._situation$.pipe(map((s) => s.recipeLabel));
+    this._timeRemaining$ = this._situation$.pipe(
+      map((s) => s.timeRemaining),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._recipeId$ = this._situation$.pipe(
+      map((s) => s.recipeId),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._recipeLabel$ = this._situation$.pipe(
+      map((s) => s.recipeLabel),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
     this._currentRecipeId$ = this._situation$.pipe(
-      map((s) => s.currentRecipeId)
+      map((s) => s.currentRecipeId),
+      distinctUntilChanged(),
+      shareReplay(1)
     );
     this._currentRecipeLabel$ = this._situation$.pipe(
-      map((s) => s.currentRecipeLabel)
+      map((s) => s.currentRecipeLabel),
+      distinctUntilChanged(),
+      shareReplay(1)
     );
-    this._state$ = this._situation$.pipe(map((s) => s.state));
-    this._label$ = this._situation$.pipe(map((s) => s.label));
-    this._description$ = this._situation$.pipe(map((s) => s.description));
+    this._state$ = this._situation$.pipe(
+      map((s) => s.state),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._label$ = this._situation$.pipe(
+      map((s) => s.label),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+    this._description$ = this._situation$.pipe(
+      map((s) => s.description),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
 
     this._parentConnectedTerrain$ = combineLatest([
       this._situation$,
-      gameModel.unlockedTerrains$,
+      terrainsSource.unlockedTerrains$,
     ]).pipe(
       map(([situation, terrains]) => {
         const tokenId = extractLibraryRoomTokenIdFromPath(situation.path);
@@ -59,7 +99,9 @@ export class SituationModel extends TokenModel {
         }
 
         return terrain;
-      })
+      }),
+      distinctUntilChanged(),
+      shareReplay(1)
     );
   }
 

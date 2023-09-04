@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { useObservation } from "@/observables";
-import { ElementStackModel } from "@/services/sh-model";
+import { ElementStackModel } from "@/services/sh-game";
 
 export interface ElementStackIconProps {
   elementStack: ElementStackModel;

@@ -1,4 +1,4 @@
-import { ModelWithLabel } from "@/services/sh-model";
+import { ModelWithLabel } from "@/services/sh-game";
 
 import { ObservableDataGridColumnDef } from "../types";
 import { textFilter } from "../filters";

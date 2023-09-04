@@ -4,7 +4,7 @@ import { useDIDependency } from "@/container";
 
 import { filterItemObservations, useObservation } from "@/observables";
 
-import { ElementStackModel } from "./models/ElementStackModel";
+import { ElementStackModel } from "./token-models/ElementStackModel";
 
 import { GameModel } from "./GameModel";
 

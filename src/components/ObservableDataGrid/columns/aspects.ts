@@ -4,7 +4,7 @@ import { Aspects } from "secrethistories-api";
 
 import { aspectsMagnitude } from "@/aspects";
 
-import { ModelWithAspects } from "@/services/sh-model";
+import { ModelWithAspects } from "@/services/sh-game";
 
 import { AspectsCell } from "../cells/aspects-list";
 import { aspectsFilter } from "../filters/aspects";

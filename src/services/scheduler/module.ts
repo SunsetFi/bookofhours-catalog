@@ -1,6 +1,6 @@
 import { ContainerModule } from "microinject";
-import { GameModel } from "./GameModel";
+import { Scheduler } from "./Scheduler";
 
 export default new ContainerModule((bind) => {
-  bind(GameModel);
+  bind(Scheduler);
 });
