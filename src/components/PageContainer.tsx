@@ -17,11 +17,7 @@ const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
   // HACK: Defer rendering the children until the next tick, so that our navigation can rerender immediately.
   // This helps the feel of the page immensely.
   // Instead of this, we should have PageContainer be outside of the route.
-  const renderDelay = useObservation(
-    `PageContainer renderDelay`,
-    () => of(true).pipe(delay(1)),
-    []
-  );
+  const renderDelay = true; //useObservation(() => of(true).pipe(delay(100)), []);
   return (
     <Box
       sx={{

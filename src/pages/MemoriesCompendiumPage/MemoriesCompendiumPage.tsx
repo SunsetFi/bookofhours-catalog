@@ -1,11 +1,8 @@
 import * as React from "react";
-import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
-
-import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 

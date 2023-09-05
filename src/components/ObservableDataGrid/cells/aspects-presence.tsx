@@ -49,10 +49,7 @@ interface AspectPresenceItemProps {
 
 const AspectPresenseItem = ({ aspectId, display }: AspectPresenceItemProps) => {
   const aspect = useAspect(aspectId);
-  const label = useObservation(
-    `aspectPresenceItem ${aspectId} label`,
-    aspect.label$
-  );
+  const label = useObservation(aspect.label$);
 
   if (!label) {
     return null;

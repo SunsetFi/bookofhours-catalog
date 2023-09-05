@@ -80,9 +80,13 @@ export class TokensSourceImpl implements TokensSource {
       );
 
       if (!arrayShallowEquals(this._tokensInternal$.value, tokenModels)) {
+        console.log("Started updating tokens array.");
         const start = Date.now();
         this._tokensInternal$.next(tokenModels);
-        console.log("Updated token array in", Date.now() - start, "ms");
+        const elapsed = Date.now() - start;
+        if (elapsed > 10) {
+          console.log("Updated token array in", elapsed, "ms");
+        }
       }
     });
   }
@@ -94,7 +98,7 @@ export class TokensSourceImpl implements TokensSource {
       model = this._tokenModelFactory.create(token);
       this._tokenModels.set(token.id, model);
       const elapsed = Date.now() - start;
-      if (elapsed > 5) {
+      if (elapsed > 10) {
         console.log("Created token", token.id, "in", elapsed, "ms");
       }
     } else {
@@ -102,7 +106,7 @@ export class TokensSourceImpl implements TokensSource {
       model = this._tokenModels.get(token.id)!;
       model.update(token);
       const elapsed = Date.now() - start;
-      if (elapsed > 5) {
+      if (elapsed > 10) {
         console.log("Updated token", token.id, "in", elapsed, "ms");
       }
     }

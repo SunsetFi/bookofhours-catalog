@@ -7,7 +7,7 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects, provisionsAspects } from "@/aspects";
 
-import { observeAll, profile, useObservation } from "@/observables";
+import { observeAll, useObservation } from "@/observables";
 
 import {
   ElementStackModel,
@@ -33,21 +33,16 @@ const ProvisionsCatalog = () => {
 
   const elements$ = React.useMemo(
     () =>
-      model.visibleElementStacks$.pipe(
-        filterHasAnyAspect(provisionsAspects),
-        profile("ProvisionsCatalog elements")
-      ),
+      model.visibleElementStacks$.pipe(filterHasAnyAspect(provisionsAspects)),
     [model]
   );
 
   const locations =
     useObservation(
-      `ProvisionsCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll("ProvisionsCatalogPage.locations"),
-          profile("ProvisionsCatalog locations")
+          observeAll()
         ),
       [model]
     ) ?? [];

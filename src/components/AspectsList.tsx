@@ -43,10 +43,7 @@ interface AspectListItemProps {
 
 const AspectListItem = ({ aspectId, level, size }: AspectListItemProps) => {
   const aspect = useAspect(aspectId);
-  const label = useObservation(
-    `AspectListItem ${aspectId} label`,
-    aspect.label$
-  );
+  const label = useObservation(aspect.label$);
 
   if (!label) {
     return null;

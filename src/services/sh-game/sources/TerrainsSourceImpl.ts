@@ -1,7 +1,10 @@
 import { inject, injectable, provides, singleton } from "microinject";
 import { Observable, map, shareReplay } from "rxjs";
 
-import { distinctUntilShallowArrayChanged, observeAll } from "@/observables";
+import {
+  distinctUntilShallowArrayChanged,
+  filterItemObservations,
+} from "@/observables";
 
 import {
   ConnectedTerrainModel,
@@ -21,15 +24,7 @@ export class TerrainsSourceImpl implements TerrainsSource {
   constructor(@inject(TokensSource) tokensSource: TokensSource) {
     this._unlockedTerrains$ = tokensSource.tokens$.pipe(
       map((tokens) => tokens.filter(isConnectedTerrainModel)),
-      map((terrains) =>
-        terrains.map((terrain) =>
-          terrain.shrouded$.pipe(map((shrouded) => ({ terrain, shrouded })))
-        )
-      ),
-      observeAll("TerrainsSourceImpl._unlockedTerrains$"),
-      map((data) =>
-        data.filter(({ shrouded }) => !shrouded).map(({ terrain }) => terrain)
-      ),
+      filterItemObservations((item) => item.shrouded$.pipe(map((x) => !x))),
       distinctUntilShallowArrayChanged(),
       shareReplay(1)
     );

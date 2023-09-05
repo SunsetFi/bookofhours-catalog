@@ -8,11 +8,7 @@ import { delay, of } from "rxjs";
 import { useObservation } from "@/observables";
 
 const GameNotRunningView = () => {
-  const timedOut = useObservation(
-    `GameNotRunningView timeout`,
-    () => of(true).pipe(delay(5000)),
-    []
-  );
+  const timedOut = useObservation(() => of(true).pipe(delay(5000)), []);
 
   return (
     <Box

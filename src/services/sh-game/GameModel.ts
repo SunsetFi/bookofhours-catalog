@@ -1,8 +1,11 @@
 import { inject, injectable, singleton } from "microinject";
 import { Observable, combineLatest, map, shareReplay } from "rxjs";
-import { operators as spy } from "rxjs-spy";
 
-import { observeAll, profile } from "@/observables";
+import {
+  mapArrayItemsCached,
+  observeAll,
+  profileDownstream,
+} from "@/observables";
 
 import {
   ElementStackModel,
@@ -91,12 +94,11 @@ export class GameModel {
   get visibleElementStacks$() {
     if (this._visibleElementStacks$ === null) {
       const elementStacksWithPath$ = this._tokensSource.tokens$.pipe(
-        map((tokens) =>
-          tokens
-            .filter(isElementStackModel)
-            .map((token) => token.path$.pipe(map((path) => ({ token, path }))))
+        map((tokens) => tokens.filter(isElementStackModel)),
+        mapArrayItemsCached((token) =>
+          token.path$.pipe(map((path) => ({ token, path })))
         ),
-        observeAll("GameModel.elementStacksWithPath")
+        observeAll()
       );
 
       this._visibleElementStacks$ = combineLatest([
@@ -108,13 +110,14 @@ export class GameModel {
             ...playerSpherePaths,
             ...terrains.map((t) => t.path),
           ];
-          return tokenPathPair
+          const result = tokenPathPair
             .filter((x) => visiblePaths.some((p) => x.path.startsWith(p)))
             .map((x) => x.token);
+
+          return result;
         }),
-        profile("visibleElementStacks$"),
-        shareReplay(1),
-        spy.tag("GameModel.visibleElementStacks$")
+        profileDownstream("visibleElementStacks$"),
+        shareReplay(1)
       );
     }
 
@@ -131,12 +134,11 @@ export class GameModel {
   get unlockedWorkstations$() {
     if (this._unlockedWorkstations$ === null) {
       const situationsWithPath$ = this._tokensSource.tokens$.pipe(
-        map((tokens) =>
-          tokens
-            .filter(isSituationModel)
-            .map((token) => token.path$.pipe(map((path) => ({ token, path }))))
+        map((tokens) => tokens.filter(isSituationModel)),
+        mapArrayItemsCached((token) =>
+          token.path$.pipe(map((path) => ({ token, path })))
         ),
-        observeAll("GameModel.situationsWithPath")
+        observeAll()
       );
 
       this._unlockedWorkstations$ = combineLatest([
@@ -152,7 +154,7 @@ export class GameModel {
             .filter((x) => visiblePaths.some((p) => x.path.startsWith(p)))
             .map((x) => x.token);
         }),
-        profile("unlockedWorkstations$"),
+        profileDownstream("unlockedWorkstations$"),
         shareReplay(1)
       );
     }

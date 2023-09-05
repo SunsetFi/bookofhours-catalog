@@ -1,8 +1,7 @@
 import * as React from "react";
 import { isEqual } from "lodash";
-import { Observable, combineLatest, map, of as observableOf } from "rxjs";
+import { Observable, combineLatest, map, of as observableOf, tap } from "rxjs";
 import { createContext, useContextSelector } from "use-context-selector";
-import { operators as spy } from "rxjs-spy";
 
 import type { SxProps } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -21,7 +20,7 @@ import type { GridColDef } from "@mui/x-data-grid/models";
 import {
   mapArrayItemsCached,
   observeAll,
-  profile,
+  profileDownstream,
   useObservation,
 } from "@/observables";
 
@@ -118,7 +117,7 @@ function itemToRow(
   item: any,
   columns: ObservableDataGridColumnDef<any>[]
 ): Observable<Record<string, any>> {
-  const observables = columns.map((column) => {
+  const observables: Observable<any>[] = columns.map((column) => {
     if (column.field) {
       return observableOf(item[column.field]);
     } else if (typeof column.observable === "string") {
@@ -130,8 +129,6 @@ function itemToRow(
     }
   });
 
-  // This claims it is deprecacted.  It lies.  We are passing an array, but typescript gets fooled into thinking
-  // we are passing an arbitrary number of arguments.
   return combineLatest(observables).pipe(
     map((values) => {
       const value: any = {
@@ -141,8 +138,7 @@ function itemToRow(
         value[`column_${i}`] = v;
       });
       return value;
-    }),
-    spy.tag("ObservableDataGrid.itemToRow " + item.id)
+    })
   );
 }
 
@@ -162,16 +158,14 @@ function ObservableDataGrid<T>({
 
   const rows =
     useObservation(
-      `ObservableDataGrid rows`,
       () =>
         items$.pipe(
-          profile("ObservableDataGrid rows pre-map"),
-          mapArrayItemsCached("ObservableDataGrid itemToRow", (element) =>
-            itemToRow(element, columns)
+          profileDownstream(
+            "ObservableDataGrid rows itemToRow+observeAll+setState"
           ),
-          profile("ObservableDataGrid rows pre-observe"),
-          observeAll("ObservableDataGrid.rows"),
-          profile("ObservableDataGrid rows post-map")
+          mapArrayItemsCached((element) => itemToRow(element, columns)),
+          profileDownstream("ObservableDataGrid rows observeAll+setState"),
+          observeAll()
         ),
       [items$, columns]
     ) ?? undefined;
@@ -272,7 +266,12 @@ const DeferredDataGrid = ({ sx, ...props }: DataGridProps) => {
   const isStale =
     deferredColumns !== props.columns || deferredRows !== props.rows;
   return (
-    <Box sx={{ ...sx, filter: isStale ? "grayscale(1)" : undefined }}>
+    <Box
+      sx={{
+        ...sx,
+        filter: isStale ? "grayscale(1) brightness(75%)" : undefined,
+      }}
+    >
       <MemoDataGrid {...props} columns={deferredColumns} rows={deferredRows} />
     </Box>
   );

@@ -10,9 +10,7 @@ import { GameModel } from "@/services/sh-game";
 
 const EnsureGameRunning = () => {
   const monitor = useDIDependency(GameModel);
-  const isRunning =
-    useObservation(`EnsureGameRunning isRunning`, monitor.isRunning$) ??
-    undefined;
+  const isRunning = useObservation(monitor.isRunning$) ?? undefined;
 
   if (isRunning == false) {
     return <Navigate to={indexPath()} />;

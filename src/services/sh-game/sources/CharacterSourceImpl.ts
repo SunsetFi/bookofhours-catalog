@@ -6,6 +6,7 @@ import { Scheduler, TaskUnsubscriber } from "@/services/scheduler";
 import { API } from "@/services/sh-api";
 
 import { CharacterSource, RunningSource } from "./services";
+import { startTransition } from "react";
 
 @injectable()
 @singleton()
@@ -57,24 +58,20 @@ export class CharacterSourceImpl implements CharacterSource {
     return this._recipeExecutions$.value;
   }
 
-  private async _pollManifestations() {
-    const manifestations = await this._api.getUniqueManifestedElements();
-    if (!isEqual(manifestations, this._uniqueElementIdsManfiested$.value)) {
-      this._uniqueElementIdsManfiested$.next(manifestations);
-    }
-  }
-
-  private async _pollRecipeExecutions() {
-    const recipeExecutions = await this._api.getRecipeExecutions();
-    if (!isEqual(recipeExecutions, this._recipeExecutions$.value)) {
-      this._recipeExecutions$.next(recipeExecutions);
-    }
-  }
-
   private async _pollCharacter(): Promise<void> {
-    await Promise.all([
-      this._pollManifestations(),
-      this._pollRecipeExecutions(),
-    ]);
+    // No point running these in parallel, as we sync with the main thread in the game to fetch data.
+    // By doing this sequentially, we take advantage of our keepalive connection.
+    const manifestations = await this._api.getUniqueManifestedElements();
+    const recipeExecutions = await this._api.getRecipeExecutions();
+
+    startTransition(() => {
+      if (!isEqual(manifestations, this._uniqueElementIdsManfiested$.value)) {
+        this._uniqueElementIdsManfiested$.next(manifestations);
+      }
+
+      if (!isEqual(recipeExecutions, this._recipeExecutions$.value)) {
+        this._recipeExecutions$.next(recipeExecutions);
+      }
+    });
   }
 }

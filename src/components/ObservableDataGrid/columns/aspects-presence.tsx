@@ -28,7 +28,7 @@ export interface AspectPresenseOpts {
 
 export function aspectsPresenceColumnDef<T extends AspectPresenceElement>(
   allowedAspects: AspectFilter,
-  { display = "label", orientation = "vertical" }: AspectPresenseOpts = {},
+  { display = "label", orientation = "horizontal" }: AspectPresenseOpts = {},
   additional: Partial<Omit<ObservableDataGridColumnDef<T>, "field">> = {}
 ): ObservableDataGridColumnDef<T> {
   let observable$ = (element: T) => {

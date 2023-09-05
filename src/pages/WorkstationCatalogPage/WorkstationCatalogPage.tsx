@@ -30,11 +30,10 @@ const WorkstationCatalogPage = () => {
 
   const locations =
     useObservation(
-      `WorkstationCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll("WorkstationCatalogPage.locations")
+          observeAll()
         ),
       [model]
     ) ?? [];

@@ -6,8 +6,6 @@ import {
   shareReplay,
 } from "rxjs";
 import { Token } from "secrethistories-api";
-import { operators as spy } from "rxjs-spy";
-import { profile } from "@/observables";
 
 export abstract class TokenModel {
   private readonly _id: string;
@@ -35,8 +33,7 @@ export abstract class TokenModel {
       this._path$ = this._token$.pipe(
         map((t) => t.path),
         distinctUntilChanged(),
-        shareReplay(1),
-        spy.tag("TokenModel.path$ " + this.id)
+        shareReplay(1)
       );
     }
 

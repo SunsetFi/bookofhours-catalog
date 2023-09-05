@@ -142,9 +142,7 @@ const BookCatalogPage = () => {
     () =>
       model.visibleElementStacks$.pipe(
         filterHasAspect("readable"),
-        mapArrayItemsCached("BookCatalogPage items", (item) =>
-          elementStackToBook(item, compendium)
-        )
+        mapArrayItemsCached((item) => elementStackToBook(item, compendium))
       ),
     [model]
   );
@@ -153,11 +151,10 @@ const BookCatalogPage = () => {
   // the locations the user has unlocked, so they can confirm there is nothing in it.
   const locations =
     useObservation(
-      `BookCatalogPage locations`,
       () =>
         model.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll("BookCatalogPage.locations")
+          observeAll()
         ),
       [model]
     ) ?? [];

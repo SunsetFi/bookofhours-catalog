@@ -9,6 +9,7 @@ import ToolsCatalogPage from "./pages/ToolsCatalogPage";
 import MaterialsCatalogPage from "./pages/MaterialsCatalogPage";
 import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
+import PageContainer from "./components/PageContainer";
 
 const AppRoutes = () => (
   <Routes>
@@ -23,6 +24,10 @@ const AppRoutes = () => (
     <Route
       path="/blank"
       element={<div>This is blank, there should be few subscribers here.</div>}
+    />
+    <Route
+      path="/test"
+      element={<PageContainer title="test">test</PageContainer>}
     />
   </Routes>
 );

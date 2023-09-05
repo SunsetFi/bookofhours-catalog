@@ -1,9 +1,7 @@
 import * as React from "react";
 import { debounce } from "lodash";
-import { operators as spy } from "rxjs-spy";
 
 import {
-  combineLatest,
   OperatorFunction,
   Observable,
   Subscription,
@@ -14,6 +12,7 @@ import {
   from,
   shareReplay,
 } from "rxjs";
+
 import { arrayShallowEquals } from "./utils";
 
 export type ObservableKeys<T> = {
@@ -22,17 +21,12 @@ export type ObservableKeys<T> = {
 
 export type Observation<T> = T extends Observable<infer K> ? K : never;
 
+export function useObservation<T>(observable: Observable<T>): T | undefined;
 export function useObservation<T>(
-  tag: string,
-  observable: Observable<T>
-): T | undefined;
-export function useObservation<T>(
-  tag: string,
   factory: () => Observable<T>,
   deps?: any[]
 ): T | undefined;
 export function useObservation<T>(
-  tag: string,
   observableOrFactory: Observable<T> | (() => Observable<T>),
   deps?: any[]
 ) {
@@ -47,9 +41,7 @@ export function useObservation<T>(
   const [value, setValue] = React.useState<T | undefined>(undefined);
 
   React.useEffect(() => {
-    const sub = factory()
-      .pipe(spy.tag("useObservation " + tag))
-      .subscribe((value) => setValue(value));
+    const sub = factory().subscribe((value) => setValue(value));
     return () => sub.unsubscribe();
   }, [factory]);
 
@@ -79,10 +71,10 @@ export function filterItemObservations<T, K extends T>(
 ) {
   return (source: Observable<readonly T[]>): Observable<K[]> => {
     return source.pipe(
-      mapArrayItemsCached("filterItemObservations", (item) =>
+      mapArrayItemsCached((item) =>
         filter(item).pipe(map((isMatch) => ({ item, isMatch })))
       ),
-      observeAll("filterItemObservations"),
+      observeAll(),
       map((items) =>
         items.filter(({ isMatch }) => isMatch).map(({ item }) => item as K)
       )
@@ -102,9 +94,7 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   };
 }
 
-export function observeAll<K>(
-  name: string
-): OperatorFunction<Observable<K>[], K[]> {
+export function observeAll<K>(): OperatorFunction<Observable<K>[], K[]> {
   return (source: Observable<Observable<K>[]>) => {
     return new Observable<K[]>((subscriber) => {
       const subscriberMap = new Map<
@@ -123,28 +113,22 @@ export function observeAll<K>(
 
           subscriber.next(values as any);
         },
-        0,
+        1,
         { leading: false, trailing: true }
       );
 
       function subscribeToChild(observable: Observable<K>) {
         const values = {
-          subscription: new Subscription(),
-          lastValue: undefined,
+          subscription: undefined as any,
+          lastValue: undefined as K | undefined,
         };
 
         // This must be set before we subscribe as cold observables will give us a value immediately.
         subscriberMap.set(observable, values);
-
         values.subscription = observable.subscribe({
           next: (value) => {
-            const entry = subscriberMap.get(observable);
-            if (entry) {
-              entry.lastValue = value;
-              tryEmitValues();
-            } else {
-              console.warn("Observable not found in subscriber map.");
-            }
+            values.lastValue = value;
+            tryEmitValues();
           },
           error: (err) => {
             subscriber.error(err);
@@ -172,18 +156,17 @@ export function observeAll<K>(
             subscriberMap.delete(observable);
           }
         }
-        console.log(name, "Cleared", cleared, "old subscriptions.");
       }
 
       function onTopLevelUpdate(values: Observable<K>[]) {
         clearOldSubscriptions(values);
         let subscribed = 0;
+
         for (const value of values) {
           if (trySubscribe(value)) {
             subscribed++;
           }
         }
-        console.log(name, "Subscribed to", subscribed, "observables.");
       }
 
       const topLevelSubscription = source.subscribe({
@@ -204,7 +187,6 @@ export function observeAll<K>(
 }
 
 export function mapArrayItemsCached<T, R>(
-  tag: string,
   fn: (value: T) => R
 ): OperatorFunction<readonly T[], R[]> {
   const cache = new Map<T, R>();
@@ -236,14 +218,13 @@ export function mapArrayItemsCached<T, R>(
           }
         }
 
-        console.log(tag, "mapArrayItemsCached made", newItems, "new items");
         return result;
       })
     );
   };
 }
 
-export function profile(tag: string) {
+export function profileDownstream(tag: string) {
   return <T>(source: Observable<T>): Observable<T> => {
     return new Observable<T>((subscriber) => {
       return source.subscribe((value) => {
