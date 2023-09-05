@@ -28,6 +28,11 @@ const tabData = [
     path: "/materials-catalog",
   },
   {
+    label: "Things",
+    aspectIcon: "thing",
+    path: "/things-catalog",
+  },
+  {
     label: "Furnishings",
     aspectIcon: "comfort",
     path: "/furnishings-catalog",

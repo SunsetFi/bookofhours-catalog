@@ -10,6 +10,7 @@ import MaterialsCatalogPage from "./pages/MaterialsCatalogPage";
 import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 import PageContainer from "./components/PageContainer";
+import ThingsCatalogPage from "./pages/ThingsCatalogPage";
 
 const AppRoutes = () => (
   <Routes>
@@ -19,6 +20,7 @@ const AppRoutes = () => (
     <Route path="/memories" Component={MemoriesCompendiumPage} />
     <Route path="/tools-catalog" Component={ToolsCatalogPage} />
     <Route path="/materials-catalog" Component={MaterialsCatalogPage} />
+    <Route path="/things-catalog" Component={ThingsCatalogPage} />
     <Route path="/furnishings-catalog" Component={FurnishingsCatalogPage} />
     <Route path="/workstations-catalog" Component={WorkstationCatalogPage} />
     <Route

@@ -34,6 +34,14 @@ export function aspectsObservableColumnDef<T>(
   pickAspects: readonly string[] | ((aspectId: string) => boolean),
   { aspectIconSize, ...additional }: AspectsColumnDefOptions<T> = {}
 ): ObservableDataGridColumnDef<T> {
+  const observable = (element: T) =>
+    source(element).pipe(
+      map((aspects) =>
+        typeof pickAspects === "function"
+          ? pickBy(aspects, (_, key) => pickAspects(key))
+          : pick(aspects, pickAspects)
+      )
+    );
   return {
     headerName: "Aspects",
     width: 300,
@@ -43,14 +51,7 @@ export function aspectsObservableColumnDef<T>(
       typeof pickAspects === "function" ? "auto" : pickAspects
     ),
     sortable: (a, b) => aspectsMagnitude(a) - aspectsMagnitude(b),
-    observable: (element) =>
-      source(element).pipe(
-        map((aspects) =>
-          typeof pickAspects === "function"
-            ? pickBy(aspects, (_, key) => pickAspects(key))
-            : pick(aspects, pickAspects)
-        )
-      ),
     ...additional,
+    observable,
   };
 }

@@ -20,6 +20,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   aspectsColumnDef,
   aspectsPresenceColumnDef,
+  aspectsPresenceFilter,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
@@ -27,7 +28,6 @@ import ObservableDataGrid, {
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
-import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 
 const MaterialsCatalogPage = () => {
   const model = useDIDependency(GameModel);
@@ -62,7 +62,7 @@ const MaterialsCatalogPage = () => {
         {
           headerName: "Type",
           width: 150,
-          filter: aspectsFilter(materialAspects),
+          filter: aspectsPresenceFilter(materialAspects),
         }
       ),
       descriptionColumnDef<ElementStackModel>(),

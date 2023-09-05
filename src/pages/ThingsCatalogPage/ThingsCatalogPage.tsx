@@ -9,26 +9,31 @@ import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
-import { GameModel, SituationModel } from "@/services/sh-game";
+import {
+  GameModel,
+  ElementStackModel,
+  filterHasAspect,
+} from "@/services/sh-game";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
   aspectsColumnDef,
-  aspectsObservableColumnDef,
-  aspectsPresenceColumnDef,
-  aspectsPresenceFilter,
   descriptionColumnDef,
+  iconColumnDef,
   labelColumnDef,
   locationColumnDef,
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 
-const WorkstationCatalogPage = () => {
+const ThingsCatalogPage = () => {
   const model = useDIDependency(GameModel);
 
-  const elements$ = React.useMemo(() => model.unlockedWorkstations$, [model]);
+  const elements$ = React.useMemo(
+    () => model.visibleElementStacks$.pipe(filterHasAspect("thing")),
+    [model]
+  );
 
   const locations =
     useObservation(
@@ -42,40 +47,19 @@ const WorkstationCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
-      labelColumnDef<SituationModel>(),
-      locationColumnDef<SituationModel>({
+      iconColumnDef<ElementStackModel>(),
+      labelColumnDef<ElementStackModel>(),
+      locationColumnDef<ElementStackModel>({
         filter: multiselectOptionsFilter(locations),
       }),
-      aspectsPresenceColumnDef<SituationModel>(
-        powerAspects,
-        { display: "none", orientation: "horizontal" },
-        {
-          headerName: "Attunement",
-          observable: "hints$",
-          filter: aspectsPresenceFilter(powerAspects),
-          width: 275,
-        }
-      ),
-      aspectsPresenceColumnDef<SituationModel>(
-        (aspect) => aspect.startsWith("e."),
-        { display: "none" },
-        // TODO: Dont use auto, find all possible evolutions
-        { headerName: "Evolves", filter: aspectsPresenceFilter("auto") }
-      ),
-      aspectsObservableColumnDef<SituationModel>(
-        (situation) => situation.slotTypes$,
-        (aspectId) => !powerAspects.includes(aspectId as any),
-        {
-          headerName: "Accepts",
-        }
-      ),
-      descriptionColumnDef<SituationModel>(),
+      aspectsColumnDef<ElementStackModel>(powerAspects),
+      descriptionColumnDef<ElementStackModel>(),
     ],
     [locations]
   );
 
   return (
-    <PageContainer title="Workstations" backTo="/">
+    <PageContainer title="Antiquities and Knicknacks" backTo="/">
       <RequireRunning />
       <Box
         sx={{
@@ -95,4 +79,4 @@ const WorkstationCatalogPage = () => {
   );
 };
 
-export default WorkstationCatalogPage;
+export default ThingsCatalogPage;

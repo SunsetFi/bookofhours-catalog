@@ -2,6 +2,7 @@ import { inject, injectable, singleton } from "microinject";
 import { Observable, combineLatest, map, shareReplay } from "rxjs";
 
 import {
+  distinctUntilShallowArrayChanged,
   mapArrayItemsCached,
   observeAll,
   profileDownstream,
@@ -117,6 +118,7 @@ export class GameModel {
           return result;
         }),
         profileDownstream("visibleElementStacks$"),
+        distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
     }
@@ -155,6 +157,7 @@ export class GameModel {
             .map((x) => x.token);
         }),
         profileDownstream("unlockedWorkstations$"),
+        distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
     }

@@ -195,7 +195,7 @@ const BookCatalogPage = () => {
         powerAspects,
         {
           headerName: "Memory Aspects",
-          width: 200,
+          width: 210,
         }
       ),
       aspectsPresenceColumnDef<BookModel>(

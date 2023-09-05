@@ -27,6 +27,7 @@ export const materialAspects = [
   "remains",
   "gem",
   "fabric",
+  "glass",
 ] as const;
 
 export const provisionsAspects = [
