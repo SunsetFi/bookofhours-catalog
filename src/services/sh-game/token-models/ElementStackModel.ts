@@ -7,7 +7,6 @@ import {
   BehaviorSubject,
   Observable,
   map,
-  combineLatest,
   distinctUntilChanged,
   shareReplay,
 } from "rxjs";
@@ -24,12 +23,10 @@ import {
   ModelWithParentTerrain,
 } from "../types";
 
-import { extractLibraryRoomTokenIdFromPath } from "../utils";
-
-import { TerrainsSource } from "../sources";
-
-import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
+import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
+import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
+import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 
 export function isElementStackModel(
   model: TokenModel
@@ -46,26 +43,32 @@ export class ElementStackModel
     ModelWithIconUrl,
     ModelWithParentTerrain
 {
-  private readonly _elementStackInternal$: BehaviorSubject<IElementStack>;
-  private readonly _elementStack$: Observable<IElementStack>;
+  private readonly _elementStack$: BehaviorSubject<IElementStack>;
+
+  private readonly _visible$: Observable<boolean>;
+  private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
 
   constructor(
     elementStack: IElementStack,
     private readonly _api: API,
-    private readonly _terrainsSource: TerrainsSource,
-    private readonly _compendium: Compendium
+    private readonly _compendium: Compendium,
+    visibilityFactory: TokenVisibilityFactory,
+    parentTerrainFactory: TokenParentTerrainFactory
   ) {
     super(elementStack);
-    this._elementStackInternal$ = new BehaviorSubject<IElementStack>(
-      elementStack
+    this._elementStack$ = new BehaviorSubject<IElementStack>(elementStack);
+
+    this._visible$ = visibilityFactory.createVisibilityObservable(
+      this._elementStack$
     );
-    this._elementStack$ = this._elementStackInternal$.pipe(
-      distinctUntilChanged(isEqual)
+
+    this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
+      this._elementStack$
     );
   }
 
   get id(): string {
-    return this._elementStackInternal$.value.id;
+    return this._elementStack$.value.id;
   }
 
   get payloadType(): "ElementStack" {
@@ -88,10 +91,9 @@ export class ElementStackModel
   private _element$: Observable<ElementModel> | null = null;
   get element$() {
     this._element$ = this._elementStack$.pipe(
-      map((elementStack) =>
-        this._compendium.getElementById(elementStack.elementId)
-      ),
+      map((elementStack) => elementStack.elementId),
       distinctUntilChanged(),
+      map((elementId) => this._compendium.getElementById(elementId)),
       shareReplay(1)
     );
 
@@ -120,29 +122,11 @@ export class ElementStackModel
     return this._description$;
   }
 
-  private _parentTerrain$: Observable<ConnectedTerrainModel | null> | null =
-    null;
+  get visible$() {
+    return this._visible$;
+  }
+
   get parentTerrain$() {
-    this._parentTerrain$ = combineLatest([
-      this._elementStack$,
-      this._terrainsSource.unlockedTerrains$,
-    ]).pipe(
-      map(([elementStack, terrains]) => {
-        const tokenId = extractLibraryRoomTokenIdFromPath(elementStack.path);
-        if (tokenId === null) {
-          return null;
-        }
-
-        const terrain = terrains.find((t) => t.id === tokenId);
-        if (terrain === undefined) {
-          return null;
-        }
-
-        return terrain;
-      }),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
     return this._parentTerrain$;
   }
 
@@ -247,6 +231,6 @@ export class ElementStackModel
       throw new Error("Invalid situation update: Wrong ID.");
     }
 
-    this._elementStackInternal$.next(element);
+    this._elementStack$.next(element);
   }
 }

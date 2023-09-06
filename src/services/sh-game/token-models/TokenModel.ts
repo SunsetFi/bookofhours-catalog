@@ -7,6 +7,8 @@ import {
 } from "rxjs";
 import { Token } from "secrethistories-api";
 
+import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
+
 export abstract class TokenModel {
   private readonly _id: string;
   private readonly _payloadType: Token["payloadType"];
@@ -26,6 +28,10 @@ export abstract class TokenModel {
   get payloadType() {
     return this._payloadType;
   }
+
+  abstract get visible$(): Observable<boolean>;
+
+  abstract get parentTerrain$(): Observable<ConnectedTerrainModel | null>;
 
   private _path$: Observable<string> | null = null;
   get path$() {

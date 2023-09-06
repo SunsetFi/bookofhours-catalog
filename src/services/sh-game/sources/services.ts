@@ -1,19 +1,12 @@
 import { Identifier } from "microinject";
 import { Observable } from "rxjs";
 
-import { ConnectedTerrainModel } from "../token-models/ConnectedTerrainModel";
 import { TokenModel } from "../token-models/TokenModel";
 
 export const RunningSource: Identifier<RunningSource> = Symbol("RunningSource");
 export interface RunningSource {
   get isRunning$(): Observable<boolean>;
   get isRunning(): boolean;
-}
-
-export const TerrainsSource: Identifier<TerrainsSource> =
-  Symbol("TerrainsSource");
-export interface TerrainsSource {
-  get unlockedTerrains$(): Observable<readonly ConnectedTerrainModel[]>;
 }
 
 export const TokensSource: Identifier<TokensSource> = Symbol("TokensSource");

@@ -1,11 +1,10 @@
 import { inject, injectable, singleton } from "microinject";
-import { Observable, combineLatest, map, shareReplay } from "rxjs";
+import { Observable, map, shareReplay } from "rxjs";
 
 import {
   distinctUntilShallowArrayChanged,
-  mapArrayItemsCached,
-  observeAll,
-  profileDownstream,
+  filterItemObservations,
+  filterItems,
 } from "@/observables";
 
 import {
@@ -17,25 +16,12 @@ import {
   isSituationModel,
 } from "./token-models/SituationModel";
 
-import {
-  RunningSource,
-  CharacterSource,
-  TerrainsSource,
-  TokensSource,
-} from "./sources";
+import { RunningSource, CharacterSource, TokensSource } from "./sources";
 import { Compendium, ElementModel } from "../sh-compendium";
-
-const playerSpherePaths = [
-  "~/portage1",
-  "~/portage2",
-  "~/portage3",
-  "~/portage4",
-  "~/portage5",
-  "~/hand.abilities",
-  "~/hand.skills",
-  "~/hand.memories",
-  "~/hand.misc",
-];
+import {
+  ConnectedTerrainModel,
+  isConnectedTerrainModel,
+} from "./token-models/ConnectedTerrainModel";
 
 @injectable()
 @singleton()
@@ -45,8 +31,7 @@ export class GameModel {
     private readonly _runningSource: RunningSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(CharacterSource) private readonly _characterSource: CharacterSource,
-    @inject(TokensSource) private readonly _tokensSource: TokensSource,
-    @inject(TerrainsSource) private readonly _terrainsSource: TerrainsSource
+    @inject(TokensSource) private readonly _tokensSource: TokensSource
   ) {}
 
   get isRunning$() {
@@ -94,30 +79,9 @@ export class GameModel {
   > | null = null;
   get visibleElementStacks$() {
     if (this._visibleElementStacks$ === null) {
-      const elementStacksWithPath$ = this._tokensSource.tokens$.pipe(
-        map((tokens) => tokens.filter(isElementStackModel)),
-        mapArrayItemsCached((token) =>
-          token.path$.pipe(map((path) => ({ token, path })))
-        ),
-        observeAll()
-      );
-
-      this._visibleElementStacks$ = combineLatest([
-        elementStacksWithPath$,
-        this._terrainsSource.unlockedTerrains$,
-      ]).pipe(
-        map(([tokenPathPair, terrains]) => {
-          const visiblePaths = [
-            ...playerSpherePaths,
-            ...terrains.map((t) => t.path),
-          ];
-          const result = tokenPathPair
-            .filter((x) => visiblePaths.some((p) => x.path.startsWith(p)))
-            .map((x) => x.token);
-
-          return result;
-        }),
-        profileDownstream("visibleElementStacks$"),
+      this._visibleElementStacks$ = this._tokensSource.tokens$.pipe(
+        filterItems(isElementStackModel),
+        filterItemObservations((model) => model.visible$),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
@@ -126,8 +90,20 @@ export class GameModel {
     return this._visibleElementStacks$;
   }
 
+  private _unlockedTerrains$: Observable<
+    readonly ConnectedTerrainModel[]
+  > | null = null;
   get unlockedTerrains$() {
-    return this._terrainsSource.unlockedTerrains$;
+    if (!this._unlockedTerrains$) {
+      this._unlockedTerrains$ = this._tokensSource.tokens$.pipe(
+        filterItems(isConnectedTerrainModel),
+        filterItemObservations((model) => model.visible$),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockedTerrains$;
   }
 
   private _unlockedWorkstations$: Observable<readonly SituationModel[]> | null =
@@ -135,28 +111,9 @@ export class GameModel {
 
   get unlockedWorkstations$() {
     if (this._unlockedWorkstations$ === null) {
-      const situationsWithPath$ = this._tokensSource.tokens$.pipe(
-        map((tokens) => tokens.filter(isSituationModel)),
-        mapArrayItemsCached((token) =>
-          token.path$.pipe(map((path) => ({ token, path })))
-        ),
-        observeAll()
-      );
-
-      this._unlockedWorkstations$ = combineLatest([
-        situationsWithPath$,
-        this._terrainsSource.unlockedTerrains$,
-      ]).pipe(
-        map(([tokenPathPair, terrains]) => {
-          const visiblePaths = [
-            ...playerSpherePaths,
-            ...terrains.map((t) => t.path),
-          ];
-          return tokenPathPair
-            .filter((x) => visiblePaths.some((p) => x.path.startsWith(p)))
-            .map((x) => x.token);
-        }),
-        profileDownstream("unlockedWorkstations$"),
+      this._unlockedWorkstations$ = this._tokensSource.tokens$.pipe(
+        filterItems(isSituationModel),
+        filterItemObservations((model) => model.visible$),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );

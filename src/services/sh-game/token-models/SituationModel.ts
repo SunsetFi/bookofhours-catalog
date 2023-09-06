@@ -1,22 +1,19 @@
 import {
   BehaviorSubject,
   Observable,
-  combineLatest,
   distinctUntilChanged,
   map,
   shareReplay,
 } from "rxjs";
 import { Aspects, Situation as ISituation } from "secrethistories-api";
+import { isEqual } from "lodash";
 
 import { API } from "../../sh-api";
 
-import { extractLibraryRoomTokenIdFromPath } from "../utils";
-
-import { TerrainsSource } from "../sources";
-
-import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
+import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
-import { isEqual } from "lodash";
+import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
+import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 
 export function isSituationModel(model: TokenModel): model is SituationModel {
   return model instanceof SituationModel;
@@ -25,13 +22,24 @@ export function isSituationModel(model: TokenModel): model is SituationModel {
 export class SituationModel extends TokenModel {
   private readonly _situation$: BehaviorSubject<ISituation>;
 
+  private readonly _visible$: Observable<boolean>;
+  private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
+
   constructor(
     situation: ISituation,
-    private readonly _terrainsSource: TerrainsSource,
-    private readonly _api: API
+    private readonly _api: API,
+    visibilityFactory: TokenVisibilityFactory,
+    parentTerrainFactory: TokenParentTerrainFactory
   ) {
     super(situation);
     this._situation$ = new BehaviorSubject<ISituation>(situation);
+
+    this._visible$ = visibilityFactory.createVisibilityObservable(
+      this._situation$
+    );
+    this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
+      this._situation$
+    );
   }
 
   get id(): string {
@@ -42,32 +50,11 @@ export class SituationModel extends TokenModel {
     return "Situation";
   }
 
-  private _parentTerrain$: Observable<ConnectedTerrainModel | null> | null =
-    null;
+  get visible$() {
+    return this._visible$;
+  }
+
   get parentTerrain$() {
-    if (!this._parentTerrain$) {
-      this._parentTerrain$ = combineLatest([
-        this._situation$,
-        this._terrainsSource.unlockedTerrains$,
-      ]).pipe(
-        map(([situation, terrains]) => {
-          const tokenId = extractLibraryRoomTokenIdFromPath(situation.path);
-          if (tokenId === null) {
-            return null;
-          }
-
-          const terrain = terrains.find((t) => t.id === tokenId);
-          if (terrain === undefined) {
-            return null;
-          }
-
-          return terrain;
-        }),
-        distinctUntilChanged(),
-        shareReplay(1)
-      );
-    }
-
     return this._parentTerrain$;
   }
 

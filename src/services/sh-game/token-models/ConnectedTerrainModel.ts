@@ -6,9 +6,9 @@ import {
   shareReplay,
 } from "rxjs";
 import { ConnectedTerrain } from "secrethistories-api";
+import { isEqual } from "lodash";
 
 import { TokenModel } from "./TokenModel";
-import { isEqual } from "lodash";
 
 export function isConnectedTerrainModel(
   model: TokenModel
@@ -16,13 +16,16 @@ export function isConnectedTerrainModel(
   return model instanceof ConnectedTerrainModel;
 }
 
+const nullTerrain = new BehaviorSubject<ConnectedTerrainModel | null>(
+  null
+).asObservable();
+
 export class ConnectedTerrainModel extends TokenModel {
   private readonly _connectedTerrainInternal$: BehaviorSubject<ConnectedTerrain>;
   private readonly _connectedTerrain$: Observable<ConnectedTerrain>;
 
   private readonly _label$: Observable<string>;
   private readonly _description$: Observable<string>;
-  private readonly _shrouded$: Observable<boolean>;
 
   constructor(terrain: ConnectedTerrain) {
     super(terrain);
@@ -61,7 +64,29 @@ export class ConnectedTerrainModel extends TokenModel {
     return this._description$;
   }
 
+  private _visible$: Observable<boolean> | null = null;
+  get visible$() {
+    if (!this._visible$) {
+      this._visible$ = this._connectedTerrain$.pipe(
+        map((t) => !t.shrouded),
+        shareReplay(1)
+      );
+    }
+    return this._visible$;
+  }
+
+  get parentTerrain$() {
+    return nullTerrain;
+  }
+
+  private _shrouded$: Observable<boolean> | null = null;
   get shrouded$() {
+    if (!this._shrouded$) {
+      this._shrouded$ = this._connectedTerrain$.pipe(
+        map((t) => t.shrouded),
+        shareReplay(1)
+      );
+    }
     return this._shrouded$;
   }
 

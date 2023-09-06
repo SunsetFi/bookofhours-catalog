@@ -106,4 +106,49 @@ export class RecipeModel
 
     return this._slots$;
   }
+
+  private _warmup$: Observable<number | null> | null = null;
+  get warmup$() {
+    if (this._warmup$ == null) {
+      this._warmup$ = this._recipe$.pipe(map((e) => e?.warmup ?? null));
+    }
+
+    return this._warmup$;
+  }
+
+  private _requirements$: Observable<Readonly<Record<string, string>>> | null =
+    null;
+  get requirements$() {
+    if (this._requirements$ == null) {
+      this._requirements$ = this._recipe$.pipe(
+        map((e) => Object.freeze({ ...e?.requirements }))
+      );
+    }
+
+    return this._requirements$;
+  }
+
+  private _extantRequirements$: Observable<
+    Readonly<Record<string, string>>
+  > | null = null;
+  get extantRequirements$() {
+    if (this._extantRequirements$ == null) {
+      this._extantRequirements$ = this._recipe$.pipe(
+        map((e) => Object.freeze({ ...e?.extantRequirements }))
+      );
+    }
+
+    return this._extantRequirements$;
+  }
+
+  private _effects$: Observable<Readonly<Record<string, string>>> | null = null;
+  get effects$() {
+    if (this._effects$ == null) {
+      this._effects$ = this._recipe$.pipe(
+        map((e) => Object.freeze({ ...e?.effects }))
+      );
+    }
+
+    return this._effects$;
+  }
 }

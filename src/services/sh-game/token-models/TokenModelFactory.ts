@@ -4,12 +4,12 @@ import { Situation, Token } from "secrethistories-api";
 import { API } from "@/services/sh-api";
 import { Compendium } from "@/services/sh-compendium";
 
-import { TerrainsSource } from "../sources";
-
 import { TokenModel } from "./TokenModel";
 import { ElementStackModel } from "./ElementStackModel";
 import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { SituationModel } from "./SituationModel";
+import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
+import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 
 @injectable()
 @singleton()
@@ -22,8 +22,9 @@ export class TokenModelFactory {
         return new ElementStackModel(
           token,
           this._container.get(API),
-          this._container.get(TerrainsSource),
-          this._container.get(Compendium)
+          this._container.get(Compendium),
+          this._container.get(TokenVisibilityFactory),
+          this._container.get(TokenParentTerrainFactory)
         );
       case "ConnectedTerrain":
         return new ConnectedTerrainModel(token);
@@ -31,8 +32,9 @@ export class TokenModelFactory {
       case "WorkstationSituation" as any:
         return new SituationModel(
           token as Situation,
-          this._container.get(TerrainsSource),
-          this._container.get(API)
+          this._container.get(API),
+          this._container.get(TokenVisibilityFactory),
+          this._container.get(TokenParentTerrainFactory)
         );
       default:
         throw new Error(`Unknown token type: ${(token as any).payloadType}`);

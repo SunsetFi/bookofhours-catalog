@@ -55,7 +55,7 @@ export function promiseFuncToObservable<T>(
 }
 
 export function distinctUntilShallowArrayChanged() {
-  return (source: Observable<readonly any[]>): Observable<readonly any[]> => {
+  return <T>(source: Observable<readonly T[]>): Observable<readonly T[]> => {
     return source.pipe(distinctUntilChanged(arrayShallowEquals));
   };
 }
