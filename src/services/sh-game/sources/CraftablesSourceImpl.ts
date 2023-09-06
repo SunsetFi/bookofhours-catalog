@@ -1,4 +1,4 @@
-import { inject, injectable, singleton } from "microinject";
+import { inject, injectable, provides, singleton } from "microinject";
 import { Observable, map, shareReplay } from "rxjs";
 
 import {
@@ -8,11 +8,12 @@ import {
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
-import { CharacterSource } from "./services";
+import { CharacterSource, CraftablesSource } from "./services";
 
 @injectable()
 @singleton()
-export class CraftablesSourceImpl {
+@provides(CraftablesSource)
+export class CraftablesSourceImpl implements CraftablesSource {
   private readonly _knownCraftableRecipes$: Observable<readonly RecipeModel[]>;
   constructor(
     @inject(Compendium) compendium: Compendium,

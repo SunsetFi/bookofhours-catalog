@@ -6,6 +6,7 @@ import { ModelWithIconUrl } from "@/services/sh-game";
 
 import { ObservableDataGridColumnDef } from "../types";
 
+// TODO: Make observable, icons can change with the element id.
 export function iconColumnDef<T extends ModelWithIconUrl>(
   additional: Partial<
     Omit<ObservableDataGridColumnDef<T>, "field" | "observable">

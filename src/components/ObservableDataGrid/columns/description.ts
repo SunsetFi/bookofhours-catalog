@@ -1,19 +1,13 @@
 import { ModelWithDescription } from "@/services/sh-game";
 
 import { ObservableDataGridColumnDef } from "../types";
-import { textFilter } from "../filters";
+
+import { textColumnDef } from "./text";
 
 export function descriptionColumnDef<T extends ModelWithDescription>(
   additional: Partial<
     Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
   > = {}
 ): ObservableDataGridColumnDef<T> {
-  return {
-    headerName: "Description",
-    flex: 1,
-    wrap: true,
-    filter: textFilter(),
-    ...additional,
-    observable: (item) => item.description$,
-  };
+  return textColumnDef("Description", (item) => item.description$, additional);
 }

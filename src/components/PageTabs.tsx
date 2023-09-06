@@ -38,6 +38,11 @@ const tabData = [
     path: "/furnishings-catalog",
   },
   {
+    label: "Craftables",
+    aspectIcon: "difficulty.keeper",
+    path: "/craftables-catalog",
+  },
+  {
     label: "Workstations",
     aspectIcon: "forge",
     path: "/workstations-catalog",

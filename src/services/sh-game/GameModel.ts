@@ -16,7 +16,12 @@ import {
   isSituationModel,
 } from "./token-models/SituationModel";
 
-import { RunningSource, CharacterSource, TokensSource } from "./sources";
+import {
+  RunningSource,
+  CharacterSource,
+  TokensSource,
+  CraftablesSource,
+} from "./sources";
 import { Compendium, ElementModel } from "../sh-compendium";
 import {
   ConnectedTerrainModel,
@@ -31,6 +36,8 @@ export class GameModel {
     private readonly _runningSource: RunningSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(CharacterSource) private readonly _characterSource: CharacterSource,
+    @inject(CraftablesSource)
+    private readonly _craftablesSource: CraftablesSource,
     @inject(TokensSource) private readonly _tokensSource: TokensSource
   ) {}
 
@@ -119,6 +126,10 @@ export class GameModel {
       );
     }
     return this._unlockedWorkstations$;
+  }
+
+  get knownCraftableRecipes$() {
+    return this._craftablesSource.knownCraftableRecipes$;
   }
 
   private _uniqueElementsManfiested$: Observable<
