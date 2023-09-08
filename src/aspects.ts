@@ -28,6 +28,7 @@ export const materialAspects = [
   "gem",
   "fabric",
   "glass",
+  "ink", // not really a material, but it needs to be somewhere.
 ] as const;
 
 export const provisionsAspects = [
