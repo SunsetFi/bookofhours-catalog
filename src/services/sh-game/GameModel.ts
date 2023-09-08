@@ -1,6 +1,8 @@
 import { inject, injectable, singleton } from "microinject";
 import { Observable, map, shareReplay } from "rxjs";
 
+import { Compendium, ElementModel } from "../sh-compendium";
+
 import {
   distinctUntilShallowArrayChanged,
   filterItemObservations,
@@ -15,6 +17,10 @@ import {
   SituationModel,
   isSituationModel,
 } from "./token-models/SituationModel";
+import {
+  ConnectedTerrainModel,
+  isConnectedTerrainModel,
+} from "./token-models/ConnectedTerrainModel";
 
 import {
   RunningSource,
@@ -22,11 +28,6 @@ import {
   TokensSource,
   CraftablesSource,
 } from "./sources";
-import { Compendium, ElementModel } from "../sh-compendium";
-import {
-  ConnectedTerrainModel,
-  isConnectedTerrainModel,
-} from "./token-models/ConnectedTerrainModel";
 
 @injectable()
 @singleton()
@@ -167,17 +168,16 @@ function seasonFromExecutions(
 
   const springCount = recipeExecutions["year.season.spring"] ?? 0;
   const summerCount = recipeExecutions["year.season.summer"] ?? 0;
-  const autumCount = recipeExecutions["year.season.autum"] ?? 0;
+  const autumnCount = recipeExecutions["year.season.autumn"] ?? 0;
   const winterCount = recipeExecutions["year.season.winter"] ?? 0;
 
-  // The lesser is the one we are at.
   if (springCount > summerCount) {
     return "summer";
   }
-  if (summerCount > autumCount) {
-    return "autum";
+  if (summerCount > autumnCount) {
+    return "autumn";
   }
-  if (autumCount > winterCount) {
+  if (autumnCount > winterCount) {
     return "winter";
   }
   return "spring";
