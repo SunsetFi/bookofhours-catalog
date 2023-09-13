@@ -48,6 +48,25 @@ function MultiselectOptionsFilter<T>({
         height: "100%",
       }}
     >
+      <Box
+        sx={{
+          px: 1,
+          display: "flex",
+          flexDirection: "row",
+          width: "100%",
+        }}
+      >
+        <Button size="small" onClick={() => onChange([])}>
+          Clear
+        </Button>
+        <Button
+          size="small"
+          sx={{ pl: 1, ml: "auto" }}
+          onClick={() => onChange(allowedValues)}
+        >
+          Select All
+        </Button>
+      </Box>
       <TextField
         sx={{ mx: 1, mt: 1 }}
         autoFocus
@@ -93,12 +112,6 @@ function MultiselectOptionsFilter<T>({
             </ListItem>
           ))}
       </List>
-      <Box sx={{ display: "flex", flexDirection: "row", px: 1, pb: 1 }}>
-        <Button onClick={() => onChange(allowedValues)}>Select All</Button>
-        <Button sx={{ ml: "auto" }} onClick={() => onChange([])}>
-          Clear
-        </Button>
-      </Box>
     </Box>
   );
 }

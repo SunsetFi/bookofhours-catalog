@@ -99,6 +99,24 @@ const AspectsPresenceFilter = ({
         p: 1,
       }}
     >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          width: "100%",
+        }}
+      >
+        <Button size="small" onClick={() => onAspectsChanged([])}>
+          Clear
+        </Button>
+        <Button
+          size="small"
+          sx={{ pl: 1, ml: "auto" }}
+          onClick={() => onAspectsChanged(choices)}
+        >
+          Select All
+        </Button>
+      </Box>
       <AspectSelectionGrid
         sx={{ justifyContent: "center" }}
         items={choices}
@@ -106,7 +124,7 @@ const AspectsPresenceFilter = ({
         onChange={onAspectsChanged}
       />
       <RadioGroup
-        sx={{ mt: 1, px: 1 }}
+        sx={{ px: 1 }}
         row
         value={matchMode}
         onChange={(e) => onModeChanged(e.target.value as any)}
@@ -115,26 +133,6 @@ const AspectsPresenceFilter = ({
         <FormControlLabel value="all" control={<Radio />} label="All" />
         <FormControlLabel value="none" control={<Radio />} label="None" />
       </RadioGroup>
-      <Box
-        sx={{
-          mt: 1,
-          px: 1,
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-        }}
-      >
-        <Button
-          size="small"
-          sx={{ pl: 1, mr: "auto" }}
-          onClick={() => onAspectsChanged(choices)}
-        >
-          Select All
-        </Button>
-        <Button size="small" onClick={() => onAspectsChanged([])}>
-          Clear
-        </Button>
-      </Box>
     </Box>
   );
 };
