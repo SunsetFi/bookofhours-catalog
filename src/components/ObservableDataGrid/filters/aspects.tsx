@@ -112,7 +112,7 @@ const AspectsFilter = ({
           width: "100%",
         }}
       >
-        <Button size="small" onClick={() => onAspectsChanged([])}>
+        <Button size="small" onClick={() => onChange({ $mode: "any" })}>
           Clear
         </Button>
         <Button

@@ -27,11 +27,11 @@ export class SituationModel extends TokenModel {
 
   constructor(
     situation: ISituation,
-    private readonly _api: API,
+    api: API,
     visibilityFactory: TokenVisibilityFactory,
     parentTerrainFactory: TokenParentTerrainFactory
   ) {
-    super(situation);
+    super(situation, api);
     this._situation$ = new BehaviorSubject<ISituation>(situation);
 
     this._visible$ = visibilityFactory.createVisibilityObservable(

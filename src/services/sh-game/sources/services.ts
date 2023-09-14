@@ -20,12 +20,12 @@ export const CharacterSource: Identifier<CharacterSource> =
 export interface CharacterSource {
   get uniqueElementIdsManifested$(): Observable<readonly string[]>;
   get uniqueElementIdsManifested(): readonly string[];
-  get recipeExecutions$(): Observable<Readonly<Record<string, number>>>;
-  get recipeExecutions(): Readonly<Record<string, number>>;
+  get ambittableRecipes$(): Observable<readonly string[]>;
+  get ambittableRecipes(): readonly string[];
 }
 
 export const CraftablesSource: Identifier<CraftablesSource> =
   Symbol("CraftablesSource");
 export interface CraftablesSource {
-  get knownCraftableRecipes$(): Observable<readonly RecipeModel[]>;
+  get unlockedRecipes$(): Observable<readonly RecipeModel[]>;
 }

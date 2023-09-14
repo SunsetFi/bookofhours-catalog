@@ -8,6 +8,8 @@ import {
 import { ConnectedTerrain } from "secrethistories-api";
 import { isEqual } from "lodash";
 
+import { API } from "@/services/sh-api";
+
 import { TokenModel } from "./TokenModel";
 
 export function isConnectedTerrainModel(
@@ -27,8 +29,8 @@ export class ConnectedTerrainModel extends TokenModel {
   private readonly _label$: Observable<string>;
   private readonly _description$: Observable<string>;
 
-  constructor(terrain: ConnectedTerrain) {
-    super(terrain);
+  constructor(terrain: ConnectedTerrain, api: API) {
+    super(terrain, api);
 
     this._connectedTerrainInternal$ = new BehaviorSubject(terrain);
 

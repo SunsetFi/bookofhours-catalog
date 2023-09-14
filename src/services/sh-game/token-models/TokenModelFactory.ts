@@ -27,7 +27,7 @@ export class TokenModelFactory {
           this._container.get(TokenParentTerrainFactory)
         );
       case "ConnectedTerrain":
-        return new ConnectedTerrainModel(token);
+        return new ConnectedTerrainModel(token, this._container.get(API));
       case "Situation":
       case "WorkstationSituation" as any:
         return new SituationModel(

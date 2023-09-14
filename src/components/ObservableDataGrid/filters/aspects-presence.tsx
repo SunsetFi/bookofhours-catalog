@@ -106,7 +106,10 @@ const AspectsPresenceFilter = ({
           width: "100%",
         }}
       >
-        <Button size="small" onClick={() => onAspectsChanged([])}>
+        <Button
+          size="small"
+          onClick={() => onChange({ mode: "any", aspects: [] })}
+        >
           Clear
         </Button>
         <Button

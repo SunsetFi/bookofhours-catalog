@@ -12,6 +12,8 @@ import { pick, first } from "lodash";
 
 import Box from "@mui/material/Box";
 
+import VisibilityIcon from "@mui/icons-material/Visibility";
+
 import { powerAspects } from "@/aspects";
 
 import { useDIDependency } from "@/container";
@@ -47,6 +49,7 @@ import ObservableDataGrid, {
 } from "@/components/ObservableDataGrid";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
+import { IconButton } from "@mui/material";
 
 interface BookModel
   extends ModelWithAspects,
@@ -54,6 +57,7 @@ interface BookModel
     ModelWithIconUrl,
     ModelWithLabel,
     ModelWithParentTerrain {
+  focus(): void;
   id: string;
   memoryLabel$: Observable<string | null>;
   memoryAspects$: Observable<Aspects>;
@@ -131,6 +135,7 @@ function elementStackToBook(
     },
     memoryLabel$,
     memoryAspects$,
+    focus: () => elementStack.focus(),
   };
 }
 
@@ -161,6 +166,24 @@ const BookCatalogPage = () => {
 
   const columns = React.useMemo<ObservableDataGridColumnDef<BookModel>[]>(
     () => [
+      {
+        headerName: "",
+        width: 50,
+        field: "focus",
+        renderCell: ({ value }) => (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <IconButton onClick={() => value()}>
+              <VisibilityIcon />
+            </IconButton>
+          </Box>
+        ),
+      } as ObservableDataGridColumnDef<BookModel>,
       iconColumnDef<BookModel>(),
       labelColumnDef<BookModel>(),
       locationColumnDef<BookModel>({

@@ -7,6 +7,8 @@ import {
 } from "rxjs";
 import { Token } from "secrethistories-api";
 
+import { API } from "@/services/sh-api";
+
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 
 export abstract class TokenModel {
@@ -15,7 +17,7 @@ export abstract class TokenModel {
 
   private readonly _token$: BehaviorSubject<Token>;
 
-  constructor(token: Token) {
+  constructor(token: Token, protected readonly _api: API) {
     this._id = token.id;
     this._payloadType = token.payloadType;
     this._token$ = new BehaviorSubject(token);
@@ -48,6 +50,10 @@ export abstract class TokenModel {
 
   get path() {
     return this._token$.value.path;
+  }
+
+  focus() {
+    this._api.focusTokenAtPath(this.path);
   }
 
   update(token: Token) {

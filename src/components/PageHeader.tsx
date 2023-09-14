@@ -9,8 +9,6 @@ import IconButton from "@mui/material/IconButton";
 
 import ArrowBack from "@mui/icons-material/ArrowBack";
 
-import { useSeason, useYear } from "@/services/sh-game";
-
 import HandOverviewIcons from "./HandOverviewIcons";
 
 export interface PageHeaderProps {
@@ -19,9 +17,6 @@ export interface PageHeaderProps {
 }
 
 const PageHeader = ({ title, backTo }: PageHeaderProps) => {
-  const year = useYear();
-  const season = useSeason();
-
   const navigate = useNavigate();
   const onBackClicked = React.useCallback(() => {
     if (!backTo) {
@@ -59,11 +54,6 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
             <ArrowBack />
           </IconButton>
         )}
-        {
-          <Typography variant="body2" sx={{ ml: 2 }}>
-            {capitalize(season)}, Year {1936 + year}
-          </Typography>
-        }
         <HandOverviewIcons sx={{ ml: 2 }} />
       </Toolbar>
     </AppBar>

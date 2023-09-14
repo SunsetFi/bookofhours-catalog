@@ -50,38 +50,6 @@ export class GameModel {
     return this._runningSource.isRunning;
   }
 
-  private _year$: Observable<number> | null = null;
-  get year$() {
-    if (!this._year$) {
-      this._year$ = this._characterSource.recipeExecutions$.pipe(
-        map(yearFromExecutions),
-        shareReplay(1)
-      );
-    }
-
-    return this._year$;
-  }
-
-  get year() {
-    return yearFromExecutions(this._characterSource.recipeExecutions);
-  }
-
-  private _season$: Observable<string> | null = null;
-  get season$() {
-    if (!this._season$) {
-      this._season$ = this._characterSource.recipeExecutions$.pipe(
-        map(seasonFromExecutions),
-        shareReplay(1)
-      );
-    }
-
-    return this._season$;
-  }
-
-  get season() {
-    return seasonFromExecutions(this._characterSource.recipeExecutions);
-  }
-
   private _visibleElementStacks$: Observable<
     readonly ElementStackModel[]
   > | null = null;
@@ -129,8 +97,8 @@ export class GameModel {
     return this._unlockedWorkstations$;
   }
 
-  get knownCraftableRecipes$() {
-    return this._craftablesSource.knownCraftableRecipes$;
+  get unlockedRecipes$() {
+    return this._craftablesSource.unlockedRecipes$;
   }
 
   private _uniqueElementsManfiested$: Observable<
@@ -147,38 +115,4 @@ export class GameModel {
 
     return this._uniqueElementsManfiested$;
   }
-}
-
-function yearFromExecutions(
-  recipeExecutions: Record<string, number> | undefined
-) {
-  if (!recipeExecutions) {
-    return 0;
-  }
-
-  return (recipeExecutions["year.season.spring"] ?? 1) - 1;
-}
-
-function seasonFromExecutions(
-  recipeExecutions: Record<string, number> | undefined
-) {
-  if (!recipeExecutions) {
-    return "spring";
-  }
-
-  const springCount = recipeExecutions["year.season.spring"] ?? 0;
-  const summerCount = recipeExecutions["year.season.summer"] ?? 0;
-  const autumnCount = recipeExecutions["year.season.autumn"] ?? 0;
-  const winterCount = recipeExecutions["year.season.winter"] ?? 0;
-
-  if (springCount > summerCount) {
-    return "summer";
-  }
-  if (summerCount > autumnCount) {
-    return "autumn";
-  }
-  if (autumnCount > winterCount) {
-    return "winter";
-  }
-  return "spring";
 }

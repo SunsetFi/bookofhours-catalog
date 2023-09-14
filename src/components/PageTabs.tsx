@@ -10,42 +10,42 @@ const tabData = [
   {
     label: "Books",
     aspectIcon: "readable",
-    path: "/books-catalog",
+    path: "/books",
   },
   {
     label: "Provisions",
     aspectIcon: "beverage",
-    path: "/provisions-catalog",
+    path: "/provisions",
   },
   {
     label: "Tools",
     aspectIcon: "tool",
-    path: "/tools-catalog",
+    path: "/tools",
   },
   {
     label: "Materials",
     aspectIcon: "material",
-    path: "/materials-catalog",
+    path: "/materials",
   },
   {
     label: "Things",
     aspectIcon: "thing",
-    path: "/things-catalog",
+    path: "/things",
   },
   {
     label: "Furnishings",
     aspectIcon: "comfort",
-    path: "/furnishings-catalog",
+    path: "/furnishings",
   },
   {
     label: "Craftables",
     aspectIcon: "difficulty.keeper",
-    path: "/craftables-catalog",
+    path: "/craftables",
   },
   {
     label: "Workstations",
     aspectIcon: "forge",
-    path: "/workstations-catalog",
+    path: "/workstations",
   },
   {
     label: "Memories",

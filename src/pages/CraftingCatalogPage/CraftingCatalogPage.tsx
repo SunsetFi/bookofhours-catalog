@@ -7,6 +7,7 @@ import {
   shareReplay,
   BehaviorSubject,
   tap,
+  of,
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
@@ -89,7 +90,7 @@ const CraftingCatalogPage = () => {
 
   const elements$ = React.useMemo(
     () =>
-      model.knownCraftableRecipes$.pipe(
+      model.unlockedRecipes$.pipe(
         mapArrayItemsCached((item) => recipeToCraftableModel(item, compendium))
       ),
     [model, compendium]

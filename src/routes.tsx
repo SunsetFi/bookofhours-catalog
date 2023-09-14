@@ -16,15 +16,15 @@ import ThingsCatalogPage from "./pages/ThingsCatalogPage";
 const AppRoutes = () => (
   <Routes>
     <Route index Component={IndexPage} />
-    <Route path="/books-catalog" Component={BookCatalogPage} />
-    <Route path="/provisions-catalog" Component={ProvisionsCatalog} />
+    <Route path="/books" Component={BookCatalogPage} />
+    <Route path="/provisions" Component={ProvisionsCatalog} />
     <Route path="/memories" Component={MemoriesCompendiumPage} />
-    <Route path="/tools-catalog" Component={ToolsCatalogPage} />
-    <Route path="/materials-catalog" Component={MaterialsCatalogPage} />
-    <Route path="/things-catalog" Component={ThingsCatalogPage} />
-    <Route path="/furnishings-catalog" Component={FurnishingsCatalogPage} />
-    <Route path="/craftables-catalog" Component={CraftingCatalogPage} />
-    <Route path="/workstations-catalog" Component={WorkstationCatalogPage} />
+    <Route path="/tools" Component={ToolsCatalogPage} />
+    <Route path="/materials" Component={MaterialsCatalogPage} />
+    <Route path="/things" Component={ThingsCatalogPage} />
+    <Route path="/furnishings" Component={FurnishingsCatalogPage} />
+    <Route path="/craftables" Component={CraftingCatalogPage} />
+    <Route path="/workstations" Component={WorkstationCatalogPage} />
   </Routes>
 );
 

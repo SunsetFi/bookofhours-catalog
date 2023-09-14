@@ -50,12 +50,12 @@ export class ElementStackModel
 
   constructor(
     elementStack: IElementStack,
-    private readonly _api: API,
+    api: API,
     private readonly _compendium: Compendium,
     visibilityFactory: TokenVisibilityFactory,
     parentTerrainFactory: TokenParentTerrainFactory
   ) {
-    super(elementStack);
+    super(elementStack, api);
     this._elementStack$ = new BehaviorSubject<IElementStack>(elementStack);
 
     this._visible$ = visibilityFactory.createVisibilityObservable(
