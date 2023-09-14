@@ -13,21 +13,18 @@ import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 
 import ThingsCatalogPage from "./pages/ThingsCatalogPage";
 
-const AppRoutes = () => {
-  console.log("AppRoutes rendering");
-  return (
-    <Routes>
-      <Route index Component={IndexPage} />
-      <Route path="/books" Component={BookCatalogPage} />
-      <Route path="/provisions" Component={ProvisionsCatalog} />
-      <Route path="/memories" Component={MemoriesCompendiumPage} />
-      <Route path="/tools" Component={ToolsCatalogPage} />
-      <Route path="/materials" Component={MaterialsCatalogPage} />
-      <Route path="/things" Component={ThingsCatalogPage} />
-      <Route path="/furnishings" Component={FurnishingsCatalogPage} />
-      <Route path="/craftables" Component={CraftingCatalogPage} />
-      <Route path="/workstations" Component={WorkstationCatalogPage} />
-    </Routes>
-  );
-};
+const AppRoutes = () => (
+  <Routes>
+    <Route index Component={IndexPage} />
+    <Route path="/books" Component={BookCatalogPage} />
+    <Route path="/provisions" Component={ProvisionsCatalog} />
+    <Route path="/memories" Component={MemoriesCompendiumPage} />
+    <Route path="/tools" Component={ToolsCatalogPage} />
+    <Route path="/materials" Component={MaterialsCatalogPage} />
+    <Route path="/things" Component={ThingsCatalogPage} />
+    <Route path="/furnishings" Component={FurnishingsCatalogPage} />
+    <Route path="/craftables" Component={CraftingCatalogPage} />
+    <Route path="/workstations" Component={WorkstationCatalogPage} />
+  </Routes>
+);
 export default AppRoutes;
