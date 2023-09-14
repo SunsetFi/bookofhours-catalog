@@ -11,6 +11,8 @@ import ThemeProvider from "./theme";
 import AppRouter from "./services/history/AppRouter";
 import AppRoutes from "./routes";
 
+console.log("We got as far as the index");
+
 const rootEl = document.getElementById("root");
 const root = ReactDOM.createRoot(rootEl!);
 root.render(
