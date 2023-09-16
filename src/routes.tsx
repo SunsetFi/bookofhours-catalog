@@ -10,8 +10,8 @@ import MaterialsCatalogPage from "./pages/MaterialsCatalogPage";
 import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
 import CraftingCatalogPage from "./pages/CraftingCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
-
 import ThingsCatalogPage from "./pages/ThingsCatalogPage";
+import HarvestCatalogPage from "./pages/HarvestCatalogPage";
 
 const AppRoutes = () => (
   <Routes>
@@ -21,6 +21,7 @@ const AppRoutes = () => (
     <Route path="/memories" Component={MemoriesCompendiumPage} />
     <Route path="/tools" Component={ToolsCatalogPage} />
     <Route path="/materials" Component={MaterialsCatalogPage} />
+    <Route path="/harvest" Component={HarvestCatalogPage} />
     <Route path="/things" Component={ThingsCatalogPage} />
     <Route path="/furnishings" Component={FurnishingsCatalogPage} />
     <Route path="/craftables" Component={CraftingCatalogPage} />

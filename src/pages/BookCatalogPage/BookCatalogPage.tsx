@@ -196,6 +196,7 @@ const BookCatalogPage = () => {
         {
           headerName: "Mystery",
           filter: aspectsFilter("mystery", "auto"),
+          width: 125,
           aspectIconSize: 50,
         }
       ),

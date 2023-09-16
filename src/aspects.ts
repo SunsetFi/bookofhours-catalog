@@ -29,6 +29,7 @@ export const materialAspects = [
   "fabric",
   "glass",
   "ink", // not really a material, but it needs to be somewhere.
+  "metal",
 ] as const;
 
 export const provisionsAspects = [
@@ -37,6 +38,12 @@ export const provisionsAspects = [
   "sustenance",
   "distributable",
 ] as const;
+
+export const interestingCraftableAspects = [
+  ...powerAspects,
+  ...materialAspects,
+  ...provisionsAspects,
+];
 
 export const furnishingAspects = ["comfort", "wallart"] as const;
 

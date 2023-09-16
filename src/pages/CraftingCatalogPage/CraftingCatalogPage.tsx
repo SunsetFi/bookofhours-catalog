@@ -121,7 +121,7 @@ const CraftingCatalogPage = () => {
       } as ObservableDataGridColumnDef<CraftableModel>,
       textColumnDef<CraftableModel>("Item", "item", "label$", { width: 250 }),
       // FIXME: Only show non-hidden aspects.
-      aspectsColumnDef<CraftableModel>((x) => !x.startsWith("boost."), {
+      aspectsColumnDef<CraftableModel>(filterCraftableAspect, {
         width: 300,
       }),
       {
@@ -182,5 +182,17 @@ const CraftingCatalogPage = () => {
     </PageContainer>
   );
 };
+
+function filterCraftableAspect(aspect: string) {
+  if (aspect.startsWith("boost.")) {
+    return false;
+  }
+
+  if (aspect === "considerable" || aspect === "thing") {
+    return false;
+  }
+
+  return true;
+}
 
 export default CraftingCatalogPage;

@@ -48,6 +48,11 @@ const tabData = [
     path: "/workstations",
   },
   {
+    label: "Harvest",
+    aspectIcon: "nectar",
+    path: "/harvest",
+  },
+  {
     label: "Memories",
     aspectIcon: "memory",
     path: "/memories",

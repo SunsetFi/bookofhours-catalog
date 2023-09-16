@@ -109,6 +109,10 @@ export class GameModel {
     return this._craftingSource.unlockedWorkstations$;
   }
 
+  get unlocekdHarvestStations$() {
+    return this._craftingSource.unlockedHarvestStations$;
+  }
+
   get unlockedRecipes$() {
     return this._craftingSource.unlockedRecipes$;
   }

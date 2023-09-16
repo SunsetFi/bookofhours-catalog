@@ -1,0 +1,1 @@
+- Fix: Items in kitchen gardens report their location as "kitchen". See: beehives

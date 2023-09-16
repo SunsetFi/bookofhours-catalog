@@ -31,6 +31,7 @@ export const CraftingSource: Identifier<CraftingSource> =
 export interface CraftingSource {
   get unlockedRecipes$(): Observable<readonly RecipeModel[]>;
   get unlockedWorkstations$(): Observable<readonly SituationModel[]>;
+  get unlockedHarvestStations$(): Observable<readonly SituationModel[]>;
 }
 
 export const TimeSource: Identifier<TimeSource> = Symbol("TimeSource");

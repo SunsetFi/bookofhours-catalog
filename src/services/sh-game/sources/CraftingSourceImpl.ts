@@ -1,5 +1,5 @@
 import { inject, injectable, provides, singleton } from "microinject";
-import { Observable, shareReplay } from "rxjs";
+import { Observable, map, shareReplay } from "rxjs";
 
 import {
   distinctUntilShallowArrayChanged,
@@ -25,6 +25,9 @@ export class CraftingSourceImpl implements CraftingSource {
   private readonly _unlockedWorkstations$: Observable<
     readonly SituationModel[]
   >;
+  private readonly _unlockedHarvestStations$: Observable<
+    readonly SituationModel[]
+  >;
 
   constructor(
     @inject(Compendium) compendium: Compendium,
@@ -41,6 +44,22 @@ export class CraftingSourceImpl implements CraftingSource {
     this._unlockedWorkstations$ = this._tokensSource.tokens$.pipe(
       filterItems(isSituationModel),
       filterItemObservations((model) => model.visible$),
+      map((situations) =>
+        situations.filter(
+          (x) =>
+            !x.verbId.startsWith("library.bed.") &&
+            !x.verbId.startsWith("garden.")
+        )
+      ),
+      distinctUntilShallowArrayChanged(),
+      shareReplay(1)
+    );
+    this._unlockedHarvestStations$ = this._tokensSource.tokens$.pipe(
+      filterItems(isSituationModel),
+      filterItemObservations((model) => model.visible$),
+      map((situations) =>
+        situations.filter((x) => x.verbId.startsWith("garden."))
+      ),
       distinctUntilShallowArrayChanged(),
       shareReplay(1)
     );
@@ -52,5 +71,9 @@ export class CraftingSourceImpl implements CraftingSource {
 
   get unlockedWorkstations$() {
     return this._unlockedWorkstations$;
+  }
+
+  get unlockedHarvestStations$() {
+    return this._unlockedHarvestStations$;
   }
 }

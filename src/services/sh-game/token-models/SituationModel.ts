@@ -50,6 +50,10 @@ export class SituationModel extends TokenModel {
     return "Situation";
   }
 
+  get verbId() {
+    return this._situation$.value.verbId;
+  }
+
   get visible$() {
     return this._visible$;
   }
