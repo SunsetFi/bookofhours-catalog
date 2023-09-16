@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 
 import PageHeader from "./PageHeader";
 import PageTabs from "./PageTabs";
-import { useObservation } from "@/observables";
+import GameNotPausedWarning from "./GameNotPausedWarning";
 
 export interface PageContainerProps {
   title: string;
@@ -27,6 +27,7 @@ const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
         height: "100%",
       }}
     >
+      <GameNotPausedWarning />
       <PageHeader title={title} backTo={backTo} />
       <Box
         sx={{

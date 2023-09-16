@@ -13,9 +13,11 @@ import ListItemText from "@mui/material/ListItemText";
 import { FilterComponentProps, FilterDef } from "../types";
 
 export function multiselectOptionsFilter<TValue>(
+  key: string,
   options: TValue[]
 ): FilterDef<TValue, TValue[]> {
   return {
+    key,
     FilterComponent: (props) => (
       <MultiselectOptionsFilter allowedValues={options} {...props} />
     ),

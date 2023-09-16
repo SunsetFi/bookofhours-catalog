@@ -17,9 +17,11 @@ type FilterValue = {
 };
 
 export function aspectsPresenceFilter(
+  key: string,
   allowedAspectIds: readonly string[] | "auto"
 ): FilterDef<readonly string[], FilterValue> {
   return {
+    key,
     FilterComponent: (props) => (
       <AspectsPresenceFilter allowedAspectIds={allowedAspectIds} {...props} />
     ),

@@ -12,7 +12,7 @@ export function labelColumnDef<T extends ModelWithLabel>(
     headerName: "Name",
     width: 200,
     wrap: true,
-    filter: textFilter(),
+    filter: textFilter("name"),
     ...additional,
     observable: (item) => item.label$,
   };

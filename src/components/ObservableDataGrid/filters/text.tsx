@@ -6,8 +6,9 @@ import Box from "@mui/material/Box";
 
 import { FilterComponentProps, FilterDef } from "../types";
 
-export function textFilter(): FilterDef<string, string> {
+export function textFilter(key: string): FilterDef<string, string> {
   return {
+    key,
     FilterComponent: TextSearchFilter,
     filterValue(value, filter) {
       if (filter == "") {

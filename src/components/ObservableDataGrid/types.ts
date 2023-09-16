@@ -17,7 +17,7 @@ export interface ObservableDataGridColumnDef<TItem>
     | "renderHeader"
     | "renderCell"
   > {
-  field?: keyof TItem;
+  field?: keyof TItem | "$item";
   wrap?: boolean;
   observable?: ObservableKeys<TItem> | ((element: TItem) => Observable<any>);
   filter?: FilterDef;
@@ -34,6 +34,7 @@ export interface FilterComponentProps<
 }
 
 export interface FilterDef<TValue = any, TFilter = any> {
+  key: string;
   FilterComponent: React.ComponentType<FilterComponentProps<TFilter, TValue>>;
   filterValue(value: TValue, filter: TFilter): boolean;
   defaultFilterValue?: TFilter;

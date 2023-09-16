@@ -15,6 +15,8 @@ import {
   filterHasAspect,
 } from "@/services/sh-game";
 
+import { useQueryObjectState } from "@/hooks/use-queryobject";
+
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
@@ -50,13 +52,15 @@ const ThingsCatalogPage = () => {
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
       locationColumnDef<ElementStackModel>({
-        filter: multiselectOptionsFilter(locations),
+        filter: multiselectOptionsFilter("location", locations),
       }),
       aspectsColumnDef<ElementStackModel>(powerAspects),
       descriptionColumnDef<ElementStackModel>(),
     ],
     [locations]
   );
+
+  const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
     <PageContainer title="Antiquities and Knicknacks" backTo="/">
@@ -73,6 +77,8 @@ const ThingsCatalogPage = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
+          filters={filters}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>

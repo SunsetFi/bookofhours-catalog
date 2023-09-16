@@ -1,8 +1,9 @@
 import { ContainerModule } from "microinject";
 
 import { CharacterSourceImpl } from "./sources/CharacterSourceImpl";
-import { CraftablesSourceImpl } from "./sources/CraftablesSourceImpl";
+import { CraftingSourceImpl } from "./sources/CraftingSourceImpl";
 import { RunningSourceImpl } from "./sources/RunningSourceImpl";
+import { TimeSourceImpl } from "./sources/TimeSourceImpl";
 import { TokensSourceImpl } from "./sources/TokensSourceImpl";
 
 import { TokenModelFactory } from "./token-models/TokenModelFactory";
@@ -13,9 +14,10 @@ import { GameModel } from "./GameModel";
 
 export default new ContainerModule((bind) => {
   bind(CharacterSourceImpl);
-  bind(CraftablesSourceImpl);
+  bind(CraftingSourceImpl);
   bind(RunningSourceImpl);
   bind(TokensSourceImpl);
+  bind(TimeSourceImpl);
   bind(TokenModelFactory);
   bind(TokenVisibilityFactory);
   bind(TokenParentTerrainFactory);

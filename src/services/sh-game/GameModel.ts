@@ -14,10 +14,6 @@ import {
   isElementStackModel,
 } from "./token-models/ElementStackModel";
 import {
-  SituationModel,
-  isSituationModel,
-} from "./token-models/SituationModel";
-import {
   ConnectedTerrainModel,
   isConnectedTerrainModel,
 } from "./token-models/ConnectedTerrainModel";
@@ -26,8 +22,13 @@ import {
   RunningSource,
   CharacterSource,
   TokensSource,
-  CraftablesSource,
+  CraftingSource,
+  TimeSource,
 } from "./sources";
+import {
+  SituationModel,
+  isSituationModel,
+} from "./token-models/SituationModel";
 
 @injectable()
 @singleton()
@@ -35,10 +36,11 @@ export class GameModel {
   constructor(
     @inject(RunningSource)
     private readonly _runningSource: RunningSource,
+    @inject(TimeSource) private readonly _timeSource: TimeSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(CharacterSource) private readonly _characterSource: CharacterSource,
-    @inject(CraftablesSource)
-    private readonly _craftablesSource: CraftablesSource,
+    @inject(CraftingSource)
+    private readonly _craftingSource: CraftingSource,
     @inject(TokensSource) private readonly _tokensSource: TokensSource
   ) {}
 
@@ -48,6 +50,10 @@ export class GameModel {
 
   get isRunning() {
     return this._runningSource.isRunning;
+  }
+
+  get gameSpeed$() {
+    return this._timeSource.gameSpeed$;
   }
 
   private _visibleElementStacks$: Observable<
@@ -82,23 +88,29 @@ export class GameModel {
     return this._unlockedTerrains$;
   }
 
-  private _unlockedWorkstations$: Observable<readonly SituationModel[]> | null =
-    null;
-
-  get unlockedWorkstations$() {
-    if (this._unlockedWorkstations$ === null) {
-      this._unlockedWorkstations$ = this._tokensSource.tokens$.pipe(
-        filterItems(isSituationModel),
-        filterItemObservations((model) => model.visible$),
-        distinctUntilShallowArrayChanged(),
+  private _considerVerb$: Observable<SituationModel | null> | null = null;
+  get considerVerb$() {
+    if (this._considerVerb$ == null) {
+      this._considerVerb$ = this._tokensSource.tokens$.pipe(
+        map(
+          (tokens) =>
+            tokens
+              .filter(isSituationModel)
+              .find((x) => x.path.startsWith("~/fixedverbs!consider.")) ?? null
+        ),
         shareReplay(1)
       );
     }
-    return this._unlockedWorkstations$;
+
+    return this._considerVerb$;
+  }
+
+  get unlockedWorkstations$() {
+    return this._craftingSource.unlockedWorkstations$;
   }
 
   get unlockedRecipes$() {
-    return this._craftablesSource.unlockedRecipes$;
+    return this._craftingSource.unlockedRecipes$;
   }
 
   private _uniqueElementsManfiested$: Observable<

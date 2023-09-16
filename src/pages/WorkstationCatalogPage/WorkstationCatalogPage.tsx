@@ -2,6 +2,9 @@ import * as React from "react";
 import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { useDIDependency } from "@/container";
 
@@ -11,10 +14,10 @@ import { powerAspects } from "@/aspects";
 
 import { GameModel, SituationModel } from "@/services/sh-game";
 
-import { RequireRunning } from "@/components/RequireLegacy";
+import { useQueryObjectState } from "@/hooks/use-queryobject";
 
+import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
-  aspectsColumnDef,
   aspectsObservableColumnDef,
   aspectsPresenceColumnDef,
   aspectsPresenceFilter,
@@ -24,6 +27,7 @@ import ObservableDataGrid, {
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
+import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
 
 const WorkstationCatalogPage = () => {
   const model = useDIDependency(GameModel);
@@ -42,9 +46,27 @@ const WorkstationCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
+      {
+        headerName: "",
+        width: 50,
+        field: "$item",
+        renderCell: ({ value }) => (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <IconButton onClick={() => value.focus()}>
+              <VisibilityIcon />
+            </IconButton>
+          </Box>
+        ),
+      } as ObservableDataGridColumnDef<SituationModel>,
       labelColumnDef<SituationModel>(),
       locationColumnDef<SituationModel>({
-        filter: multiselectOptionsFilter(locations),
+        filter: multiselectOptionsFilter("location", locations),
       }),
       aspectsPresenceColumnDef<SituationModel>(
         powerAspects,
@@ -52,7 +74,7 @@ const WorkstationCatalogPage = () => {
         {
           headerName: "Attunement",
           observable: "hints$",
-          filter: aspectsPresenceFilter(powerAspects),
+          filter: aspectsPresenceFilter("attunement", powerAspects),
           width: 275,
         }
       ),
@@ -60,10 +82,14 @@ const WorkstationCatalogPage = () => {
         (aspect) => aspect.startsWith("e."),
         { display: "none" },
         // TODO: Dont use auto, find all possible evolutions
-        { headerName: "Evolves", filter: aspectsPresenceFilter("auto") }
+        {
+          headerName: "Evolves",
+          filter: aspectsPresenceFilter("evolves", "auto"),
+        }
       ),
       aspectsObservableColumnDef<SituationModel>(
-        (situation) => situation.slotTypes$,
+        "threshold",
+        (situation) => situation.thresholdAspects$,
         (aspectId) => !powerAspects.includes(aspectId as any),
         {
           headerName: "Accepts",
@@ -73,6 +99,8 @@ const WorkstationCatalogPage = () => {
     ],
     [locations]
   );
+
+  const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
     <PageContainer title="Workstations" backTo="/">
@@ -89,6 +117,8 @@ const WorkstationCatalogPage = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
+          filters={filters}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>

@@ -15,6 +15,8 @@ import {
   filterHasAnyAspect,
 } from "@/services/sh-game";
 
+import { useQueryObjectState } from "@/hooks/use-queryobject";
+
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   descriptionColumnDef,
@@ -52,18 +54,20 @@ const ProvisionsCatalog = () => {
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
       locationColumnDef<ElementStackModel>({
-        filter: multiselectOptionsFilter(locations),
+        filter: multiselectOptionsFilter("location", locations),
       }),
       aspectsPresenceColumnDef<ElementStackModel>(
         provisionsAspects,
         { display: "none", orientation: "horizontal" },
-        { headerName: "Type", filter: aspectsFilter(provisionsAspects) }
+        { headerName: "Type", filter: aspectsFilter("type", provisionsAspects) }
       ),
       aspectsColumnDef<ElementStackModel>(powerAspects),
       descriptionColumnDef<ElementStackModel>(),
     ],
     [locations]
   );
+
+  const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
     <PageContainer title="Stores and Provisions" backTo="/">
@@ -80,6 +84,8 @@ const ProvisionsCatalog = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
+          filters={filters}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>

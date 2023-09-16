@@ -9,6 +9,8 @@ import { powerAspects } from "@/aspects";
 import { GameModel, filterHasAnyAspect } from "@/services/sh-game";
 import { ElementModel } from "@/services/sh-compendium";
 
+import { useQueryObjectState } from "@/hooks/use-queryobject";
+
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   aspectsColumnDef,
@@ -36,6 +38,8 @@ const MemoriesCompendiumPage = () => {
     []
   );
 
+  const [filters, onFiltersChanged] = useQueryObjectState();
+
   return (
     <PageContainer title="Memories" backTo="/">
       <Box
@@ -51,6 +55,8 @@ const MemoriesCompendiumPage = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
+          filters={filters}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>

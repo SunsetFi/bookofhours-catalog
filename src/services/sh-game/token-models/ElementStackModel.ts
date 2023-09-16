@@ -166,6 +166,9 @@ export class ElementStackModel
 
     return this._elementAspects$;
   }
+  get elementAspects() {
+    return this._elementStack$.value.elementAspects;
+  }
 
   private _mutations$: Observable<Aspects> | null = null;
   get mutations$() {

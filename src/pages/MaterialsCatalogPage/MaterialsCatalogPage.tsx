@@ -15,6 +15,8 @@ import {
   filterHasAspect,
 } from "@/services/sh-game";
 
+import { useQueryObjectState } from "@/hooks/use-queryobject";
+
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
@@ -53,7 +55,7 @@ const MaterialsCatalogPage = () => {
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
       locationColumnDef<ElementStackModel>({
-        filter: multiselectOptionsFilter(locations),
+        filter: multiselectOptionsFilter("location", locations),
       }),
       aspectsColumnDef<ElementStackModel>(powerAspects),
       aspectsPresenceColumnDef<ElementStackModel>(
@@ -62,13 +64,15 @@ const MaterialsCatalogPage = () => {
         {
           headerName: "Type",
           width: 150,
-          filter: aspectsPresenceFilter(materialAspects),
+          filter: aspectsPresenceFilter("type", materialAspects),
         }
       ),
       descriptionColumnDef<ElementStackModel>(),
     ],
     [locations]
   );
+
+  const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
     <PageContainer title="Malleary Shelf" backTo="/">
@@ -85,6 +89,8 @@ const MaterialsCatalogPage = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
+          filters={filters}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>

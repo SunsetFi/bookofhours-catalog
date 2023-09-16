@@ -110,13 +110,17 @@ export class SituationModel extends TokenModel {
     return this._hints$;
   }
 
+  get thresholds() {
+    return this._situation$.value.thresholds;
+  }
+
   // This is a bit wonky, but thankfully workstation thresholds all require at least 1 aspect rather than any limits.
   // Because of this, we can sum up the aspects into one object to get an idea of how many cards of that type you can slot.
   // This kinda breaks down with 'essential' aspects, but those are rare enough for workstations that I'm not going to worry about it.
-  private _slotTypes$: Observable<Aspects> | null = null;
-  get slotTypes$() {
-    if (!this._slotTypes$) {
-      this._slotTypes$ = this._situation$.pipe(
+  private _thresholdAspects$: Observable<Aspects> | null = null;
+  get thresholdAspects$() {
+    if (!this._thresholdAspects$) {
+      this._thresholdAspects$ = this._situation$.pipe(
         map((s) => {
           const thresholds = s.thresholds;
           const slotTypes: Aspects = {};
@@ -136,7 +140,7 @@ export class SituationModel extends TokenModel {
       );
     }
 
-    return this._slotTypes$;
+    return this._thresholdAspects$;
   }
 
   private _state$: Observable<string | null> | null = null;

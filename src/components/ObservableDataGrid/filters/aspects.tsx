@@ -18,9 +18,11 @@ type FilterValue = {
 };
 
 export function aspectsFilter(
+  key: string,
   allowedAspectIds: readonly string[] | "auto"
 ): FilterDef<Aspects, FilterValue> {
   return {
+    key,
     FilterComponent: (props) => (
       <AspectsFilter allowedAspectIds={allowedAspectIds} {...props} />
     ),

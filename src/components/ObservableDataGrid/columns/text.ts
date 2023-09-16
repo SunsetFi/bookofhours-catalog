@@ -3,6 +3,7 @@ import { textFilter } from "../filters";
 
 export function textColumnDef<T>(
   headerName: string,
+  filterKey: string,
   observable: ObservableDataGridColumnDef<T>["observable"],
   additional: Partial<
     Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
@@ -11,7 +12,7 @@ export function textColumnDef<T>(
   return {
     flex: additional.width === undefined ? 1 : undefined,
     wrap: true,
-    filter: textFilter(),
+    filter: textFilter(filterKey),
     sortable: (a: string, b: string) => {
       if (a === b) {
         return 0;

@@ -9,5 +9,10 @@ export function descriptionColumnDef<T extends ModelWithDescription>(
     Omit<ObservableDataGridColumnDef<T>, "field" | "observable">
   > = {}
 ): ObservableDataGridColumnDef<T> {
-  return textColumnDef("Description", (item) => item.description$, additional);
+  return textColumnDef(
+    "Description",
+    "description",
+    (item) => item.description$,
+    additional
+  );
 }

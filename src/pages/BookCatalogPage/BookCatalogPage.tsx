@@ -11,6 +11,7 @@ import { Aspects } from "secrethistories-api";
 import { pick, first } from "lodash";
 
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
@@ -33,6 +34,8 @@ import {
   ModelWithParentTerrain,
 } from "@/services/sh-game";
 
+import { useQueryObjectState } from "@/hooks/use-queryobject";
+
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import PageContainer from "@/components/PageContainer";
@@ -49,7 +52,6 @@ import ObservableDataGrid, {
 } from "@/components/ObservableDataGrid";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
-import { IconButton } from "@mui/material";
 
 interface BookModel
   extends ModelWithAspects,
@@ -187,13 +189,13 @@ const BookCatalogPage = () => {
       iconColumnDef<BookModel>(),
       labelColumnDef<BookModel>(),
       locationColumnDef<BookModel>({
-        filter: multiselectOptionsFilter(locations),
+        filter: multiselectOptionsFilter("location", locations),
       }),
       aspectsColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("mystery."),
         {
           headerName: "Mystery",
-          filter: aspectsFilter("auto"),
+          filter: aspectsFilter("mystery", "auto"),
           aspectIconSize: 50,
         }
       ),
@@ -204,7 +206,7 @@ const BookCatalogPage = () => {
           headerName: "Mastered",
           sortable: false,
           width: 125,
-          filter: aspectsPresenceFilter("auto"),
+          filter: aspectsPresenceFilter("mastered", "auto"),
         }
       ),
       {
@@ -214,6 +216,7 @@ const BookCatalogPage = () => {
         sortable: true,
       },
       aspectsObservableColumnDef<BookModel>(
+        "memoryAspects",
         (element) => element.memoryAspects$,
         powerAspects,
         {
@@ -224,7 +227,11 @@ const BookCatalogPage = () => {
       aspectsPresenceColumnDef<BookModel>(
         (aspectId) => aspectId.startsWith("w."),
         { display: "none" },
-        { headerName: "Language", width: 125, filter: aspectsFilter("auto") }
+        {
+          headerName: "Language",
+          width: 125,
+          filter: aspectsFilter("language", "auto"),
+        }
       ),
       aspectsPresenceColumnDef<BookModel>(
         ["film", "record.phonograph"],
@@ -232,7 +239,7 @@ const BookCatalogPage = () => {
         {
           headerName: "Type",
           width: 125,
-          filter: aspectsFilter(["film", "record.phonograph"]),
+          filter: aspectsFilter("type", ["film", "record.phonograph"]),
         }
       ),
       aspectsPresenceColumnDef<BookModel>(
@@ -241,13 +248,15 @@ const BookCatalogPage = () => {
         {
           headerName: "Contamination",
           width: 200,
-          filter: aspectsFilter("auto"),
+          filter: aspectsFilter("contamination", "auto"),
         }
       ),
       descriptionColumnDef<BookModel>(),
     ],
     [locations]
   );
+
+  const [filter, onFiltersChanged] = useQueryObjectState();
 
   return (
     <PageContainer title="Bibliographical Collection" backTo="/">
@@ -264,6 +273,8 @@ const BookCatalogPage = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={items$}
+          filters={filter}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>

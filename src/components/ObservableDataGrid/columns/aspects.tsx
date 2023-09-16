@@ -23,6 +23,7 @@ export function aspectsColumnDef<T extends ModelWithAspects>(
   additional: AspectsColumnDefOptions<T> = {}
 ): ObservableDataGridColumnDef<T> {
   return aspectsObservableColumnDef(
+    "aspects",
     (element) => element.aspects$,
     pickAspects,
     additional
@@ -30,6 +31,7 @@ export function aspectsColumnDef<T extends ModelWithAspects>(
 }
 
 export function aspectsObservableColumnDef<T>(
+  filterKey: string,
   source: (target: T) => Observable<Aspects>,
   pickAspects: readonly string[] | ((aspectId: string) => boolean),
   { aspectIconSize, ...additional }: AspectsColumnDefOptions<T> = {}
@@ -48,6 +50,7 @@ export function aspectsObservableColumnDef<T>(
     wrap: true,
     renderCell: (props) => <AspectsCell iconSize={aspectIconSize} {...props} />,
     filter: aspectsFilter(
+      filterKey,
       typeof pickAspects === "function" ? "auto" : pickAspects
     ),
     sortable: (a, b) => aspectsMagnitude(a) - aspectsMagnitude(b),

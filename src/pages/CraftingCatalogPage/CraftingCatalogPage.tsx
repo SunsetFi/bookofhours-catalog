@@ -20,6 +20,8 @@ import { mapArrayItemsCached } from "@/observables";
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 import { GameModel } from "@/services/sh-game";
 
+import { useQueryObjectState } from "@/hooks/use-queryobject";
+
 import ObservableDataGrid, {
   aspectsColumnDef,
 } from "@/components/ObservableDataGrid";
@@ -117,7 +119,7 @@ const CraftingCatalogPage = () => {
         ),
         observable: "iconUrl$",
       } as ObservableDataGridColumnDef<CraftableModel>,
-      textColumnDef<CraftableModel>("Item", "label$", { width: 250 }),
+      textColumnDef<CraftableModel>("Item", "item", "label$", { width: 250 }),
       // FIXME: Only show non-hidden aspects.
       aspectsColumnDef<CraftableModel>((x) => !x.startsWith("boost."), {
         width: 300,
@@ -141,13 +143,22 @@ const CraftingCatalogPage = () => {
         ),
         observable: "skillIconUrl$",
       } as ObservableDataGridColumnDef<CraftableModel>,
-      textColumnDef<CraftableModel>("Skill", "skillLabel$", { width: 250 }),
-      textColumnDef<CraftableModel>("Description", "recipeDescription$", {
-        flex: 1,
+      textColumnDef<CraftableModel>("Skill", "skill", "skillLabel$", {
+        width: 250,
       }),
+      textColumnDef<CraftableModel>(
+        "Description",
+        "description",
+        "recipeDescription$",
+        {
+          flex: 1,
+        }
+      ),
     ],
     []
   );
+
+  const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
     <PageContainer title="The Fruits of Knowledge" backTo="/">
@@ -164,6 +175,8 @@ const CraftingCatalogPage = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
+          filters={filters}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>
