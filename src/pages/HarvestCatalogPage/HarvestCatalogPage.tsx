@@ -15,14 +15,14 @@ import { GameModel, SituationModel } from "@/services/sh-game";
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
+import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
+  ObservableDataGridColumnDef,
   descriptionColumnDef,
   labelColumnDef,
   locationColumnDef,
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
-import PageContainer from "@/components/PageContainer";
-import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
 
 const HarvestCatalogPage = () => {
   const model = useDIDependency(GameModel);

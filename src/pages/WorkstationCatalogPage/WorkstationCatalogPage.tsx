@@ -18,6 +18,7 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
+  ObservableDataGridColumnDef,
   aspectsObservableColumnDef,
   aspectsPresenceColumnDef,
   aspectsPresenceFilter,
@@ -27,7 +28,6 @@ import ObservableDataGrid, {
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
-import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
 
 const WorkstationCatalogPage = () => {
   const model = useDIDependency(GameModel);

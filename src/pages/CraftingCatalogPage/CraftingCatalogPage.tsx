@@ -22,13 +22,13 @@ import { GameModel } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
-import ObservableDataGrid, {
-  aspectsColumnDef,
-} from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
-import { textColumnDef } from "@/components/ObservableDataGrid/columns/text";
-import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
+import ObservableDataGrid, {
+  ObservableDataGridColumnDef,
+  aspectsColumnDef,
+  textColumnDef,
+} from "@/components/ObservableDataGrid";
 
 interface CraftableModel {
   id: string;

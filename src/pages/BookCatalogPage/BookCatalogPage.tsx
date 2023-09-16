@@ -40,6 +40,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
+  ObservableDataGridColumnDef,
   aspectsPresenceColumnDef,
   aspectsObservableColumnDef,
   aspectsPresenceFilter,
@@ -49,9 +50,8 @@ import ObservableDataGrid, {
   locationColumnDef,
   multiselectOptionsFilter,
   aspectsColumnDef,
+  aspectsFilter,
 } from "@/components/ObservableDataGrid";
-import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
-import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid/types";
 
 interface BookModel
   extends ModelWithAspects,

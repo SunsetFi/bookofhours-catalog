@@ -48,7 +48,8 @@ export class CraftingSourceImpl implements CraftingSource {
         situations.filter(
           (x) =>
             !x.verbId.startsWith("library.bed.") &&
-            !x.verbId.startsWith("garden.")
+            !x.verbId.startsWith("garden.") &&
+            x.verbId != "world.beachcombing"
         )
       ),
       distinctUntilShallowArrayChanged(),
@@ -58,7 +59,10 @@ export class CraftingSourceImpl implements CraftingSource {
       filterItems(isSituationModel),
       filterItemObservations((model) => model.visible$),
       map((situations) =>
-        situations.filter((x) => x.verbId.startsWith("garden."))
+        situations.filter(
+          (x) =>
+            x.verbId.startsWith("garden.") || x.verbId == "world.beachcombing"
+        )
       ),
       distinctUntilShallowArrayChanged(),
       shareReplay(1)
