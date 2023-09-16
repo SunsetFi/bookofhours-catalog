@@ -1,6 +1,6 @@
 # Hush House Catalogue
 
-This is a cataloging and autuo-spreadsheet webapp that adds searching, sorting, and filtering capabilities for [Book of Hours](https://store.steampowered.com/app/1028310/BOOK_OF_HOURS/).
+This is a cataloging and auto-spreadsheet webapp that adds searching, sorting, and filtering capabilities for [Book of Hours](https://store.steampowered.com/app/1028310/BOOK_OF_HOURS/).
 It relies on the [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) mod, which provides game data access and hosts the webapp.
 
 ![ALT](/preview/preview.png)
@@ -11,7 +11,7 @@ It has been designed to provide an automatic spreadsheet, akin to those we might
 
 This mod provides a sortable, filterable interface for various aspects. Where possible, it also provides a button to zoom the camera in on the item in question.
 
-It has the following pages
+It has the following pages:
 
 ### Bibliographical Collection
 
