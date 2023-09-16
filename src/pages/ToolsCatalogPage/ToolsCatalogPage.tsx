@@ -2,6 +2,9 @@ import * as React from "react";
 import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { useDIDependency } from "@/container";
 
@@ -20,6 +23,7 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 import { RequireRunning } from "@/components/RequireLegacy";
 
 import ObservableDataGrid, {
+  ObservableDataGridColumnDef,
   aspectsColumnDef,
   aspectsPresenceColumnDef,
   descriptionColumnDef,
@@ -50,6 +54,24 @@ const ToolsCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
+      {
+        headerName: "",
+        width: 50,
+        field: "focus",
+        renderCell: ({ value }) => (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <IconButton onClick={() => value()}>
+              <VisibilityIcon />
+            </IconButton>
+          </Box>
+        ),
+      } as ObservableDataGridColumnDef<ElementStackModel>,
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
       locationColumnDef<ElementStackModel>({

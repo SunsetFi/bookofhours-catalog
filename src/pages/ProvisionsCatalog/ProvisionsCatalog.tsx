@@ -2,6 +2,9 @@ import * as React from "react";
 import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { useDIDependency } from "@/container";
 
@@ -24,6 +27,7 @@ import ObservableDataGrid, {
   multiselectOptionsFilter,
   aspectsColumnDef,
   aspectsPresenceColumnDef,
+  ObservableDataGridColumnDef,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
@@ -49,6 +53,24 @@ const ProvisionsCatalog = () => {
 
   const columns = React.useMemo(
     () => [
+      {
+        headerName: "",
+        width: 50,
+        field: "focus",
+        renderCell: ({ value }) => (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <IconButton onClick={() => value()}>
+              <VisibilityIcon />
+            </IconButton>
+          </Box>
+        ),
+      } as ObservableDataGridColumnDef<ElementStackModel>,
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
       locationColumnDef<ElementStackModel>({
