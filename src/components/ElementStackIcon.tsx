@@ -44,7 +44,13 @@ const ElementStackIcon = ({ elementStack }: ElementStackIconProps) => {
           style={{ width: "40px", height: "40px" }}
         />
       </Badge>
-      <Popper open={popupAnchor != null} anchorEl={popupAnchor!}>
+      <Popper
+        open={popupAnchor != null}
+        anchorEl={popupAnchor!}
+        sx={{
+          pointerEvents: "none",
+        }}
+      >
         <ElementStackDetails elementStack={elementStack} />
       </Popper>
     </div>

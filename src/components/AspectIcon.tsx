@@ -59,7 +59,18 @@ const AspectIcon = ({
           height={size}
         />
       </Box>
-      <Popper open={popupAnchor != null} anchorEl={popupAnchor!}>
+      <Popper
+        open={popupAnchor != null}
+        anchorEl={popupAnchor!}
+        sx={{
+          pointerEvents: "none",
+          // This is here because filters are done in a popper, and these icons are in those filters.
+          // You would think that the new popper would order further on in the document from the portal, but nope.
+          // FIXME: Fix AspectIcon z order issues.
+          // I hate z indexes so much...  This is a disgustingly high value, but Popper is using 1300 by default.
+          zIndex: 2000,
+        }}
+      >
         <Card
           sx={{
             display: "flex",
