@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import { useObservation } from "@/observables";
 
 import { useAspect } from "@/services/sh-compendium";
+import AspectIcon from "./AspectIcon";
 
 export interface AspectsListProps {
   aspects: Aspects;
@@ -44,8 +45,9 @@ interface AspectListItemProps {
 const AspectListItem = ({ aspectId, level, size }: AspectListItemProps) => {
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$);
+  const isHidden = useObservation(aspect.isHidden$) ?? true;
 
-  if (!label) {
+  if (isHidden || !label) {
     return null;
   }
 
@@ -54,13 +56,7 @@ const AspectListItem = ({ aspectId, level, size }: AspectListItemProps) => {
       key={label}
       sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
     >
-      <img
-        src={aspect.iconUrl}
-        alt={label}
-        title={label}
-        width={size ?? 40}
-        height={size ?? 40}
-      />
+      <AspectIcon aspectId={aspectId} size={size} />
       <Typography variant="body2" sx={{ pl: 1 }}>
         {level}
       </Typography>

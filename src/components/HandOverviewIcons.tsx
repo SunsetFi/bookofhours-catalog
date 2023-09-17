@@ -36,10 +36,10 @@ const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
         ...sx,
       }}
     >
-      {elements.slice(0, 5).map((element) => (
+      {elements.slice(0, 10).map((element) => (
         <ElementStackIcon key={element.id} elementStack={element} />
       ))}
-      {elements.length >= 5 && <Typography>...</Typography>}
+      {elements.length >= 10 && <Typography>...</Typography>}
     </Box>
   );
 };

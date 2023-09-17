@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Aspects } from "secrethistories-api";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -9,6 +8,8 @@ import { GridRenderCellParams } from "@mui/x-data-grid";
 import { useObservation } from "@/observables";
 
 import { useAspect } from "@/services/sh-compendium";
+
+import AspectIcon from "@/components/AspectIcon";
 
 interface AspectPresenceProps
   extends GridRenderCellParams<any, readonly string[]> {
@@ -64,13 +65,7 @@ const AspectPresenseItem = ({ aspectId, display }: AspectPresenceItemProps) => {
         gap: 2,
       }}
     >
-      <img
-        src={aspect.iconUrl}
-        alt={label}
-        title={label}
-        width={50}
-        height={50}
-      />
+      <AspectIcon aspectId={aspectId} size={50} />
       {display === "label" && (
         <Typography
           variant="body2"

@@ -41,6 +41,15 @@ export class ElementModel
     return this._exists$;
   }
 
+  private _isHidden$: Observable<boolean> | null = null;
+  get isHidden$() {
+    if (this._isHidden$ == null) {
+      this._isHidden$ = this._element$.pipe(map((e) => e?.isHidden ?? false));
+    }
+
+    return this._isHidden$;
+  }
+
   private _label$: Observable<string | null> | null = null;
   get label$() {
     if (this._label$ == null) {

@@ -29,6 +29,15 @@ export class AspectModel {
     return this._exists$;
   }
 
+  private _isHidden$: Observable<boolean> | null = null;
+  get isHidden$() {
+    if (this._isHidden$ == null) {
+      this._isHidden$ = this._element$.pipe(map((e) => e?.isHidden ?? false));
+    }
+
+    return this._isHidden$;
+  }
+
   private _label$: Observable<string | null> | null = null;
   get label$() {
     if (this._label$ == null) {
@@ -39,7 +48,7 @@ export class AspectModel {
   }
 
   private _description$: Observable<string | null> | null = null;
-  get description() {
+  get description$() {
     if (this._description$ == null) {
       this._description$ = this._element$.pipe(
         map((e) => e?.description ?? null)

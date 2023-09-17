@@ -1,5 +1,6 @@
 import { inject, injectable, singleton } from "microinject";
 import { SphereSpec } from "secrethistories-api";
+import { pickBy } from "lodash";
 
 import {
   BehaviorSubject,
@@ -13,7 +14,6 @@ import { SituationModel } from "./token-models/SituationModel";
 import { ElementStackModel } from "./token-models/ElementStackModel";
 
 import { GameModel } from "./GameModel";
-import { pickBy } from "lodash";
 
 interface RecipeOrchestration {
   readonly situation: SituationModel | null;
@@ -129,6 +129,10 @@ export class RecipeOrchestrator {
       inputs: state.inputs.filter((x) => x !== element),
       assignments,
     });
+  }
+
+  cancel() {
+    this._orchestration$.next(null);
   }
 
   private _beginOrchestration(data: Partial<RecipeOrchestration>) {

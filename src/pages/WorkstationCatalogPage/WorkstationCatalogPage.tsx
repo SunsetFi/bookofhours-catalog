@@ -16,6 +16,7 @@ import { GameModel, SituationModel } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
+import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   ObservableDataGridColumnDef,
@@ -27,7 +28,6 @@ import ObservableDataGrid, {
   locationColumnDef,
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
-import PageContainer from "@/components/PageContainer";
 
 const WorkstationCatalogPage = () => {
   const model = useDIDependency(GameModel);
