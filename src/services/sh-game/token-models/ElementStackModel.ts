@@ -90,34 +90,40 @@ export class ElementStackModel
 
   private _element$: Observable<ElementModel> | null = null;
   get element$() {
-    this._element$ = this._elementStack$.pipe(
-      map((elementStack) => elementStack.elementId),
-      distinctUntilChanged(),
-      map((elementId) => this._compendium.getElementById(elementId)),
-      shareReplay(1)
-    );
+    if (!this._element$) {
+      this._element$ = this._elementStack$.pipe(
+        map((elementStack) => elementStack.elementId),
+        distinctUntilChanged(),
+        map((elementId) => this._compendium.getElementById(elementId)),
+        shareReplay(1)
+      );
+    }
 
     return this._element$;
   }
 
   private _label$: Observable<string | null> | null = null;
   get label$() {
-    this._label$ = this._elementStack$.pipe(
-      map((e) => e.label),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    if (!this._label$) {
+      this._label$ = this._elementStack$.pipe(
+        map((e) => e.label),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
 
     return this._label$;
   }
 
   private _description$: Observable<string | null> | null = null;
   get description$() {
-    this._description$ = this._elementStack$.pipe(
-      map((e) => e.description),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    if (!this._description$) {
+      this._description$ = this._elementStack$.pipe(
+        map((e) => e.description),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
 
     return this._description$;
   }
@@ -132,11 +138,13 @@ export class ElementStackModel
 
   private _quantity$: Observable<number> | null = null;
   get quantity$() {
-    this._quantity$ = this._elementStack$.pipe(
-      map((e) => e.quantity),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    if (!this._quantity$) {
+      this._quantity$ = this._elementStack$.pipe(
+        map((e) => e.quantity),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
 
     return this._quantity$;
   }
@@ -147,22 +155,26 @@ export class ElementStackModel
 
   private _lifetimeRemaining$: Observable<number> | null = null;
   get lifetimeRemaining$() {
-    this._lifetimeRemaining$ = this._elementStack$.pipe(
-      map((e) => e.lifetimeRemaining),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    if (!this._lifetimeRemaining$) {
+      this._lifetimeRemaining$ = this._elementStack$.pipe(
+        map((e) => e.lifetimeRemaining),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
 
     return this._lifetimeRemaining$;
   }
 
   private _elementAspects$: Observable<Aspects> | null = null;
   get elementAspects$() {
-    this._elementAspects$ = this._elementStack$.pipe(
-      map((e) => e.elementAspects),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    if (!this._elementAspects$) {
+      this._elementAspects$ = this._elementStack$.pipe(
+        map((e) => e.elementAspects),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
 
     return this._elementAspects$;
   }
@@ -172,33 +184,39 @@ export class ElementStackModel
 
   private _mutations$: Observable<Aspects> | null = null;
   get mutations$() {
-    this._mutations$ = this._elementStack$.pipe(
-      map((e) => e.mutations),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    if (!this._mutations$) {
+      this._mutations$ = this._elementStack$.pipe(
+        map((e) => e.mutations),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
 
     return this._mutations$;
   }
 
   private _aspects$: Observable<Aspects> | null = null;
   get aspects$() {
-    this._aspects$ = this._elementStack$.pipe(
-      map((e) => combineAspects(e.elementAspects, e.mutations)),
-      distinctUntilChanged(isEqual),
-      shareReplay(1)
-    );
+    if (!this._aspects$) {
+      this._aspects$ = this._elementStack$.pipe(
+        map((e) => combineAspects(e.elementAspects, e.mutations)),
+        distinctUntilChanged(isEqual),
+        shareReplay(1)
+      );
+    }
 
     return this._aspects$;
   }
 
   private _shrouded$: Observable<boolean> | null = null;
   get shrouded$() {
-    this._shrouded$ = this._elementStack$.pipe(
-      map((e) => e.shrouded),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    if (!this._shrouded$) {
+      this._shrouded$ = this._elementStack$.pipe(
+        map((e) => e.shrouded),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
 
     return this._shrouded$;
   }
