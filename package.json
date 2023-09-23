@@ -1,5 +1,5 @@
 {
-  "name": "bh-web-frontend",
+  "name": "bookofhours-catalog",
   "version": "0.0.1",
   "description": "Frontend for various Book of Hours experiments",
   "scripts": {
