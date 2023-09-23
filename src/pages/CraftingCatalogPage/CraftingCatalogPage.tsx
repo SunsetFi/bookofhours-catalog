@@ -1,5 +1,5 @@
 import * as React from "react";
-import { first } from "lodash";
+import { first, mapValues } from "lodash";
 import {
   Observable,
   map,
@@ -27,6 +27,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   ObservableDataGridColumnDef,
   aspectsColumnDef,
+  aspectsObservableColumnDef,
   textColumnDef,
 } from "@/components/ObservableDataGrid";
 
@@ -34,9 +35,10 @@ interface CraftableModel {
   id: string;
   iconUrl$: Observable<string | null>;
   label$: Observable<string | null>;
-  aspects$: Observable<Aspects>;
+  aspects$: Observable<Readonly<Aspects>>;
   skillIconUrl$: Observable<string | null>;
   skillLabel$: Observable<string | null>;
+  requirements$: Observable<Readonly<Aspects>>;
   recipeDescription$: Observable<string | null>;
 }
 
@@ -81,6 +83,9 @@ function recipeToCraftableModel(
     skillIconUrl$: skill$.pipe(map((element) => element?.iconUrl ?? null)),
     skillLabel$: skill$.pipe(
       mergeMap((element) => element?.label$ ?? nullStringObservable)
+    ),
+    requirements$: recipeModel.requirements$.pipe(
+      map((x) => mapValues(x, Number))
     ),
     recipeDescription$: recipeModel.startDescription$,
   };
@@ -146,6 +151,15 @@ const CraftingCatalogPage = () => {
       textColumnDef<CraftableModel>("Skill", "skill", "skillLabel$", {
         width: 250,
       }),
+      aspectsObservableColumnDef<CraftableModel>(
+        "requirements",
+        (value) => value.requirements$,
+        (x) => x != "ability",
+        {
+          headerName: "Requirements",
+          width: 100,
+        }
+      ),
       textColumnDef<CraftableModel>(
         "Description",
         "description",

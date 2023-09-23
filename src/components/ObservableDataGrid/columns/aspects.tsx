@@ -53,7 +53,9 @@ export function aspectsObservableColumnDef<T>(
       filterKey,
       typeof pickAspects === "function" ? "auto" : pickAspects
     ),
-    sortable: (a, b) => aspectsMagnitude(a) - aspectsMagnitude(b),
+    sortable: (a, b) =>
+      Math.max(...Object.values(a).map(Number)) -
+      Math.max(...Object.values(b).map(Number)),
     ...additional,
     observable,
   };
