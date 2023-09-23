@@ -5,11 +5,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "build:wp": "cross-env NODE_ENV=production webpack --config ./webpack.config.js",
     "build": "cross-env NODE_ENV=production vite build",
     "preview": "cross-env NODE_ENV=development vite preview",
-    "test": "jest",
-    "start:wp": "cross-env NODE_ENV=development webpack-dev-server --config ./webpack.config.js",
     "start": "cross-env NODE_ENV=development vite",
     "watch-errors": "tsc --noEmit --watch"
   },
