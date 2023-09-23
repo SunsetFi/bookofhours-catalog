@@ -171,7 +171,7 @@ const BookCatalogPage = () => {
       {
         headerName: "",
         width: 50,
-        field: "focus",
+        field: "$item",
         renderCell: ({ value }) => (
           <Box
             sx={{
@@ -180,7 +180,7 @@ const BookCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <IconButton onClick={() => value()}>
+            <IconButton onClick={() => value.focus()}>
               <VisibilityIcon />
             </IconButton>
           </Box>

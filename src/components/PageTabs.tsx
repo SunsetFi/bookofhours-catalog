@@ -3,8 +3,10 @@ import { useLocation } from "react-router";
 import { Link } from "react-router-dom";
 
 import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 
-import AspectIcon from "./AspectIcon";
+import { useAspect } from "@/services/sh-compendium";
 
 const tabData = [
   {
@@ -60,8 +62,6 @@ const tabData = [
 ];
 
 const PageTabs = () => {
-  const { pathname } = useLocation();
-  const value = firstPathPart(pathname);
   return (
     <Box
       sx={{
@@ -77,19 +77,44 @@ const PageTabs = () => {
       }}
     >
       {tabData.map(({ label, aspectIcon, path }) => (
-        <Link key={path} to={path}>
-          <AspectIcon
-            sx={{
-              filter:
-                path !== value ? "brightness(75%) grayscale(0.9)" : undefined,
-            }}
-            title={label}
-            aspectId={aspectIcon}
-            size={40}
-          />
-        </Link>
+        <PageTab key={path} label={label} aspectId={aspectIcon} path={path} />
       ))}
     </Box>
+  );
+};
+
+interface PageTab {
+  label: string;
+  aspectId: string;
+  path: string;
+}
+const PageTab = ({ label, aspectId, path }: PageTab) => {
+  const aspect = useAspect(aspectId);
+  const { pathname } = useLocation();
+  const value = firstPathPart(pathname);
+  return (
+    <Tooltip
+      title={<Typography variant="body1">{label}</Typography>}
+      PopperProps={{ sx: { pointerEvents: "none" }, placement: "right" }}
+    >
+      <Link key={path} to={path}>
+        <Box
+          sx={{
+            cursor: "pointer",
+            filter:
+              path !== value ? "brightness(75%) grayscale(0.9)" : undefined,
+          }}
+        >
+          <img
+            style={{ display: "block" }}
+            src={aspect.iconUrl}
+            alt={label}
+            width={40}
+            height={40}
+          />
+        </Box>
+      </Link>
+    </Tooltip>
   );
 };
 

@@ -58,7 +58,7 @@ const FurnishingsCatalogPage = () => {
       {
         headerName: "",
         width: 50,
-        field: "focus",
+        field: "$item",
         renderCell: ({ value }) => (
           <Box
             sx={{
@@ -67,7 +67,7 @@ const FurnishingsCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <IconButton onClick={() => value()}>
+            <IconButton onClick={() => value.focus()}>
               <VisibilityIcon />
             </IconButton>
           </Box>
