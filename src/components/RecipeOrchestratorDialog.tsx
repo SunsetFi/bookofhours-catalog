@@ -9,13 +9,13 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { useDIDependency } from "@/container";
 import { useObservation } from "@/observables";
 
-import { RecipeOrchestrator } from "@/services/sh-game/RecipeOrchestrator";
+import { Orchestrator } from "@/services/sh-game/orchestration";
 
 export const RecipeOrchestratorDialog = () => {
-  const orchestrator = useDIDependency(RecipeOrchestrator);
-  const isOrchestrating = useObservation(orchestrator.isOrchestrating$);
+  const orchestrator = useDIDependency(Orchestrator);
+  const orchestration = useObservation(orchestrator.orchestration$);
 
-  if (!isOrchestrating) {
+  if (!orchestration) {
     return null;
   }
 

@@ -1,5 +1,6 @@
 import { ContainerModule } from "microinject";
 
+import { Orchestrator } from "./orchestration/Orchestrator";
 import { CharacterSourceImpl } from "./sources/CharacterSourceImpl";
 import { CraftingSourceImpl } from "./sources/CraftingSourceImpl";
 import { RunningSourceImpl } from "./sources/RunningSourceImpl";
@@ -13,6 +14,7 @@ import { TokenParentTerrainFactory } from "./token-models/TokenParentTerrainFact
 import { GameModel } from "./GameModel";
 
 export default new ContainerModule((bind) => {
+  bind(Orchestrator);
   bind(CharacterSourceImpl);
   bind(CraftingSourceImpl);
   bind(RunningSourceImpl);

@@ -60,8 +60,14 @@ export function distinctUntilShallowArrayChanged() {
   };
 }
 
-export function filterItems<T, K extends T>(filter: (item: T) => item is K) {
-  return (source: Observable<readonly T[]>): Observable<K[]> => {
+export function filterItems<T, K extends T>(
+  filter: (item: T) => item is K
+): OperatorFunction<readonly T[], readonly K[]>;
+export function filterItems<T>(
+  filter: (item: T) => boolean
+): OperatorFunction<readonly T[], readonly T[]>;
+export function filterItems(filter: (item: any) => boolean) {
+  return (source: Observable<readonly any[]>): Observable<any[]> => {
     return source.pipe(map((items) => items.filter(filter)));
   };
 }

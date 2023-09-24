@@ -1,4 +1,4 @@
-import { Aspects, Recipe, SphereSpec, XTrigger } from "secrethistories-api";
+import { Aspects, Recipe, SphereSpec } from "secrethistories-api";
 import { Observable, map } from "rxjs";
 
 import { promiseFuncToObservable } from "@/observables";
@@ -13,12 +13,16 @@ export class RecipeModel
   implements ModelWithLabel, ModelWithDescription, ModelWithAspects
 {
   private readonly _recipe$: Observable<Recipe | null>;
+  private _recipe: Recipe | null = null;
 
   constructor(
     private readonly _id: string,
     resolve: (id: string) => Promise<Recipe | null>
   ) {
-    this._recipe$ = promiseFuncToObservable(() => resolve(_id));
+    this._recipe$ = promiseFuncToObservable(async () => {
+      this._recipe = await resolve(_id);
+      return this._recipe;
+    });
   }
 
   get id() {
@@ -32,6 +36,19 @@ export class RecipeModel
     }
 
     return this._exists$;
+  }
+
+  private _actionId$: Observable<string | null> | null = null;
+  get actionId$() {
+    if (this._actionId$ == null) {
+      this._actionId$ = this._recipe$.pipe(map((e) => e?.actionId ?? null));
+    }
+
+    return this._actionId$;
+  }
+
+  get actionId() {
+    return this._recipe?.actionId ?? null;
   }
 
   private _label$: Observable<string | null> | null = null;
