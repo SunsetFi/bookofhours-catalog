@@ -19,7 +19,12 @@ import { powerAspects } from "@/aspects";
 
 import { useDIDependency } from "@/container";
 
-import { mapArrayItemsCached, observeAll, useObservation } from "@/observables";
+import {
+  Null$,
+  mapArrayItemsCached,
+  observeAll,
+  useObservation,
+} from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
 
@@ -78,7 +83,7 @@ function elementStackToBook(
         aspectId.startsWith("mastery.")
       );
       if (!mastery || aspects[mastery] < 1) {
-        return observableOf(null);
+        return Null$;
       }
 
       return element.xtriggers$.pipe(
@@ -103,7 +108,7 @@ function elementStackToBook(
           map((label) =>
             label?.startsWith("Memory: ") ? label.substring(8) : label
           )
-        ) ?? observableOf(null)
+        ) ?? Null$
     )
   );
 

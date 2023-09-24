@@ -9,7 +9,7 @@ import { useObservation } from "@/observables";
 
 import { ElementStackModel } from "@/services/sh-game";
 
-import { AspectsList } from "./AspectsList";
+import AspectsList from "./AspectsList";
 
 export interface ElementStackDetails {
   elementStack: ElementStackModel;

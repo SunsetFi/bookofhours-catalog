@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Aspects } from "secrethistories-api";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -10,11 +9,11 @@ import { useAspect } from "@/services/sh-compendium";
 import AspectIcon from "./AspectIcon";
 
 export interface AspectsListProps {
-  aspects: Aspects;
+  aspects: Readonly<Record<string, React.ReactNode>>;
   iconSize?: number;
 }
 
-export const AspectsList = ({ aspects, iconSize }: AspectsListProps) => {
+const AspectsList = ({ aspects, iconSize }: AspectsListProps) => {
   return (
     <Box
       sx={{
@@ -25,24 +24,23 @@ export const AspectsList = ({ aspects, iconSize }: AspectsListProps) => {
       }}
     >
       {Object.keys(aspects).map((aspectId) => (
-        <AspectListItem
-          key={aspectId}
-          aspectId={aspectId}
-          size={iconSize}
-          level={aspects[aspectId] ?? 0}
-        />
+        <AspectListItem key={aspectId} aspectId={aspectId} size={iconSize}>
+          {aspects[aspectId]}
+        </AspectListItem>
       ))}
     </Box>
   );
 };
 
+export default AspectsList;
+
 interface AspectListItemProps {
   aspectId: string;
-  level: number;
   size?: number;
+  children: React.ReactNode;
 }
 
-const AspectListItem = ({ aspectId, level, size }: AspectListItemProps) => {
+const AspectListItem = ({ aspectId, size, children }: AspectListItemProps) => {
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$);
   const isHidden = useObservation(aspect.isHidden$) ?? true;
@@ -58,7 +56,7 @@ const AspectListItem = ({ aspectId, level, size }: AspectListItemProps) => {
     >
       <AspectIcon aspectId={aspectId} size={size} />
       <Typography variant="body2" sx={{ pl: 1 }}>
-        {level}
+        {children}
       </Typography>
     </Box>
   );

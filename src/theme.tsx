@@ -18,15 +18,6 @@ const theme = createTheme({
     h3: {
       fontFamily: headerFontFamily,
     },
-    h4: {
-      fontFamily: headerFontFamily,
-    },
-    h5: {
-      fontFamily: headerFontFamily,
-    },
-    h6: {
-      fontFamily: headerFontFamily,
-    },
     body1: {
       fontSize: "1.2rem",
     },

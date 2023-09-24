@@ -12,6 +12,8 @@ import {
 import { Aspects } from "secrethistories-api";
 
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import CraftIcon from "@mui/icons-material/Settings";
 
 import { useDIDependency } from "@/container";
 
@@ -30,6 +32,7 @@ import ObservableDataGrid, {
   aspectsObservableColumnDef,
   textColumnDef,
 } from "@/components/ObservableDataGrid";
+import { Orchestrator } from "@/services/sh-game/orchestration";
 
 interface CraftableModel {
   id: string;
@@ -40,6 +43,7 @@ interface CraftableModel {
   skillLabel$: Observable<string | null>;
   requirements$: Observable<Readonly<Aspects>>;
   recipeDescription$: Observable<string | null>;
+  craft(): void;
 }
 
 const nullStringObservable = new BehaviorSubject<string | null>(null);
@@ -47,7 +51,8 @@ const nullAspectsObservable = new BehaviorSubject<Aspects>({});
 
 function recipeToCraftableModel(
   recipeModel: RecipeModel,
-  compendium: Compendium
+  compendium: Compendium,
+  orchestrator: Orchestrator
 ): CraftableModel {
   const craftable$ = recipeModel.effects$.pipe(
     map((effects) =>
@@ -88,23 +93,45 @@ function recipeToCraftableModel(
       map((x) => mapValues(x, Number))
     ),
     recipeDescription$: recipeModel.startDescription$,
+    craft: () => orchestrator.beginRecipeOrchestration(recipeModel.id),
   };
 }
 
 const CraftingCatalogPage = () => {
   const compendium = useDIDependency(Compendium);
   const model = useDIDependency(GameModel);
+  const orchestrator = useDIDependency(Orchestrator);
 
   const elements$ = React.useMemo(
     () =>
       model.unlockedRecipes$.pipe(
-        mapArrayItemsCached((item) => recipeToCraftableModel(item, compendium))
+        mapArrayItemsCached((item) =>
+          recipeToCraftableModel(item, compendium, orchestrator)
+        )
       ),
-    [model, compendium]
+    [model, compendium, orchestrator]
   );
 
   const columns = React.useMemo(
     () => [
+      {
+        headerName: "",
+        width: 50,
+        field: "$item",
+        renderCell: ({ value }) => (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <IconButton onClick={() => value.craft()}>
+              <CraftIcon />
+            </IconButton>
+          </Box>
+        ),
+      } as ObservableDataGridColumnDef<CraftableModel>,
       {
         headerName: "",
         width: 90,

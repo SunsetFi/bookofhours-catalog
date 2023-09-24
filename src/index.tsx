@@ -9,6 +9,9 @@ import { ContainerProvider } from "./container";
 import ThemeProvider from "./theme";
 
 import AppRouter from "./services/history/AppRouter";
+
+import RecipeOrchestratorDialog from "./components/RecipeOrchestratorDialog";
+
 import AppRoutes from "./routes";
 
 const rootEl = document.getElementById("root");
@@ -20,6 +23,7 @@ root.render(
         <ThemeProvider>
           <CssBaseline />
           <AppRoutes />
+          <RecipeOrchestratorDialog />
         </ThemeProvider>
       </AppRouter>
     </ContainerProvider>

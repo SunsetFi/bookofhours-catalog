@@ -16,8 +16,6 @@ const GameNotPausedWarning = () => {
     return null;
   }
 
-  console.log("GameNotPausedWarning", gameSpeed);
-
   const content = (
     <Box
       sx={{

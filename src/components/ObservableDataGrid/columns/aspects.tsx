@@ -4,8 +4,6 @@ import { Observable, map } from "rxjs";
 import { pick, pickBy } from "lodash";
 import { Aspects } from "secrethistories-api";
 
-import { aspectsMagnitude } from "@/aspects";
-
 import { ModelWithAspects } from "@/services/sh-game";
 
 import { AspectsCell } from "../cells/aspects-list";

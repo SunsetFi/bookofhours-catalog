@@ -8,6 +8,8 @@ import {
   shareReplay,
 } from "rxjs";
 
+import { workstationFilterAspects } from "@/aspects";
+
 import { RecipeModel } from "@/services/sh-compendium";
 
 import { GameModel } from "../GameModel";
@@ -147,7 +149,7 @@ export class RecipeOrchestration
     this._tryClearSituation();
   }
 
-  selectSituation(situation: SituationModel): void {
+  selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
 
     // TODO: Try to keep the same cards and reassign them to other slots.
@@ -176,16 +178,25 @@ export class RecipeOrchestration
     situation: SituationModel,
     aspectsFilter: readonly string[]
   ): boolean {
-    if (this._recipe.actionId?.endsWith("*")) {
-      const partial = this._recipe.actionId.slice(0, -1);
-      if (!situation.verbId.startsWith(partial)) {
+    const requiredAspects = [
+      ...aspectsFilter,
+      ...Object.keys(this._recipe.requirements).filter((x) =>
+        workstationFilterAspects.includes(x)
+      ),
+    ];
+
+    if (this._recipe.actionId) {
+      if (this._recipe.actionId?.endsWith("*")) {
+        const partial = this._recipe.actionId.slice(0, -1);
+        if (!situation.verbId.startsWith(partial)) {
+          return false;
+        }
+      } else if (situation.verbId != this._recipe.actionId) {
         return false;
       }
-    } else if (situation.verbId != this._recipe.actionId) {
-      return false;
     }
 
-    for (const aspect of aspectsFilter) {
+    for (const aspect of requiredAspects) {
       if (
         !situation.thresholds.some(
           (t) =>

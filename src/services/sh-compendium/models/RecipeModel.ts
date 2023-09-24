@@ -145,6 +145,10 @@ export class RecipeModel
     return this._requirements$;
   }
 
+  get requirements() {
+    return this._recipe?.requirements ?? {};
+  }
+
   private _extantRequirements$: Observable<
     Readonly<Record<string, string>>
   > | null = null;

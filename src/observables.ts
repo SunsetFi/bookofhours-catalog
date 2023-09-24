@@ -11,6 +11,7 @@ import {
   defer,
   from,
   shareReplay,
+  BehaviorSubject,
 } from "rxjs";
 
 import { arrayShallowEquals } from "./utils";
@@ -20,6 +21,12 @@ export type ObservableKeys<T> = {
 }[keyof T];
 
 export type Observation<T> = T extends Observable<infer K> ? K : never;
+
+export const Null$: Observable<null> = new BehaviorSubject(null);
+export const EmptyObject$: Observable<{}> = new BehaviorSubject({});
+export function emptyObjectObservable<T>() {
+  return EmptyObject$ as Observable<T>;
+}
 
 export function useObservation<T>(observable: Observable<T>): T | undefined;
 export function useObservation<T>(

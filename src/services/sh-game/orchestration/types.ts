@@ -20,12 +20,17 @@ export interface OrchestrationBase {
 
 export interface VariableSituationOrchestration extends OrchestrationBase {
   readonly availableSituations$: Observable<readonly SituationModel[]>;
-  selectSituation(situation: SituationModel): void;
+  selectSituation(situation: SituationModel | null): void;
+}
+export function isVariableSituationOrchestration(
+  orchestration: Orchestration
+): orchestration is VariableSituationOrchestration {
+  return "availableSituations$" in orchestration;
 }
 
 export interface VariableRecipeOrchestration extends OrchestrationBase {
   readonly availableRecipes$: Observable<readonly RecipeModel[]>;
-  selectRecipe(recipe: RecipeModel): void;
+  selectRecipe(recipe: RecipeModel | null): void;
 }
 
 export type Orchestration = OrchestrationBase &

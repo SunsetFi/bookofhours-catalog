@@ -41,10 +41,11 @@ export const provisionsAspects = [
   "distributable",
 ] as const;
 
-export const interestingCraftableAspects = [
+export const workstationFilterAspects = [
   ...powerAspects,
   ...materialAspects,
-  ...provisionsAspects,
+  "ability",
+  "memory",
 ];
 
 export const furnishingAspects = ["comfort", "wallart"] as const;

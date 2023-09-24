@@ -3,7 +3,7 @@ import { Aspects } from "secrethistories-api";
 
 import type { GridRenderCellParams } from "@mui/x-data-grid/models";
 
-import { AspectsList } from "@/components/AspectsList";
+import AspectsList from "@/components/AspectsList";
 
 export interface AspectListCellProps
   extends GridRenderCellParams<any, Aspects> {

@@ -5,7 +5,6 @@ import {
   firstValueFrom,
   map,
   mergeMap,
-  of as observableOf,
   shareReplay,
 } from "rxjs";
 
@@ -15,6 +14,8 @@ import { GameModel } from "../GameModel";
 
 import { Orchestration } from "./types";
 import { RecipeOrchestration } from "./RecipeOrchestration";
+import { Null$ } from "@/observables";
+import { RunningSource } from "../sources";
 
 @injectable()
 @singleton()
@@ -24,9 +25,16 @@ export class Orchestrator {
   );
 
   constructor(
+    @inject(RunningSource) runningSource: RunningSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(GameModel) private readonly _gameModel: GameModel
-  ) {}
+  ) {
+    runningSource.isRunning$.subscribe((isRunning) => {
+      if (!isRunning) {
+        this.cancel();
+      }
+    });
+  }
 
   get orchestration$() {
     return this._orchestration$;
@@ -36,7 +44,7 @@ export class Orchestrator {
   get canExecute$() {
     if (!this._canExecute$) {
       this._canExecute$ = this._orchestration$.pipe(
-        mergeMap((x) => x?.solution$ ?? observableOf(null)),
+        mergeMap((x) => x?.solution$ ?? Null$),
         map((x) => x != null),
         shareReplay(1)
       );
@@ -61,9 +69,7 @@ export class Orchestrator {
 
   async execute() {
     const solution = await firstValueFrom(
-      this._orchestration$.pipe(
-        mergeMap((x) => x?.solution$ ?? observableOf(null))
-      )
+      this._orchestration$.pipe(mergeMap((x) => x?.solution$ ?? Null$))
     );
     if (!solution) {
       return;
