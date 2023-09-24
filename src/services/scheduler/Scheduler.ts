@@ -11,7 +11,8 @@ export type TaskUnsubscriber = () => void;
 @provides(Initializable)
 export class Scheduler implements Initializable {
   private readonly _tasks: (() => Promise<void>)[] = [];
-  private currentTask = 0;
+  private _currentTask = 0;
+  private _pollingTimeout: NodeJS.Timeout | null = null;
 
   addTask(task: () => Promise<void>): () => void {
     this._tasks.push(task);
@@ -27,31 +28,51 @@ export class Scheduler implements Initializable {
     this._scheduleNextPoll(0);
   }
 
+  async updateNow() {
+    if (this._pollingTimeout) {
+      clearTimeout(this._pollingTimeout);
+      this._pollingTimeout = null;
+    }
+
+    try {
+      await Promise.all(this._tasks.map((task) => task()));
+    } finally {
+      this._currentTask = 0;
+      this._scheduleNextPoll(0);
+    }
+  }
+
   private _scheduleNextPoll(reduceBy: number) {
+    if (this._pollingTimeout) {
+      clearTimeout(this._pollingTimeout);
+      this._pollingTimeout = null;
+    }
+
     if (this._tasks.length === 0) {
-      setTimeout(() => this._scheduleNextPoll(0), 100);
+      this._pollingTimeout = setTimeout(() => this._scheduleNextPoll(0), 100);
       return;
     }
 
     let timeToWait = pollingPeriod / this._tasks.length;
     // Reduce by the time spent on the last poll, but dont go too low.
     timeToWait = Math.max(10, timeToWait - reduceBy);
-    setTimeout(() => this._poll(), timeToWait);
+    this._pollingTimeout = setTimeout(() => this._poll(), timeToWait);
   }
 
   private async _poll() {
-    if (this.currentTask >= this._tasks.length) {
-      this.currentTask = 0;
+    this._pollingTimeout = null;
+    if (this._currentTask >= this._tasks.length) {
+      this._currentTask = 0;
     }
 
-    const task = this._tasks[this.currentTask];
+    const task = this._tasks[this._currentTask];
     const started = Date.now();
     try {
       await task();
     } catch (e: any) {
       console.error(e);
     } finally {
-      this.currentTask = (this.currentTask + 1) % this._tasks.length;
+      this._currentTask = (this._currentTask + 1) % this._tasks.length;
       this._scheduleNextPoll(Date.now() - started);
     }
   }

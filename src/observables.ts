@@ -94,7 +94,13 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   };
 }
 
-export function observeAll<K>(): OperatorFunction<Observable<K>[], K[]> {
+export function observeAll<K>(): OperatorFunction<Observable<K>[], K[]>;
+export function observeAll<K, F>(
+  fallback: F
+): OperatorFunction<Observable<K>[], (K | F)[]>;
+export function observeAll<K>(
+  fallback?: any
+): OperatorFunction<Observable<K>[], any[]> {
   return (source: Observable<Observable<K>[]>) => {
     return new Observable<K[]>((subscriber) => {
       const subscriberMap = new Map<
@@ -108,6 +114,12 @@ export function observeAll<K>(): OperatorFunction<Observable<K>[], K[]> {
           );
 
           if (values.some((value) => value === undefined)) {
+            if (fallback !== undefined) {
+              subscriber.next(
+                values.map((x) => (x === undefined ? fallback : x))
+              );
+            }
+
             return;
           }
 
@@ -189,15 +201,13 @@ export function observeAll<K>(): OperatorFunction<Observable<K>[], K[]> {
 export function mapArrayItemsCached<T, R>(
   fn: (value: T) => R
 ): OperatorFunction<readonly T[], R[]> {
-  const cache = new Map<T, R>();
-
   return (source: Observable<readonly T[]>): Observable<R[]> => {
+    const cache = new Map<T, R>();
     return source.pipe(
       map((arr) => {
         // Temporary set to track items in the current array.
         const currentSet = new Set<T>();
 
-        let newItems = 0;
         const result = arr.map((item) => {
           currentSet.add(item);
 
@@ -206,7 +216,6 @@ export function mapArrayItemsCached<T, R>(
           } else {
             const newValue = fn(item);
             cache.set(item, newValue);
-            newItems++;
             return newValue;
           }
         });
@@ -231,6 +240,34 @@ export function profileDownstream(tag: string) {
         console.time(tag);
         subscriber.next(value);
         console.timeEnd(tag);
+      });
+    });
+  };
+}
+
+const extantTimers = new Set<string>();
+export function profileStart(tag: string) {
+  return <T>(source: Observable<T>): Observable<T> => {
+    return new Observable<T>((subscriber) => {
+      return source.subscribe((value) => {
+        if (!extantTimers.has(tag)) {
+          extantTimers.add(tag);
+          console.time(tag);
+        }
+        subscriber.next(value);
+      });
+    });
+  };
+}
+
+export function profileEnd(tag: string) {
+  return <T>(source: Observable<T>): Observable<T> => {
+    return new Observable<T>((subscriber) => {
+      return source.subscribe((value) => {
+        if (extantTimers.delete(tag)) {
+          console.timeEnd(tag);
+        }
+        subscriber.next(value);
       });
     });
   };

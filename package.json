@@ -4,6 +4,7 @@
   "description": "Frontend for various Book of Hours experiments",
   "scripts": {
     "clean": "rimraf dist",
+    "postinstall": "rimraf node_modules/.vite",
     "prebuild": "npm run clean",
     "build": "cross-env NODE_ENV=production vite build",
     "preview": "cross-env NODE_ENV=development vite preview",
@@ -50,7 +51,7 @@
     "react-router-dom": "^6.3.0",
     "rxjs": "^7.5.5",
     "scheduler": "^0.23.0",
-    "secrethistories-api": "^1.14.0",
+    "secrethistories-api": "^1.15.4",
     "type-fest": "^2.13.0",
     "use-context-selector": "^1.4.1"
   }

@@ -29,6 +29,7 @@ import {
   SituationModel,
   isSituationModel,
 } from "./token-models/SituationModel";
+import { Scheduler } from "../scheduler";
 
 @injectable()
 @singleton()
@@ -36,13 +37,20 @@ export class GameModel {
   constructor(
     @inject(RunningSource)
     private readonly _runningSource: RunningSource,
+    @inject(Scheduler) scheduler: Scheduler,
     @inject(TimeSource) private readonly _timeSource: TimeSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(CharacterSource) private readonly _characterSource: CharacterSource,
     @inject(CraftingSource)
     private readonly _craftingSource: CraftingSource,
     @inject(TokensSource) private readonly _tokensSource: TokensSource
-  ) {}
+  ) {
+    this._runningSource.isRunning$.subscribe((isRunning) => {
+      if (isRunning) {
+        scheduler.updateNow();
+      }
+    });
+  }
 
   get isRunning$() {
     return this._runningSource.isRunning$;

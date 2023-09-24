@@ -1,10 +1,10 @@
 import { Identifier } from "microinject";
 import { Observable } from "rxjs";
+import { GameSpeed } from "secrethistories-api";
 
 import { TokenModel } from "../token-models/TokenModel";
 import { RecipeModel } from "@/services/sh-compendium";
 import { SituationModel } from "../token-models/SituationModel";
-import { GameSpeed } from "secrethistories-api";
 
 export const RunningSource: Identifier<RunningSource> = Symbol("RunningSource");
 export interface RunningSource {

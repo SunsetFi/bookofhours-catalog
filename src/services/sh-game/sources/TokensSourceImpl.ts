@@ -14,6 +14,19 @@ import { TokenModelFactory } from "../token-models/TokenModelFactory";
 
 import { TokensSource, RunningSource } from "./services";
 
+const spherePaths = [
+  "~/portage1",
+  "~/portage2",
+  "~/portage3",
+  "~/portage4",
+  "~/portage5",
+  "~/hand.abilities",
+  "~/hand.skills",
+  "~/hand.memories",
+  "~/hand.misc",
+  "~/library",
+];
+
 const supportedPayloadTypes = [
   "ConnectedTerrain",
   "ElementStack",
@@ -27,9 +40,8 @@ const supportedPayloadTypes = [
 export class TokensSourceImpl implements TokensSource {
   private _tokensTaskSubsciption: TaskUnsubscriber | null = null;
   private readonly _tokenModels: Map<string, TokenModel> = new Map();
-  private readonly _tokensInternal$ = new BehaviorSubject<
-    readonly TokenModel[]
-  >([]);
+
+  private readonly _tokens$ = new BehaviorSubject<readonly TokenModel[]>([]);
 
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
@@ -55,34 +67,37 @@ export class TokensSourceImpl implements TokensSource {
   }
 
   get tokens$(): Observable<readonly TokenModel[]> {
-    return this._tokensInternal$;
+    return this._tokens$;
   }
 
   private async _pollTokens() {
-    // I suppose pulling every single token is ok.  This could be better, but its workable for now.
-    const tokens = await this._api.getAllTokens();
+    const tokens = await this._api.getAllTokens({
+      spherePrefix: spherePaths,
+      payloadType: supportedPayloadTypes,
+    });
+
+    const existingTokenIds = Array.from(this._tokenModels.keys());
+    const foundIds = tokens.map((t) => t.id);
+    const tokenIdsToRemove = difference(existingTokenIds, foundIds);
+    tokenIdsToRemove.forEach((id) => this._tokenModels.delete(id));
 
     startTransition(() => {
-      const supportedTokens = tokens.filter((x) =>
-        supportedPayloadTypes.includes(x.payloadType)
-      );
-
-      const existingTokenIds = Array.from(this._tokenModels.keys());
-      const tokenIdsToRemove = difference(
-        existingTokenIds,
-        supportedTokens.map((x) => x.id)
-      );
-      tokenIdsToRemove.forEach((id) => this._tokenModels.delete(id));
-
-      const tokenModels = sortBy(
-        supportedTokens.map((token) => this._getOrUpdateTokenModel(token)),
-        "id"
-      );
-
-      if (!arrayShallowEquals(this._tokensInternal$.value, tokenModels)) {
-        this._tokensInternal$.next(tokenModels);
-      }
+      this._updateTokenModels(tokens, this._tokens$);
     });
+  }
+
+  private _updateTokenModels(
+    tokens: Token[],
+    subject: BehaviorSubject<readonly TokenModel[]>
+  ) {
+    const tokenModels = sortBy(
+      tokens.map((token) => this._getOrUpdateTokenModel(token)),
+      "id"
+    );
+
+    if (!arrayShallowEquals(subject.value, tokenModels)) {
+      subject.next(tokenModels);
+    }
   }
 
   private _getOrUpdateTokenModel(token: Token): TokenModel {
