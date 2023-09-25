@@ -66,7 +66,11 @@ const ElementStackSelectField = ({
           onChange(elementStacks.find((es) => es.id === e.target.value) ?? null)
         }
       >
-        <MenuItem value=""></MenuItem>
+        <MenuItem value="">
+          <Typography variant="body1" sx={{ height: "30px" }}>
+            (None)
+          </Typography>
+        </MenuItem>
         {elementStacks.map((elementStack) => (
           <MenuItem key={elementStack.id} value={elementStack.id}>
             <ElementStackSelectItem

@@ -23,6 +23,7 @@ import AspectsList from "./AspectsList";
 import ElementStackSelectField from "./ElementStackSelectField";
 import AspectIcon from "./AspectIcon";
 import { Button } from "@mui/material";
+import { powerAspects } from "@/aspects";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -48,11 +49,15 @@ const RecipeOrchestratorDialog = () => {
   }
 
   return (
-    <Dialog open={true} onClose={() => orchestrator.cancel()} maxWidth="md">
-      <DialogTitle>Recipe Executor</DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-          <Typography variant="body2" sx={{ mr: 2 }}>
+    <Dialog
+      open={true}
+      onClose={() => orchestrator.cancel()}
+      fullWidth
+      maxWidth="md"
+    >
+      <DialogTitle>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Typography variant="h5" sx={{ mr: 2 }}>
             {recipeLabel}
           </Typography>
           <AspectsList
@@ -63,6 +68,15 @@ const RecipeOrchestratorDialog = () => {
             iconSize={30}
           />
         </Box>
+      </DialogTitle>
+      <DialogContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          height: 475,
+        }}
+      >
         {isVariableSituationOrchestration(orchestration) ? (
           <SituationSelectField
             label="Workstation"
@@ -85,7 +99,6 @@ const RecipeOrchestratorDialog = () => {
             rowGap: 2,
             columnGap: 3,
             overflow: "auto",
-            maxHeight: 400,
           }}
         >
           {Object.keys(slots).map((slotId) => (
@@ -115,10 +128,11 @@ interface SlotEditorProps {
 const SlotEditor = ({ slot, requiredAspects }: SlotEditorProps) => {
   const assignment = useObservation(slot.assignment$) ?? null;
 
+  // Remove the power aspects from these since that will be displayed by the workstation hints.
   const allowedAspects = [
     ...Object.keys(slot.spec.essential),
     ...Object.keys(slot.spec.required),
-  ];
+  ].filter((x) => !powerAspects.includes(x as any));
 
   return (
     <Box

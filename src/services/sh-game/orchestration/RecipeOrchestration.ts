@@ -6,13 +6,12 @@ import {
   firstValueFrom,
   map,
   of as observableOf,
-  share,
   shareReplay,
 } from "rxjs";
 import { SphereSpec } from "secrethistories-api";
-import { isEqual } from "lodash";
+import { isEqual, pick, sortBy } from "lodash";
 
-import { workstationFilterAspects } from "@/aspects";
+import { aspectsMagnitude, workstationFilterAspects } from "@/aspects";
 
 import { RecipeModel } from "@/services/sh-compendium";
 
@@ -178,9 +177,8 @@ export class RecipeOrchestration
     let availableElementStacks$: Observable<readonly ElementStackModel[]>;
     // HACK: We are currently designing around skill recipes, that have this as a common requirements.
     // We need a better way to handle this, probably by detecting the case where no other slots can accept this requirement.
-    const skillRequirement = Object.keys(this._recipe.requirements).find((x) =>
-      x.startsWith("s.")
-    );
+    const requirementKeys = Object.keys(this._recipe.requirements);
+    const skillRequirement = requirementKeys.find((x) => x.startsWith("s."));
     if (spec.id === "s" && skillRequirement) {
       availableElementStacks$ = this._gameModel.visibleElementStacks$.pipe(
         mapArrayItemsCached((stack) =>
@@ -205,9 +203,27 @@ export class RecipeOrchestration
             )
           )
         ),
+        map((stacks) =>
+          sortBy(stacks, (stack) =>
+            aspectsMagnitude(pick(stack.aspects, requirementKeys))
+          ).reverse()
+        ),
         shareReplay(1)
       );
     }
+
+    // This is hackish
+    firstValueFrom(availableElementStacks$).then((stacks) => {
+      const item = stacks[0];
+      if (!item) {
+        return;
+      }
+
+      this._slotAssignments$.next({
+        ...this._slotAssignments$.value,
+        [spec.id]: item,
+      });
+    });
 
     return {
       spec,
