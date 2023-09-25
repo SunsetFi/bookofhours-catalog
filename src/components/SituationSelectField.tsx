@@ -63,7 +63,7 @@ interface SituationSelectItemProps {
 }
 
 const SituationSelectItem = ({ situation }: SituationSelectItemProps) => {
-  const label = useObservation(situation.label$);
+  const label = useObservation(situation.verbLabel$);
   const hints = useObservation(situation.hints$);
 
   if (!label || !hints) {

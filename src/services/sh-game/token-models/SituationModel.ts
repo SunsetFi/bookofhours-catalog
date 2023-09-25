@@ -88,6 +88,19 @@ export class SituationModel extends TokenModel {
     return this._description$;
   }
 
+  private _verbLabel$: Observable<string | null> | null = null;
+  get verbLabel$() {
+    if (!this._verbLabel$) {
+      this._verbLabel$ = this._situation$.pipe(
+        map((s) => s.verbLabel),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._verbLabel$;
+  }
+
   private _aspects$: Observable<Aspects> | null = null;
   get aspects$() {
     if (!this._aspects$) {

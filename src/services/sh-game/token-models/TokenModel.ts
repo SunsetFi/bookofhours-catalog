@@ -52,6 +52,10 @@ export abstract class TokenModel {
     return this._token$.value.path;
   }
 
+  get spherePath() {
+    return this._token$.value.spherePath;
+  }
+
   focus() {
     this._api.focusTokenAtPath(this.path);
   }

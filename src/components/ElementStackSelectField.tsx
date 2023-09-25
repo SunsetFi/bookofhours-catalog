@@ -14,6 +14,8 @@ import { mapArrayItemsCached, observeAll, useObservation } from "@/observables";
 import { ElementStackModel } from "@/services/sh-game";
 
 import AspectsList from "./AspectsList";
+import ElementStackDetails from "./ElementStackDetails";
+import Popper from "@mui/material/Popper";
 
 export interface ElementStackSelectFieldProps {
   label: string;
@@ -98,6 +100,8 @@ const ElementStackSelectItem = ({
   const label = useObservation(elementStack.label$);
   let aspects = useObservation(elementStack.aspects$);
 
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
   if (!label || !aspects) {
     return null;
   }
@@ -108,14 +112,20 @@ const ElementStackSelectItem = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}>
-      <img
-        style={{ display: "block" }}
-        src={elementStack.iconUrl}
-        alt={label ?? ""}
-        width={30}
-        height={30}
-      />
-      <Typography variant="body1">{label}</Typography>
+      <Box
+        sx={{ display: "flex", flexDirection: "row", gap: 2 }}
+        onMouseOver={(e) => setAnchorEl(e.currentTarget)}
+        onMouseOut={() => setAnchorEl(null)}
+      >
+        <img
+          style={{ display: "block" }}
+          src={elementStack.iconUrl}
+          alt={label ?? ""}
+          width={30}
+          height={30}
+        />
+        <Typography variant="body1">{label}</Typography>
+      </Box>
       <Box
         sx={{
           ml: "auto",
@@ -126,6 +136,19 @@ const ElementStackSelectItem = ({
       >
         <AspectsList aspects={aspects} iconSize={30} />
       </Box>
+      <Popper
+        anchorEl={anchorEl}
+        open={anchorEl != null}
+        sx={{
+          // This is here because this is used in a modal
+          // You would think that the new popper would order further on in the document from the portal, but nope.
+          // FIXME: Fix ElementStackSelectField z order issues.
+          // I hate z indexes so much...  This is a disgustingly high value, but Popper is using 1300 by default.
+          zIndex: 2000,
+        }}
+      >
+        <ElementStackDetails elementStack={elementStack} />
+      </Popper>
     </Box>
   );
 };

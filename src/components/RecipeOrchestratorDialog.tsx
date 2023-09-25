@@ -31,7 +31,6 @@ const RecipeOrchestratorDialog = () => {
   const orchestration = useObservation(orchestrator.orchestration$);
   const aspectRequirements =
     useObservation(orchestrator.aspectRequirements$) ?? {};
-  const canExecute = useObservation(orchestrator.canExecute$) ?? false;
 
   const recipe = useObservation(orchestration?.recipe$ ?? Null$);
   const recipeLabel = useObservation(recipe?.label$ ?? Null$);
@@ -112,9 +111,7 @@ const RecipeOrchestratorDialog = () => {
       </DialogContent>
       <DialogActions>
         <Button onClick={() => orchestrator.cancel()}>Cancel</Button>
-        <Button disabled={!canExecute} onClick={() => orchestrator.execute()}>
-          Execute
-        </Button>
+        <Button onClick={() => orchestrator.apply()}>Apply</Button>
       </DialogActions>
     </Dialog>
   );

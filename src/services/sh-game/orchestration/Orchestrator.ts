@@ -204,7 +204,7 @@ export class Orchestrator {
     this._orchestration$.next(null);
   }
 
-  async execute() {
+  async apply() {
     var operation = this._orchestration$.value;
     if (!operation) {
       return;
@@ -226,8 +226,6 @@ export class Orchestrator {
     }
 
     this._sync(situation, recipe, slotTokens);
-
-    // TODO: Execute
   }
 
   private async _sync(
@@ -247,9 +245,11 @@ export class Orchestrator {
         try {
           var token = slots[slotId];
           if (token) {
-            await this._api.updateTokenAtPath(token.path, {
-              spherePath: slotPath,
-            });
+            if (token.spherePath !== slotPath) {
+              await this._api.updateTokenAtPath(token.path, {
+                spherePath: slotPath,
+              });
+            }
           } else {
             await this._api.evictTokenAtPath(slotPath);
           }

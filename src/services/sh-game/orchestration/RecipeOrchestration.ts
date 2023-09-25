@@ -136,6 +136,7 @@ export class RecipeOrchestration
     const filter = await firstValueFrom(this._aspectsFilter$);
     if (!this._situationIsAvailable(this._situation$.value, filter)) {
       this._situation$.next(null);
+      this._slotAssignments$.next({});
     }
   }
 
@@ -228,6 +229,9 @@ export class RecipeOrchestration
       }
     }
 
+    // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.
+    // This really is a special / edge case for skills, so maybe restrict the match to the skill card off-aspect.
+    // Interestingly enough, this is absolutely required to 'read' phonographs and films.
     for (const aspect of requiredAspects) {
       if (
         !situation.thresholds.some(
