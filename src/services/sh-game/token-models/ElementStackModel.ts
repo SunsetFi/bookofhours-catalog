@@ -239,6 +239,15 @@ export class ElementStackModel
     return this._aspectsAndSelf$;
   }
 
+  get aspectsAndSelf() {
+    const aspects = this.aspects;
+    const elementId = this.elementId;
+    return {
+      ...aspects,
+      [elementId]: 1,
+    };
+  }
+
   private _shrouded$: Observable<boolean> | null = null;
   get shrouded$() {
     if (!this._shrouded$) {

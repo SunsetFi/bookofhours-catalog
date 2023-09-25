@@ -11,15 +11,28 @@ import {
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
-import { Null$, emptyObjectObservable, observeAll } from "@/observables";
+import {
+  EmptyArray$,
+  Null$,
+  emptyObjectObservable,
+  observeAll,
+} from "@/observables";
 
-import { Compendium } from "@/services/sh-compendium";
+import {
+  Compendium,
+  ElementModel,
+  RecipeModel,
+} from "@/services/sh-compendium";
+import { API } from "@/services/sh-api";
+import { Scheduler } from "@/services/scheduler";
 
+import { RunningSource } from "../sources";
 import { GameModel } from "../GameModel";
+import { SituationModel } from "../token-models/SituationModel";
 
 import { AspectRequirement, Orchestration, OrchestrationSlot } from "./types";
 import { RecipeOrchestration } from "./RecipeOrchestration";
-import { RunningSource } from "../sources";
+import { ElementStackModel } from "../token-models/ElementStackModel";
 
 @injectable()
 @singleton()
@@ -30,6 +43,8 @@ export class Orchestrator {
 
   constructor(
     @inject(RunningSource) runningSource: RunningSource,
+    @inject(API) private readonly _api: API,
+    @inject(Scheduler) private readonly _scheduler: Scheduler,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(GameModel) private readonly _gameModel: GameModel
   ) {
@@ -38,6 +53,51 @@ export class Orchestrator {
         this.cancel();
       }
     });
+
+    // This was here for live updating the game as options were selected.
+    // In practice this is a bit wonky, lets leave it on-demand.
+    // this._orchestration$.subscribe((orchestration) => {
+    //   if (this._lastSync && !orchestration) {
+    //     this._api.updateTokenAtPath(this._lastSync.path, {
+    //       open: false,
+    //     });
+    //   }
+    // });
+
+    // combineLatest([
+    //   this._orchestration$.pipe(mergeMap((x) => x?.situation$ ?? Null$)),
+    //   this._orchestration$.pipe(mergeMap((x) => x?.recipe$ ?? Null$)),
+    //   this._orchestration$
+    //     .pipe(
+    //       mergeMap(
+    //         (x) =>
+    //           x?.slots$ ??
+    //           emptyObjectObservable<Record<string, OrchestrationSlot>>()
+    //       )
+    //     )
+    //     .pipe(
+    //       map((x) =>
+    //         Object.entries(x).map(([k, v]) =>
+    //           v.assignment$.pipe(
+    //             map((token) => [k, token] as [string, ElementStackModel | null])
+    //           )
+    //         )
+    //       ),
+    //       observeAll(),
+    //       map((x) =>
+    //         x.reduce((o, [k, v]) => {
+    //           o[k] = v;
+    //           return o;
+    //         }, {} as Record<string, ElementStackModel | null>)
+    //       )
+    //     ),
+    // ]).subscribe(([situation, recipe, slots]) => {
+    //   if (!situation || !recipe || !slots) {
+    //     return;
+    //   }
+
+    //   this._sync(situation, recipe, slots);
+    // });
   }
 
   get orchestration$() {
@@ -47,14 +107,13 @@ export class Orchestrator {
   private _canExecute$: Observable<boolean> | null = null;
   get canExecute$() {
     if (!this._canExecute$) {
-      // FIXME: Bit weird having this partially rely on the orchestration and partially on us.
       this._canExecute$ = combineLatest([
-        this._orchestration$.pipe(mergeMap((x) => x?.solution$ ?? Null$)),
+        this._orchestration$.pipe(mergeMap((x) => x?.situation$ ?? Null$)),
+        this._orchestration$.pipe(mergeMap((x) => x?.recipe$ ?? Null$)),
         this.aspectRequirements$,
       ]).pipe(
-        map(([solution, reqs]) => {
-          if (!solution) {
-            console.log("Cannot execute - no solution");
+        map(([situation, recipe, reqs]) => {
+          if (!situation || !recipe) {
             return false;
           }
 
@@ -146,11 +205,64 @@ export class Orchestrator {
   }
 
   async execute() {
-    const solution = await firstValueFrom(
-      this._orchestration$.pipe(mergeMap((x) => x?.solution$ ?? Null$))
-    );
-    if (!solution) {
+    var operation = this._orchestration$.value;
+    if (!operation) {
       return;
     }
+
+    const [situation, recipe, slots] = await Promise.all([
+      firstValueFrom(operation.situation$),
+      firstValueFrom(operation.recipe$),
+      firstValueFrom(operation.slots$),
+    ]);
+
+    if (!situation || !recipe) {
+      return;
+    }
+
+    const slotTokens: Record<string, ElementStackModel | null> = {};
+    for (const slotId of Object.keys(slots)) {
+      slotTokens[slotId] = await firstValueFrom(slots[slotId].assignment$);
+    }
+
+    this._sync(situation, recipe, slotTokens);
+
+    // TODO: Execute
+  }
+
+  private async _sync(
+    situation: SituationModel,
+    recipe: RecipeModel,
+    slots: Readonly<Record<string, ElementStackModel | null>>
+  ) {
+    var success = true;
+    try {
+      await this._scheduler.updateNow();
+
+      await this._api.focusTokenAtPath(situation.path);
+      await this._api.openTokenAtPath(situation.path);
+      for (const slotId of situation.thresholds.map((x) => x.id)) {
+        const slotPath = `${situation.path}/${slotId}`;
+
+        try {
+          var token = slots[slotId];
+          if (token) {
+            await this._api.updateTokenAtPath(token.path, {
+              spherePath: slotPath,
+            });
+          } else {
+            await this._api.evictTokenAtPath(slotPath);
+          }
+        } catch (e) {
+          success = false;
+        }
+      }
+
+      // TODO: Select recipe
+    } catch (e) {
+      success = false;
+    }
+
+    return success;
   }
 }

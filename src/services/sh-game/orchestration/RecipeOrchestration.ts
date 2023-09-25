@@ -23,7 +23,6 @@ import { SituationModel } from "../token-models/SituationModel";
 import {
   OrchestrationBase,
   OrchestrationSlot,
-  OrchestrationSolution,
   VariableSituationOrchestration,
 } from "./types";
 import {
@@ -110,39 +109,6 @@ export class RecipeOrchestration
     return this._slots$;
   }
 
-  private _solution$: Observable<null | OrchestrationSolution> | null = null;
-  get solution$(): Observable<null | OrchestrationSolution> {
-    if (!this._solution$) {
-      this._solution$ = combineLatest([
-        this._situation$,
-        this._slotAssignments$,
-      ]).pipe(
-        map(([situation, assignments]) => {
-          if (!situation) {
-            return null;
-          }
-
-          const slotTargetsByPath: Record<string, string> = {};
-          for (const threshold of situation.thresholds) {
-            const assignment = assignments[threshold.id];
-            if (assignment) {
-              slotTargetsByPath[threshold.id] = assignment.path;
-            }
-          }
-
-          return {
-            recipeId: this._recipe.id,
-            situationPath: situation.path,
-            slotTargetsByPath,
-          };
-        }),
-        shareReplay(1)
-      );
-    }
-
-    return this._solution$;
-  }
-
   setAspectsFilter(aspects: readonly string[]): void {
     this._aspectsFilter$.next(aspects);
     this._tryClearSituation();
@@ -176,7 +142,6 @@ export class RecipeOrchestration
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
     let availableElementStacks$: Observable<readonly ElementStackModel[]>;
     // HACK: We are currently designing around skill recipes, that have this as a common requirements.
-    // We need a better way to handle this, probably by detecting the case where no other slots can accept this requirement.
     const requirementKeys = Object.keys(this._recipe.requirements);
     const skillRequirement = requirementKeys.find((x) => x.startsWith("s."));
     if (spec.id === "s" && skillRequirement) {
@@ -198,8 +163,8 @@ export class RecipeOrchestration
         map((stacks) =>
           stacks.filter((stack) =>
             Object.keys(this._recipe.requirements).some((r) =>
-              // FIXME: use aspects$
-              Object.keys(stack.aspects).includes(r)
+              // FIXME: use aspectsAndSelf$
+              Object.keys(stack.aspectsAndSelf).includes(r)
             )
           )
         ),
