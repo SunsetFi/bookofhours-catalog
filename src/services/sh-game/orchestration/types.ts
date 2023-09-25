@@ -39,11 +39,19 @@ export type Orchestration = OrchestrationBase &
 
 export interface OrchestrationSlot {
   readonly spec: SphereSpec;
-  readonly assignment: ElementStackModel | null;
+  readonly locked: boolean;
+  readonly assignment$: Observable<ElementStackModel | null>;
+  readonly availableElementStacks$: Observable<readonly ElementStackModel[]>;
+  assign(element: ElementStackModel | null): void;
 }
 
 export interface OrchestrationSolution {
   readonly recipeId: string;
   readonly situationPath: string;
   readonly slotTargetsByPath: Readonly<Record<string, string>>;
+}
+
+export interface AspectRequirement {
+  current: number;
+  required: number;
 }

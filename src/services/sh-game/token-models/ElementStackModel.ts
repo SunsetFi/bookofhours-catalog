@@ -9,6 +9,7 @@ import {
   map,
   distinctUntilChanged,
   shareReplay,
+  combineLatest,
 } from "rxjs";
 import { isEqual } from "lodash";
 
@@ -86,6 +87,10 @@ export class ElementStackModel
     }
 
     return this._elementId$;
+  }
+
+  get elementId() {
+    return this._elementStack$.value.elementId;
   }
 
   private _element$: Observable<ElementModel> | null = null;
@@ -206,6 +211,32 @@ export class ElementStackModel
     }
 
     return this._aspects$;
+  }
+
+  get aspects() {
+    const value = this._elementStack$.value;
+    if (!value) {
+      return {};
+    }
+
+    return combineAspects(value.elementAspects, value.mutations);
+  }
+
+  private _aspectsAndSelf$: Observable<Aspects> | null = null;
+  get aspectsAndSelf$() {
+    if (!this._aspectsAndSelf$) {
+      this._aspectsAndSelf$ = combineLatest([
+        this.aspects$,
+        this.elementId$,
+      ]).pipe(
+        map(([aspects, elementId]) => ({
+          ...aspects,
+          [elementId]: 1,
+        }))
+      );
+    }
+
+    return this._aspectsAndSelf$;
   }
 
   private _shrouded$: Observable<boolean> | null = null;

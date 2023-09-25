@@ -1,101 +1,68 @@
 import * as React from "react";
-import { map } from "rxjs";
-import { Aspects } from "secrethistories-api";
+import { mapValues } from "lodash";
 
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogTitle";
 import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
-import {
-  EmptyObject$,
-  Null$,
-  Observation,
-  emptyObjectObservable,
-  observeAll,
-  useObservation,
-} from "@/observables";
+import { Null$, emptyObjectObservable, useObservation } from "@/observables";
 
 import {
-  Orchestration,
+  OrchestrationSlot,
   Orchestrator,
   isVariableSituationOrchestration,
 } from "@/services/sh-game/orchestration";
 
 import SituationSelectField from "./SituationSelectField";
 import AspectsList from "./AspectsList";
+import ElementStackSelectField from "./ElementStackSelectField";
+import AspectIcon from "./AspectIcon";
+import { Button } from "@mui/material";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
+
   const orchestration = useObservation(orchestrator.orchestration$);
+  const aspectRequirements =
+    useObservation(orchestrator.aspectRequirements$) ?? {};
+  const canExecute = useObservation(orchestrator.canExecute$) ?? false;
 
   const recipe = useObservation(orchestration?.recipe$ ?? Null$);
   const recipeLabel = useObservation(recipe?.label$ ?? Null$);
-  const requirements = useObservation(recipe?.requirements$ ?? Null$) ?? {};
   const situation = useObservation(orchestration?.situation$ ?? Null$);
   const situationLabel = useObservation(situation?.label$ ?? Null$);
 
-  const slots$ =
-    orchestration?.slots$ ??
-    emptyObjectObservable<Observation<Orchestration["slots$"]>>();
-
-  const slotAspects =
+  const slots =
     useObservation(
-      () =>
-        slots$.pipe(
-          map((slots) =>
-            Object.values(slots).map(
-              (slot) =>
-                slot.assignment?.aspects$ ?? emptyObjectObservable<Aspects>()
-            )
-          ),
-          observeAll(),
-          map((aspects) => {
-            const combined: Aspects = {};
-            for (const aspect of aspects) {
-              for (const id of Object.keys(aspect)) {
-                combined[id] = aspect[id];
-              }
-            }
-            return combined;
-          })
-        ),
-      [slots$]
+      orchestration?.slots$ ??
+        emptyObjectObservable<Record<string, OrchestrationSlot>>()
     ) ?? {};
-
-  const reqsTotaled = React.useMemo(() => {
-    const result: Record<string, React.ReactNode> = {};
-    for (const req of Object.keys(requirements)) {
-      result[req] = (
-        <span>
-          {slotAspects[req] ?? 0} / {requirements[req]}
-        </span>
-      );
-    }
-    return result;
-  }, [requirements, slotAspects]);
 
   if (!orchestration) {
     return null;
   }
 
   return (
-    <Dialog open={true} onClose={() => orchestrator.cancel()}>
+    <Dialog open={true} onClose={() => orchestrator.cancel()} maxWidth="md">
       <DialogTitle>Recipe Executor</DialogTitle>
-      <DialogContent
-        sx={{ width: 480, display: "flex", flexDirection: "column", gap: 2 }}
-      >
-        {recipeLabel && (
-          <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-            <Typography variant="body2" sx={{ mr: 2 }}>
-              {recipeLabel}
-            </Typography>
-            <AspectsList aspects={reqsTotaled} iconSize={30} />
-          </Box>
-        )}
+      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+          <Typography variant="body2" sx={{ mr: 2 }}>
+            {recipeLabel}
+          </Typography>
+          <AspectsList
+            aspects={mapValues(
+              aspectRequirements,
+              (value) => `${value.current} / ${value.required}`
+            )}
+            iconSize={30}
+          />
+        </Box>
         {isVariableSituationOrchestration(orchestration) ? (
           <SituationSelectField
             label="Workstation"
@@ -111,8 +78,72 @@ const RecipeOrchestratorDialog = () => {
             value={situationLabel ?? ""}
           />
         )}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            rowGap: 2,
+            columnGap: 3,
+            overflow: "auto",
+            maxHeight: 400,
+          }}
+        >
+          {Object.keys(slots).map((slotId) => (
+            <SlotEditor
+              key={slotId}
+              slot={slots[slotId]}
+              requiredAspects={Object.keys(aspectRequirements)}
+            />
+          ))}
+        </Box>
       </DialogContent>
+      <DialogActions>
+        <Button onClick={() => orchestrator.cancel()}>Cancel</Button>
+        <Button disabled={!canExecute} onClick={() => orchestrator.execute()}>
+          Execute
+        </Button>
+      </DialogActions>
     </Dialog>
+  );
+};
+
+interface SlotEditorProps {
+  slot: OrchestrationSlot;
+  requiredAspects: readonly string[];
+}
+
+const SlotEditor = ({ slot, requiredAspects }: SlotEditorProps) => {
+  const assignment = useObservation(slot.assignment$) ?? null;
+
+  const allowedAspects = [
+    ...Object.keys(slot.spec.essential),
+    ...Object.keys(slot.spec.required),
+  ];
+
+  return (
+    <Box
+      sx={{ display: "flex", flexDirection: "column", gap: 1, width: "100%" }}
+    >
+      <Box
+        sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
+      >
+        <Typography variant="body1" sx={{ mr: "auto" }}>
+          {slot.spec.label}
+        </Typography>
+        {allowedAspects.map((aspectId) => (
+          <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
+        ))}
+      </Box>
+      <ElementStackSelectField
+        label="Element"
+        fullWidth
+        elementStacks$={slot.availableElementStacks$}
+        uniqueElementIds
+        displayAspects={requiredAspects}
+        value={assignment}
+        onChange={(stack) => slot.assign(stack)}
+      />
+    </Box>
   );
 };
 

@@ -1,8 +1,11 @@
 import { Observable, map } from "rxjs";
+import { SphereSpec } from "secrethistories-api";
 
 import { filterItemObservations } from "@/observables";
 
 import { ModelWithAspects } from "./types";
+
+import { ElementStackModel } from "./token-models/ElementStackModel";
 
 export function filterHasAspect(
   aspect: string | readonly string[] | ((aspectId: string) => boolean)
@@ -54,4 +57,50 @@ export function filterHasNoneOfAspect(match: readonly string[]) {
       )
     );
   };
+}
+
+export function sphereMatchesToken(
+  t: SphereSpec,
+  input: ElementStackModel
+): Observable<boolean> {
+  return input.aspects$.pipe(
+    map((aspects) => {
+      for (const essential of Object.keys(t.essential)) {
+        const expectedValue = t.essential[essential];
+        const compareValue = aspects[essential];
+        if (compareValue === undefined) {
+          return false;
+        } else if (compareValue < expectedValue) {
+          return false;
+        }
+      }
+
+      let foundRequired = false;
+      for (const required of Object.keys(t.required)) {
+        const expectedValue = t.required[required];
+        const compareValue = aspects[required];
+        if (compareValue === undefined) {
+          continue;
+        } else if (compareValue >= expectedValue) {
+          foundRequired = true;
+          break;
+        }
+      }
+      if (!foundRequired) {
+        return false;
+      }
+
+      for (const forbidden of Object.keys(t.forbidden)) {
+        const expectedValue = t.forbidden[forbidden];
+        const compareValue = aspects[forbidden];
+        if (compareValue === undefined) {
+          continue;
+        } else if (compareValue >= expectedValue) {
+          return false;
+        }
+      }
+
+      return true;
+    })
+  );
 }

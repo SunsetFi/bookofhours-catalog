@@ -2,11 +2,15 @@ import {
   BehaviorSubject,
   Observable,
   combineLatest,
+  distinctUntilChanged,
   firstValueFrom,
   map,
   of as observableOf,
+  share,
   shareReplay,
 } from "rxjs";
+import { SphereSpec } from "secrethistories-api";
+import { isEqual } from "lodash";
 
 import { workstationFilterAspects } from "@/aspects";
 
@@ -23,6 +27,12 @@ import {
   OrchestrationSolution,
   VariableSituationOrchestration,
 } from "./types";
+import {
+  filterItemObservations,
+  mapArrayItemsCached,
+  observeAll,
+} from "@/observables";
+import { sphereMatchesToken } from "../observables";
 
 export class RecipeOrchestration
   implements OrchestrationBase, VariableSituationOrchestration
@@ -83,21 +93,13 @@ export class RecipeOrchestration
   > | null = null;
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
     if (!this._slots$) {
-      this._slots$ = combineLatest([
-        this._situation$,
-        this._slotAssignments$,
-      ]).pipe(
-        map(([situation, assignments]) => {
+      this._slots$ = this._situation$.pipe(
+        map((situation) => situation?.thresholds ?? []),
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+        map((thresholds) => {
           const result: Record<string, OrchestrationSlot> = {};
-          if (!situation) {
-            return result;
-          }
-
-          for (const threshold of situation.thresholds) {
-            result[threshold.id] = {
-              spec: threshold,
-              assignment: assignments[threshold.id] ?? null,
-            };
+          for (const threshold of thresholds) {
+            result[threshold.id] = this._createSlot(threshold);
           }
 
           return result;
@@ -124,11 +126,9 @@ export class RecipeOrchestration
           const slotTargetsByPath: Record<string, string> = {};
           for (const threshold of situation.thresholds) {
             const assignment = assignments[threshold.id];
-            if (!assignment) {
-              return null;
+            if (assignment) {
+              slotTargetsByPath[threshold.id] = assignment.path;
             }
-
-            slotTargetsByPath[threshold.id] = assignment.path;
           }
 
           return {
@@ -172,6 +172,57 @@ export class RecipeOrchestration
     if (!this._situationIsAvailable(this._situation$.value, filter)) {
       this._situation$.next(null);
     }
+  }
+
+  private _createSlot(spec: SphereSpec): OrchestrationSlot {
+    let availableElementStacks$: Observable<readonly ElementStackModel[]>;
+    // HACK: We are currently designing around skill recipes, that have this as a common requirements.
+    // We need a better way to handle this, probably by detecting the case where no other slots can accept this requirement.
+    const skillRequirement = Object.keys(this._recipe.requirements).find((x) =>
+      x.startsWith("s.")
+    );
+    if (spec.id === "s" && skillRequirement) {
+      availableElementStacks$ = this._gameModel.visibleElementStacks$.pipe(
+        mapArrayItemsCached((stack) =>
+          stack.elementId$.pipe(map((elementId) => ({ elementId, stack })))
+        ),
+        observeAll(),
+        map((stacks) =>
+          stacks
+            .filter(({ elementId }) => elementId === skillRequirement)
+            .map(({ stack }) => stack)
+        ),
+        shareReplay(1)
+      );
+    } else {
+      availableElementStacks$ = this._gameModel.visibleElementStacks$.pipe(
+        filterItemObservations((item) => sphereMatchesToken(spec, item)),
+        map((stacks) =>
+          stacks.filter((stack) =>
+            Object.keys(this._recipe.requirements).some((r) =>
+              // FIXME: use aspects$
+              Object.keys(stack.aspects).includes(r)
+            )
+          )
+        ),
+        shareReplay(1)
+      );
+    }
+
+    return {
+      spec,
+      locked: false,
+      assignment$: this._slotAssignments$.pipe(
+        map((assignments) => assignments[spec.id] ?? null)
+      ),
+      availableElementStacks$,
+      assign: (element) => {
+        this._slotAssignments$.next({
+          ...this._slotAssignments$.value,
+          [spec.id]: element,
+        });
+      },
+    };
   }
 
   private _situationIsAvailable(
