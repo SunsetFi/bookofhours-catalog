@@ -5,7 +5,31 @@ It relies on the [Secret Histories API](https://github.com/RoboPhred/secrethisto
 
 ![ALT](/preview/preview.png)
 
-It has been designed to provide an automatic spreadsheet, akin to those we might make manually while playing the game. It has been designed in a way as to not give any spoilers. Only items in unlocked rooms are shown, and only crafting recipes that have been discovered will be displayed.
+It has been designed to provide an automatic spreadsheet, akin to those we might make manually while playing the game. It has been designed in a way as to not give any spoilers. Only items in unlocked rooms are shown, and only crafting recipes that have been discovered will be displayed. It can additionally interact with the game engine itself, to queue up recipes or focus the camera on in-game items.
+
+## Building
+
+This project uses [NodeJS](https://nodejs.org) as a build engine.
+
+Once installed, the project dependencies can be installed with `npm install`, and the project itself can be built with `npm run build`.
+
+## Dependencies
+
+This project requires [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) to be installed in Book of Hours. Without it, this project cannot access the game engine and will be unable
+to display any data.
+
+## How to run
+
+This project can be ran in one of two ways:
+
+### From the dev server
+
+Run `npm start` in the root folder of the project to compile and run the webapp. It will then be available at `http://localhost:8080/catalogue`
+
+### From the Secret Histories API
+
+Once built, the project contents can be placed into the `web-content/catalogue` folder of the Secret Histories API. This will cause the API to self-host the website.
+Once done, it can be accessed from `http://localhost:8081/catalogue`
 
 ## Features
 
@@ -87,6 +111,7 @@ Displays comforts and wall art around the house
 
 Displays all discovered crafting recipes and what they craft.
 
+- Skill recipe planner / executor
 - Name
 - Aspects (aspects of the item that is crafted, including powers and other attributes)
 - Skill (the skill card needed to craft it)
