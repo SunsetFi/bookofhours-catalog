@@ -1,22 +1,24 @@
 # Hush House Catalogue
 
-This is a cataloging and auto-spreadsheet webapp that adds searching, sorting, and filtering capabilities to [Book of Hours](https://store.steampowered.com/app/1028310/BOOK_OF_HOURS/).
+This is a spoiler-free cataloging and auto-spreadsheet webapp that adds searching, sorting, and filtering capabilities to [Book of Hours](https://store.steampowered.com/app/1028310/BOOK_OF_HOURS/).
 It relies on the [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) mod, which provides game data access and hosts the webapp.
 
 ![ALT](/preview/preview.png)
 
-It has been designed to provide an automatic spreadsheet, akin to those we might make manually while playing the game. It has been designed in a way as to not give any spoilers. Only items in unlocked rooms are shown, and only crafting recipes that have been discovered will be displayed. It can additionally interact with the game engine itself, to queue up recipes or focus the camera on in-game items.
+It has been designed to provide an automatic spreadsheet, akin to those we might make manually while playing the game. It can additionally interact with the game engine itself, to queue up recipes or focus the camera on in-game items.
 
-## Building
-
-This project uses [NodeJS](https://nodejs.org) as a build engine.
-
-Once installed, the project dependencies can be installed with `npm install`, and the project itself can be built with `npm run build`.
+All information given is restricted to information you would have had already. This is done by only showing recipes you have discovered, items in rooms that are unlocked, cards that you currently have, and other similar restrictions.
 
 ## Dependencies
 
 This project requires [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) to be installed in Book of Hours. Without it, this project cannot access the game engine and will be unable
 to display any data.
+
+## Building the project
+
+This project uses [NodeJS](https://nodejs.org) as a build engine.
+
+Once installed, the project dependencies can be installed with `npm install`, and the project itself can be built with `npm run build`.
 
 ## How to run
 
@@ -28,8 +30,12 @@ Run `npm start` in the root folder of the project to compile and run the webapp.
 
 ### From the Secret Histories API
 
-Once built, the project contents can be placed into the `web-content/catalogue` folder of the Secret Histories API. This will cause the API to self-host the website.
-Once done, it can be accessed from `http://localhost:8081/catalogue`
+Once built, the project contents can be placed into the `/web-content/catalogue` folder of the Secret Histories API mod. This will cause the API to self-host the website.
+Once done, it can be accessed from `http://localhost:8081/catalogue` while the game is running.
+
+## Notes on Usage
+
+This project is best used in the browser of your choice while the game runs in windowed mode. However, the website can also be accessed from the Steam Overlay for fullscreen use.
 
 ## Features
 
