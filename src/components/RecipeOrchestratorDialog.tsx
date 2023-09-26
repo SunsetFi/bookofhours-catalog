@@ -8,6 +8,13 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+
+import { powerAspects } from "@/aspects";
 
 import { useDIDependency } from "@/container";
 import { Null$, emptyObjectObservable, useObservation } from "@/observables";
@@ -22,8 +29,6 @@ import SituationSelectField from "./SituationSelectField";
 import AspectsList from "./AspectsList";
 import ElementStackSelectField from "./ElementStackSelectField";
 import AspectIcon from "./AspectIcon";
-import { Button } from "@mui/material";
-import { powerAspects } from "@/aspects";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -31,6 +36,7 @@ const RecipeOrchestratorDialog = () => {
   const orchestration = useObservation(orchestrator.orchestration$);
   const aspectRequirements =
     useObservation(orchestrator.aspectRequirements$) ?? {};
+  const canExecute = useObservation(orchestrator.canExecute$) ?? false;
 
   const recipe = useObservation(orchestration?.recipe$ ?? Null$);
   const recipeLabel = useObservation(recipe?.label$ ?? Null$);
@@ -54,10 +60,11 @@ const RecipeOrchestratorDialog = () => {
       fullWidth
       maxWidth="md"
     >
-      <DialogTitle>
+      <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Typography variant="h5" sx={{ mr: 2 }}>
-            {recipeLabel}
+            {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
+            {recipeLabel?.toLocaleUpperCase()}
           </Typography>
           <AspectsList
             aspects={mapValues(
@@ -67,6 +74,12 @@ const RecipeOrchestratorDialog = () => {
             iconSize={30}
           />
         </Box>
+        <IconButton
+          sx={{ ml: "auto", alignSelf: "flex-start" }}
+          onClick={() => orchestrator.cancel()}
+        >
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
       <DialogContent
         sx={{
@@ -109,9 +122,16 @@ const RecipeOrchestratorDialog = () => {
           ))}
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={() => orchestrator.cancel()}>Cancel</Button>
-        <Button onClick={() => orchestrator.apply()}>Apply</Button>
+      <DialogActions sx={{ display: "flex", flexDirection: "row" }}>
+        <Button sx={{ mr: "auto" }} onClick={() => orchestrator.cancel()}>
+          Cancel
+        </Button>
+        <ButtonGroup>
+          <Button onClick={() => orchestrator.apply()}>Prepare Recipe</Button>
+          <Button disabled={!canExecute} onClick={() => orchestrator.apply()}>
+            Start Recipe
+          </Button>
+        </ButtonGroup>
       </DialogActions>
     </Dialog>
   );

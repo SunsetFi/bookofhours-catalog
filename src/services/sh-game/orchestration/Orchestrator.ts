@@ -11,18 +11,9 @@ import {
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
-import {
-  EmptyArray$,
-  Null$,
-  emptyObjectObservable,
-  observeAll,
-} from "@/observables";
+import { Null$, emptyObjectObservable, observeAll } from "@/observables";
 
-import {
-  Compendium,
-  ElementModel,
-  RecipeModel,
-} from "@/services/sh-compendium";
+import { Compendium, RecipeModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
 import { Scheduler } from "@/services/scheduler";
 
@@ -119,7 +110,6 @@ export class Orchestrator {
 
           for (const aspect of Object.keys(reqs)) {
             if (reqs[aspect].current < reqs[aspect].required) {
-              console.log("Cannot execute - not enough aspect", aspect);
               return false;
             }
           }
@@ -166,10 +156,19 @@ export class Orchestrator {
         map(([requirements, aspects]) => {
           const result: Record<string, AspectRequirement> = {};
           for (const aspect of Object.keys(requirements)) {
+            let required = Number(requirements[aspect]);
+            if (required <= 0) {
+              continue;
+            }
+
+            // TODO: This will be the name of an aspect.  Calculate that on our end given our inputs.
+            if (Number.isNaN(required)) {
+              required = 1;
+            }
+
             result[aspect] = {
               current: 0,
-              // This can sometimes be calculations, but we can ignore that for now.
-              required: Number(requirements[aspect]),
+              required,
             };
           }
 
@@ -190,14 +189,19 @@ export class Orchestrator {
     return this._aspectRequirements$;
   }
 
-  async beginRecipeOrchestration(recipeId: string) {
+  async beginRecipeOrchestration(
+    recipeId: string,
+    desiredElementIds: readonly string[] = []
+  ) {
     const recipe = this._compendium.getRecipeById(recipeId);
     const exists = await firstValueFrom(recipe.exists$);
     if (!exists) {
       return;
     }
 
-    this._orchestration$.next(new RecipeOrchestration(recipe, this._gameModel));
+    this._orchestration$.next(
+      new RecipeOrchestration(recipe, this._gameModel, desiredElementIds)
+    );
   }
 
   cancel() {

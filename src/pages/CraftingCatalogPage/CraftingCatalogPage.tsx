@@ -12,8 +12,6 @@ import {
 import { Aspects } from "secrethistories-api";
 
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import CraftIcon from "@mui/icons-material/Settings";
 
 import { useDIDependency } from "@/container";
 
@@ -21,6 +19,7 @@ import { mapArrayItemsCached } from "@/observables";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 import { GameModel } from "@/services/sh-game";
+import { Orchestrator } from "@/services/sh-game/orchestration";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
@@ -32,7 +31,7 @@ import ObservableDataGrid, {
   aspectsObservableColumnDef,
   textColumnDef,
 } from "@/components/ObservableDataGrid";
-import { Orchestrator } from "@/services/sh-game/orchestration";
+import CraftIconButton from "@/components/CraftIconButton";
 
 interface CraftableModel {
   id: string;
@@ -126,9 +125,7 @@ const CraftingCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <IconButton onClick={() => value.craft()}>
-              <CraftIcon />
-            </IconButton>
+            <CraftIconButton onClick={() => value.craft()} />
           </Box>
         ),
       } as ObservableDataGridColumnDef<CraftableModel>,

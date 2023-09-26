@@ -11,9 +11,6 @@ import { Aspects } from "secrethistories-api";
 import { pick, first } from "lodash";
 
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-
-import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { powerAspects } from "@/aspects";
 
@@ -27,6 +24,7 @@ import {
 } from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
+import { Orchestrator } from "@/services/sh-game/orchestration";
 
 import {
   ElementStackModel,
@@ -42,6 +40,7 @@ import {
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
+import FocusIconButton from "@/components/FocusIconButton";
 
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
@@ -57,6 +56,7 @@ import ObservableDataGrid, {
   aspectsColumnDef,
   aspectsFilter,
 } from "@/components/ObservableDataGrid";
+import CraftIconButton from "@/components/CraftIconButton";
 
 interface BookModel
   extends ModelWithAspects,
@@ -64,15 +64,17 @@ interface BookModel
     ModelWithIconUrl,
     ModelWithLabel,
     ModelWithParentTerrain {
-  focus(): void;
   id: string;
   memoryLabel$: Observable<string | null>;
   memoryAspects$: Observable<Aspects>;
+  focus(): void;
+  read(): void;
 }
 
 function elementStackToBook(
   elementStack: ElementStackModel,
-  compendium: Compendium
+  compendium: Compendium,
+  orchestrator: Orchestrator
 ): BookModel {
   const memory$ = combineLatest([
     elementStack.aspects$,
@@ -143,18 +145,44 @@ function elementStackToBook(
     memoryLabel$,
     memoryAspects$,
     focus: () => elementStack.focus(),
+    read: () => {
+      const mystery = extractMysteryAspect(elementStack.aspects);
+      const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
+        aspectId.startsWith("mastery.")
+      );
+      orchestrator.beginRecipeOrchestration(
+        isMastered
+          ? `study.mystery.${mystery}.mastered`
+          : `study.mystery.${mystery}.mastering.begin`,
+        [elementStack.elementId]
+      );
+    },
   };
+}
+
+function extractMysteryAspect(aspects: Aspects): string | null {
+  let mystery = Object.keys(aspects).find((aspectId) =>
+    aspectId.startsWith("mystery.")
+  );
+  if (!mystery) {
+    return null;
+  }
+
+  return mystery.substring(8);
 }
 
 const BookCatalogPage = () => {
   const model = useDIDependency(GameModel);
   const compendium = useDIDependency(Compendium);
+  const orchestrator = useDIDependency(Orchestrator);
 
   const items$ = React.useMemo(
     () =>
       model.visibleElementStacks$.pipe(
         filterHasAspect("readable"),
-        mapArrayItemsCached((item) => elementStackToBook(item, compendium))
+        mapArrayItemsCached((item) =>
+          elementStackToBook(item, compendium, orchestrator)
+        )
       ),
     [model]
   );
@@ -185,9 +213,8 @@ const BookCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <IconButton onClick={() => value.focus()}>
-              <VisibilityIcon />
-            </IconButton>
+            <FocusIconButton onClick={() => value.focus()} />
+            <CraftIconButton onClick={() => value.read()} />
           </Box>
         ),
       } as ObservableDataGridColumnDef<BookModel>,

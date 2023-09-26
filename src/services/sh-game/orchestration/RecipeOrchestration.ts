@@ -30,6 +30,7 @@ import {
   mapArrayItemsCached,
   observeAll,
 } from "@/observables";
+
 import { sphereMatchesToken } from "../observables";
 
 export class RecipeOrchestration
@@ -46,8 +47,19 @@ export class RecipeOrchestration
 
   constructor(
     private readonly _recipe: RecipeModel,
-    private readonly _gameModel: GameModel
-  ) {}
+    private readonly _gameModel: GameModel,
+    private readonly _desiredElementIds: readonly string[] = []
+  ) {
+    // Select a default situation.  This is hackish
+    firstValueFrom(this.availableSituations$).then((situations) => {
+      const situation = situations[0];
+      if (!situation) {
+        return;
+      }
+
+      this._situation$.next(situation);
+    });
+  }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
   get recipe$(): Observable<RecipeModel | null> {
@@ -170,15 +182,18 @@ export class RecipeOrchestration
           )
         ),
         map((stacks) =>
-          sortBy(stacks, (stack) =>
-            aspectsMagnitude(pick(stack.aspects, requirementKeys))
-          ).reverse()
+          sortBy(stacks, [
+            (stack) =>
+              this._desiredElementIds.includes(stack.elementId) ? 1 : 0,
+            (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
+            (stack) => aspectsMagnitude(stack.aspects),
+          ]).reverse()
         ),
         shareReplay(1)
       );
     }
 
-    // This is hackish
+    // Select a default value.  This is hackish.
     firstValueFrom(availableElementStacks$).then((stacks) => {
       const item = stacks[0];
       if (!item) {
@@ -218,15 +233,25 @@ export class RecipeOrchestration
       ),
     ];
 
+    // Book reading recipes are "*consider", which is strange...
+    // This doesn't fit the pattern of the workstations where it can be used.
+    // I guess * at the start means any?
+    // Lets special case it for now.
     if (this._recipe.actionId) {
-      if (this._recipe.actionId?.endsWith("*")) {
-        const partial = this._recipe.actionId.slice(0, -1);
-        if (!situation.verbId.startsWith(partial)) {
-          return false;
-        }
-      } else if (situation.verbId != this._recipe.actionId) {
+      const comparison = new RegExp(
+        `^${this._recipe.actionId.replace("*", "(?:.*)")}$`
+      );
+      if (!comparison.test(situation.verbId)) {
         return false;
       }
+      // if (this._recipe.actionId?.endsWith("*")) {
+      //   const partial = this._recipe.actionId.slice(0, -1);
+      //   if (!situation.verbId.startsWith(partial)) {
+      //     return false;
+      //   }
+      // } else if (situation.verbId != this._recipe.actionId) {
+      //   return false;
+      // }
     }
 
     // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.

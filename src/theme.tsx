@@ -29,9 +29,9 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          // TODO: Only for text buttons?
-          fontSize: "0.6em",
-          fontWeight: "bold",
+          fontSize: "0.9em",
+          // fontSize: "0.6em",
+          // fontWeight: "bold",
         },
       },
     },

@@ -2,9 +2,6 @@ import * as React from "react";
 import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-
-import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { useDIDependency } from "@/container";
 
@@ -34,6 +31,7 @@ import ObservableDataGrid, {
   multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
+import FocusIconButton from "@/components/FocusIconButton";
 
 const MaterialsCatalogPage = () => {
   const model = useDIDependency(GameModel);
@@ -68,9 +66,7 @@ const MaterialsCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <IconButton onClick={() => value.focus()}>
-              <VisibilityIcon />
-            </IconButton>
+            <FocusIconButton onClick={() => value.focus()} />
           </Box>
         ),
       } as ObservableDataGridColumnDef<ElementStackModel>,
