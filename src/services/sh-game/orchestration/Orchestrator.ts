@@ -5,7 +5,6 @@ import {
   combineLatest,
   firstValueFrom,
   map,
-  mergeMap,
   shareReplay,
   startWith,
 } from "rxjs";
@@ -17,7 +16,6 @@ import {
   EmptyObject$,
   mergeMapIf,
   mergeMapIfNotNull,
-  observableObjectOrEmpty,
   observeAll,
 } from "@/observables";
 
@@ -25,8 +23,8 @@ import { Compendium, RecipeModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
 import { Scheduler } from "@/services/scheduler";
 
-import { RunningSource } from "../sources";
-import { GameModel } from "../GameModel";
+import { RunningSource } from "../sources/RunningSource";
+import { TokensSource } from "../sources/TokensSource";
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
 
@@ -62,7 +60,7 @@ export class Orchestrator {
     @inject(API) private readonly _api: API,
     @inject(Scheduler) private readonly _scheduler: Scheduler,
     @inject(Compendium) private readonly _compendium: Compendium,
-    @inject(GameModel) private readonly _gameModel: GameModel
+    @inject(TokensSource) private readonly _tokensSource: TokensSource
   ) {
     runningSource.isRunning$.subscribe((isRunning) => {
       if (!isRunning) {
@@ -173,7 +171,11 @@ export class Orchestrator {
     }
 
     this._orchestration$.next(
-      new RecipeOrchestration(recipe, this._gameModel, desiredElementIds ?? [])
+      new RecipeOrchestration(
+        recipe,
+        this._tokensSource,
+        desiredElementIds ?? []
+      )
     );
   }
 

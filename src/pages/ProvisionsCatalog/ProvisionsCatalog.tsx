@@ -11,7 +11,7 @@ import { observeAll, useObservation } from "@/observables";
 
 import {
   ElementStackModel,
-  GameModel,
+  TokensSource,
   filterHasAnyAspect,
 } from "@/services/sh-game";
 
@@ -31,22 +31,24 @@ import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import FocusIconButton from "@/components/FocusIconButton";
 
 const ProvisionsCatalog = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
     () =>
-      model.visibleElementStacks$.pipe(filterHasAnyAspect(provisionsAspects)),
-    [model]
+      tokensSource.visibleElementStacks$.pipe(
+        filterHasAnyAspect(provisionsAspects)
+      ),
+    [tokensSource]
   );
 
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo(

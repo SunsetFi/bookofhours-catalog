@@ -11,7 +11,7 @@ import { powerAspects } from "@/aspects";
 
 import {
   ElementStackModel,
-  GameModel,
+  TokensSource,
   filterHasAspect,
 } from "@/services/sh-game";
 
@@ -33,21 +33,21 @@ import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 
 const ToolsCatalogPage = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
-    () => model.visibleElementStacks$.pipe(filterHasAspect("tool")),
-    [model]
+    () => tokensSource.visibleElementStacks$.pipe(filterHasAspect("tool")),
+    [tokensSource]
   );
 
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo(

@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from "rxjs";
 
 import { Compendium } from "../sh-compendium";
 import { Orchestrator } from "../sh-game/orchestration";
-import { GameModel } from "../sh-game";
+import { TokensSource } from "../sh-game";
 
 import { PinItemRequest } from "./types";
 import { PinnedItemModel } from "./PinnedItemModel";
@@ -14,7 +14,7 @@ export class Pinboard {
   private readonly _pins$ = new BehaviorSubject<readonly PinnedItemModel[]>([]);
 
   constructor(
-    @inject(GameModel) private readonly _gameModel: GameModel,
+    @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(Orchestrator) private readonly _orchestrator: Orchestrator
   ) {}
@@ -33,7 +33,7 @@ export class Pinboard {
         item.produce
           ? this._orchestrator.requestOrchestration(item.produce)
           : null,
-      this._gameModel,
+      this._tokensSource,
       this._compendium,
       () => this.remove(model)
     );

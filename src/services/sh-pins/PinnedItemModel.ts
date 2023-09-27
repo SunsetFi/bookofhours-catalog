@@ -7,14 +7,15 @@ import {
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
-import { ElementStackModel, GameModel } from "../sh-game";
 import { Compendium, ElementModel } from "../sh-compendium";
+import { ElementStackModel } from "../sh-game";
+import { TokensSource } from "../sh-game/sources/TokensSource";
 
 export class PinnedItemModel {
   constructor(
     private readonly _item: ElementModel | ElementStackModel,
     private readonly _produce: Function,
-    private readonly _gameModel: GameModel,
+    private readonly _tokensSource: TokensSource,
     private readonly _compendium: Compendium,
     private readonly _remove: (item: PinnedItemModel) => void
   ) {
@@ -78,7 +79,7 @@ export class PinnedItemModel {
 
     if (this._item instanceof ElementModel) {
       const tokens = await firstValueFrom(
-        this._gameModel.visibleElementStacks$
+        this._tokensSource.visibleElementStacks$
       );
       return tokens.filter((t) => t.elementId == this._item.id);
     }

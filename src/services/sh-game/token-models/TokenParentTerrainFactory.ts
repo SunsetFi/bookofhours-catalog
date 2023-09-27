@@ -6,7 +6,7 @@ import {
   shareReplay,
 } from "rxjs";
 import { Token } from "secrethistories-api";
-import { inject, injectable, singleton } from "microinject";
+import { Container, inject, injectable, singleton } from "microinject";
 
 import {
   distinctUntilShallowArrayChanged,
@@ -15,7 +15,7 @@ import {
   observeAll,
 } from "@/observables";
 
-import { TokensSource } from "../sources";
+import { TokensSource } from "../sources/TokensSource";
 
 import {
   ConnectedTerrainModel,
@@ -25,19 +25,27 @@ import {
 @injectable()
 @singleton()
 export class TokenParentTerrainFactory {
-  private readonly _terrainsByPath$: Observable<
+  // We have a circular dependency here due to needing tokens from tokenSource, but tokenSource indirectly needing us to make the models.
+  // Since we cannot inject TokensSource, just grab the container and get it later.
+  constructor(@inject(Container) private readonly _container: Container) {}
+
+  private __terrainsByPath$: Observable<
     Record<string, ConnectedTerrainModel>
-  >;
-  constructor(@inject(TokensSource) tokensSource: TokensSource) {
-    this._terrainsByPath$ = tokensSource.tokens$.pipe(
-      filterItems(isConnectedTerrainModel),
-      distinctUntilShallowArrayChanged(),
-      mapArrayItemsCached((t) =>
-        t.path$.pipe(map((path) => [path, t] as const))
-      ),
-      observeAll(),
-      map((items) => Object.fromEntries(items))
-    );
+  > | null = null;
+  private get _terrainsByPath$() {
+    if (this.__terrainsByPath$ === null) {
+      this.__terrainsByPath$ = this._container.get(TokensSource).tokens$.pipe(
+        filterItems(isConnectedTerrainModel),
+        distinctUntilShallowArrayChanged(),
+        mapArrayItemsCached((t) =>
+          t.path$.pipe(map((path) => [path, t] as const))
+        ),
+        observeAll(),
+        map((items) => Object.fromEntries(items))
+      );
+    }
+
+    return this.__terrainsByPath$;
   }
 
   createParentTerrainObservable(

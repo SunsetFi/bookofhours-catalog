@@ -1,16 +1,15 @@
-import { inject, injectable, provides, singleton } from "microinject";
+import { inject, injectable, singleton } from "microinject";
 import { BehaviorSubject, Observable } from "rxjs";
 import { GameSpeed } from "secrethistories-api";
 
 import { API } from "@/services/sh-api";
 import { Scheduler } from "@/services/scheduler";
-
-import { TimeSource } from "./services";
+import { useDIDependency } from "@/container";
+import { useObservation } from "@/observables";
 
 @injectable()
 @singleton()
-@provides(TimeSource)
-export class TimeSourceImpl implements TimeSource {
+export class TimeSource {
   private readonly _gameSpeed$ = new BehaviorSubject<GameSpeed | null>(null);
 
   constructor(
@@ -30,4 +29,9 @@ export class TimeSourceImpl implements TimeSource {
       this._gameSpeed$.next(speed);
     }
   }
+}
+
+export function useGameSpeed(): GameSpeed | null {
+  const model = useDIDependency(TimeSource);
+  return useObservation(model.gameSpeed$) ?? null;
 }

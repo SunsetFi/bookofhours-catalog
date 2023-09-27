@@ -13,8 +13,8 @@ import { observeAll, useObservation } from "@/observables";
 import { furnishingAspects, powerAspects } from "@/aspects";
 
 import {
-  GameModel,
   ElementStackModel,
+  TokensSource,
   filterHasAspect,
 } from "@/services/sh-game";
 
@@ -36,21 +36,24 @@ import ObservableDataGrid, {
 import PageContainer from "@/components/PageContainer";
 
 const FurnishingsCatalogPage = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
-    () => model.visibleElementStacks$.pipe(filterHasAspect(furnishingAspects)),
-    [model]
+    () =>
+      tokensSource.visibleElementStacks$.pipe(
+        filterHasAspect(furnishingAspects)
+      ),
+    [tokensSource]
   );
 
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo(

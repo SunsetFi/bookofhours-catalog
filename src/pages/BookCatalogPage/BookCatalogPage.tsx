@@ -24,13 +24,13 @@ import { Orchestrator } from "@/services/sh-game/orchestration";
 import { Pinboard } from "@/services/sh-pins/Pinboard";
 import {
   ElementStackModel,
-  GameModel,
   filterHasAspect,
   ModelWithAspects,
   ModelWithDescription,
   ModelWithIconUrl,
   ModelWithLabel,
   ModelWithParentTerrain,
+  TokensSource,
 } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
@@ -185,20 +185,20 @@ function extractMysteryAspect(aspects: Aspects): string | null {
 }
 
 const BookCatalogPage = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
   const compendium = useDIDependency(Compendium);
   const orchestrator = useDIDependency(Orchestrator);
   const pinboard = useDIDependency(Pinboard);
 
   const items$ = React.useMemo(
     () =>
-      model.visibleElementStacks$.pipe(
+      tokensSource.visibleElementStacks$.pipe(
         filterHasAspect("readable"),
         mapArrayItemsCached((item) =>
           elementStackToBook(item, compendium, orchestrator, pinboard)
         )
       ),
-    [model]
+    [tokensSource]
   );
 
   // We do have "auto" now, but its probably best to show
@@ -206,11 +206,11 @@ const BookCatalogPage = () => {
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo<ObservableDataGridColumnDef<BookModel>[]>(

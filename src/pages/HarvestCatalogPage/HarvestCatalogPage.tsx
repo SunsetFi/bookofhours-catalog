@@ -7,7 +7,7 @@ import { useDIDependency } from "@/container";
 
 import { observeAll, useObservation } from "@/observables";
 
-import { GameModel, SituationModel } from "@/services/sh-game";
+import { SituationModel, TokensSource } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
@@ -23,16 +23,16 @@ import ObservableDataGrid, {
 import FocusIconButton from "@/components/FocusIconButton";
 
 const HarvestCatalogPage = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
 
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo(
@@ -78,7 +78,7 @@ const HarvestCatalogPage = () => {
         <ObservableDataGrid
           sx={{ height: "100%" }}
           columns={columns}
-          items$={model.unlocekdHarvestStations$}
+          items$={tokensSource.unlockedHarvestStations$}
           filters={filters}
           onFiltersChanged={onFiltersChanged}
         />

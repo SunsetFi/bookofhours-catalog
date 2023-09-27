@@ -8,7 +8,7 @@ import { useDIDependency } from "@/container";
 
 import { useObservation } from "@/observables";
 
-import { GameModel, filterHasAnyAspect } from "@/services/sh-game";
+import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import ElementStackIcon from "./ElementStackIcon";
 
@@ -17,11 +17,11 @@ export interface HandOverviewIconsProps {
 }
 
 const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
   const elements =
     useObservation(
       () =>
-        model.visibleElementStacks$.pipe(
+        tokensSource.visibleElementStacks$.pipe(
           filterHasAnyAspect(["memory", "weather", "assistance"])
         ),
       []

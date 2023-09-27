@@ -1,18 +1,36 @@
 import { startTransition } from "react";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
 
 import { arrayShallowEquals } from "@/utils";
 
+import {
+  distinctUntilShallowArrayChanged,
+  filterItemObservations,
+  filterItems,
+} from "@/observables";
+
 import { Scheduler, TaskUnsubscriber } from "../../scheduler";
 import { API } from "../../sh-api";
 
 import { TokenModel } from "../token-models/TokenModel";
 import { TokenModelFactory } from "../token-models/TokenModelFactory";
+import {
+  ConnectedTerrainModel,
+  isConnectedTerrainModel,
+} from "../token-models/ConnectedTerrainModel";
+import {
+  SituationModel,
+  isSituationModel,
+} from "../token-models/SituationModel";
+import {
+  ElementStackModel,
+  isElementStackModel,
+} from "../token-models/ElementStackModel";
 
-import { TokensSource, RunningSource } from "./services";
+import { RunningSource } from "./RunningSource";
 
 const spherePaths = [
   "~/portage1",
@@ -37,7 +55,7 @@ const supportedPayloadTypes = [
 @injectable()
 @singleton()
 @provides(TokensSource)
-export class TokensSourceImpl implements TokensSource {
+export class TokensSource {
   private _tokensTaskSubsciption: TaskUnsubscriber | null = null;
   private readonly _tokenModels: Map<string, TokenModel> = new Map();
 
@@ -68,6 +86,83 @@ export class TokensSourceImpl implements TokensSource {
 
   get tokens$(): Observable<readonly TokenModel[]> {
     return this._tokens$;
+  }
+
+  private _unlockedTerrains$: Observable<
+    readonly ConnectedTerrainModel[]
+  > | null = null;
+  get unlockedTerrains$(): Observable<readonly ConnectedTerrainModel[]> {
+    if (!this._unlockedTerrains$) {
+      this._unlockedTerrains$ = this._tokens$.pipe(
+        filterItems(isConnectedTerrainModel),
+        filterItemObservations((model) => model.visible$),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockedTerrains$;
+  }
+
+  private _visibleElementStacks$: Observable<
+    readonly ElementStackModel[]
+  > | null = null;
+  get visibleElementStacks$() {
+    if (this._visibleElementStacks$ === null) {
+      this._visibleElementStacks$ = this._tokens$.pipe(
+        filterItems(isElementStackModel),
+        filterItemObservations((model) => model.visible$),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._visibleElementStacks$;
+  }
+
+  private _unlockedWorkstations$: Observable<readonly SituationModel[]> | null =
+    null;
+  get unlockedWorkstations$() {
+    if (!this._unlockedWorkstations$) {
+      this._unlockedWorkstations$ = this._tokens$.pipe(
+        filterItems(isSituationModel),
+        filterItemObservations((model) => model.visible$),
+        map((situations) =>
+          situations.filter(
+            (x) =>
+              !x.verbId.startsWith("library.bed.") &&
+              !x.verbId.startsWith("garden.") &&
+              x.verbId != "world.beachcombing"
+          )
+        ),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockedWorkstations$;
+  }
+
+  private _unlockedHarvestStations$: Observable<
+    readonly SituationModel[]
+  > | null = null;
+  get unlockedHarvestStations$() {
+    if (!this._unlockedHarvestStations$) {
+      this._unlockedHarvestStations$ = this._tokens$.pipe(
+        filterItems(isSituationModel),
+        filterItemObservations((model) => model.visible$),
+        map((situations) =>
+          situations.filter(
+            (x) =>
+              x.verbId.startsWith("garden.") || x.verbId == "world.beachcombing"
+          )
+        ),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockedHarvestStations$;
   }
 
   private async _pollTokens() {

@@ -7,7 +7,6 @@ import {
   shareReplay,
   BehaviorSubject,
   tap,
-  of,
   firstValueFrom,
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
@@ -19,8 +18,7 @@ import { useDIDependency } from "@/container";
 import { mapArrayItemsCached } from "@/observables";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
-import { GameModel } from "@/services/sh-game";
-import { Orchestrator } from "@/services/sh-game/orchestration";
+import { CharacterSource, Orchestrator } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
@@ -105,17 +103,17 @@ function recipeToCraftableModel(
 
 const CraftingCatalogPage = () => {
   const compendium = useDIDependency(Compendium);
-  const model = useDIDependency(GameModel);
+  const characterSource = useDIDependency(CharacterSource);
   const orchestrator = useDIDependency(Orchestrator);
 
   const elements$ = React.useMemo(
     () =>
-      model.unlockedRecipes$.pipe(
+      characterSource.ambittableRecipes$.pipe(
         mapArrayItemsCached((item) =>
           recipeToCraftableModel(item, compendium, orchestrator)
         )
       ),
-    [model, compendium, orchestrator]
+    [characterSource, compendium, orchestrator]
   );
 
   const columns = React.useMemo(

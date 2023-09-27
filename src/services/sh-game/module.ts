@@ -1,27 +1,22 @@
 import { ContainerModule } from "microinject";
 
 import { Orchestrator } from "./orchestration/Orchestrator";
-import { CharacterSourceImpl } from "./sources/CharacterSourceImpl";
-import { CraftingSourceImpl } from "./sources/CraftingSourceImpl";
-import { RunningSourceImpl } from "./sources/RunningSourceImpl";
-import { TimeSourceImpl } from "./sources/TimeSourceImpl";
-import { TokensSourceImpl } from "./sources/TokensSourceImpl";
+import { CharacterSource } from "./sources/CharacterSource";
+import { RunningSource } from "./sources/RunningSource";
+import { TimeSource } from "./sources/TimeSource";
+import { TokensSource } from "./sources/TokensSource";
 
 import { TokenModelFactory } from "./token-models/TokenModelFactory";
 import { TokenVisibilityFactory } from "./token-models/TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./token-models/TokenParentTerrainFactory";
 
-import { GameModel } from "./GameModel";
-
 export default new ContainerModule((bind) => {
   bind(Orchestrator);
-  bind(CharacterSourceImpl);
-  bind(CraftingSourceImpl);
-  bind(RunningSourceImpl);
-  bind(TokensSourceImpl);
-  bind(TimeSourceImpl);
+  bind(CharacterSource);
+  bind(RunningSource);
+  bind(TokensSource);
+  bind(TimeSource);
   bind(TokenModelFactory);
   bind(TokenVisibilityFactory);
   bind(TokenParentTerrainFactory);
-  bind(GameModel);
 });

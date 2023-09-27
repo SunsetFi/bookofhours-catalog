@@ -6,7 +6,7 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects } from "@/aspects";
 
-import { GameModel, filterHasAnyAspect } from "@/services/sh-game";
+import { CharacterSource, filterHasAnyAspect } from "@/services/sh-game";
 import { ElementModel } from "@/services/sh-compendium";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
@@ -21,11 +21,14 @@ import ObservableDataGrid, {
 import PageContainer from "@/components/PageContainer";
 
 const MemoriesCompendiumPage = () => {
-  const model = useDIDependency(GameModel);
+  const characterSource = useDIDependency(CharacterSource);
 
   const elements$ = React.useMemo(
-    () => model.uniqueElementsManifested$.pipe(filterHasAnyAspect(["memory"])),
-    [model]
+    () =>
+      characterSource.uniqueElementsManifested$.pipe(
+        filterHasAnyAspect(["memory"])
+      ),
+    [characterSource]
   );
 
   const columns = React.useMemo(

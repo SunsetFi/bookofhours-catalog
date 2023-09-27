@@ -1,15 +1,17 @@
 import { inject, injectable, provides, singleton } from "microinject";
 import { BehaviorSubject, distinctUntilChanged } from "rxjs";
 
+import { useDIDependency } from "@/container";
+
+import { useObservation } from "@/observables";
+
 import { Scheduler } from "@/services/scheduler";
 import { API } from "@/services/sh-api";
-
-import { RunningSource } from "./services";
 
 @injectable()
 @singleton()
 @provides(RunningSource)
-export class RunningSourceImpl implements RunningSource {
+export class RunningSource {
   private readonly _isRunningInternal$ = new BehaviorSubject(false);
 
   constructor(
@@ -38,4 +40,9 @@ export class RunningSourceImpl implements RunningSource {
       this._isRunningInternal$.next(false);
     }
   }
+}
+
+export function useIsRunning(): boolean | undefined {
+  const runningSource = useDIDependency(RunningSource);
+  return useObservation(runningSource.isRunning$) ?? runningSource.isRunning;
 }

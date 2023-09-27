@@ -11,11 +11,15 @@ import {
 import { SphereSpec } from "secrethistories-api";
 import { isEqual, pick, sortBy } from "lodash";
 
+import { filterItemObservations } from "@/observables";
+
 import { aspectsMagnitude, workstationFilterAspects } from "@/aspects";
 
 import { RecipeModel } from "@/services/sh-compendium";
 
-import { GameModel } from "../GameModel";
+import { sphereMatchesToken } from "../observables";
+
+import { TokensSource } from "../sources/TokensSource";
 
 import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
@@ -25,13 +29,6 @@ import {
   OrchestrationSlot,
   VariableSituationOrchestration,
 } from "./types";
-import {
-  filterItemObservations,
-  mapArrayItemsCached,
-  observeAll,
-} from "@/observables";
-
-import { sphereMatchesToken } from "../observables";
 
 export class RecipeOrchestration
   implements OrchestrationBase, VariableSituationOrchestration
@@ -47,7 +44,7 @@ export class RecipeOrchestration
 
   constructor(
     private readonly _recipe: RecipeModel,
-    private readonly _gameModel: GameModel,
+    private readonly _tokensSource: TokensSource,
     private readonly _desiredElementIds: readonly string[] = []
   ) {
     // Select a default situation.  This is hackish
@@ -83,7 +80,7 @@ export class RecipeOrchestration
   get availableSituations$(): Observable<readonly SituationModel[]> {
     if (!this._availableSituations$) {
       this._availableSituations$ = combineLatest([
-        this._gameModel.unlockedWorkstations$,
+        this._tokensSource.unlockedWorkstations$,
         this._aspectsFilter$,
       ]).pipe(
         map(([workstations, aspectsFilter]) =>
@@ -153,27 +150,28 @@ export class RecipeOrchestration
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
     const requirementKeys = Object.keys(this._recipe.requirements);
 
-    const availableElementStacks$ = this._gameModel.visibleElementStacks$.pipe(
-      filterItemObservations((item) => sphereMatchesToken(spec, item)),
-      filterItemObservations((item) =>
-        item.aspectsAndSelf$.pipe(
-          map((aspects) =>
-            Object.keys(this._recipe.requirements).some((r) =>
-              Object.keys(aspects).includes(r)
+    const availableElementStacks$ =
+      this._tokensSource.visibleElementStacks$.pipe(
+        filterItemObservations((item) => sphereMatchesToken(spec, item)),
+        filterItemObservations((item) =>
+          item.aspectsAndSelf$.pipe(
+            map((aspects) =>
+              Object.keys(this._recipe.requirements).some((r) =>
+                Object.keys(aspects).includes(r)
+              )
             )
           )
-        )
-      ),
-      map((stacks) =>
-        sortBy(stacks, [
-          (stack) =>
-            this._desiredElementIds.includes(stack.elementId) ? 1 : 0,
-          (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
-          (stack) => aspectsMagnitude(stack.aspects),
-        ]).reverse()
-      ),
-      shareReplay(1)
-    );
+        ),
+        map((stacks) =>
+          sortBy(stacks, [
+            (stack) =>
+              this._desiredElementIds.includes(stack.elementId) ? 1 : 0,
+            (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
+            (stack) => aspectsMagnitude(stack.aspects),
+          ]).reverse()
+        ),
+        shareReplay(1)
+      );
 
     // Select a default value.  This is hackish.
     firstValueFrom(availableElementStacks$).then((stacks) => {

@@ -10,8 +10,8 @@ import { observeAll, useObservation } from "@/observables";
 import { materialAspects, powerAspects } from "@/aspects";
 
 import {
-  GameModel,
   ElementStackModel,
+  TokensSource,
   filterHasAspect,
 } from "@/services/sh-game";
 
@@ -34,22 +34,23 @@ import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 
 const MaterialsCatalogPage = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
     // Much more than just materials.  This is whatever I find useful to Make Things With
-    () => model.visibleElementStacks$.pipe(filterHasAspect(materialAspects)),
-    [model]
+    () =>
+      tokensSource.visibleElementStacks$.pipe(filterHasAspect(materialAspects)),
+    [tokensSource]
   );
 
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo(

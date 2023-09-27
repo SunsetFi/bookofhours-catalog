@@ -10,8 +10,8 @@ import { observeAll, useObservation } from "@/observables";
 import { powerAspects } from "@/aspects";
 
 import {
-  GameModel,
   ElementStackModel,
+  TokensSource,
   filterHasAspect,
 } from "@/services/sh-game";
 
@@ -32,21 +32,21 @@ import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 
 const ThingsCatalogPage = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
-    () => model.visibleElementStacks$.pipe(filterHasAspect("thing")),
-    [model]
+    () => tokensSource.visibleElementStacks$.pipe(filterHasAspect("thing")),
+    [tokensSource]
   );
 
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo(

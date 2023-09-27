@@ -9,7 +9,7 @@ import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
-import { GameModel, SituationModel } from "@/services/sh-game";
+import { SituationModel, TokensSource } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
@@ -28,18 +28,21 @@ import ObservableDataGrid, {
 import FocusIconButton from "@/components/FocusIconButton";
 
 const WorkstationCatalogPage = () => {
-  const model = useDIDependency(GameModel);
+  const tokensSource = useDIDependency(TokensSource);
 
-  const elements$ = React.useMemo(() => model.unlockedWorkstations$, [model]);
+  const elements$ = React.useMemo(
+    () => tokensSource.unlockedWorkstations$,
+    [tokensSource]
+  );
 
   const locations =
     useObservation(
       () =>
-        model.unlockedTerrains$.pipe(
+        tokensSource.unlockedTerrains$.pipe(
           map((terrains) => terrains.map((terrain) => terrain.label$)),
           observeAll()
         ),
-      [model]
+      [tokensSource]
     ) ?? [];
 
   const columns = React.useMemo(
