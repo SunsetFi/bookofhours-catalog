@@ -11,7 +11,7 @@ import {
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
-import { Null$, emptyObjectObservable, observeAll } from "@/observables";
+import { Null$, observableObjectOrEmpty, observeAll } from "@/observables";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
@@ -20,10 +20,10 @@ import { Scheduler } from "@/services/scheduler";
 import { RunningSource } from "../sources";
 import { GameModel } from "../GameModel";
 import { SituationModel } from "../token-models/SituationModel";
-
-import { AspectRequirement, Orchestration, OrchestrationSlot } from "./types";
-import { RecipeOrchestration } from "./RecipeOrchestration";
 import { ElementStackModel } from "../token-models/ElementStackModel";
+
+import { AspectRequirement, Orchestration } from "./types";
+import { RecipeOrchestration } from "./RecipeOrchestration";
 
 @injectable()
 @singleton()
@@ -44,51 +44,6 @@ export class Orchestrator {
         this.cancel();
       }
     });
-
-    // This was here for live updating the game as options were selected.
-    // In practice this is a bit wonky, lets leave it on-demand.
-    // this._orchestration$.subscribe((orchestration) => {
-    //   if (this._lastSync && !orchestration) {
-    //     this._api.updateTokenAtPath(this._lastSync.path, {
-    //       open: false,
-    //     });
-    //   }
-    // });
-
-    // combineLatest([
-    //   this._orchestration$.pipe(mergeMap((x) => x?.situation$ ?? Null$)),
-    //   this._orchestration$.pipe(mergeMap((x) => x?.recipe$ ?? Null$)),
-    //   this._orchestration$
-    //     .pipe(
-    //       mergeMap(
-    //         (x) =>
-    //           x?.slots$ ??
-    //           emptyObjectObservable<Record<string, OrchestrationSlot>>()
-    //       )
-    //     )
-    //     .pipe(
-    //       map((x) =>
-    //         Object.entries(x).map(([k, v]) =>
-    //           v.assignment$.pipe(
-    //             map((token) => [k, token] as [string, ElementStackModel | null])
-    //           )
-    //         )
-    //       ),
-    //       observeAll(),
-    //       map((x) =>
-    //         x.reduce((o, [k, v]) => {
-    //           o[k] = v;
-    //           return o;
-    //         }, {} as Record<string, ElementStackModel | null>)
-    //       )
-    //     ),
-    // ]).subscribe(([situation, recipe, slots]) => {
-    //   if (!situation || !recipe || !slots) {
-    //     return;
-    //   }
-
-    //   this._sync(situation, recipe, slots);
-    // });
   }
 
   get orchestration$() {
@@ -132,24 +87,14 @@ export class Orchestrator {
       this._aspectRequirements$ = combineLatest([
         this._orchestration$.pipe(
           mergeMap((o) => o?.recipe$ ?? Null$),
-          mergeMap(
-            (r) =>
-              r?.requirements$ ??
-              emptyObjectObservable<Record<string, string>>()
-          )
+          mergeMap((r) => observableObjectOrEmpty(r?.requirements$))
         ),
         this._orchestration$.pipe(
-          mergeMap(
-            (o) =>
-              o?.slots$ ??
-              emptyObjectObservable<Record<string, OrchestrationSlot>>()
-          ),
+          mergeMap((o) => observableObjectOrEmpty(o?.slots$)),
           map((slots) =>
             Object.values(slots).map((x) =>
               x.assignment$.pipe(
-                mergeMap(
-                  (x) => x?.aspectsAndSelf$ ?? emptyObjectObservable<Aspects>()
-                )
+                mergeMap((x) => observableObjectOrEmpty(x?.aspectsAndSelf$))
               )
             )
           ),
@@ -279,6 +224,7 @@ export class Orchestrator {
 
       await this._api.focusTokenAtPath(situation.path);
       await this._api.openTokenAtPath(situation.path);
+
       for (const slotId of situation.thresholds.map((x) => x.id)) {
         const slotPath = `${situation.path}/${slotId}`;
 

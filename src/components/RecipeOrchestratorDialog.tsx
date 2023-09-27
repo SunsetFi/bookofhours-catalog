@@ -17,7 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { powerAspects } from "@/aspects";
 
 import { useDIDependency } from "@/container";
-import { Null$, emptyObjectObservable, useObservation } from "@/observables";
+import { Null$, observableObjectOrEmpty, useObservation } from "@/observables";
 
 import {
   OrchestrationSlot,
@@ -44,10 +44,7 @@ const RecipeOrchestratorDialog = () => {
   const situationLabel = useObservation(situation?.label$ ?? Null$);
 
   const slots =
-    useObservation(
-      orchestration?.slots$ ??
-        emptyObjectObservable<Record<string, OrchestrationSlot>>()
-    ) ?? {};
+    useObservation(observableObjectOrEmpty(orchestration?.slots$)) ?? {};
 
   if (!orchestration) {
     return null;
