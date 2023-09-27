@@ -79,7 +79,13 @@ export class TokensSourceImpl implements TokensSource {
     const existingTokenIds = Array.from(this._tokenModels.keys());
     const foundIds = tokens.map((t) => t.id);
     const tokenIdsToRemove = difference(existingTokenIds, foundIds);
-    tokenIdsToRemove.forEach((id) => this._tokenModels.delete(id));
+    tokenIdsToRemove.forEach((id) => {
+      const token = this._tokenModels.get(id);
+      if (token) {
+        token.retire();
+        this._tokenModels.delete(id);
+      }
+    });
 
     startTransition(() => {
       this._updateTokenModels(tokens, this._tokens$);

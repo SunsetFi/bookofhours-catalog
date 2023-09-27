@@ -40,7 +40,6 @@ const ElementStackIcon = ({ elementStack }: ElementStackIconProps) => {
         <img
           src={iconUrl}
           alt={label}
-          title={label}
           style={{ width: "40px", height: "40px" }}
         />
       </Badge>

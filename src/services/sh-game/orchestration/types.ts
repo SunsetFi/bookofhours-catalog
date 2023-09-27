@@ -6,6 +6,11 @@ import { RecipeModel } from "@/services/sh-compendium";
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
 
+export interface OrchestrationRequest {
+  recipeId: string;
+  desiredElementIds?: string[];
+}
+
 export interface OrchestrationBase {
   readonly recipe$: Observable<RecipeModel | null>;
   readonly situation$: Observable<SituationModel | null>;

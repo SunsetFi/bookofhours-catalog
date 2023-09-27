@@ -83,7 +83,7 @@ const RecipeOrchestratorDialog = () => {
           display: "flex",
           flexDirection: "column",
           gap: 3,
-          height: 475,
+          height: 500,
         }}
       >
         {isVariableSituationOrchestration(orchestration) ? (

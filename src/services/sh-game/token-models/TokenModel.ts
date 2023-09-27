@@ -16,6 +16,7 @@ export abstract class TokenModel {
   private readonly _payloadType: Token["payloadType"];
 
   private readonly _token$: BehaviorSubject<Token>;
+  private readonly _retired$ = new BehaviorSubject<boolean>(false);
 
   constructor(token: Token, protected readonly _api: API) {
     this._id = token.id;
@@ -34,6 +35,14 @@ export abstract class TokenModel {
   abstract get visible$(): Observable<boolean>;
 
   abstract get parentTerrain$(): Observable<ConnectedTerrainModel | null>;
+
+  get retired$(): Observable<boolean> {
+    return this._retired$;
+  }
+
+  get retired() {
+    return this._retired$.value;
+  }
 
   private _path$: Observable<string> | null = null;
   get path$() {
@@ -63,6 +72,10 @@ export abstract class TokenModel {
   update(token: Token) {
     this._token$.next(token);
     this._onUpdate(token);
+  }
+
+  retire() {
+    this._retired$.next(true);
   }
 
   protected abstract _onUpdate(token: Token): void;

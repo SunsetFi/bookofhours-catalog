@@ -128,8 +128,6 @@ export class RecipeOrchestration
 
   selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
-
-    // TODO: Try to keep the same cards and reassign them to other slots.
     this._slotAssignments$.next({});
   }
 
@@ -153,45 +151,29 @@ export class RecipeOrchestration
   }
 
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
-    let availableElementStacks$: Observable<readonly ElementStackModel[]>;
-    // HACK: We are currently designing around skill recipes, that have this as a common requirements.
     const requirementKeys = Object.keys(this._recipe.requirements);
-    const skillRequirement = requirementKeys.find((x) => x.startsWith("s."));
-    if (spec.id === "s" && skillRequirement) {
-      availableElementStacks$ = this._gameModel.visibleElementStacks$.pipe(
-        mapArrayItemsCached((stack) =>
-          stack.elementId$.pipe(map((elementId) => ({ elementId, stack })))
-        ),
-        observeAll(),
-        map((stacks) =>
-          stacks
-            .filter(({ elementId }) => elementId === skillRequirement)
-            .map(({ stack }) => stack)
-        ),
-        shareReplay(1)
-      );
-    } else {
-      availableElementStacks$ = this._gameModel.visibleElementStacks$.pipe(
-        filterItemObservations((item) => sphereMatchesToken(spec, item)),
-        map((stacks) =>
-          stacks.filter((stack) =>
+
+    const availableElementStacks$ = this._gameModel.visibleElementStacks$.pipe(
+      filterItemObservations((item) => sphereMatchesToken(spec, item)),
+      filterItemObservations((item) =>
+        item.aspectsAndSelf$.pipe(
+          map((aspects) =>
             Object.keys(this._recipe.requirements).some((r) =>
-              // FIXME: use aspectsAndSelf$
-              Object.keys(stack.aspectsAndSelf).includes(r)
+              Object.keys(aspects).includes(r)
             )
           )
-        ),
-        map((stacks) =>
-          sortBy(stacks, [
-            (stack) =>
-              this._desiredElementIds.includes(stack.elementId) ? 1 : 0,
-            (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
-            (stack) => aspectsMagnitude(stack.aspects),
-          ]).reverse()
-        ),
-        shareReplay(1)
-      );
-    }
+        )
+      ),
+      map((stacks) =>
+        sortBy(stacks, [
+          (stack) =>
+            this._desiredElementIds.includes(stack.elementId) ? 1 : 0,
+          (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
+          (stack) => aspectsMagnitude(stack.aspects),
+        ]).reverse()
+      ),
+      shareReplay(1)
+    );
 
     // Select a default value.  This is hackish.
     firstValueFrom(availableElementStacks$).then((stacks) => {
@@ -233,10 +215,6 @@ export class RecipeOrchestration
       ),
     ];
 
-    // Book reading recipes are "*consider", which is strange...
-    // This doesn't fit the pattern of the workstations where it can be used.
-    // I guess * at the start means any?
-    // Lets special case it for now.
     if (this._recipe.actionId) {
       const comparison = new RegExp(
         `^${this._recipe.actionId.replace("*", "(?:.*)")}$`
@@ -244,14 +222,6 @@ export class RecipeOrchestration
       if (!comparison.test(situation.verbId)) {
         return false;
       }
-      // if (this._recipe.actionId?.endsWith("*")) {
-      //   const partial = this._recipe.actionId.slice(0, -1);
-      //   if (!situation.verbId.startsWith(partial)) {
-      //     return false;
-      //   }
-      // } else if (situation.verbId != this._recipe.actionId) {
-      //   return false;
-      // }
     }
 
     // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.

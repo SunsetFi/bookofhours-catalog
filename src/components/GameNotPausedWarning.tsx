@@ -9,7 +9,6 @@ import { useGameSpeed } from "@/services/sh-game";
 
 const GameNotPausedWarning = () => {
   const gameSpeed = useGameSpeed();
-  // TODO: Place this centered below the appbar title in a floating box.
   const theme = useTheme();
 
   if (gameSpeed === null || gameSpeed === "Paused") {

@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  Observable,
-  combineLatest,
-  map,
-  mergeMap,
-  of as observableOf,
-} from "rxjs";
+import { Observable, combineLatest, firstValueFrom, map, mergeMap } from "rxjs";
 
 import { Aspects } from "secrethistories-api";
 import { pick, first } from "lodash";
@@ -19,13 +13,14 @@ import { useDIDependency } from "@/container";
 import {
   Null$,
   mapArrayItemsCached,
+  observableObjectOrEmpty,
   observeAll,
   useObservation,
 } from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
 import { Orchestrator } from "@/services/sh-game/orchestration";
-
+import { Pinboard } from "@/services/sh-pins/Pinboard";
 import {
   ElementStackModel,
   GameModel,
@@ -41,7 +36,6 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
-
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
   ObservableDataGridColumnDef,
@@ -57,6 +51,7 @@ import ObservableDataGrid, {
   aspectsFilter,
 } from "@/components/ObservableDataGrid";
 import CraftIconButton from "@/components/CraftIconButton";
+import PinIconButton from "@/components/PinIconButton";
 
 interface BookModel
   extends ModelWithAspects,
@@ -69,12 +64,14 @@ interface BookModel
   memoryAspects$: Observable<Aspects>;
   focus(): void;
   read(): void;
+  pin(): void;
 }
 
 function elementStackToBook(
   elementStack: ElementStackModel,
   compendium: Compendium,
-  orchestrator: Orchestrator
+  orchestrator: Orchestrator,
+  pinboard: Pinboard
 ): BookModel {
   const memory$ = combineLatest([
     elementStack.aspects$,
@@ -115,10 +112,10 @@ function elementStackToBook(
   );
 
   const memoryAspects$ = memory$.pipe(
-    mergeMap(
-      (memory) =>
-        memory?.aspects$.pipe(map((aspects) => pick(aspects, powerAspects))) ??
-        observableOf({})
+    mergeMap((memory) =>
+      observableObjectOrEmpty(memory?.aspects$).pipe(
+        map((aspects) => pick(aspects, powerAspects))
+      )
     )
   );
 
@@ -150,12 +147,33 @@ function elementStackToBook(
       const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
         aspectId.startsWith("mastery.")
       );
-      orchestrator.beginRecipeOrchestration(
-        isMastered
+      orchestrator.requestOrchestration({
+        recipeId: isMastered
           ? `study.mystery.${mystery}.mastered`
           : `study.mystery.${mystery}.mastering.begin`,
-        [elementStack.elementId]
+        desiredElementIds: [elementStack.elementId],
+      });
+    },
+    pin: async () => {
+      const memory = await firstValueFrom(memory$);
+      if (!memory) {
+        return;
+      }
+
+      const mystery = extractMysteryAspect(elementStack.aspects);
+      const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
+        aspectId.startsWith("mastery.")
       );
+
+      pinboard.pin({
+        elementId: memory.id,
+        produce: {
+          recipeId: isMastered
+            ? `study.mystery.${mystery}.mastered`
+            : `study.mystery.${mystery}.mastering.begin`,
+          desiredElementIds: [elementStack.elementId],
+        },
+      });
     },
   };
 }
@@ -175,13 +193,14 @@ const BookCatalogPage = () => {
   const model = useDIDependency(GameModel);
   const compendium = useDIDependency(Compendium);
   const orchestrator = useDIDependency(Orchestrator);
+  const pinboard = useDIDependency(Pinboard);
 
   const items$ = React.useMemo(
     () =>
       model.visibleElementStacks$.pipe(
         filterHasAspect("readable"),
         mapArrayItemsCached((item) =>
-          elementStackToBook(item, compendium, orchestrator)
+          elementStackToBook(item, compendium, orchestrator, pinboard)
         )
       ),
     [model]
@@ -242,6 +261,22 @@ const BookCatalogPage = () => {
           filter: aspectsPresenceFilter("mastered", "auto"),
         }
       ),
+      {
+        headerName: "",
+        width: 50,
+        field: "$item",
+        renderCell: ({ value }) => (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <PinIconButton title="Pin Memory" onClick={() => value.pin()} />
+          </Box>
+        ),
+      } as ObservableDataGridColumnDef<BookModel>,
       {
         headerName: "Memory",
         width: 150,

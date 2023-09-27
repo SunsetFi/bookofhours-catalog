@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router";
-import { capitalize } from "lodash";
 
 import Typography from "@mui/material/Typography";
 import AppBar from "@mui/material/AppBar";
@@ -10,6 +9,7 @@ import IconButton from "@mui/material/IconButton";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 
 import HandOverviewIcons from "./HandOverviewIcons";
+import PinboardHeader from "./PinboardHeader";
 
 export interface PageHeaderProps {
   title: string;
@@ -55,6 +55,7 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
           </IconButton>
         )}
         <HandOverviewIcons sx={{ ml: 2 }} />
+        <PinboardHeader sx={{ ml: "auto" }} />
       </Toolbar>
     </AppBar>
   );

@@ -8,6 +8,7 @@ import {
   BehaviorSubject,
   tap,
   of,
+  firstValueFrom,
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
@@ -92,7 +93,13 @@ function recipeToCraftableModel(
       map((x) => mapValues(x, Number))
     ),
     recipeDescription$: recipeModel.startDescription$,
-    craft: () => orchestrator.beginRecipeOrchestration(recipeModel.id),
+    craft: async () => {
+      const skill = await firstValueFrom(skill$);
+      orchestrator.requestOrchestration({
+        recipeId: recipeModel.id,
+        desiredElementIds: skill ? [skill.id] : [],
+      });
+    },
   };
 }
 
@@ -149,7 +156,6 @@ const CraftingCatalogPage = () => {
         observable: "iconUrl$",
       } as ObservableDataGridColumnDef<CraftableModel>,
       textColumnDef<CraftableModel>("Item", "item", "label$", { width: 250 }),
-      // FIXME: Only show non-hidden aspects.
       aspectsColumnDef<CraftableModel>(filterCraftableAspect, {
         width: 300,
       }),

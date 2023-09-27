@@ -22,7 +22,11 @@ import { GameModel } from "../GameModel";
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
 
-import { AspectRequirement, Orchestration } from "./types";
+import {
+  AspectRequirement,
+  Orchestration,
+  OrchestrationRequest,
+} from "./types";
 import { RecipeOrchestration } from "./RecipeOrchestration";
 
 @injectable()
@@ -141,10 +145,10 @@ export class Orchestrator {
     return this._aspectRequirements$;
   }
 
-  async beginRecipeOrchestration(
-    recipeId: string,
-    desiredElementIds: readonly string[] = []
-  ) {
+  async requestOrchestration({
+    recipeId,
+    desiredElementIds,
+  }: OrchestrationRequest) {
     const recipe = this._compendium.getRecipeById(recipeId);
     const exists = await firstValueFrom(recipe.exists$);
     if (!exists) {
@@ -152,7 +156,7 @@ export class Orchestrator {
     }
 
     this._orchestration$.next(
-      new RecipeOrchestration(recipe, this._gameModel, desiredElementIds)
+      new RecipeOrchestration(recipe, this._gameModel, desiredElementIds ?? [])
     );
   }
 

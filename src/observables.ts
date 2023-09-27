@@ -12,6 +12,7 @@ import {
   from,
   shareReplay,
   BehaviorSubject,
+  of as observableOf,
 } from "rxjs";
 
 import { arrayShallowEquals } from "./utils";
@@ -25,9 +26,7 @@ export type Observation<T> = T extends Observable<infer K> ? K : never;
 export const Null$: Observable<null> = new BehaviorSubject(null);
 export const EmptyArray$: Observable<[]> = new BehaviorSubject([]);
 export const EmptyObject$: Observable<{}> = new BehaviorSubject({});
-export function emptyObjectObservable<T extends {}>() {
-  return EmptyObject$ as Observable<T>;
-}
+
 export function observableObjectOrEmpty<T extends {}>(
   value: Observable<T> | null | undefined
 ): Observable<T> {
@@ -35,7 +34,7 @@ export function observableObjectOrEmpty<T extends {}>(
     return value;
   }
 
-  return emptyObjectObservable<T>();
+  return EmptyObject$ as any;
 }
 
 export function useObservation<T>(observable: Observable<T>): T | undefined;
