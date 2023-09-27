@@ -1,11 +1,11 @@
 import * as React from "react";
 
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
-import ControlPointIcon from "@mui/icons-material/ControlPoint";
+import PlayCircle from "@mui/icons-material/PlayCircle";
 
 const CraftIconButton = (props: IconButtonProps) => (
   <IconButton title="Craft Item" {...props}>
-    <ControlPointIcon />
+    <PlayCircle />
   </IconButton>
 );
 

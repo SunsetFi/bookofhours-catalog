@@ -132,7 +132,11 @@ export class Orchestrator {
       this._aspectRequirements$ = combineLatest([
         this._orchestration$.pipe(
           mergeMap((o) => o?.recipe$ ?? Null$),
-          mergeMap((r) => r?.requirements$ ?? emptyObjectObservable<Aspects>())
+          mergeMap(
+            (r) =>
+              r?.requirements$ ??
+              emptyObjectObservable<Record<string, string>>()
+          )
         ),
         this._orchestration$.pipe(
           mergeMap(
@@ -150,20 +154,23 @@ export class Orchestrator {
             )
           ),
           observeAll(),
-          startWith([])
+          startWith([] as Aspects[])
         ),
       ]).pipe(
         map(([requirements, aspects]) => {
           const result: Record<string, AspectRequirement> = {};
           for (const aspect of Object.keys(requirements)) {
-            let required = Number(requirements[aspect]);
-            if (required <= 0) {
-              continue;
+            const reqValue = requirements[aspect];
+            let required = Number(reqValue);
+
+            if (Number.isNaN(required)) {
+              required = aspects.reduce((sum, slotAspects) => {
+                return sum + (slotAspects[reqValue] ?? 0);
+              }, 0);
             }
 
-            // TODO: This will be the name of an aspect.  Calculate that on our end given our inputs.
-            if (Number.isNaN(required)) {
-              required = 1;
+            if (required <= 0) {
+              continue;
             }
 
             result[aspect] = {
@@ -211,7 +218,7 @@ export class Orchestrator {
   async apply() {
     var operation = this._orchestration$.value;
     if (!operation) {
-      return;
+      return false;
     }
 
     const [situation, recipe, slots] = await Promise.all([
@@ -221,7 +228,7 @@ export class Orchestrator {
     ]);
 
     if (!situation || !recipe) {
-      return;
+      return false;
     }
 
     const slotTokens: Record<string, ElementStackModel | null> = {};
@@ -229,7 +236,36 @@ export class Orchestrator {
       slotTokens[slotId] = await firstValueFrom(slots[slotId].assignment$);
     }
 
-    this._sync(situation, recipe, slotTokens);
+    return this._sync(situation, recipe, slotTokens);
+  }
+
+  async execute() {
+    var operation = this._orchestration$.value;
+    if (!operation) {
+      return false;
+    }
+
+    const [situation, recipe, slots] = await Promise.all([
+      firstValueFrom(operation.situation$),
+      firstValueFrom(operation.recipe$),
+      firstValueFrom(operation.slots$),
+    ]);
+
+    if (!situation || !recipe) {
+      return false;
+    }
+
+    const slotTokens: Record<string, ElementStackModel | null> = {};
+    for (const slotId of Object.keys(slots)) {
+      slotTokens[slotId] = await firstValueFrom(slots[slotId].assignment$);
+    }
+
+    const synced = await this._sync(situation, recipe, slotTokens);
+    if (!synced) {
+      return false;
+    }
+
+    await this._api.executeTokenAtPath(situation.path);
   }
 
   private async _sync(

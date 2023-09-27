@@ -128,7 +128,7 @@ const RecipeOrchestratorDialog = () => {
         </Button>
         <ButtonGroup>
           <Button onClick={() => orchestrator.apply()}>Prepare Recipe</Button>
-          <Button disabled={!canExecute} onClick={() => orchestrator.apply()}>
+          <Button disabled={!canExecute} onClick={() => orchestrator.execute()}>
             Start Recipe
           </Button>
         </ButtonGroup>
