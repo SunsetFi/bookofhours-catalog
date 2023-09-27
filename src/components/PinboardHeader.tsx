@@ -3,7 +3,7 @@ import * as React from "react";
 import type { SxProps } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 
-import { Null$, useObservation } from "@/observables";
+import { useObservation } from "@/observables";
 
 import { useDIDependency } from "@/container";
 

@@ -1,9 +1,8 @@
-import { mergeMap, of as observableOf } from "rxjs";
+import { mergeMapIfNotNull } from "@/observables";
 
 import { ModelWithParentTerrain } from "@/services/sh-game";
 
 import { ObservableDataGridColumnDef } from "../types";
-import { Null$ } from "@/observables";
 
 export function locationColumnDef<T extends ModelWithParentTerrain>(
   additional: Partial<
@@ -16,6 +15,6 @@ export function locationColumnDef<T extends ModelWithParentTerrain>(
     wrap: true,
     ...additional,
     observable: (item) =>
-      item.parentTerrain$.pipe(mergeMap((terrain) => terrain?.label$ ?? Null$)),
+      item.parentTerrain$.pipe(mergeMapIfNotNull((terrain) => terrain.label$)),
   };
 }

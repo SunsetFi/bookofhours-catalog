@@ -9,9 +9,17 @@ import {
   shareReplay,
   startWith,
 } from "rxjs";
-import { Aspects } from "secrethistories-api";
+import { Aspects, combineAspects } from "secrethistories-api";
 
-import { Null$, observableObjectOrEmpty, observeAll } from "@/observables";
+import { isNotNull } from "@/utils";
+
+import {
+  EmptyObject$,
+  mergeMapIf,
+  mergeMapIfNotNull,
+  observableObjectOrEmpty,
+  observeAll,
+} from "@/observables";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
@@ -36,6 +44,19 @@ export class Orchestrator {
     null
   );
 
+  // These are assisters for other observations we make across this class.
+  private readonly _situation$ = this._orchestration$.pipe(
+    mergeMapIfNotNull((x) => x.situation$)
+  );
+
+  private readonly _recipe$ = this._orchestration$.pipe(
+    mergeMapIfNotNull((x) => x.recipe$)
+  );
+
+  private readonly _requirements$ = this._recipe$.pipe(
+    mergeMapIf(isNotNull, (x) => x.requirements$, EmptyObject$)
+  );
+
   constructor(
     @inject(RunningSource) runningSource: RunningSource,
     @inject(API) private readonly _api: API,
@@ -58,8 +79,8 @@ export class Orchestrator {
   get canExecute$() {
     if (!this._canExecute$) {
       this._canExecute$ = combineLatest([
-        this._orchestration$.pipe(mergeMap((x) => x?.situation$ ?? Null$)),
-        this._orchestration$.pipe(mergeMap((x) => x?.recipe$ ?? Null$)),
+        this._situation$,
+        this._recipe$,
         this.aspectRequirements$,
       ]).pipe(
         map(([situation, recipe, reqs]) => {
@@ -87,23 +108,29 @@ export class Orchestrator {
   > | null = null;
   get aspectRequirements$() {
     if (!this._aspectRequirements$) {
-      // This is an absolute monstrosity...
       this._aspectRequirements$ = combineLatest([
+        this._requirements$,
         this._orchestration$.pipe(
-          mergeMap((o) => o?.recipe$ ?? Null$),
-          mergeMap((r) => observableObjectOrEmpty(r?.requirements$))
-        ),
-        this._orchestration$.pipe(
-          mergeMap((o) => observableObjectOrEmpty(o?.slots$)),
-          map((slots) =>
-            Object.values(slots).map((x) =>
+          mergeMapIfNotNull((o) => o.slots$),
+          map((slots) => {
+            if (!slots) {
+              return [];
+            }
+
+            return Object.values(slots).map((x) =>
               x.assignment$.pipe(
-                mergeMap((x) => observableObjectOrEmpty(x?.aspectsAndSelf$))
+                mergeMapIf(isNotNull, (x) => x?.aspectsAndSelf$, EmptyObject$)
               )
-            )
-          ),
+            );
+          }),
           observeAll(),
-          startWith([] as Aspects[])
+          startWith([] as Aspects[]),
+          map((aspectArray) =>
+            aspectArray.reduce(
+              (acc, aspects) => combineAspects(acc, aspects),
+              {} as Aspects
+            )
+          )
         ),
       ]).pipe(
         map(([requirements, aspects]) => {
@@ -113,9 +140,7 @@ export class Orchestrator {
             let required = Number(reqValue);
 
             if (Number.isNaN(required)) {
-              required = aspects.reduce((sum, slotAspects) => {
-                return sum + (slotAspects[reqValue] ?? 0);
-              }, 0);
+              required = aspects[reqValue];
             }
 
             if (required <= 0) {
@@ -123,17 +148,9 @@ export class Orchestrator {
             }
 
             result[aspect] = {
-              current: 0,
+              current: aspects[aspect],
               required,
             };
-          }
-
-          for (const slotAspects of aspects) {
-            for (const aspect of Object.keys(slotAspects)) {
-              if (result[aspect]) {
-                result[aspect].current += slotAspects[aspect];
-              }
-            }
           }
 
           return result;

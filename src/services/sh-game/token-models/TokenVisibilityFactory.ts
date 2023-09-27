@@ -12,7 +12,7 @@ import {
   distinctUntilShallowArrayChanged,
   filterItemObservations,
   filterItems,
-  mapItems,
+  mapArrayItems,
   observeAll,
 } from "@/observables";
 
@@ -41,7 +41,7 @@ export class TokenVisibilityFactory {
       filterItems(isConnectedTerrainModel),
       distinctUntilShallowArrayChanged(),
       filterItemObservations((t) => t.visible$),
-      mapItems((t) => t.path$),
+      mapArrayItems((t) => t.path$),
       observeAll()
     );
   }

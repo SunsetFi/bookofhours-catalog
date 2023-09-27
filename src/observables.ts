@@ -15,7 +15,7 @@ import {
   of as observableOf,
 } from "rxjs";
 
-import { arrayShallowEquals } from "./utils";
+import { arrayShallowEquals, isNotNull } from "./utils";
 
 export type ObservableKeys<T> = {
   [K in keyof T]: T[K] extends Observable<any> ? K : never;
@@ -101,12 +101,6 @@ export function filterItemObservations<T, K extends T>(
         items.filter(({ isMatch }) => isMatch).map(({ item }) => item as K)
       )
     );
-  };
-}
-
-export function mapItems<T, K>(mapping: (item: T) => K) {
-  return (source: Observable<readonly T[]>): Observable<K[]> => {
-    return source.pipe(map((items) => items.map(mapping)));
   };
 }
 
@@ -218,6 +212,28 @@ export function observeAll<K>(
       };
     });
   };
+}
+
+export function mapArrayItems<T, K>(mapping: (item: T) => K) {
+  return (source: Observable<readonly T[]>): Observable<K[]> => {
+    return source.pipe(map((items) => items.map(mapping)));
+  };
+}
+
+export function mergeMapIf<T, TM extends T, K>(
+  condition: (value: T) => value is TM,
+  mapping: (value: TM) => Observable<K>,
+  ifFalse: Observable<K>
+) {
+  return (source: Observable<T>): Observable<K> => {
+    return source.pipe(
+      mergeMap((value) => (condition(value) ? mapping(value) : ifFalse))
+    );
+  };
+}
+
+export function mergeMapIfNotNull<T, K>(mapping: (value: T) => Observable<K>) {
+  return mergeMapIf<T | null, T, K | null>(isNotNull, mapping, Null$);
 }
 
 export function mapArrayItemsCached<T, R>(

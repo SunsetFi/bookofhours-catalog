@@ -13,6 +13,7 @@ import { useDIDependency } from "@/container";
 import {
   Null$,
   mapArrayItemsCached,
+  mergeMapIfNotNull,
   observableObjectOrEmpty,
   observeAll,
   useObservation,
@@ -101,14 +102,8 @@ function elementStackToBook(
   );
 
   const memoryLabel$ = memory$.pipe(
-    mergeMap(
-      (memory) =>
-        memory?.label$.pipe(
-          map((label) =>
-            label?.startsWith("Memory: ") ? label.substring(8) : label
-          )
-        ) ?? Null$
-    )
+    mergeMapIfNotNull((memory) => memory.label$),
+    map((label) => (label?.startsWith("Memory: ") ? label.substring(8) : label))
   );
 
   const memoryAspects$ = memory$.pipe(
