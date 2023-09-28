@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Observable, combineLatest, firstValueFrom, map, mergeMap } from "rxjs";
+import { Observable, combineLatest, map, mergeMap } from "rxjs";
 
 import { Aspects } from "secrethistories-api";
 import { pick, first } from "lodash";
@@ -21,7 +21,6 @@ import {
 
 import { Compendium } from "@/services/sh-compendium";
 import { Orchestrator } from "@/services/sh-game/orchestration";
-import { Pinboard } from "@/services/sh-pins/Pinboard";
 import {
   ElementStackModel,
   filterHasAspect,
@@ -53,6 +52,7 @@ import ObservableDataGrid, {
 } from "@/components/ObservableDataGrid";
 import CraftIconButton from "@/components/CraftIconButton";
 import PinIconButton from "@/components/PinIconButton";
+import ElementIcon from "@/components/ElementIcon";
 
 interface BookModel
   extends ModelWithAspects,
@@ -61,18 +61,17 @@ interface BookModel
     ModelWithLabel,
     ModelWithParentTerrain {
   id: string;
+  memoryElementId$: Observable<string | null>;
   memoryLabel$: Observable<string | null>;
   memoryAspects$: Observable<Aspects>;
   focus(): void;
   read(): void;
-  pin(): void;
 }
 
 function elementStackToBook(
   elementStack: ElementStackModel,
   compendium: Compendium,
-  orchestrator: Orchestrator,
-  pinboard: Pinboard
+  orchestrator: Orchestrator
 ): BookModel {
   const memory$ = combineLatest([
     elementStack.aspects$,
@@ -101,6 +100,9 @@ function elementStackToBook(
     map((memoryId) => (memoryId ? compendium.getElementById(memoryId) : null))
   );
 
+  const memoryElementId$ = memory$.pipe(
+    map((memory) => memory?.elementId ?? null)
+  );
   const memoryLabel$ = memory$.pipe(
     mergeMapIfNotNull((memory) => memory.label$),
     map((label) => (label?.startsWith("Memory: ") ? label.substring(8) : label))
@@ -118,7 +120,6 @@ function elementStackToBook(
     get id() {
       return elementStack.id;
     },
-
     get label$() {
       return elementStack.label$;
     },
@@ -134,6 +135,7 @@ function elementStackToBook(
     get parentTerrain$() {
       return elementStack.parentTerrain$;
     },
+    memoryElementId$,
     memoryLabel$,
     memoryAspects$,
     focus: () => elementStack.focus(),
@@ -147,27 +149,6 @@ function elementStackToBook(
           ? `study.mystery.${mystery}.mastered`
           : `study.mystery.${mystery}.mastering.begin`,
         desiredElementIds: [elementStack.elementId],
-      });
-    },
-    pin: async () => {
-      const memory = await firstValueFrom(memory$);
-      if (!memory) {
-        return;
-      }
-
-      const mystery = extractMysteryAspect(elementStack.aspects);
-      const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
-        aspectId.startsWith("mastery.")
-      );
-
-      pinboard.pin({
-        elementId: memory.id,
-        produce: {
-          recipeId: isMastered
-            ? `study.mystery.${mystery}.mastered`
-            : `study.mystery.${mystery}.mastering.begin`,
-          desiredElementIds: [elementStack.elementId],
-        },
       });
     },
   };
@@ -188,14 +169,13 @@ const BookCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
   const compendium = useDIDependency(Compendium);
   const orchestrator = useDIDependency(Orchestrator);
-  const pinboard = useDIDependency(Pinboard);
 
   const items$ = React.useMemo(
     () =>
       tokensSource.visibleElementStacks$.pipe(
         filterHasAspect("readable"),
         mapArrayItemsCached((item) =>
-          elementStackToBook(item, compendium, orchestrator, pinboard)
+          elementStackToBook(item, compendium, orchestrator)
         )
       ),
     [tokensSource]
@@ -258,19 +238,28 @@ const BookCatalogPage = () => {
       ),
       {
         headerName: "",
-        width: 50,
-        field: "$item",
+        observable: "memoryElementId$",
+        width: 90,
         renderCell: ({ value }) => (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <PinIconButton title="Pin Memory" onClick={() => value.pin()} />
-          </Box>
+          <ElementIcon elementId={value} width={75} title="Memory" />
         ),
+      } as ObservableDataGridColumnDef<BookModel>,
+      {
+        headerName: "",
+        width: 50,
+        observable: "memoryElementId$",
+        renderCell: ({ value }) =>
+          value ? (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <PinIconButton elementId={value} title="Pin Memory" />
+            </Box>
+          ) : null,
       } as ObservableDataGridColumnDef<BookModel>,
       {
         headerName: "Memory",

@@ -12,7 +12,6 @@ import {
   from,
   shareReplay,
   BehaviorSubject,
-  of as observableOf,
 } from "rxjs";
 
 import { arrayShallowEquals, isNotNull } from "./utils";
@@ -24,6 +23,7 @@ export type ObservableKeys<T> = {
 export type Observation<T> = T extends Observable<infer K> ? K : never;
 
 export const Null$: Observable<null> = new BehaviorSubject(null);
+export const False$: Observable<false> = new BehaviorSubject(false);
 export const EmptyArray$: Observable<[]> = new BehaviorSubject([]);
 export const EmptyObject$: Observable<{}> = new BehaviorSubject({});
 
@@ -123,10 +123,12 @@ export function observeAll<K>(
         Observable<K>,
         { subscription: Subscription; lastValue: K | undefined }
       >();
+      let lastValues: Observable<K>[] = [];
+
       const tryEmitValues = debounce(
         () => {
-          const values = Array.from(subscriberMap.values()).map(
-            ({ lastValue }) => lastValue
+          const values = lastValues.map(
+            (value) => subscriberMap.get(value)?.lastValue
           );
 
           if (values.some((value) => value === undefined)) {
@@ -188,13 +190,12 @@ export function observeAll<K>(
 
       function onTopLevelUpdate(values: Observable<K>[]) {
         clearOldSubscriptions(values);
-        let subscribed = 0;
-
         for (const value of values) {
-          if (trySubscribe(value)) {
-            subscribed++;
-          }
+          trySubscribe(value);
         }
+
+        lastValues = values;
+        tryEmitValues();
       }
 
       const topLevelSubscription = source.subscribe({

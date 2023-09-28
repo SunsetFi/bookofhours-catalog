@@ -3,19 +3,41 @@ import * as React from "react";
 import Popper from "@mui/material/Popper";
 import type { Instance as PopperInstance } from "@popperjs/core";
 
-import { useObservation } from "@/observables";
+import { useDIDependency } from "@/container";
+
+import { Null$, useObservation } from "@/observables";
 
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 
-import { ElementModel } from "@/services/sh-compendium";
+import { Compendium, ElementModel } from "@/services/sh-compendium";
 
 import ElementDetails from "./ElementDetails";
 
-export interface ElementIconProps {
-  element: ElementModel;
-}
+export type ElementIconProps = {
+  title?: string;
+  width?: number;
+} & (
+  | {
+      element: ElementModel;
+    }
+  | {
+      elementId: string;
+    }
+);
 
-const ElementIcon = ({ element }: ElementIconProps) => {
+const ElementIcon = ({
+  title,
+  width,
+  element,
+  elementId,
+}: {
+  width?: number;
+  title?: string;
+  element?: ElementModel;
+  elementId?: string;
+}) => {
+  const compendium = useDIDependency(Compendium);
+
   const popperRef = React.useRef<PopperInstance>(null);
   const [elementDetailsRef, setElementDetailsRef] =
     React.useState<HTMLDivElement | null>(null);
@@ -24,8 +46,12 @@ const ElementIcon = ({ element }: ElementIconProps) => {
     null
   );
 
-  const iconUrl = element.iconUrl;
-  const label = useObservation(element.label$) ?? "";
+  if (!element && elementId) {
+    element = compendium.getElementById(elementId);
+  }
+
+  const iconUrl = element?.iconUrl;
+  const label = useObservation(element?.label$ ?? Null$) ?? "";
 
   const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     // FIXME: Popper is appearing off screen, despite the preventOverflow, and jumps back on screen if the screen is scrolled.
@@ -37,7 +63,6 @@ const ElementIcon = ({ element }: ElementIconProps) => {
   }, []);
 
   useMutationObserver(elementDetailsRef, () => {
-    console.log("Mutation");
     if (popperRef.current == null) {
       return;
     }
@@ -45,12 +70,17 @@ const ElementIcon = ({ element }: ElementIconProps) => {
     popperRef.current.update();
   });
 
+  if (!element) {
+    return null;
+  }
+
   return (
     <div onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
       <img
         src={iconUrl}
         alt={label}
-        style={{ width: "40px", height: "40px" }}
+        title={title}
+        style={{ maxWidth: `${width ?? 40}px` }}
       />
       <Popper
         popperRef={popperRef}

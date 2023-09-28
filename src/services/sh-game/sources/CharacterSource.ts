@@ -1,6 +1,5 @@
-import { isEqual } from "lodash";
 import { inject, injectable, singleton } from "microinject";
-import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
+import { Observable, Subject, map, shareReplay } from "rxjs";
 import { startTransition } from "react";
 
 import {
@@ -22,13 +21,19 @@ import { RunningSource } from "./RunningSource";
 @singleton()
 export class CharacterSource implements CharacterSource {
   private _characterTaskSubscription: TaskUnsubscriber | null = null;
-  private readonly _uniqueElementIdsManifested$ = new BehaviorSubject<
+  private readonly _uniqueElementIdsManifestedSubject$ = new Subject<
     readonly string[]
-  >([]);
+  >();
+  private readonly _uniqueElementIdsManifested$ =
+    this._uniqueElementIdsManifestedSubject$.pipe(
+      distinctUntilShallowArrayChanged()
+    );
 
-  private readonly _ambittableRecipeIds$ = new BehaviorSubject<
+  private readonly _ambittableRecipeIdsSubject$ = new Subject<
     readonly string[]
-  >([]);
+  >();
+  private readonly _ambittableRecipeIds$ =
+    this._ambittableRecipeIdsSubject$.pipe(distinctUntilShallowArrayChanged());
 
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
@@ -98,13 +103,8 @@ export class CharacterSource implements CharacterSource {
     const ambittableRecipes = await this._api.getAmbittableRecipesUnlocked();
 
     startTransition(() => {
-      if (!isEqual(manifestations, this._uniqueElementIdsManifested$.value)) {
-        this._uniqueElementIdsManifested$.next(manifestations);
-      }
-
-      if (!isEqual(ambittableRecipes, this._ambittableRecipeIds$.value)) {
-        this._ambittableRecipeIds$.next(ambittableRecipes);
-      }
+      this._uniqueElementIdsManifestedSubject$.next(manifestations);
+      this._ambittableRecipeIdsSubject$.next(ambittableRecipes);
     });
   }
 }

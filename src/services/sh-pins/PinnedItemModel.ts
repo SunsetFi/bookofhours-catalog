@@ -1,55 +1,45 @@
-import {
-  BehaviorSubject,
-  Observable,
-  Subscription,
-  firstValueFrom,
-  map,
-} from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
-import { Compendium, ElementModel } from "../sh-compendium";
-import { ElementStackModel } from "../sh-game";
-import { TokensSource } from "../sh-game/sources/TokensSource";
+import { ElementModel } from "../sh-compendium";
 
-export class PinnedItemModel {
+export interface PinnedItemModel {
+  readonly iconUrl: string;
+  readonly elementId: string | null;
+  readonly elementId$: Observable<string | null>;
+  readonly label$: Observable<string | null>;
+  readonly aspects$: Observable<Readonly<Aspects>>;
+  remove(): void;
+}
+
+export class PinnedElementItemModel implements PinnedItemModel {
+  private readonly _item$: BehaviorSubject<ElementModel>;
+  private readonly _elementId$: BehaviorSubject<string | null>;
+
   constructor(
-    private readonly _item: ElementModel | ElementStackModel,
-    private readonly _produce: Function,
-    private readonly _tokensSource: TokensSource,
-    private readonly _compendium: Compendium,
+    private readonly _item: ElementModel,
     private readonly _remove: (item: PinnedItemModel) => void
   ) {
-    if (_item instanceof ElementStackModel) {
-      let sub: Subscription | null = null;
-      sub = _item.retired$.subscribe((retired) => {
-        if (retired) {
-          sub?.unsubscribe();
-          _remove(this);
-        }
-      });
-    }
+    this._item$ = new BehaviorSubject(_item);
+    this._elementId$ = new BehaviorSubject<string | null>(_item.elementId);
+  }
+
+  get elementId$(): Observable<string | null> {
+    return this._elementId$;
+  }
+
+  get elementId(): string | null {
+    return this._item.elementId;
   }
 
   get iconUrl(): string {
     return this._item.iconUrl;
   }
 
-  private _element$: Observable<ElementModel> | null = null;
   get element$(): Observable<ElementModel> {
-    if (!this._element$) {
-      if (this._item instanceof ElementModel) {
-        this._element$ = new BehaviorSubject<ElementModel>(this._item);
-      } else {
-        this._element$ = this._item.elementId$.pipe(
-          map((elementId) => this._compendium.getElementById(elementId))
-        );
-      }
-    }
-
-    return this._element$;
+    return this._item$;
   }
 
-  // Bit weird, we have to return nullable because ElementModels load in after they are created.
   get label$(): Observable<string | null> {
     return this._item.label$;
   }
@@ -58,32 +48,13 @@ export class PinnedItemModel {
     return this._item.aspects$;
   }
 
-  get producable() {
-    return this._produce != null;
-  }
-
   remove() {
     this._remove(this);
   }
+}
 
-  produce() {
-    if (this._produce) {
-      return this._produce();
-    }
-  }
-
-  async getCandidateStacks(): Promise<ElementStackModel[]> {
-    if (this._item instanceof ElementStackModel) {
-      return [this._item];
-    }
-
-    if (this._item instanceof ElementModel) {
-      const tokens = await firstValueFrom(
-        this._tokensSource.visibleElementStacks$
-      );
-      return tokens.filter((t) => t.elementId == this._item.id);
-    }
-
-    return [];
-  }
+export function isPinnedElementItemModel(
+  item: PinnedItemModel
+): item is PinnedElementItemModel {
+  return item instanceof PinnedElementItemModel;
 }

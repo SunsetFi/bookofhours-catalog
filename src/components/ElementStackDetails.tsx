@@ -46,7 +46,7 @@ const ElementStackDetails = ({ elementStack }: ElementStackDetails) => {
             src={elementStack.iconUrl}
             alt={label}
             title={label}
-            style={{ width: "50px", height: "50px" }}
+            style={{ width: "50px" }}
           />
         </Badge>
         <Typography variant="body1">{label}</Typography>

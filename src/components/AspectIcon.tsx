@@ -92,7 +92,7 @@ const AspectIcon = ({
               src={aspect.iconUrl}
               alt={label}
               title={label}
-              style={{ width: "50px", height: "50px" }}
+              style={{ width: "50px" }}
             />
             <Typography variant="body1">{label}</Typography>
           </Box>

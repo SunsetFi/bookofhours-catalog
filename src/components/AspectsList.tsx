@@ -2,6 +2,7 @@ import * as React from "react";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import type { SxProps } from "@mui/material/styles";
 
 import { useObservation } from "@/observables";
 
@@ -9,11 +10,12 @@ import { useAspect } from "@/services/sh-compendium";
 import AspectIcon from "./AspectIcon";
 
 export interface AspectsListProps {
+  sx?: SxProps;
   aspects: Readonly<Record<string, React.ReactNode>>;
   iconSize?: number;
 }
 
-const AspectsList = ({ aspects, iconSize }: AspectsListProps) => {
+const AspectsList = ({ sx, aspects, iconSize }: AspectsListProps) => {
   return (
     <Box
       sx={{
@@ -21,6 +23,7 @@ const AspectsList = ({ aspects, iconSize }: AspectsListProps) => {
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 2,
+        ...sx,
       }}
     >
       {Object.keys(aspects).map((aspectId) => (

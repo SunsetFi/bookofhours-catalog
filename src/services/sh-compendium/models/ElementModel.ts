@@ -28,7 +28,7 @@ export class ElementModel
     this._element$ = promiseFuncToObservable(() => resolve(_id));
   }
 
-  get id() {
+  get elementId() {
     return this._id;
   }
 
@@ -71,7 +71,7 @@ export class ElementModel
   }
 
   get iconUrl() {
-    return `${this._api.baseUrl}/api/compendium/elements/${this.id}/icon.png`;
+    return `${this._api.baseUrl}/api/compendium/elements/${this.elementId}/icon.png`;
   }
 
   private _aspects$: Observable<Readonly<Aspects>> | null = null;

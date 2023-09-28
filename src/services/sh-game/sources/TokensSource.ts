@@ -1,10 +1,8 @@
 import { startTransition } from "react";
-import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
+import { Observable, Subject, map, shareReplay, tap } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
-
-import { arrayShallowEquals } from "@/utils";
 
 import {
   distinctUntilShallowArrayChanged,
@@ -59,7 +57,10 @@ export class TokensSource {
   private _tokensTaskSubsciption: TaskUnsubscriber | null = null;
   private readonly _tokenModels: Map<string, TokenModel> = new Map();
 
-  private readonly _tokens$ = new BehaviorSubject<readonly TokenModel[]>([]);
+  private readonly _tokensSubject$ = new Subject<readonly TokenModel[]>();
+  private readonly _tokens$ = this._tokensSubject$.pipe(
+    distinctUntilShallowArrayChanged()
+  );
 
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
@@ -183,22 +184,13 @@ export class TokensSource {
     });
 
     startTransition(() => {
-      this._updateTokenModels(tokens, this._tokens$);
+      const tokenModels = sortBy(
+        tokens.map((token) => this._getOrUpdateTokenModel(token)),
+        "id"
+      );
+
+      this._tokensSubject$.next(tokenModels);
     });
-  }
-
-  private _updateTokenModels(
-    tokens: Token[],
-    subject: BehaviorSubject<readonly TokenModel[]>
-  ) {
-    const tokenModels = sortBy(
-      tokens.map((token) => this._getOrUpdateTokenModel(token)),
-      "id"
-    );
-
-    if (!arrayShallowEquals(subject.value, tokenModels)) {
-      subject.next(tokenModels);
-    }
   }
 
   private _getOrUpdateTokenModel(token: Token): TokenModel {

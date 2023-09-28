@@ -95,7 +95,7 @@ function recipeToCraftableModel(
       const skill = await firstValueFrom(skill$);
       orchestrator.requestOrchestration({
         recipeId: recipeModel.id,
-        desiredElementIds: skill ? [skill.id] : [],
+        desiredElementIds: skill ? [skill.elementId] : [],
       });
     },
   };

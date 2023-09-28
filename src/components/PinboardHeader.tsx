@@ -8,7 +8,11 @@ import { useObservation } from "@/observables";
 import { useDIDependency } from "@/container";
 
 import { Pinboard } from "@/services/sh-pins/Pinboard";
-import { PinnedItemModel } from "@/services/sh-pins/PinnedItemModel";
+import {
+  PinnedElementItemModel,
+  PinnedItemModel,
+  isPinnedElementItemModel,
+} from "@/services/sh-pins/PinnedItemModel";
 
 import ElementIcon from "./ElementIcon";
 
@@ -23,7 +27,7 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "row", gap: 1, ...sx }}>
       {pins.map((pin, i) => (
-        <PinboardHeaderIcon key={i} model={pin} />
+        <PinnedItemModelIcon key={i} model={pin} />
       ))}
     </Box>
   );
@@ -31,11 +35,25 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
 
 export default PinboardHeader;
 
-interface PinboardHeaderIconProps {
+interface PinnedItemModelIconProps {
   model: PinnedItemModel;
 }
 
-const PinboardHeaderIcon = ({ model }: PinboardHeaderIconProps) => {
+const PinnedItemModelIcon = ({ model }: PinnedItemModelIconProps) => {
+  if (isPinnedElementItemModel(model)) {
+    return <PinnedElementItemHeaderIcon model={model} />;
+  }
+
+  return null;
+};
+
+interface PinnedElementItemHeaderIconProps {
+  model: PinnedElementItemModel;
+}
+
+const PinnedElementItemHeaderIcon = ({
+  model,
+}: PinnedElementItemHeaderIconProps) => {
   const element = useObservation(model.element$);
 
   if (!element) {

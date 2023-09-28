@@ -37,11 +37,7 @@ const ElementStackIcon = ({ elementStack }: ElementStackIconProps) => {
         color="primary"
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <img
-          src={iconUrl}
-          alt={label}
-          style={{ width: "40px", height: "40px" }}
-        />
+        <img src={iconUrl} alt={label} style={{ maxWidth: "40px" }} />
       </Badge>
       <Popper
         open={popupAnchor != null}

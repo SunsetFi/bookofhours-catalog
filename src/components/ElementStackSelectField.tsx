@@ -117,14 +117,32 @@ const ElementStackSelectItem = ({
         onMouseOver={(e) => setAnchorEl(e.currentTarget)}
         onMouseOut={() => setAnchorEl(null)}
       >
-        <img
-          style={{ display: "block" }}
-          src={elementStack.iconUrl}
-          alt={label ?? ""}
-          width={30}
-          height={30}
-        />
-        <Typography variant="body1">{label}</Typography>
+        <Box
+          sx={{
+            width: "30px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src={elementStack.iconUrl}
+            alt={label ?? ""}
+            style={{
+              display: "block",
+              maxWidth: "30px",
+              maxHeight: "30px",
+            }}
+          />
+        </Box>
+        {/* FIXME: Shrink this text to fit the aspects in.  Not working for some reason. */}
+        <Typography
+          variant="body1"
+          sx={{ flex: "1 1", textOverflow: "ellipsis", minWidth: 0 }}
+        >
+          {label}
+        </Typography>
       </Box>
       <Box
         sx={{
@@ -134,7 +152,11 @@ const ElementStackSelectItem = ({
           gap: 1,
         }}
       >
-        <AspectsList aspects={aspects} iconSize={30} />
+        <AspectsList
+          sx={{ flexWrap: "nowrap" }}
+          aspects={aspects}
+          iconSize={30}
+        />
       </Box>
       <Popper
         anchorEl={anchorEl}
