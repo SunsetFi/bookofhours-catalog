@@ -1,11 +1,22 @@
 import { inject, injectable, singleton } from "microinject";
-import { BehaviorSubject, Observable, map, shareReplay, tap } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  map,
+  shareReplay,
+  combineLatest,
+} from "rxjs";
 
-import { Compendium } from "../sh-compendium";
+import { Compendium, RecipeModel } from "../sh-compendium";
 
 import { PinItemRequest } from "./types";
 import { PinnedElementItemModel, PinnedItemModel } from "./PinnedItemModel";
-import { mapArrayItems, mapArrayItemsCached, observeAll } from "@/observables";
+import {
+  mapArrayItems,
+  mapArrayItemsCached,
+  mergeMapIfNotNull,
+  observeAll,
+} from "@/observables";
 
 export interface PinnedAspect {
   readonly current: number;
@@ -15,9 +26,22 @@ export interface PinnedAspect {
 @injectable()
 @singleton()
 export class Pinboard {
+  private readonly _pinnedRecipeId$ = new BehaviorSubject<string | null>(null);
   private readonly _pins$ = new BehaviorSubject<readonly PinnedItemModel[]>([]);
 
   constructor(@inject(Compendium) private readonly _compendium: Compendium) {}
+
+  private _pinnedRecipe$: Observable<RecipeModel | null> | null = null;
+  get pinnedRecipe$() {
+    if (!this._pinnedRecipe$) {
+      this._pinnedRecipe$ = this._pinnedRecipeId$.pipe(
+        map((id) => (id ? this._compendium.getRecipeById(id) : null)),
+        shareReplay(1)
+      );
+    }
+
+    return this._pinnedRecipe$;
+  }
 
   get pins$(): Observable<readonly PinnedItemModel[]> {
     return this._pins$;
@@ -28,19 +52,44 @@ export class Pinboard {
   > | null = null;
   get pinnedAspects$() {
     if (!this._pinnedAspects$) {
-      this._pinnedAspects$ = this._pins$.pipe(
-        mapArrayItems((x) => x.aspects$),
-        observeAll(),
-        map((aspectArray) => {
+      this._pinnedAspects$ = combineLatest([
+        this._pins$.pipe(
+          mapArrayItems((x) => x.aspects$),
+          observeAll()
+        ),
+        this.pinnedRecipe$.pipe(mergeMapIfNotNull((r) => r.requirements$)),
+      ]).pipe(
+        map(([aspectArray, recipeReqs]) => {
           const result: Record<string, PinnedAspect> = {};
+
           for (const aspects of aspectArray) {
             for (const aspect of Object.keys(aspects)) {
+              // Don't show aspects that aren't in the recipe.
+              if (recipeReqs && !recipeReqs[aspect]) {
+                continue;
+              }
+
               result[aspect] = {
                 desired: 0,
                 current: (result[aspect]?.current ?? 0) + aspects[aspect],
               };
             }
           }
+
+          if (recipeReqs) {
+            for (const key of Object.keys(recipeReqs)) {
+              let desiredValue = Number(recipeReqs[key]);
+              if (isNaN(desiredValue)) {
+                desiredValue = result[recipeReqs[key]]?.current ?? 0;
+              }
+
+              result[key] = {
+                current: result[key]?.current ?? 0,
+                desired: desiredValue,
+              };
+            }
+          }
+
           return result;
         }),
         shareReplay(1)
@@ -48,6 +97,10 @@ export class Pinboard {
     }
 
     return this._pinnedAspects$;
+  }
+
+  pinRecipe(recipeId: string | null) {
+    this._pinnedRecipeId$.next(recipeId);
   }
 
   async isTokenPinned$(tokenId: string) {
@@ -83,6 +136,7 @@ export class Pinboard {
   }
 
   clear() {
+    this._pinnedRecipeId$.next(null);
     this._pins$.next([]);
   }
 }

@@ -146,7 +146,7 @@ export class Orchestrator {
             }
 
             result[aspect] = {
-              current: aspects[aspect],
+              current: aspects[aspect] ?? 0,
               required,
             };
           }

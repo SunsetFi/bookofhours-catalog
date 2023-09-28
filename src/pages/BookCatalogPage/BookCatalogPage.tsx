@@ -49,9 +49,10 @@ import ObservableDataGrid, {
   multiselectOptionsFilter,
   aspectsColumnDef,
   aspectsFilter,
+  textColumnDef,
 } from "@/components/ObservableDataGrid";
 import CraftIconButton from "@/components/CraftIconButton";
-import PinIconButton from "@/components/PinIconButton";
+import PinElementIconButton from "@/components/PinElementIconButton";
 import ElementIcon from "@/components/ElementIcon";
 
 interface BookModel
@@ -67,6 +68,25 @@ interface BookModel
   focus(): void;
   read(): void;
 }
+
+interface MemoryButtonsProps {
+  model: BookModel;
+}
+
+const MemoryButtons = ({ model }: MemoryButtonsProps) => {
+  const memoryElementId = useObservation(model.memoryElementId$);
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      {memoryElementId && <PinElementIconButton elementId={memoryElementId} />}
+    </Box>
+  );
+};
 
 function elementStackToBook(
   elementStack: ElementStackModel,
@@ -104,8 +124,8 @@ function elementStackToBook(
     map((memory) => memory?.elementId ?? null)
   );
   const memoryLabel$ = memory$.pipe(
-    mergeMapIfNotNull((memory) => memory.label$),
-    map((label) => (label?.startsWith("Memory: ") ? label.substring(8) : label))
+    mergeMapIfNotNull((memory) => memory.label$)
+    // map((label) => (label?.startsWith("Memory: ") ? label.substring(8) : label))
   );
 
   const memoryAspects$ = memory$.pipe(
@@ -238,35 +258,21 @@ const BookCatalogPage = () => {
       ),
       {
         headerName: "",
+        width: 40,
+        field: "$item",
+        renderCell: ({ value }) => <MemoryButtons model={value} />,
+      } as ObservableDataGridColumnDef<BookModel>,
+      {
+        headerName: "",
         observable: "memoryElementId$",
         width: 90,
         renderCell: ({ value }) => (
           <ElementIcon elementId={value} width={75} title="Memory" />
         ),
       } as ObservableDataGridColumnDef<BookModel>,
-      {
-        headerName: "",
-        width: 50,
-        observable: "memoryElementId$",
-        renderCell: ({ value }) =>
-          value ? (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <PinIconButton elementId={value} title="Pin Memory" />
-            </Box>
-          ) : null,
-      } as ObservableDataGridColumnDef<BookModel>,
-      {
-        headerName: "Memory",
+      textColumnDef<BookModel>("Memory", "memory", "memoryLabel$", {
         width: 150,
-        observable: "memoryLabel$",
-        sortable: true,
-      },
+      }),
       aspectsObservableColumnDef<BookModel>(
         "memoryAspects",
         (element) => element.memoryAspects$,

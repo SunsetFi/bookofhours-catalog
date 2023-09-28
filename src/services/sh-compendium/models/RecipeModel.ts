@@ -25,7 +25,7 @@ export class RecipeModel
     });
   }
 
-  get id() {
+  get recipeId() {
     return this._id;
   }
 

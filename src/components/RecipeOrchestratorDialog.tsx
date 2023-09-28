@@ -24,14 +24,17 @@ import {
   Orchestrator,
   isVariableSituationOrchestration,
 } from "@/services/sh-game/orchestration";
+import { Pinboard } from "@/services/sh-pins/Pinboard";
 
 import SituationSelectField from "./SituationSelectField";
 import AspectsList from "./AspectsList";
 import ElementStackSelectField from "./ElementStackSelectField";
 import AspectIcon from "./AspectIcon";
+import PinRecipeIconButton from "./PinRecipeIconButton";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
+  const pinboard = useDIDependency(Pinboard);
 
   const orchestration = useObservation(orchestrator.orchestration$);
   const aspectRequirements =
@@ -59,10 +62,18 @@ const RecipeOrchestratorDialog = () => {
     >
       <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Typography variant="h5" sx={{ mr: 2 }}>
-            {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
-            {recipeLabel?.toLocaleUpperCase()}
-          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "row" }}>
+            <Typography variant="h5" sx={{ mr: 2 }}>
+              {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
+              {recipeLabel?.toLocaleUpperCase()}
+            </Typography>
+            {recipe && (
+              <PinRecipeIconButton
+                sx={{ mt: "-4px" }}
+                recipeId={recipe.recipeId}
+              />
+            )}
+          </Box>
           <AspectsList
             aspects={mapValues(
               aspectRequirements,
@@ -83,7 +94,7 @@ const RecipeOrchestratorDialog = () => {
           display: "flex",
           flexDirection: "column",
           gap: 3,
-          height: 500,
+          height: 460,
         }}
       >
         {isVariableSituationOrchestration(orchestration) ? (

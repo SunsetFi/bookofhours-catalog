@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import IconButton, { IconButtonProps } from "@mui/material/IconButton";
+import IconButton from "@mui/material/IconButton";
 import PushPin from "@mui/icons-material/PushPin";
 
 import { False$, useObservation } from "@/observables";
@@ -8,11 +8,14 @@ import { useDIDependency } from "@/container";
 
 import { Pinboard } from "@/services/sh-pins/Pinboard";
 
-export interface PinIconButtonProps {
+export interface PinElementIconButtonProps {
   title?: string;
   elementId: string;
 }
-const PinIconButton = ({ title, elementId }: PinIconButtonProps) => {
+const PinElementIconButton = ({
+  title,
+  elementId,
+}: PinElementIconButtonProps) => {
   const pinboard = useDIDependency(Pinboard);
 
   const isElementPinned = useObservation(
@@ -21,12 +24,10 @@ const PinIconButton = ({ title, elementId }: PinIconButtonProps) => {
   );
 
   const onClick = React.useCallback(() => {
-    if (elementId) {
-      if (isElementPinned) {
-        pinboard.removeElementId(elementId);
-      } else {
-        pinboard.pin({ elementId });
-      }
+    if (isElementPinned) {
+      pinboard.removeElementId(elementId);
+    } else {
+      pinboard.pin({ elementId });
     }
   }, [isElementPinned, elementId, pinboard]);
 
@@ -39,4 +40,4 @@ const PinIconButton = ({ title, elementId }: PinIconButtonProps) => {
   );
 };
 
-export default PinIconButton;
+export default PinElementIconButton;

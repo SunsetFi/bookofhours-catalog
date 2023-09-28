@@ -61,7 +61,9 @@ function recipeToCraftableModel(
     ),
     tap((x) => {
       if (!x) {
-        console.warn(`Recipe ${recipeModel.id} has no craftable element.`);
+        console.warn(
+          `Recipe ${recipeModel.recipeId} has no craftable element.`
+        );
       }
     }),
     shareReplay(1)
@@ -75,7 +77,7 @@ function recipeToCraftableModel(
   );
 
   return {
-    id: recipeModel.id,
+    id: recipeModel.recipeId,
     iconUrl$: craftable$.pipe(map((element) => element?.iconUrl ?? null)),
     label$: craftable$.pipe(
       mergeMap((element) => element?.label$ ?? nullStringObservable)
@@ -94,7 +96,7 @@ function recipeToCraftableModel(
     craft: async () => {
       const skill = await firstValueFrom(skill$);
       orchestrator.requestOrchestration({
-        recipeId: recipeModel.id,
+        recipeId: recipeModel.recipeId,
         desiredElementIds: skill ? [skill.elementId] : [],
       });
     },

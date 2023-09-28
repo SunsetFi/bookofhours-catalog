@@ -7,7 +7,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import { useObservation } from "@/observables";
+import { useObservation, mergeMapIfNotNull } from "@/observables";
 
 import { useDIDependency } from "@/container";
 
@@ -21,6 +21,7 @@ import {
 import ElementIcon from "./ElementIcon";
 import AspectsList from "./AspectsList";
 import CraftIconButton from "./CraftIconButton";
+import { Typography } from "@mui/material";
 
 export interface PinboardHeaderProps {
   sx?: SxProps;
@@ -28,9 +29,13 @@ export interface PinboardHeaderProps {
 
 const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
   const pinboard = useDIDependency(Pinboard);
+  const recipeLabel = useObservation(() =>
+    pinboard.pinnedRecipe$.pipe(mergeMapIfNotNull((r) => r.label$))
+  );
   const pins = useObservation(pinboard.pins$) ?? [];
   const aspects = useObservation(pinboard.pinnedAspects$) ?? {};
 
+  const hasRecipe = recipeLabel !== null;
   const hasPins = pins.length > 0;
   const hasAspects = Object.keys(aspects).length > 0;
   if (!hasPins && !hasAspects) {
@@ -48,21 +53,31 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
         ...sx,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 1,
-          height: "100%",
-          justifyContent: "center",
-        }}
-      >
-        {pins.map((pin, i) => (
-          <PinnedItemModelIcon key={i} model={pin} />
-        ))}
-      </Box>
-      {hasPins && hasAspects && (
-        <Divider orientation="vertical" sx={{ my: 2 }} />
+      {recipeLabel && (
+        <>
+          <Typography variant="body2">{recipeLabel}</Typography>
+          {(hasPins || hasAspects) && (
+            <Divider orientation="vertical" sx={{ my: 2 }} />
+          )}
+        </>
+      )}
+      {hasPins && (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 1,
+              height: "100%",
+              justifyContent: "center",
+            }}
+          >
+            {pins.map((pin, i) => (
+              <PinnedItemModelIcon key={i} model={pin} />
+            ))}
+          </Box>
+          {hasAspects && <Divider orientation="vertical" sx={{ my: 2 }} />}
+        </>
       )}
       <AspectsList
         sx={{ justifyContent: "center" }}
