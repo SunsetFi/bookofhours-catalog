@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import Popper from "@mui/material/Popper";
+import Box from "@mui/material/Box";
 import type { Instance as PopperInstance } from "@popperjs/core";
 
 import { useDIDependency } from "@/container";
@@ -75,13 +76,24 @@ const ElementIcon = ({
   }
 
   return (
-    <div onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
-      <img
-        src={iconUrl}
-        alt={label}
-        title={title}
-        style={{ maxWidth: `${width ?? 40}px` }}
-      />
+    <>
+      <Box
+        sx={{
+          maxWidth: `${width ?? 40}px`,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <img
+          src={iconUrl}
+          alt={label}
+          title={title}
+          onMouseOver={onMouseOver}
+          onMouseOut={onMouseOut}
+          style={{ maxWidth: "100%" }}
+        />
+      </Box>
       <Popper
         popperRef={popperRef}
         open={popupAnchor != null}
@@ -103,7 +115,7 @@ const ElementIcon = ({
       >
         <ElementDetails ref={setElementDetailsRef} element={element} />
       </Popper>
-    </div>
+    </>
   );
 };
 

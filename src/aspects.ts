@@ -55,3 +55,11 @@ export function aspectsMagnitude(aspects: Aspects): number {
     Object.values(aspects).reduce((sum, value) => sum + value * value, 0)
   );
 }
+
+export function aspectOrder(aspect: string) {
+  if (powerAspects.includes(aspect as any)) {
+    return 0;
+  } else if (materialAspects.includes(aspect as any)) {
+    return 1;
+  }
+}

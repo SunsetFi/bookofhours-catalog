@@ -55,7 +55,7 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
           </IconButton>
         )}
         <HandOverviewIcons sx={{ ml: 2 }} />
-        <PinboardHeader sx={{ ml: "auto" }} />
+        <PinboardHeader sx={{ ml: "auto", py: 1 }} />
       </Toolbar>
     </AppBar>
   );

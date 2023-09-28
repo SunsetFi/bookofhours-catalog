@@ -62,6 +62,12 @@ export class TokensSource {
     distinctUntilShallowArrayChanged()
   );
 
+  private readonly _visibleTokens$ = this._tokens$.pipe(
+    filterItemObservations((model) => model.visible$),
+    distinctUntilShallowArrayChanged(),
+    shareReplay(1)
+  );
+
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
     @inject(RunningSource) runningSource: RunningSource,
@@ -94,9 +100,8 @@ export class TokensSource {
   > | null = null;
   get unlockedTerrains$(): Observable<readonly ConnectedTerrainModel[]> {
     if (!this._unlockedTerrains$) {
-      this._unlockedTerrains$ = this._tokens$.pipe(
+      this._unlockedTerrains$ = this._visibleTokens$.pipe(
         filterItems(isConnectedTerrainModel),
-        filterItemObservations((model) => model.visible$),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
@@ -110,9 +115,8 @@ export class TokensSource {
   > | null = null;
   get visibleElementStacks$() {
     if (this._visibleElementStacks$ === null) {
-      this._visibleElementStacks$ = this._tokens$.pipe(
+      this._visibleElementStacks$ = this._visibleTokens$.pipe(
         filterItems(isElementStackModel),
-        filterItemObservations((model) => model.visible$),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
@@ -125,9 +129,8 @@ export class TokensSource {
     null;
   get unlockedWorkstations$() {
     if (!this._unlockedWorkstations$) {
-      this._unlockedWorkstations$ = this._tokens$.pipe(
+      this._unlockedWorkstations$ = this._visibleTokens$.pipe(
         filterItems(isSituationModel),
-        filterItemObservations((model) => model.visible$),
         map((situations) =>
           situations.filter(
             (x) =>
@@ -149,9 +152,8 @@ export class TokensSource {
   > | null = null;
   get unlockedHarvestStations$() {
     if (!this._unlockedHarvestStations$) {
-      this._unlockedHarvestStations$ = this._tokens$.pipe(
+      this._unlockedHarvestStations$ = this._visibleTokens$.pipe(
         filterItems(isSituationModel),
-        filterItemObservations((model) => model.visible$),
         map((situations) =>
           situations.filter(
             (x) =>

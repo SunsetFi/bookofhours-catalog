@@ -1,12 +1,15 @@
 import * as React from "react";
+import { sortBy } from "lodash";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { SxProps } from "@mui/material/styles";
 
 import { useObservation } from "@/observables";
+import { aspectOrder } from "@/aspects";
 
 import { useAspect } from "@/services/sh-compendium";
+
 import AspectIcon from "./AspectIcon";
 
 export interface AspectsListProps {
@@ -26,7 +29,7 @@ const AspectsList = ({ sx, aspects, iconSize }: AspectsListProps) => {
         ...sx,
       }}
     >
-      {Object.keys(aspects).map((aspectId) => (
+      {sortBy(Object.keys(aspects), aspectOrder).map((aspectId) => (
         <AspectListItem key={aspectId} aspectId={aspectId} size={iconSize}>
           {aspects[aspectId]}
         </AspectListItem>
