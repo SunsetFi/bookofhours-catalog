@@ -13,7 +13,7 @@ export function labelColumnDef<T extends ModelWithLabel>(
     width: 200,
     wrap: true,
     filter: textFilter("name"),
-    sortable: true,
+    sortable: (a, b) => a.localeCompare(b),
     ...additional,
     observable: (item) => item.label$,
   };

@@ -155,7 +155,7 @@ const CraftingCatalogPage = () => {
         ),
         observable: "iconUrl$",
       } as ObservableDataGridColumnDef<CraftableModel>,
-      textColumnDef<CraftableModel>("Item", "item", "label$", { width: 250 }),
+      textColumnDef<CraftableModel>("Item", "item", "label$", { width: 200 }),
       aspectsColumnDef<CraftableModel>(filterCraftableAspect, {
         width: 300,
       }),
@@ -179,7 +179,7 @@ const CraftingCatalogPage = () => {
         observable: "skillIconUrl$",
       } as ObservableDataGridColumnDef<CraftableModel>,
       textColumnDef<CraftableModel>("Skill", "skill", "skillLabel$", {
-        width: 250,
+        width: 200,
       }),
       aspectsObservableColumnDef<CraftableModel>(
         "requirements",
@@ -187,7 +187,7 @@ const CraftingCatalogPage = () => {
         (x) => x != "ability",
         {
           headerName: "Requirements",
-          width: 100,
+          width: 200,
         }
       ),
       textColumnDef<CraftableModel>(

@@ -287,7 +287,7 @@ const BookCatalogPage = () => {
         { display: "none" },
         {
           headerName: "Language",
-          width: 125,
+          width: 150,
           filter: aspectsFilter("language", "auto"),
         }
       ),

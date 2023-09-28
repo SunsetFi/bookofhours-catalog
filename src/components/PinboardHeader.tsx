@@ -5,6 +5,7 @@ import type { SxProps } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { useObservation, mergeMapIfNotNull } from "@/observables";
@@ -21,7 +22,6 @@ import {
 import ElementIcon from "./ElementIcon";
 import AspectsList from "./AspectsList";
 import CraftIconButton from "./CraftIconButton";
-import { Typography } from "@mui/material";
 
 export interface PinboardHeaderProps {
   sx?: SxProps;
@@ -90,9 +90,9 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
       />
       <Box sx={{ display: "flex", flexDirection: "row" }}>
         <CraftIconButton />
-        <IconButton>
+        {/* <IconButton>
           <ExpandMoreIcon />
-        </IconButton>
+        </IconButton> */}
       </Box>
     </Box>
   );
