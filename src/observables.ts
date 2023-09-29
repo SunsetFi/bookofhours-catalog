@@ -1,5 +1,4 @@
 import * as React from "react";
-import { debounce } from "lodash";
 
 import {
   OperatorFunction,
@@ -96,6 +95,7 @@ export function filterItemObservations<T, K extends T>(
       mapArrayItemsCached((item) =>
         filter(item).pipe(map((isMatch) => ({ item, isMatch })))
       ),
+      distinctUntilShallowArrayChanged(),
       observeAll(),
       map((items) =>
         items.filter(({ isMatch }) => isMatch).map(({ item }) => item as K)
@@ -110,42 +110,36 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   };
 }
 
-export function observeAll<K>(): OperatorFunction<Observable<K>[], K[]>;
-export function observeAll<K, F>(
-  fallback: F
-): OperatorFunction<Observable<K>[], (K | F)[]>;
-export function observeAll<K>(
-  fallback?: any
-): OperatorFunction<Observable<K>[], any[]> {
-  return (source: Observable<Observable<K>[]>) => {
+export function observeAll<K>(): OperatorFunction<
+  readonly Observable<K>[],
+  any[]
+> {
+  return (source: Observable<readonly Observable<K>[]>) => {
     return new Observable<K[]>((subscriber) => {
       const subscriberMap = new Map<
         Observable<K>,
         { subscription: Subscription; lastValue: K | undefined }
       >();
-      let lastValues: Observable<K>[] = [];
+      let lastValues: readonly Observable<K>[] = [];
+      let isSubscribing = false;
 
-      const tryEmitValues = debounce(
-        () => {
-          const values = lastValues.map(
-            (value) => subscriberMap.get(value)?.lastValue
-          );
+      function tryEmitValues() {
+        if (isSubscribing) {
+          return;
+        }
 
-          if (values.some((value) => value === undefined)) {
-            if (fallback !== undefined) {
-              subscriber.next(
-                values.map((x) => (x === undefined ? fallback : x))
-              );
-            }
+        const values = lastValues.map(
+          (value) => subscriberMap.get(value)?.lastValue
+        );
 
-            return;
-          }
+        if (values.some((value) => value === undefined)) {
+          return;
+        }
 
-          subscriber.next(values as any);
-        },
-        1,
-        { leading: false, trailing: true }
-      );
+        // In practice this is called a bonkers number of times even after we get all values.
+        // Books page does this particularly... Need a distinct somewhere?
+        subscriber.next(values as any);
+      }
 
       function subscribeToChild(observable: Observable<K>) {
         const values = {
@@ -177,7 +171,7 @@ export function observeAll<K>(
         return false;
       }
 
-      function clearOldSubscriptions(values: Observable<K>[]) {
+      function clearOldSubscriptions(values: readonly Observable<K>[]) {
         let cleared = 0;
         for (const [observable, { subscription }] of subscriberMap.entries()) {
           if (!values.includes(observable)) {
@@ -186,16 +180,29 @@ export function observeAll<K>(
             subscriberMap.delete(observable);
           }
         }
+        return cleared > 0;
       }
 
-      function onTopLevelUpdate(values: Observable<K>[]) {
-        clearOldSubscriptions(values);
-        for (const value of values) {
-          trySubscribe(value);
+      function onTopLevelUpdate(values: readonly Observable<K>[]) {
+        let emit = false;
+        try {
+          isSubscribing = true;
+
+          emit = clearOldSubscriptions(values);
+          for (const value of values) {
+            if (trySubscribe(value)) {
+              emit = true;
+            }
+          }
+
+          lastValues = values;
+        } finally {
+          isSubscribing = false;
         }
 
-        lastValues = values;
-        tryEmitValues();
+        if (emit || values.length === 0) {
+          tryEmitValues();
+        }
       }
 
       const topLevelSubscription = source.subscribe({

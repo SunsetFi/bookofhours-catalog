@@ -232,7 +232,8 @@ export class ElementStackModel
         map(([aspects, elementId]) => ({
           ...aspects,
           [elementId]: 1,
-        }))
+        })),
+        shareReplay(1)
       );
     }
 

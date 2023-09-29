@@ -41,7 +41,8 @@ export class TokenParentTerrainFactory {
           t.path$.pipe(map((path) => [path, t] as const))
         ),
         observeAll(),
-        map((items) => Object.fromEntries(items))
+        map((items) => Object.fromEntries(items)),
+        shareReplay(1)
       );
     }
 

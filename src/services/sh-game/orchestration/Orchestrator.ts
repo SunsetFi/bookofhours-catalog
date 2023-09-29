@@ -123,12 +123,15 @@ export class Orchestrator {
           }),
           observeAll(),
           startWith([] as Aspects[]),
-          map((aspectArray) =>
-            aspectArray.reduce(
-              (acc, aspects) => combineAspects(acc, aspects),
-              {} as Aspects
-            )
-          )
+          map((aspectArray) => {
+            // This stupid code reproduces the .reduce() that was here before.
+            // This is because vite for some baffling reason starts erroring on this function, but only after changes are made.
+            let result = {} as Aspects;
+            for (const aspects of aspectArray) {
+              result = combineAspects(aspects, aspects);
+            }
+            return result;
+          })
         ),
       ]).pipe(
         map(([requirements, aspects]) => {

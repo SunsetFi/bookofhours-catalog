@@ -47,7 +47,8 @@ export class TokenVisibilityFactory {
         distinctUntilShallowArrayChanged(),
         filterItemObservations((t) => t.visible$),
         mapArrayItems((t) => t.path$),
-        observeAll()
+        observeAll(),
+        shareReplay(1)
       );
     }
 

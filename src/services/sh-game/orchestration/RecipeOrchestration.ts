@@ -6,7 +6,6 @@ import {
   firstValueFrom,
   map,
   of as observableOf,
-  share,
   shareReplay,
   throttleTime,
 } from "rxjs";
@@ -20,6 +19,7 @@ import {
 import { flatten, isEqual, pick, sortBy } from "lodash";
 
 import {
+  distinctUntilShallowArrayChanged,
   filterItemObservations,
   mapArrayItemsCached,
   observeAll,
@@ -54,6 +54,10 @@ export class RecipeOrchestration
     Record<string, ElementStackModel | null>
   >({});
 
+  private readonly _elementStacksMatchingRecipe$: Observable<
+    readonly ElementStackModel[]
+  >;
+
   // This is hackish, and really only exists for 'consider' and skill level ups.
   private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
 
@@ -62,6 +66,21 @@ export class RecipeOrchestration
     private readonly _tokensSource: TokensSource,
     private readonly _desiredElements: readonly ElementModel[]
   ) {
+    const requiredAspects = Object.keys(_recipe.requirements);
+    console.log("Recipe reqs", requiredAspects);
+    this._elementStacksMatchingRecipe$ =
+      this._tokensSource.visibleElementStacks$.pipe(
+        filterItemObservations((item) =>
+          item.aspectsAndSelf$.pipe(
+            map((aspects) =>
+              Object.keys(aspects).some((r) => requiredAspects.includes(r))
+            )
+          )
+        ),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+
     // Must set this before accessing availableSituations$
     this._desiredElementThresholds$ = new BehaviorSubject(
       _desiredElements
@@ -144,7 +163,7 @@ export class RecipeOrchestration
           assignments.map((x) => x?.element$).filter(isNotNull)
         ),
         observeAll(),
-        share()
+        shareReplay(1)
       );
       this._slots$ = combineLatest([
         this._situation$,
@@ -247,30 +266,20 @@ export class RecipeOrchestration
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
     const requirementKeys = Object.keys(this._recipe.requirements);
 
-    const availableElementStacks$ =
-      this._tokensSource.visibleElementStacks$.pipe(
-        filterItemObservations((item) => sphereMatchesToken(spec, item)),
-        filterItemObservations((item) =>
-          item.aspectsAndSelf$.pipe(
-            map((aspects) =>
-              Object.keys(this._recipe.requirements).some((r) =>
-                Object.keys(aspects).includes(r)
-              )
-            )
-          )
-        ),
-        map((stacks) =>
-          sortBy(stacks, [
-            (stack) =>
-              this._desiredElements.some((x) => x.elementId === stack.elementId)
-                ? 1
-                : 0,
-            (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
-            (stack) => aspectsMagnitude(stack.aspects),
-          ]).reverse()
-        ),
-        shareReplay(1)
-      );
+    const availableElementStacks$ = this._elementStacksMatchingRecipe$.pipe(
+      filterItemObservations((item) => sphereMatchesToken(spec, item)),
+      map((stacks) =>
+        sortBy(stacks, [
+          (stack) =>
+            this._desiredElements.some((x) => x.elementId === stack.elementId)
+              ? 1
+              : 0,
+          (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
+          (stack) => aspectsMagnitude(stack.aspects),
+        ]).reverse()
+      ),
+      shareReplay(1)
+    );
 
     const lastSelectedItem = this._slotAssignments$.value[spec.id] ?? null;
     this._slotAssignments$.next({
