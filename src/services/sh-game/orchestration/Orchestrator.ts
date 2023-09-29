@@ -124,11 +124,12 @@ export class Orchestrator {
           observeAll(),
           startWith([] as Aspects[]),
           map((aspectArray) => {
-            // This stupid code reproduces the .reduce() that was here before.
-            // This is because vite for some baffling reason starts erroring on this function, but only after changes are made.
+            // This looks like a simple reduce(), but vite throws baffling errors when we use reduce.
+            // It also is totally happy to use it, but only the first time, and starts erroring on it when
+            // the project rebuilds from totally unrelated areas of the code.
             let result = {} as Aspects;
             for (const aspects of aspectArray) {
-              result = combineAspects(aspects, aspects);
+              result = combineAspects(result, aspects);
             }
             return result;
           })
@@ -141,7 +142,7 @@ export class Orchestrator {
             let required = Number(reqValue);
 
             if (Number.isNaN(required)) {
-              required = aspects[reqValue];
+              required = aspects[reqValue] ?? 0;
             }
 
             if (required <= 0) {
