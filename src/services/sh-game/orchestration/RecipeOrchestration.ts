@@ -67,7 +67,6 @@ export class RecipeOrchestration
     private readonly _desiredElements: readonly ElementModel[]
   ) {
     const requiredAspects = Object.keys(_recipe.requirements);
-    console.log("Recipe reqs", requiredAspects);
     this._elementStacksMatchingRecipe$ =
       this._tokensSource.visibleElementStacks$.pipe(
         filterItemObservations((item) =>
