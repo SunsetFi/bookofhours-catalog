@@ -34,7 +34,6 @@ import PinRecipeIconButton from "./PinRecipeIconButton";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
-  const pinboard = useDIDependency(Pinboard);
 
   const orchestration = useObservation(orchestrator.orchestration$);
   const aspectRequirements =
@@ -53,6 +52,11 @@ const RecipeOrchestratorDialog = () => {
     return null;
   }
 
+  let label = recipeLabel ?? situationLabel;
+  if (label === ".") {
+    label = situationLabel;
+  }
+
   return (
     <Dialog
       open={true}
@@ -65,7 +69,7 @@ const RecipeOrchestratorDialog = () => {
           <Box sx={{ display: "flex", flexDirection: "row" }}>
             <Typography variant="h5" sx={{ mr: 2 }}>
               {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
-              {recipeLabel?.toLocaleUpperCase()}
+              {label?.toLocaleUpperCase()}
             </Typography>
             {recipe && (
               <PinRecipeIconButton

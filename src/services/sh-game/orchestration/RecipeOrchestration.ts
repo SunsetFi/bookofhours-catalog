@@ -6,16 +6,28 @@ import {
   firstValueFrom,
   map,
   of as observableOf,
+  share,
   shareReplay,
+  throttleTime,
 } from "rxjs";
-import { SphereSpec } from "secrethistories-api";
-import { isEqual, pick, sortBy } from "lodash";
+import {
+  Aspects,
+  SphereSpec,
+  combineAspects,
+  actionIdMatches,
+  aspectsMatchExpression,
+} from "secrethistories-api";
+import { flatten, isEqual, pick, sortBy } from "lodash";
 
-import { filterItemObservations } from "@/observables";
-
+import {
+  filterItemObservations,
+  mapArrayItemsCached,
+  observeAll,
+} from "@/observables";
+import { isNotNull } from "@/utils";
 import { aspectsMagnitude, workstationFilterAspects } from "@/aspects";
 
-import { RecipeModel } from "@/services/sh-compendium";
+import { ElementModel, RecipeModel } from "@/services/sh-compendium";
 
 import { sphereMatchesToken } from "../observables";
 
@@ -42,11 +54,24 @@ export class RecipeOrchestration
     Record<string, ElementStackModel | null>
   >({});
 
+  // This is hackish, and really only exists for 'consider' and skill level ups.
+  private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
+
   constructor(
     private readonly _recipe: RecipeModel,
     private readonly _tokensSource: TokensSource,
-    private readonly _desiredElementIds: readonly string[] = []
+    private readonly _desiredElements: readonly ElementModel[]
   ) {
+    // Must set this before accessing availableSituations$
+    this._desiredElementThresholds$ = new BehaviorSubject(
+      _desiredElements
+    ).pipe(
+      map((items) => items.map((item) => item.slots$)),
+      observeAll(),
+      map((items) => flatten(items)),
+      shareReplay(1)
+    );
+
     // Select a default situation.  This is hackish
     firstValueFrom(this.availableSituations$).then((situations) => {
       const situation = situations[0];
@@ -80,14 +105,21 @@ export class RecipeOrchestration
   get availableSituations$(): Observable<readonly SituationModel[]> {
     if (!this._availableSituations$) {
       this._availableSituations$ = combineLatest([
+        this._tokensSource.considerSituation$,
         this._tokensSource.unlockedWorkstations$,
         this._aspectsFilter$,
+        this._desiredElementThresholds$,
       ]).pipe(
-        map(([workstations, aspectsFilter]) =>
-          workstations.filter((ws) =>
-            this._situationIsAvailable(ws, aspectsFilter)
-          )
-        ),
+        map(([consider, workstations, aspectsFilter, elementThresholds]) => {
+          const verbs = [...workstations];
+          if (consider) {
+            verbs.push(consider);
+          }
+
+          return verbs.filter((verb) =>
+            this._situationIsAvailable(verb, aspectsFilter, elementThresholds)
+          );
+        }),
         shareReplay(1)
       );
     }
@@ -100,18 +132,77 @@ export class RecipeOrchestration
   > | null = null;
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
     if (!this._slots$) {
-      this._slots$ = this._situation$.pipe(
-        map((situation) => situation?.thresholds ?? []),
+      // The sheer amount of observeAlls here is a bit concerning.
+      const slottedElements = this._slotAssignments$.pipe(
+        // Sort the values to guarentee the order doesn't change on us and mess up our distinct check.
+        map((assignments) =>
+          Object.keys(assignments)
+            .sort()
+            .map((key) => assignments[key])
+        ),
+        map((assignments) =>
+          assignments.map((x) => x?.element$).filter(isNotNull)
+        ),
+        observeAll(),
+        share()
+      );
+      this._slots$ = combineLatest([
+        this._situation$,
+        // Cards can add slots too, so we need this mess to watch all assignments,
+        // get the elements, and get the slots.
+        // Honestly, it amazes me that this whole thing hasn't collapsed in on itself with the egregious
+        // chain of observables I am shoving into it.
+        // Update: We now have to track aspects as well.  Wonderful.
+        slottedElements.pipe(
+          map((elements) => elements.map((x) => x.slots$)),
+          observeAll()
+        ),
+        slottedElements.pipe(
+          map((elements) => elements.map((x) => x.aspects$)),
+          observeAll(),
+          map((aspectsArray) =>
+            aspectsArray.reduce((a, b) => combineAspects(a, b), {} as Aspects)
+          )
+        ),
+      ]).pipe(
+        map(([situation, inputThresholds, aspects]) => {
+          if (!situation) {
+            return [];
+          }
+
+          const thresholds = [
+            ...situation.thresholds,
+            ...flatten(inputThresholds),
+          ].filter((spec) => {
+            if (!actionIdMatches(spec.actionId, situation.verbId)) {
+              return false;
+            }
+
+            if (!aspectsMatchExpression(aspects, spec.ifAspectsPresent)) {
+              return false;
+            }
+
+            return true;
+          });
+
+          return thresholds;
+        }),
         distinctUntilChanged((a, b) => isEqual(a, b)),
-        map((thresholds) => {
+        mapArrayItemsCached((spec) => this._createSlot(spec)),
+        map((slots) => {
           const result: Record<string, OrchestrationSlot> = {};
-          for (const threshold of thresholds) {
-            result[threshold.id] = this._createSlot(threshold);
+          for (const slot of slots) {
+            if (result[slot.spec.id]) {
+              continue;
+            }
+
+            result[slot.spec.id] = slot;
           }
 
           return result;
         }),
-        shareReplay(1)
+        // This is just more evidence how horribly jank using observables like this is.
+        throttleTime(1, undefined, { leading: false, trailing: true })
       );
     }
 
@@ -140,8 +231,14 @@ export class RecipeOrchestration
       return;
     }
 
-    const filter = await firstValueFrom(this._aspectsFilter$);
-    if (!this._situationIsAvailable(this._situation$.value, filter)) {
+    const [filter, thresholds] = await Promise.all([
+      firstValueFrom(this._aspectsFilter$),
+      firstValueFrom(this._desiredElementThresholds$),
+    ]);
+
+    if (
+      !this._situationIsAvailable(this._situation$.value, filter, thresholds)
+    ) {
       this._situation$.next(null);
       this._slotAssignments$.next({});
     }
@@ -165,7 +262,9 @@ export class RecipeOrchestration
         map((stacks) =>
           sortBy(stacks, [
             (stack) =>
-              this._desiredElementIds.includes(stack.elementId) ? 1 : 0,
+              this._desiredElements.some((x) => x.elementId === stack.elementId)
+                ? 1
+                : 0,
             (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
             (stack) => aspectsMagnitude(stack.aspects),
           ]).reverse()
@@ -173,8 +272,23 @@ export class RecipeOrchestration
         shareReplay(1)
       );
 
+    const lastSelectedItem = this._slotAssignments$.value[spec.id] ?? null;
+    this._slotAssignments$.next({
+      ...this._slotAssignments$.value,
+      [spec.id]: null,
+    });
+
     // Select a default value.  This is hackish.
     firstValueFrom(availableElementStacks$).then((stacks) => {
+      // Currently have a value.  This can happen when slots regenerate as a result of aspect changes and isAspectsPresent
+      if (lastSelectedItem && stacks.includes(lastSelectedItem)) {
+        this._slotAssignments$.next({
+          ...this._slotAssignments$.value,
+          [spec.id]: lastSelectedItem,
+        });
+        return;
+      }
+
       const item = stacks[0];
       if (!item) {
         return;
@@ -204,7 +318,8 @@ export class RecipeOrchestration
 
   private _situationIsAvailable(
     situation: SituationModel,
-    aspectsFilter: readonly string[]
+    aspectsFilter: readonly string[],
+    additionalThresholds: SphereSpec[]
   ): boolean {
     const requiredAspects = [
       ...aspectsFilter,
@@ -213,21 +328,29 @@ export class RecipeOrchestration
       ),
     ];
 
-    if (this._recipe.actionId) {
-      const comparison = new RegExp(
-        `^${this._recipe.actionId.replace("*", "(?:.*)")}$`
-      );
-      if (!comparison.test(situation.verbId)) {
-        return false;
-      }
+    if (
+      this._recipe.actionId &&
+      !actionIdMatches(this._recipe.actionId, situation.verbId)
+    ) {
+      return false;
     }
+
+    const thresholds = [
+      ...situation.thresholds,
+      ...additionalThresholds.filter(
+        (spec) => actionIdMatches(spec.actionId, situation.verbId)
+        // There is another thresh controller here: ifAspectsPresent.
+        // This changes based on slotted cards, and thus is impossible to factor in for what situations
+        // are available.
+      ),
+    ];
 
     // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.
     // This really is a special / edge case for skills, so maybe restrict the match to the skill card off-aspect.
     // Interestingly enough, this is absolutely required to 'read' phonographs and films.
     for (const aspect of requiredAspects) {
       if (
-        !situation.thresholds.some(
+        !thresholds.some(
           (t) =>
             (Object.keys(t.essential).includes(aspect) ||
               Object.keys(t.required).includes(aspect)) &&

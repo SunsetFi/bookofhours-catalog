@@ -1,4 +1,4 @@
-import { Aspects, Element, XTrigger } from "secrethistories-api";
+import { Aspects, Element, SphereSpec, XTrigger } from "secrethistories-api";
 import { Observable, map } from "rxjs";
 
 import { promiseFuncToObservable } from "@/observables";
@@ -83,6 +83,17 @@ export class ElementModel
     }
 
     return this._aspects$;
+  }
+
+  private _slots$: Observable<readonly SphereSpec[]> | null = null;
+  get slots$() {
+    if (this._slots$ == null) {
+      this._slots$ = this._element$.pipe(
+        map((e) => Object.freeze([...(e?.slots ?? [])]))
+      );
+    }
+
+    return this._slots$;
   }
 
   private _xtriggers$: Observable<Record<string, XTrigger[]>> | null = null;

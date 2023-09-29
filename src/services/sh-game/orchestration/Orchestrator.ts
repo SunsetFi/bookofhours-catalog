@@ -170,12 +170,12 @@ export class Orchestrator {
       return;
     }
 
+    const desiredElements = (desiredElementIds ?? []).map((id) =>
+      this._compendium.getElementById(id)
+    );
+
     this._orchestration$.next(
-      new RecipeOrchestration(
-        recipe,
-        this._tokensSource,
-        desiredElementIds ?? []
-      )
+      new RecipeOrchestration(recipe, this._tokensSource, desiredElements)
     );
   }
 

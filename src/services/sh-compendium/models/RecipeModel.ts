@@ -1,4 +1,9 @@
-import { Aspects, Recipe, SphereSpec } from "secrethistories-api";
+import {
+  Aspects,
+  AspectsExpression,
+  Recipe,
+  SphereSpec,
+} from "secrethistories-api";
 import { Observable, map } from "rxjs";
 
 import { promiseFuncToObservable } from "@/observables";
@@ -133,8 +138,7 @@ export class RecipeModel
     return this._warmup$;
   }
 
-  private _requirements$: Observable<Readonly<Record<string, string>>> | null =
-    null;
+  private _requirements$: Observable<Readonly<AspectsExpression>> | null = null;
   get requirements$() {
     if (this._requirements$ == null) {
       this._requirements$ = this._recipe$.pipe(
@@ -149,9 +153,8 @@ export class RecipeModel
     return this._recipe?.requirements ?? {};
   }
 
-  private _extantRequirements$: Observable<
-    Readonly<Record<string, string>>
-  > | null = null;
+  private _extantRequirements$: Observable<Readonly<AspectsExpression>> | null =
+    null;
   get extantRequirements$() {
     if (this._extantRequirements$ == null) {
       this._extantRequirements$ = this._recipe$.pipe(

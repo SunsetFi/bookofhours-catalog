@@ -1,5 +1,5 @@
 import { startTransition } from "react";
-import { Observable, Subject, map, shareReplay, tap } from "rxjs";
+import { Observable, Subject, map, shareReplay } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
@@ -41,6 +41,7 @@ const spherePaths = [
   "~/hand.memories",
   "~/hand.misc",
   "~/library",
+  "~/fixedverbs",
 ];
 
 const supportedPayloadTypes = [
@@ -93,6 +94,23 @@ export class TokensSource {
 
   get tokens$(): Observable<readonly TokenModel[]> {
     return this._tokens$;
+  }
+
+  private _considerSituation$: Observable<SituationModel | null> | null = null;
+  get considerSituation$() {
+    if (this._considerSituation$ == null) {
+      this._considerSituation$ = this._tokens$.pipe(
+        map(
+          (tokens) =>
+            tokens
+              .filter(isSituationModel)
+              .find((x) => x.path.startsWith("~/fixedverbs!consider.")) ?? null
+        ),
+        shareReplay(1)
+      );
+    }
+
+    return this._considerSituation$;
   }
 
   private _unlockedTerrains$: Observable<

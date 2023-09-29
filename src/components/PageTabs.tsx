@@ -40,6 +40,11 @@ const tabData = [
     path: "/furnishings",
   },
   {
+    label: "Skills",
+    aspectIcon: "skill",
+    path: "/skills",
+  },
+  {
     label: "Craftables",
     aspectIcon: "difficulty.keeper",
     path: "/craftables",
