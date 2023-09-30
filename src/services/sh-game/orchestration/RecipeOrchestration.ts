@@ -1,13 +1,15 @@
 import {
   BehaviorSubject,
   Observable,
+  asapScheduler,
   combineLatest,
   distinctUntilChanged,
   firstValueFrom,
   map,
+  mergeMap,
   of as observableOf,
+  observeOn,
   shareReplay,
-  throttleTime,
 } from "rxjs";
 import {
   Aspects,
@@ -151,17 +153,14 @@ export class RecipeOrchestration
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
     if (!this._slots$) {
       // The sheer amount of observeAlls here is a bit concerning.
-      const slottedElements = this._slotAssignments$.pipe(
+      const slottedElementStacks = this._slotAssignments$.pipe(
         // Sort the values to guarentee the order doesn't change on us and mess up our distinct check.
         map((assignments) =>
           Object.keys(assignments)
             .sort()
             .map((key) => assignments[key])
+            .filter(isNotNull)
         ),
-        map((assignments) =>
-          assignments.map((x) => x?.element$).filter(isNotNull)
-        ),
-        observeAll(),
         shareReplay(1)
       );
       this._slots$ = combineLatest([
@@ -171,18 +170,26 @@ export class RecipeOrchestration
         // Honestly, it amazes me that this whole thing hasn't collapsed in on itself with the egregious
         // chain of observables I am shoving into it.
         // Update: We now have to track aspects as well.  Wonderful.
-        slottedElements.pipe(
-          map((elements) => elements.map((x) => x.slots$)),
+        slottedElementStacks.pipe(
+          map((assignments) =>
+            assignments.map((x) => x.element$.pipe(mergeMap((x) => x.slots$)))
+          ),
           observeAll()
         ),
-        slottedElements.pipe(
-          map((elements) => elements.map((x) => x.aspects$)),
+        slottedElementStacks.pipe(
+          map((elements) => elements.map((x) => x.aspectsAndSelf$)),
           observeAll(),
           map((aspectsArray) =>
             aspectsArray.reduce((a, b) => combineAspects(a, b), {} as Aspects)
           )
         ),
       ]).pipe(
+        // The use of a shared slottedElementStacks here means we get 2 rapid updates from slotAssignments changing
+        // By default these are listened to with asyncScheduler, but that changes the order of our updates for some reason, leading
+        // to older values overriding newer values.
+        // What we really want is the null / concurrent scheduler, but this won't take null as an argument and the rxjs
+        // docs dont specify how else to get it.
+        observeOn(asapScheduler),
         map(([situation, inputThresholds, aspects]) => {
           if (!situation) {
             return [];
@@ -217,10 +224,10 @@ export class RecipeOrchestration
             result[slot.spec.id] = slot;
           }
 
+          console.log(4.5);
           return result;
         }),
-        // This is just more evidence how horribly jank using observables like this is.
-        throttleTime(1, undefined, { leading: false, trailing: true })
+        shareReplay(1)
       );
     }
 

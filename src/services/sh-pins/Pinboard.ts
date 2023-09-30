@@ -83,6 +83,10 @@ export class Pinboard {
                 desiredValue = result[recipeReqs[key]]?.current ?? 0;
               }
 
+              if (desiredValue <= 0) {
+                continue;
+              }
+
               result[key] = {
                 current: result[key]?.current ?? 0,
                 desired: desiredValue,

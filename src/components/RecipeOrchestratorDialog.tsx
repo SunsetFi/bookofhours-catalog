@@ -14,8 +14,6 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { powerAspects } from "@/aspects";
-
 import { useDIDependency } from "@/container";
 import { Null$, observableObjectOrEmpty, useObservation } from "@/observables";
 
@@ -24,7 +22,6 @@ import {
   Orchestrator,
   isVariableSituationOrchestration,
 } from "@/services/sh-game/orchestration";
-import { Pinboard } from "@/services/sh-pins/Pinboard";
 
 import SituationSelectField from "./SituationSelectField";
 import AspectsList from "./AspectsList";
@@ -129,7 +126,7 @@ const RecipeOrchestratorDialog = () => {
             <SlotEditor
               key={slotId}
               slot={slots[slotId]}
-              requiredAspects={Object.keys(aspectRequirements)}
+              recipeRequiredAspects={Object.keys(aspectRequirements)}
             />
           ))}
         </Box>
@@ -151,17 +148,15 @@ const RecipeOrchestratorDialog = () => {
 
 interface SlotEditorProps {
   slot: OrchestrationSlot;
-  requiredAspects: readonly string[];
+  recipeRequiredAspects: readonly string[];
 }
 
-const SlotEditor = ({ slot, requiredAspects }: SlotEditorProps) => {
+const SlotEditor = ({ slot, recipeRequiredAspects }: SlotEditorProps) => {
   const assignment = useObservation(slot.assignment$) ?? null;
 
   // Remove the power aspects from these since that will be displayed by the workstation hints.
-  const allowedAspects = [
-    ...Object.keys(slot.spec.essential),
-    ...Object.keys(slot.spec.required),
-  ].filter((x) => !powerAspects.includes(x as any));
+  const requiredAspects = Object.keys(slot.spec.required);
+  const essentialAspects = Object.keys(slot.spec.essential);
 
   return (
     <Box
@@ -173,16 +168,31 @@ const SlotEditor = ({ slot, requiredAspects }: SlotEditorProps) => {
         <Typography variant="body1" sx={{ mr: "auto" }}>
           {slot.spec.label}
         </Typography>
-        {allowedAspects.map((aspectId) => (
-          <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
-        ))}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 1,
+            // FIXME: We are getting an aspect that is hidden here... See skill upgrade recipes on consider slot.
+            mr: essentialAspects.length > 0 ? 2 : 0,
+          }}
+        >
+          {requiredAspects.map((aspectId) => (
+            <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
+          ))}
+        </Box>
+        <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+          {essentialAspects.map((aspectId) => (
+            <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
+          ))}
+        </Box>
       </Box>
       <ElementStackSelectField
         label="Element"
         fullWidth
         elementStacks$={slot.availableElementStacks$}
         uniqueElementIds
-        displayAspects={requiredAspects}
+        displayAspects={recipeRequiredAspects}
         value={assignment}
         onChange={(stack) => slot.assign(stack)}
       />

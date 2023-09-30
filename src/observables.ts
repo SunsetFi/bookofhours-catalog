@@ -110,11 +110,8 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   };
 }
 
-export function observeAll<K>(): OperatorFunction<
-  readonly Observable<K>[],
-  any[]
-> {
-  return (source: Observable<readonly Observable<K>[]>) => {
+export function observeAll() {
+  return <K>(source: Observable<readonly Observable<K>[]>) => {
     return new Observable<K[]>((subscriber) => {
       const subscriberMap = new Map<
         Observable<K>,
@@ -249,6 +246,7 @@ export function mapArrayItemsCached<T, R>(
 ): OperatorFunction<readonly T[], R[]> {
   return (source: Observable<readonly T[]>): Observable<R[]> => {
     const cache = new Map<T, R>();
+
     return source.pipe(
       map((arr) => {
         // Temporary set to track items in the current array.
@@ -258,7 +256,7 @@ export function mapArrayItemsCached<T, R>(
           currentSet.add(item);
 
           if (cache.has(item)) {
-            return cache.get(item) as R;
+            return cache.get(item)!;
           } else {
             const newValue = fn(item);
             cache.set(item, newValue);
