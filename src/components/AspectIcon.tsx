@@ -52,6 +52,7 @@ const AspectIcon = ({
         onClick={onClick}
       >
         <img
+          loading="lazy"
           style={{ display: "block" }}
           src={aspect.iconUrl}
           alt={title ?? label ?? ""}
@@ -89,6 +90,7 @@ const AspectIcon = ({
             }}
           >
             <img
+              loading="lazy"
               src={aspect.iconUrl}
               alt={label}
               title={label}

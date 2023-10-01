@@ -26,7 +26,11 @@ export function iconColumnDef<T extends ModelWithIconUrl>(
           p: 2,
         }}
       >
-        <img src={value} style={{ maxWidth: "75px", maxHeight: "75px" }} />
+        <img
+          loading="lazy"
+          src={value}
+          style={{ maxWidth: "75px", maxHeight: "75px" }}
+        />
       </Box>
     ),
     ...additional,

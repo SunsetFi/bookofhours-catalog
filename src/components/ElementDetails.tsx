@@ -38,6 +38,7 @@ const ElementDetails = React.forwardRef<HTMLDivElement, ElementDetailsProps>(
           }}
         >
           <img
+            loading="lazy"
             src={element.iconUrl}
             alt={label}
             title={label}

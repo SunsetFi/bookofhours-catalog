@@ -191,7 +191,6 @@ const SlotEditor = ({ slot, recipeRequiredAspects }: SlotEditorProps) => {
         label="Element"
         fullWidth
         elementStacks$={slot.availableElementStacks$}
-        uniqueElementIds
         displayAspects={recipeRequiredAspects}
         value={assignment}
         onChange={(stack) => slot.assign(stack)}

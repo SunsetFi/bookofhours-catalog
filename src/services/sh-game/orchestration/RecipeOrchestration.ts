@@ -10,6 +10,7 @@ import {
   of as observableOf,
   observeOn,
   shareReplay,
+  throttleTime,
 } from "rxjs";
 import {
   Aspects,
@@ -18,7 +19,7 @@ import {
   actionIdMatches,
   aspectsMatchExpression,
 } from "secrethistories-api";
-import { flatten, isEqual, pick, sortBy } from "lodash";
+import { flatten, isEqual, omit, pick, sortBy } from "lodash";
 
 import {
   distinctUntilShallowArrayChanged,
@@ -39,6 +40,7 @@ import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
 
 import {
+  ExecutionPlan,
   OrchestrationBase,
   OrchestrationSlot,
   VariableSituationOrchestration,
@@ -101,6 +103,55 @@ export class RecipeOrchestration
 
       this._situation$.next(situation);
     });
+
+    this.slots$
+      .pipe(throttleTime(5, asapScheduler, { leading: false, trailing: true }))
+      .subscribe((slots) => {
+        this._pickDefaults(Object.values(slots));
+      });
+  }
+
+  private _executionPlan$: Observable<ExecutionPlan | null> | null = null;
+  get executionPlan$() {
+    if (!this._executionPlan$) {
+      this._executionPlan$ = combineLatest([
+        this.situation$,
+        this.slots$,
+        this._slotAssignments$,
+      ]).pipe(
+        map(([situation, slots, assignments]) => {
+          if (!situation) {
+            return null;
+          }
+
+          const recipe = this._recipe;
+          const plan: ExecutionPlan = {
+            situation,
+            recipe,
+            slots: {},
+          };
+
+          for (const slotId of Object.keys(slots)) {
+            const slot = slots[slotId];
+            if (!slot) {
+              continue;
+            }
+
+            const assignment = assignments[slotId];
+            if (!assignment) {
+              continue;
+            }
+
+            plan.slots[slotId] = assignment;
+          }
+
+          return plan;
+        }),
+        shareReplay(1)
+      );
+    }
+
+    return this._executionPlan$;
   }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
@@ -140,6 +191,10 @@ export class RecipeOrchestration
             this._situationIsAvailable(verb, aspectsFilter, elementThresholds)
           );
         }),
+        // TODO: Show these but make them disabled.
+        filterItemObservations((item) =>
+          item.state$.pipe(map((s) => s === "Unstarted"))
+        ),
         shareReplay(1)
       );
     }
@@ -224,7 +279,6 @@ export class RecipeOrchestration
             result[slot.spec.id] = slot;
           }
 
-          console.log(4.5);
           return result;
         }),
         shareReplay(1)
@@ -242,13 +296,6 @@ export class RecipeOrchestration
   selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
     this._slotAssignments$.next({});
-  }
-
-  assignSlot(slotId: string, element: ElementStackModel): void {
-    this._slotAssignments$.next({
-      ...this._slotAssignments$.value,
-      [slotId]: element,
-    });
   }
 
   private async _tryClearSituation() {
@@ -272,54 +319,36 @@ export class RecipeOrchestration
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
     const requirementKeys = Object.keys(this._recipe.requirements);
 
-    const availableElementStacks$ = this._elementStacksMatchingRecipe$.pipe(
-      filterItemObservations((item) => sphereMatchesToken(spec, item)),
-      map((stacks) =>
-        sortBy(stacks, [
+    const availableElementStacks$ = combineLatest([
+      this._elementStacksMatchingRecipe$.pipe(
+        filterItemObservations((item) => sphereMatchesToken(spec, item))
+      ),
+      this._slotAssignments$.pipe(
+        map((assignments) => omit(assignments, spec.id)),
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+        map((assignments) => Object.values(assignments).filter(isNotNull))
+      ),
+    ]).pipe(
+      map(([stacks, assigned]) => {
+        stacks = stacks.filter((x) => !assigned.includes(x));
+        return sortBy(stacks, [
           (stack) =>
             this._desiredElements.some((x) => x.elementId === stack.elementId)
               ? 1
               : 0,
           (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
           (stack) => aspectsMagnitude(stack.aspects),
-        ]).reverse()
-      ),
+        ]).reverse();
+      }),
       shareReplay(1)
     );
-
-    const lastSelectedItem = this._slotAssignments$.value[spec.id] ?? null;
-    this._slotAssignments$.next({
-      ...this._slotAssignments$.value,
-      [spec.id]: null,
-    });
-
-    // Select a default value.  This is hackish.
-    firstValueFrom(availableElementStacks$).then((stacks) => {
-      // Currently have a value.  This can happen when slots regenerate as a result of aspect changes and isAspectsPresent
-      if (lastSelectedItem && stacks.includes(lastSelectedItem)) {
-        this._slotAssignments$.next({
-          ...this._slotAssignments$.value,
-          [spec.id]: lastSelectedItem,
-        });
-        return;
-      }
-
-      const item = stacks[0];
-      if (!item) {
-        return;
-      }
-
-      this._slotAssignments$.next({
-        ...this._slotAssignments$.value,
-        [spec.id]: item,
-      });
-    });
 
     return {
       spec,
       locked: false,
       assignment$: this._slotAssignments$.pipe(
-        map((assignments) => assignments[spec.id] ?? null)
+        map((assignments) => assignments[spec.id] ?? null),
+        shareReplay(1)
       ),
       availableElementStacks$,
       assign: (element) => {
@@ -329,6 +358,40 @@ export class RecipeOrchestration
         });
       },
     };
+  }
+
+  private async _pickDefaults(slots: OrchestrationSlot[]) {
+    // Maybe we should recalculate all of these from the current values, but these should all be warmed up and ready.
+    const options = await Promise.all(
+      slots.map((slot) =>
+        firstValueFrom(slot.availableElementStacks$).then(
+          (stacks) => [slot, stacks] as const
+        )
+      )
+    );
+
+    const assignments = { ...this._slotAssignments$.value };
+
+    for (const [slot, stacks] of options) {
+      const lastSelectedItem = assignments[slot.spec.id] ?? null;
+      if (lastSelectedItem && stacks.includes(lastSelectedItem)) {
+        continue;
+      }
+
+      // TODO: Pick the item by our own logic.
+      // Currently we screw with sorting to put the one we want at the top.  Don't rely on this, and let the user
+      // order things however.
+      const item = stacks.filter(
+        (x) => !Object.values(assignments).includes(x)
+      )[0];
+      if (!item) {
+        continue;
+      }
+
+      assignments[slot.spec.id] = item;
+    }
+
+    this._slotAssignments$.next(assignments);
   }
 
   private _situationIsAvailable(

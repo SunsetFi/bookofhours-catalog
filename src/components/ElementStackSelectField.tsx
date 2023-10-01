@@ -1,106 +1,114 @@
 import * as React from "react";
-import { Observable, map } from "rxjs";
+import { Observable, combineLatest, map } from "rxjs";
 import { pick, uniqBy } from "lodash";
+import { Aspects } from "secrethistories-api";
 
+import Popper from "@mui/material/Popper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Autocomplete from "@mui/material/Autocomplete";
+import CircularProgress from "@mui/material/CircularProgress";
 
-import { mapArrayItemsCached, observeAll, useObservation } from "@/observables";
+import { observeAll, useObservation } from "@/observables";
 
 import { ElementStackModel } from "@/services/sh-game";
 
 import AspectsList from "./AspectsList";
 import ElementStackDetails from "./ElementStackDetails";
-import Popper from "@mui/material/Popper";
+import { TextField } from "@mui/material";
 
 export interface ElementStackSelectFieldProps {
   label: string;
   fullWidth?: boolean;
   elementStacks$: Observable<readonly ElementStackModel[]>;
-  uniqueElementIds?: boolean;
   displayAspects?: readonly string[];
   value: ElementStackModel | null;
   onChange(value: ElementStackModel | null): void;
+}
+
+interface ElementStackAutocompleteItem {
+  label: string | null;
+  elementStack: ElementStackModel;
+}
+
+function observeElementAutocomplete(
+  model: ElementStackModel
+): Observable<ElementStackAutocompleteItem> {
+  return model.label$.pipe(
+    map((label) => ({
+      label,
+      elementStack: model,
+    }))
+  );
 }
 
 const ElementStackSelectField = ({
   label,
   fullWidth,
   elementStacks$,
-  uniqueElementIds,
   displayAspects,
   value,
   onChange,
 }: ElementStackSelectFieldProps) => {
-  const id = React.useId();
-  const elementStacks =
-    useObservation(() => {
-      let observable = elementStacks$;
-      if (uniqueElementIds) {
-        observable = observable.pipe(
-          mapArrayItemsCached((elementStack) =>
-            elementStack.elementId$.pipe(
-              map((elementId) => ({ elementId, elementStack }))
-            )
-          ),
-          observeAll(),
-          map((pairs) =>
-            uniqBy(pairs, (pair) => pair.elementId).map((x) => x.elementStack)
-          )
-        );
-      }
-      return observable;
-    }, [elementStacks$, uniqueElementIds]) ?? [];
+  let elementStacks =
+    useObservation(
+      () =>
+        elementStacks$.pipe(
+          map((items) => items.map(observeElementAutocomplete)),
+          observeAll()
+        ),
+      [elementStacks$]
+    ) ?? null;
+
+  if (!elementStacks) {
+    return <CircularProgress />;
+  }
+
+  elementStacks = elementStacks.filter((x) => x.label != null);
+
+  const selectedValue =
+    elementStacks.find(({ elementStack }) => elementStack === value) ?? null;
 
   return (
-    <FormControl fullWidth={fullWidth}>
-      <InputLabel id={id + "-label"}>{label}</InputLabel>
-      <Select
-        labelId={id + "-label"}
-        id={id}
-        label={label}
-        value={value?.id ?? ""}
-        onChange={(e) =>
-          onChange(elementStacks.find((es) => es.id === e.target.value) ?? null)
-        }
-      >
-        <MenuItem value="">
-          <Typography variant="body1" sx={{ height: "30px" }}>
-            (None)
-          </Typography>
-        </MenuItem>
-        {elementStacks.map((elementStack) => (
-          <MenuItem key={elementStack.id} value={elementStack.id}>
-            <ElementStackSelectItem
-              elementStack={elementStack}
-              displayAspects={displayAspects}
-            />
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Autocomplete
+      fullWidth={fullWidth}
+      options={elementStacks}
+      autoHighlight
+      getOptionLabel={(option) => option.label ?? ""}
+      renderInput={(params) => <TextField {...params} label={label} />}
+      value={selectedValue}
+      onChange={(_, value) => onChange(value?.elementStack ?? null)}
+      renderOption={(props, option) => (
+        <ElementStackSelectItem
+          props={props}
+          displayAspects={displayAspects}
+          {...option}
+        />
+      )}
+    />
   );
 };
 
 export default ElementStackSelectField;
 
-interface ElementStackSelectItemProps {
-  elementStack: ElementStackModel;
+interface ElementStackSelectItemProps extends ElementStackAutocompleteItem {
+  props: any;
   displayAspects?: readonly string[];
 }
 
 const ElementStackSelectItem = ({
+  props,
+  label,
   elementStack,
   displayAspects,
 }: ElementStackSelectItemProps) => {
-  const label = useObservation(elementStack.label$);
-  let aspects = useObservation(elementStack.aspects$);
-
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  let aspects = useObservation(elementStack.aspects$);
 
   if (!label || !aspects) {
     return null;
@@ -111,7 +119,11 @@ const ElementStackSelectItem = ({
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}>
+    <Box
+      component="li"
+      sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
+      {...props}
+    >
       <Box
         sx={{ display: "flex", flexDirection: "row", gap: 2 }}
         onMouseOver={(e) => setAnchorEl(e.currentTarget)}
@@ -127,6 +139,7 @@ const ElementStackSelectItem = ({
           }}
         >
           <img
+            loading="lazy"
             src={elementStack.iconUrl}
             alt={label ?? ""}
             style={{

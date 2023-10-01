@@ -43,6 +43,7 @@ const ElementStackDetails = ({ elementStack }: ElementStackDetails) => {
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           <img
+            loading="lazy"
             src={elementStack.iconUrl}
             alt={label}
             title={label}

@@ -17,8 +17,9 @@ export interface OrchestrationBase {
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
   readonly aspectsFilter$: Observable<readonly string[]>;
 
+  readonly executionPlan$: Observable<ExecutionPlan | null>;
+
   setAspectsFilter(aspects: readonly string[]): void;
-  assignSlot(slotId: string, element: ElementStackModel): void;
 }
 
 export interface VariableSituationOrchestration extends OrchestrationBase {
@@ -51,4 +52,10 @@ export interface OrchestrationSlot {
 export interface AspectRequirement {
   current: number;
   required: number;
+}
+
+export interface ExecutionPlan {
+  situation: SituationModel;
+  recipe: RecipeModel;
+  slots: Record<string, ElementStackModel | null>;
 }

@@ -19,20 +19,20 @@ import {
   observeAll,
 } from "@/observables";
 
-import { Compendium, RecipeModel } from "@/services/sh-compendium";
+import { Compendium } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
 import { Scheduler } from "@/services/scheduler";
 
 import { RunningSource } from "../sources/RunningSource";
 import { TokensSource } from "../sources/TokensSource";
-import { SituationModel } from "../token-models/SituationModel";
-import { ElementStackModel } from "../token-models/ElementStackModel";
 
 import {
   AspectRequirement,
+  ExecutionPlan,
   Orchestration,
   OrchestrationRequest,
 } from "./types";
+
 import { RecipeOrchestration } from "./RecipeOrchestration";
 
 @injectable()
@@ -192,23 +192,13 @@ export class Orchestrator {
     if (!operation) {
       return false;
     }
+    const plan = await firstValueFrom(operation.executionPlan$);
 
-    const [situation, recipe, slots] = await Promise.all([
-      firstValueFrom(operation.situation$),
-      firstValueFrom(operation.recipe$),
-      firstValueFrom(operation.slots$),
-    ]);
-
-    if (!situation || !recipe) {
+    if (!plan) {
       return false;
     }
 
-    const slotTokens: Record<string, ElementStackModel | null> = {};
-    for (const slotId of Object.keys(slots)) {
-      slotTokens[slotId] = await firstValueFrom(slots[slotId].assignment$);
-    }
-
-    return this._sync(situation, recipe, slotTokens);
+    return this._sync(plan);
   }
 
   async execute() {
@@ -217,34 +207,22 @@ export class Orchestrator {
       return false;
     }
 
-    const [situation, recipe, slots] = await Promise.all([
-      firstValueFrom(operation.situation$),
-      firstValueFrom(operation.recipe$),
-      firstValueFrom(operation.slots$),
-    ]);
+    const plan = await firstValueFrom(operation.executionPlan$);
 
-    if (!situation || !recipe) {
+    if (!plan) {
       return false;
     }
 
-    const slotTokens: Record<string, ElementStackModel | null> = {};
-    for (const slotId of Object.keys(slots)) {
-      slotTokens[slotId] = await firstValueFrom(slots[slotId].assignment$);
-    }
-
-    const synced = await this._sync(situation, recipe, slotTokens);
+    const synced = await this._sync(plan);
     if (!synced) {
       return false;
     }
 
-    await this._api.executeTokenAtPath(situation.path);
+    await this._api.executeTokenAtPath(plan.situation.path);
   }
 
-  private async _sync(
-    situation: SituationModel,
-    recipe: RecipeModel,
-    slots: Readonly<Record<string, ElementStackModel | null>>
-  ) {
+  private async _sync(plan: ExecutionPlan) {
+    const { situation, recipe, slots } = plan;
     var success = true;
     try {
       await this._scheduler.updateNow();
@@ -252,9 +230,8 @@ export class Orchestrator {
       await this._api.focusTokenAtPath(situation.path);
       await this._api.openTokenAtPath(situation.path);
 
-      for (const slotId of situation.thresholds.map((x) => x.id)) {
+      for (const slotId of Object.keys(slots)) {
         const slotPath = `${situation.path}/${slotId}`;
-
         try {
           var token = slots[slotId];
           if (token) {
@@ -267,6 +244,7 @@ export class Orchestrator {
             await this._api.evictTokenAtPath(slotPath);
           }
         } catch (e) {
+          console.error("Failed to slot", slotId, "to", slotPath, e);
           success = false;
         }
       }

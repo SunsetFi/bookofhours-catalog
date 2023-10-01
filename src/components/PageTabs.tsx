@@ -111,6 +111,7 @@ const PageTab = ({ label, aspectId, path }: PageTab) => {
           }}
         >
           <img
+            loading="lazy"
             style={{ display: "block" }}
             src={aspect.iconUrl}
             alt={label}
