@@ -218,7 +218,14 @@ export class Orchestrator {
       return false;
     }
 
-    await plan.situation.execute();
+    const result = await plan.situation.execute();
+    if (result) {
+      this._orchestration$.next(null);
+      return true;
+    }
+
+    // TODO: Set an error message.
+    return false;
   }
 
   private async _sync(plan: ExecutionPlan) {

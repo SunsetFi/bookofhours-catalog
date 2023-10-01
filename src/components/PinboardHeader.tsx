@@ -4,9 +4,7 @@ import { mapValues } from "lodash";
 import type { SxProps } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { useObservation, mergeMapIfNotNull } from "@/observables";
 
@@ -21,7 +19,6 @@ import {
 
 import ElementIcon from "./ElementIcon";
 import AspectsList from "./AspectsList";
-import CraftIconButton from "./CraftIconButton";
 
 export interface PinboardHeaderProps {
   sx?: SxProps;
@@ -35,7 +32,6 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
   const pins = useObservation(pinboard.pins$) ?? [];
   const aspects = useObservation(pinboard.pinnedAspects$) ?? {};
 
-  const hasRecipe = recipeLabel !== null;
   const hasPins = pins.length > 0;
   const hasAspects = Object.keys(aspects).length > 0;
   if (!hasPins && !hasAspects) {
@@ -88,12 +84,6 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
         )}
         iconSize={30}
       />
-      <Box sx={{ display: "flex", flexDirection: "row" }}>
-        <CraftIconButton />
-        {/* <IconButton>
-          <ExpandMoreIcon />
-        </IconButton> */}
-      </Box>
     </Box>
   );
 };

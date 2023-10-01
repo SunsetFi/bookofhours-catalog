@@ -62,10 +62,10 @@ interface BookModel
     ModelWithLabel,
     ModelWithParentTerrain {
   id: string;
+  token: ElementStackModel;
   memoryElementId$: Observable<string | null>;
   memoryLabel$: Observable<string | null>;
   memoryAspects$: Observable<Aspects>;
-  focus(): void;
   read(): void;
 }
 
@@ -140,6 +140,7 @@ function elementStackToBook(
     get id() {
       return elementStack.id;
     },
+    token: elementStack,
     get label$() {
       return elementStack.label$;
     },
@@ -158,7 +159,6 @@ function elementStackToBook(
     memoryElementId$,
     memoryLabel$,
     memoryAspects$,
-    focus: () => elementStack.focus(),
     read: () => {
       const mystery = extractMysteryAspect(elementStack.aspects);
       const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
@@ -227,7 +227,7 @@ const BookCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <FocusIconButton onClick={() => value.focus()} />
+            <FocusIconButton token={value.token} />
             <CraftIconButton onClick={() => value.read()} />
           </Box>
         ),

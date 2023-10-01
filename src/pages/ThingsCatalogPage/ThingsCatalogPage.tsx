@@ -63,7 +63,7 @@ const ThingsCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <FocusIconButton onClick={() => value.focus()} />
+            <FocusIconButton token={value} />
           </Box>
         ),
       } as ObservableDataGridColumnDef<ElementStackModel>,

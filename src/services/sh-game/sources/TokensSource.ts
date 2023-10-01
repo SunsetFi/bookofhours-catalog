@@ -1,5 +1,5 @@
 import { startTransition } from "react";
-import { Observable, Subject, map, shareReplay } from "rxjs";
+import { Observable, Subject, combineLatest, map, shareReplay } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
@@ -111,6 +111,28 @@ export class TokensSource {
     }
 
     return this._considerSituation$;
+  }
+
+  private _visibleSituations$: Observable<SituationModel[]> | null = null;
+  get visibleSituations$() {
+    if (!this._visibleSituations$) {
+      this._visibleSituations$ = combineLatest([
+        this.considerSituation$,
+        this.unlockedWorkstations$,
+        this.unlockedHarvestStations$,
+      ]).pipe(
+        map(([consider, workstations, harvestStations]) => {
+          const situations = [...workstations, ...harvestStations];
+          if (consider) {
+            situations.push(consider);
+          }
+          return situations;
+        }),
+        shareReplay(1)
+      );
+    }
+
+    return this._visibleSituations$;
   }
 
   private _unlockedTerrains$: Observable<

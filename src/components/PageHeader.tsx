@@ -5,11 +5,13 @@ import Typography from "@mui/material/Typography";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
 
 import ArrowBack from "@mui/icons-material/ArrowBack";
 
 import HandOverviewIcons from "./HandOverviewIcons";
 import PinboardHeader from "./PinboardHeader";
+import RecipeExecutionHeader from "./RecipeExecutionHeader";
 
 export interface PageHeaderProps {
   title: string;
@@ -55,7 +57,9 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
           </IconButton>
         )}
         <HandOverviewIcons sx={{ ml: 2 }} />
-        <PinboardHeader sx={{ ml: "auto", py: 1 }} />
+        <Box sx={{ ml: "auto" }} />
+        <PinboardHeader sx={{ py: 1 }} />
+        <RecipeExecutionHeader />
       </Toolbar>
     </AppBar>
   );
