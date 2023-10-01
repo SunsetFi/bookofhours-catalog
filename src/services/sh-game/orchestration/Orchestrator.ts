@@ -218,7 +218,7 @@ export class Orchestrator {
       return false;
     }
 
-    await this._api.executeTokenAtPath(plan.situation.path);
+    await plan.situation.execute();
   }
 
   private async _sync(plan: ExecutionPlan) {
@@ -227,7 +227,12 @@ export class Orchestrator {
     try {
       await this._scheduler.updateNow();
 
-      await this._api.focusTokenAtPath(situation.path);
+      // hack: Don't do this for fixedVerbs, they aren't focusable.
+      // FIXME: Put this into the api mod logic.
+      if (!situation.path.startsWith("~/fixedVerbs")) {
+        await this._api.focusTokenAtPath(situation.path);
+      }
+
       await this._api.openTokenAtPath(situation.path);
 
       for (const slotId of Object.keys(slots)) {
@@ -236,9 +241,7 @@ export class Orchestrator {
           var token = slots[slotId];
           if (token) {
             if (token.spherePath !== slotPath) {
-              await this._api.updateTokenAtPath(token.path, {
-                spherePath: slotPath,
-              });
+              await token.moveToSphere(slotPath);
             }
           } else {
             await this._api.evictTokenAtPath(slotPath);

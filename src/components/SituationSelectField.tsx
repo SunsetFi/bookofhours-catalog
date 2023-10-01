@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Observable, map } from "rxjs";
+import { Observable, combineLatest, map } from "rxjs";
 import { sortBy } from "lodash";
 
 import Box from "@mui/material/Box";
@@ -17,6 +17,7 @@ import AspectIcon from "./AspectIcon";
 export interface SituationSelectFieldProps {
   label: string;
   fullWidth?: boolean;
+  requireUnstarted?: boolean;
   situations$: Observable<readonly SituationModel[]>;
   value: SituationModel | null;
   onChange(value: SituationModel | null): void;
@@ -24,15 +25,17 @@ export interface SituationSelectFieldProps {
 
 interface SituationAutocompleteItem {
   label: string | null;
+  state: string;
   situation: SituationModel;
 }
 
 function observeSituationAutocomplete(
   model: SituationModel
 ): Observable<SituationAutocompleteItem> {
-  return model.verbLabel$.pipe(
-    map((label) => ({
+  return combineLatest([model.verbLabel$, model.state$]).pipe(
+    map(([label, state]) => ({
       label,
+      state,
       situation: model,
     }))
   );
@@ -41,6 +44,7 @@ function observeSituationAutocomplete(
 const SituationSelectField = ({
   label,
   fullWidth,
+  requireUnstarted,
   situations$,
   value,
   onChange,
@@ -69,6 +73,9 @@ const SituationSelectField = ({
       options={situations}
       autoHighlight
       getOptionLabel={(option) => option.label ?? ""}
+      getOptionDisabled={(option) =>
+        requireUnstarted ? option.state !== "Unstarted" : false
+      }
       renderInput={(params) => <TextField {...params} label={label} />}
       value={selectedValue}
       onChange={(_, value) => onChange(value?.situation ?? null)}
@@ -95,6 +102,7 @@ const SituationSelectItem = ({
   situation,
 }: SituationSelectItemProps) => {
   const hints = useObservation(situation.hints$);
+  const recipeLabel = useObservation(situation.recipeLabel$);
 
   if (!label || !hints) {
     return null;
@@ -106,7 +114,10 @@ const SituationSelectItem = ({
       sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
       {...props}
     >
-      <Typography variant="body1">{label}</Typography>
+      <Typography variant="body1">
+        {label}
+        {recipeLabel ? ` - ${recipeLabel}` : null}
+      </Typography>
       <Box
         sx={{
           ml: "auto",

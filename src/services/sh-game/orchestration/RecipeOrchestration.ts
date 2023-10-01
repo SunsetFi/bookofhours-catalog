@@ -191,10 +191,6 @@ export class RecipeOrchestration
             this._situationIsAvailable(verb, aspectsFilter, elementThresholds)
           );
         }),
-        // TODO: Show these but make them disabled.
-        filterItemObservations((item) =>
-          item.state$.pipe(map((s) => s === "Unstarted"))
-        ),
         shareReplay(1)
       );
     }

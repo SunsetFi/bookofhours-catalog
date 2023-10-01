@@ -5,7 +5,11 @@ import {
   map,
   shareReplay,
 } from "rxjs";
-import { Aspects, Situation as ISituation } from "secrethistories-api";
+import {
+  Aspects,
+  Situation as ISituation,
+  SituationState,
+} from "secrethistories-api";
 import { isEqual } from "lodash";
 
 import { API } from "../../sh-api";
@@ -48,6 +52,10 @@ export class SituationModel extends TokenModel {
 
   get payloadType(): "Situation" {
     return "Situation";
+  }
+
+  get iconUrl(): string {
+    return `${this._api.baseUrl}/api/by-path/${this._situation$.value.path}/icon.png`;
   }
 
   get verbId() {
@@ -160,7 +168,7 @@ export class SituationModel extends TokenModel {
     return this._thresholdAspects$;
   }
 
-  private _state$: Observable<string | null> | null = null;
+  private _state$: Observable<SituationState> | null = null;
   get state$() {
     if (!this._state$) {
       this._state$ = this._situation$.pipe(
@@ -238,8 +246,18 @@ export class SituationModel extends TokenModel {
     return this._timeRemaining$;
   }
 
-  get iconUrl(): string {
-    return `${this._api.baseUrl}/api/by-path/${this._situation$.value.path}/icon.png`;
+  async execute() {
+    try {
+      const result = await this._api.executeTokenAtPath(this.path);
+      this._situation$.next({
+        ...this._situation$.value,
+        label: result.executedRecipeLabel,
+        state: "Ongoing",
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   _onUpdate(situation: ISituation) {

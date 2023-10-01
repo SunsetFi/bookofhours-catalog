@@ -55,12 +55,7 @@ const RecipeOrchestratorDialog = () => {
   }
 
   return (
-    <Dialog
-      open={true}
-      onClose={() => orchestrator.cancel()}
-      fullWidth
-      maxWidth="md"
-    >
+    <Dialog open onClose={() => orchestrator.cancel()} fullWidth maxWidth="md">
       <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Box sx={{ display: "flex", flexDirection: "row" }}>
@@ -102,6 +97,7 @@ const RecipeOrchestratorDialog = () => {
           <SituationSelectField
             label="Workstation"
             fullWidth
+            requireUnstarted
             situations$={orchestration.availableSituations$}
             value={situation ?? null}
             onChange={(s) => orchestration.selectSituation(s)}

@@ -288,6 +288,22 @@ export class ElementStackModel
     return this._unique$;
   }
 
+  async moveToSphere(spherePath: string) {
+    try {
+      await this._api.updateTokenAtPath(this.path, {
+        spherePath,
+      });
+      this._elementStack$.next({
+        ...this._elementStack$.value,
+        path: `${spherePath}/${this.id}`,
+        spherePath,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   _onUpdate(element: IElementStack) {
     if (element.id !== this.id) {
       throw new Error("Invalid situation update: Wrong ID.");
