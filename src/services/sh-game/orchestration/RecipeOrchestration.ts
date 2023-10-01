@@ -410,6 +410,11 @@ export class RecipeOrchestration
       this._recipe.actionId &&
       !actionIdMatches(this._recipe.actionId, situation.verbId)
     ) {
+      // console.log(
+      //   "Rejecting situation due to action mismatch",
+      //   this._recipe.actionId,
+      //   situation.verbId
+      // );
       return false;
     }
 
@@ -435,6 +440,11 @@ export class RecipeOrchestration
             !Object.keys(t.forbidden).includes(aspect)
         )
       ) {
+        // console.log(
+        //   "Rejecting situation due to missing aspect",
+        //   aspect,
+        //   situation.verbId
+        // );
         return false;
       }
     }

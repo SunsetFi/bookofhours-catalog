@@ -1,15 +1,14 @@
 import * as React from "react";
-import { Observable } from "rxjs";
+import { Observable, map } from "rxjs";
 import { sortBy } from "lodash";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 
-import { useObservation } from "@/observables";
+import { observeAll, useObservation } from "@/observables";
 
 import { SituationModel } from "@/services/sh-game";
 
@@ -23,6 +22,22 @@ export interface SituationSelectFieldProps {
   onChange(value: SituationModel | null): void;
 }
 
+interface SituationAutocompleteItem {
+  label: string | null;
+  situation: SituationModel;
+}
+
+function observeSituationAutocomplete(
+  model: SituationModel
+): Observable<SituationAutocompleteItem> {
+  return model.verbLabel$.pipe(
+    map((label) => ({
+      label,
+      situation: model,
+    }))
+  );
+}
+
 const SituationSelectField = ({
   label,
   fullWidth,
@@ -30,40 +45,55 @@ const SituationSelectField = ({
   value,
   onChange,
 }: SituationSelectFieldProps) => {
-  const id = React.useId();
-  const situations = useObservation(situations$) ?? [];
+  let situations =
+    useObservation(
+      () =>
+        situations$.pipe(
+          map((items) => items.map(observeSituationAutocomplete)),
+          observeAll()
+        ),
+      [situations$]
+    ) ?? null;
+
+  if (!situations) {
+    return <CircularProgress />;
+  }
+
+  situations = situations.filter((x) => x.label !== null);
+
+  const selectedValue = situations.find((x) => x.situation === value) ?? null;
 
   return (
-    <FormControl fullWidth={fullWidth}>
-      <InputLabel id={id + "-label"}>{label}</InputLabel>
-      <Select
-        labelId={id + "-label"}
-        label={label}
-        id={id}
-        value={value?.id ?? ""}
-        onChange={(e) =>
-          onChange(situations.find((es) => es.id === e.target.value) ?? null)
-        }
-      >
-        <MenuItem value=""></MenuItem>
-        {situations.map((situation) => (
-          <MenuItem key={situation.id} value={situation.id}>
-            <SituationSelectItem situation={situation} />
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Autocomplete
+      fullWidth={fullWidth}
+      options={situations}
+      autoHighlight
+      getOptionLabel={(option) => option.label ?? ""}
+      renderInput={(params) => <TextField {...params} label={label} />}
+      value={selectedValue}
+      onChange={(_, value) => onChange(value?.situation ?? null)}
+      renderOption={(props, option) => (
+        <SituationSelectItem
+          key={option.situation.id}
+          props={props}
+          {...option}
+        />
+      )}
+    />
   );
 };
 
 export default SituationSelectField;
 
-interface SituationSelectItemProps {
-  situation: SituationModel;
+interface SituationSelectItemProps extends SituationAutocompleteItem {
+  props: any;
 }
 
-const SituationSelectItem = ({ situation }: SituationSelectItemProps) => {
-  const label = useObservation(situation.verbLabel$);
+const SituationSelectItem = ({
+  props,
+  label,
+  situation,
+}: SituationSelectItemProps) => {
   const hints = useObservation(situation.hints$);
 
   if (!label || !hints) {
@@ -71,7 +101,11 @@ const SituationSelectItem = ({ situation }: SituationSelectItemProps) => {
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}>
+    <Box
+      component="li"
+      sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
+      {...props}
+    >
       <Typography variant="body1">{label}</Typography>
       <Box
         sx={{

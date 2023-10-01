@@ -1,16 +1,12 @@
 import * as React from "react";
-import { Observable, combineLatest, map } from "rxjs";
-import { pick, uniqBy } from "lodash";
-import { Aspects } from "secrethistories-api";
+import { Observable, map } from "rxjs";
+import { pick } from "lodash";
 
 import Popper from "@mui/material/Popper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { observeAll, useObservation } from "@/observables";
@@ -19,7 +15,6 @@ import { ElementStackModel } from "@/services/sh-game";
 
 import AspectsList from "./AspectsList";
 import ElementStackDetails from "./ElementStackDetails";
-import { TextField } from "@mui/material";
 
 export interface ElementStackSelectFieldProps {
   label: string;
@@ -68,7 +63,7 @@ const ElementStackSelectField = ({
     return <CircularProgress />;
   }
 
-  elementStacks = elementStacks.filter((x) => x.label != null);
+  elementStacks = elementStacks.filter((x) => x.label != null) ?? null;
 
   const selectedValue =
     elementStacks.find(({ elementStack }) => elementStack === value) ?? null;
@@ -84,6 +79,7 @@ const ElementStackSelectField = ({
       onChange={(_, value) => onChange(value?.elementStack ?? null)}
       renderOption={(props, option) => (
         <ElementStackSelectItem
+          key={option.elementStack.id}
           props={props}
           displayAspects={displayAspects}
           {...option}
