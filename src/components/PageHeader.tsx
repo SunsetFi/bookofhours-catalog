@@ -11,7 +11,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 
 import HandOverviewIcons from "./HandOverviewIcons";
 import PinboardHeader from "./PinboardHeader";
-import RecipeExecutionHeader from "./RecipeExecutionHeader";
+import TimeAndRecipeHeader from "./TimeAndRecipeHeader";
 
 export interface PageHeaderProps {
   title: string;
@@ -59,7 +59,7 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
         <HandOverviewIcons sx={{ ml: 2 }} />
         <Box sx={{ ml: "auto" }} />
         <PinboardHeader sx={{ py: 1 }} />
-        <RecipeExecutionHeader />
+        <TimeAndRecipeHeader sx={{ ml: 2 }} />
       </Toolbar>
     </AppBar>
   );
