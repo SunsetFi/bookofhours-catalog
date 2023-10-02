@@ -181,6 +181,10 @@ export class SituationModel extends TokenModel {
     return this._state$;
   }
 
+  get state() {
+    return this._situation$.value.state;
+  }
+
   private _recipeId$: Observable<string | null> | null = null;
   get recipeId$() {
     if (!this._recipeId$) {

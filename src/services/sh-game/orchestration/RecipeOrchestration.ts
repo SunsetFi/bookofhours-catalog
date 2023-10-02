@@ -96,7 +96,7 @@ export class RecipeOrchestration
 
     // Select a default situation.  This is hackish
     firstValueFrom(this.availableSituations$).then((situations) => {
-      const situation = situations[0];
+      const situation = situations.find((x) => x.state === "Unstarted");
       if (!situation) {
         return;
       }
@@ -120,7 +120,7 @@ export class RecipeOrchestration
         this._slotAssignments$,
       ]).pipe(
         map(([situation, slots, assignments]) => {
-          if (!situation) {
+          if (!situation || situation.state !== "Unstarted") {
             return null;
           }
 
