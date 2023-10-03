@@ -1,11 +1,8 @@
 import * as React from "react";
-import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
-
-import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
@@ -23,7 +20,6 @@ import ObservableDataGrid, {
   descriptionColumnDef,
   labelColumnDef,
   locationColumnDef,
-  multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import FocusIconButton from "@/components/FocusIconButton";
 
@@ -34,16 +30,6 @@ const WorkstationCatalogPage = () => {
     () => tokensSource.unlockedWorkstations$,
     [tokensSource]
   );
-
-  const locations =
-    useObservation(
-      () =>
-        tokensSource.unlockedTerrains$.pipe(
-          map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
-        ),
-      [tokensSource]
-    ) ?? [];
 
   const columns = React.useMemo(
     () => [
@@ -64,9 +50,7 @@ const WorkstationCatalogPage = () => {
         ),
       } as ObservableDataGridColumnDef<SituationModel>,
       labelColumnDef<SituationModel>(),
-      locationColumnDef<SituationModel>({
-        filter: multiselectOptionsFilter("location", locations),
-      }),
+      locationColumnDef<SituationModel>(),
       aspectsPresenceColumnDef<SituationModel>(
         powerAspects,
         { display: "none", orientation: "horizontal" },
@@ -96,7 +80,7 @@ const WorkstationCatalogPage = () => {
       ),
       descriptionColumnDef<SituationModel>(),
     ],
-    [locations]
+    []
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();

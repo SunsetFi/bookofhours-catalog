@@ -1,5 +1,4 @@
 import * as React from "react";
-import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -7,8 +6,6 @@ import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { useDIDependency } from "@/container";
-
-import { observeAll, useObservation } from "@/observables";
 
 import { furnishingAspects, powerAspects } from "@/aspects";
 
@@ -31,7 +28,6 @@ import ObservableDataGrid, {
   iconColumnDef,
   labelColumnDef,
   locationColumnDef,
-  multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 
@@ -45,16 +41,6 @@ const FurnishingsCatalogPage = () => {
       ),
     [tokensSource]
   );
-
-  const locations =
-    useObservation(
-      () =>
-        tokensSource.unlockedTerrains$.pipe(
-          map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
-        ),
-      [tokensSource]
-    ) ?? [];
 
   const columns = React.useMemo(
     () => [
@@ -78,9 +64,7 @@ const FurnishingsCatalogPage = () => {
       } as ObservableDataGridColumnDef<ElementStackModel>,
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>({
-        filter: multiselectOptionsFilter("location", locations),
-      }),
+      locationColumnDef<ElementStackModel>(),
       aspectsColumnDef<ElementStackModel>(powerAspects),
       aspectsPresenceColumnDef<ElementStackModel>(
         furnishingAspects,
@@ -93,7 +77,7 @@ const FurnishingsCatalogPage = () => {
       ),
       descriptionColumnDef<ElementStackModel>(),
     ],
-    [locations]
+    []
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();

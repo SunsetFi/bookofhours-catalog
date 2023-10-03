@@ -1,11 +1,8 @@
 import * as React from "react";
-import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
-
-import { observeAll, useObservation } from "@/observables";
 
 import { SituationModel, TokensSource } from "@/services/sh-game";
 
@@ -18,22 +15,11 @@ import ObservableDataGrid, {
   descriptionColumnDef,
   labelColumnDef,
   locationColumnDef,
-  multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import FocusIconButton from "@/components/FocusIconButton";
 
 const HarvestCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
-
-  const locations =
-    useObservation(
-      () =>
-        tokensSource.unlockedTerrains$.pipe(
-          map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
-        ),
-      [tokensSource]
-    ) ?? [];
 
   const columns = React.useMemo(
     () => [
@@ -54,12 +40,10 @@ const HarvestCatalogPage = () => {
         ),
       } as ObservableDataGridColumnDef<SituationModel>,
       labelColumnDef<SituationModel>(),
-      locationColumnDef<SituationModel>({
-        filter: multiselectOptionsFilter("location", locations),
-      }),
+      locationColumnDef<SituationModel>(),
       descriptionColumnDef<SituationModel>(),
     ],
-    [locations]
+    []
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();

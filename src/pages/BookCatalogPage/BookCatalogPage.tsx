@@ -1,331 +1,53 @@
 import * as React from "react";
-import { Observable, combineLatest, map, mergeMap } from "rxjs";
-import { pick, first } from "lodash";
-
-import { Aspects } from "secrethistories-api";
 
 import Box from "@mui/material/Box";
-
-import { powerAspects } from "@/aspects";
-
-import { useDIDependency } from "@/container";
-
-import {
-  Null$,
-  filterItemObservations,
-  mapArrayItemsCached,
-  mergeMapIfNotNull,
-  observableObjectOrEmpty,
-  observeAll,
-  useObservation,
-} from "@/observables";
-
-import { Compendium } from "@/services/sh-compendium";
-import { Orchestrator } from "@/services/sh-game/orchestration";
-import {
-  ElementStackModel,
-  filterHasAspect,
-  ModelWithAspects,
-  ModelWithDescription,
-  ModelWithIconUrl,
-  ModelWithLabel,
-  ModelWithParentTerrain,
-  TokensSource,
-} from "@/services/sh-game";
-import {
-  mapElementStacksToSearchItems,
-  elementStackMatchesQuery,
-  PageSearchProviderPipe,
-} from "@/services/search";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-import FocusIconButton from "@/components/FocusIconButton";
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
   ObservableDataGridColumnDef,
-  aspectsPresenceColumnDef,
-  aspectsObservableColumnDef,
-  aspectsPresenceFilter,
   descriptionColumnDef,
   iconColumnDef,
   labelColumnDef,
   locationColumnDef,
-  multiselectOptionsFilter,
-  aspectsColumnDef,
-  aspectsFilter,
-  textColumnDef,
 } from "@/components/ObservableDataGrid";
-import CraftIconButton from "@/components/CraftIconButton";
-import PinElementIconButton from "@/components/PinElementIconButton";
-import ElementIcon from "@/components/ElementIcon";
 
-interface BookModel
-  extends ModelWithAspects,
-    ModelWithDescription,
-    ModelWithIconUrl,
-    ModelWithLabel,
-    ModelWithParentTerrain {
-  id: string;
-  token: ElementStackModel;
-  memoryElementId$: Observable<string | null>;
-  memoryLabel$: Observable<string | null>;
-  memoryAspects$: Observable<Aspects>;
-  read(): void;
-}
+import { bookCommandsColumn } from "./columns/book-commands";
+import { mysteryColumn } from "./columns/mystery";
+import { masteryColumn } from "./columns/mastery";
+import { memoryCommandsColumn } from "./columns/memory-commands";
+import { memoryIconColumn } from "./columns/memory-icon";
+import { memoryLabelColumn } from "./columns/memory-label";
+import { memoryAspectsColumn } from "./columns/memory-aspects";
+import { languageColumn } from "./columns/language";
+import { typeColumn } from "./columns/type";
+import { contaminationColumn } from "./columns/contamination";
 
-interface MemoryButtonsProps {
-  model: BookModel;
-}
-
-const MemoryButtons = ({ model }: MemoryButtonsProps) => {
-  const memoryElementId = useObservation(model.memoryElementId$);
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      {memoryElementId && <PinElementIconButton elementId={memoryElementId} />}
-    </Box>
-  );
-};
-
-function elementStackToBook(
-  elementStack: ElementStackModel,
-  compendium: Compendium,
-  orchestrator: Orchestrator
-): BookModel {
-  const memory$ = combineLatest([
-    elementStack.aspects$,
-    elementStack.element$,
-  ]).pipe(
-    mergeMap(([aspects, element]) => {
-      const mastery = Object.keys(aspects).find((aspectId) =>
-        aspectId.startsWith("mastery.")
-      );
-      if (!mastery || aspects[mastery] < 1) {
-        return Null$;
-      }
-
-      return element.xtriggers$.pipe(
-        map((xtriggers) => {
-          for (var key of Object.keys(xtriggers).filter((x) =>
-            x.startsWith("reading.")
-          )) {
-            return first(xtriggers[key])?.id ?? null;
-          }
-
-          return null;
-        })
-      );
-    }),
-    map((memoryId) => (memoryId ? compendium.getElementById(memoryId) : null))
-  );
-
-  const memoryElementId$ = memory$.pipe(
-    map((memory) => memory?.elementId ?? null)
-  );
-  const memoryLabel$ = memory$.pipe(
-    mergeMapIfNotNull((memory) => memory.label$)
-  );
-
-  const memoryAspects$ = memory$.pipe(
-    mergeMap((memory) =>
-      observableObjectOrEmpty(memory?.aspects$).pipe(
-        map((aspects) => pick(aspects, powerAspects))
-      )
-    )
-  );
-
-  return {
-    get id() {
-      return elementStack.id;
-    },
-    token: elementStack,
-    get label$() {
-      return elementStack.label$;
-    },
-    get description$() {
-      return elementStack.description$;
-    },
-    get iconUrl() {
-      return elementStack.iconUrl;
-    },
-    get aspects$() {
-      return elementStack.aspects$;
-    },
-    get parentTerrain$() {
-      return elementStack.parentTerrain$;
-    },
-    memoryElementId$,
-    memoryLabel$,
-    memoryAspects$,
-    read: () => {
-      const mystery = extractMysteryAspect(elementStack.aspects);
-      const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
-        aspectId.startsWith("mastery.")
-      );
-      orchestrator.requestOrchestration({
-        recipeId: isMastered
-          ? `study.mystery.${mystery}.mastered`
-          : `study.mystery.${mystery}.mastering.begin`,
-        desiredElementIds: [elementStack.elementId],
-      });
-    },
-  };
-}
-
-export const bookCatalogSearchProvider: PageSearchProviderPipe = (
-  query$,
-  container
-) =>
-  query$.pipe(
-    mergeMap((query) =>
-      container.get(TokensSource).visibleElementStacks$.pipe(
-        filterHasAspect("readable"),
-        filterItemObservations((item) => elementStackMatchesQuery(query, item)),
-        mapElementStacksToSearchItems((element) =>
-          element.label$.pipe(
-            map((label) =>
-              label ? `name=\"${encodeURIComponent(label)}\"` : null
-            )
-          )
-        )
-      )
-    )
-  );
+import { BookModel, useBooks } from "./BookDataSource";
 
 const BookCatalogPage = () => {
-  const tokensSource = useDIDependency(TokensSource);
-  const compendium = useDIDependency(Compendium);
-  const orchestrator = useDIDependency(Orchestrator);
-
-  const items$ = React.useMemo(
-    () =>
-      tokensSource.visibleElementStacks$.pipe(
-        filterHasAspect("readable"),
-        mapArrayItemsCached((item) =>
-          elementStackToBook(item, compendium, orchestrator)
-        )
-      ),
-    [tokensSource]
-  );
-
-  // We do have "auto" now, but its probably best to show
-  // the locations the user has unlocked, so they can confirm there is nothing in it.
-  const locations =
-    useObservation(
-      () =>
-        tokensSource.unlockedTerrains$.pipe(
-          map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
-        ),
-      [tokensSource]
-    ) ?? [];
+  const items$ = useBooks();
 
   const columns = React.useMemo<ObservableDataGridColumnDef<BookModel>[]>(
     () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <FocusIconButton token={value.token} />
-            <CraftIconButton onClick={() => value.read()} />
-          </Box>
-        ),
-      } as ObservableDataGridColumnDef<BookModel>,
+      bookCommandsColumn(),
       iconColumnDef<BookModel>(),
       labelColumnDef<BookModel>(),
-      locationColumnDef<BookModel>({
-        filter: multiselectOptionsFilter("location", locations),
-      }),
-      aspectsColumnDef<BookModel>(
-        (aspectId) => aspectId.startsWith("mystery."),
-        {
-          headerName: "Mystery",
-          filter: aspectsFilter("mystery", "auto"),
-          width: 150,
-          aspectIconSize: 50,
-        }
-      ),
-      aspectsPresenceColumnDef<BookModel>(
-        (aspectId) => aspectId.startsWith("mastery."),
-        { display: "none" },
-        {
-          headerName: "Mastered",
-          sortable: false,
-          width: 125,
-          filter: aspectsPresenceFilter("mastered", "auto"),
-        }
-      ),
-      {
-        headerName: "",
-        width: 40,
-        field: "$item",
-        renderCell: ({ value }) => <MemoryButtons model={value} />,
-      } as ObservableDataGridColumnDef<BookModel>,
-      {
-        headerName: "",
-        observable: "memoryElementId$",
-        width: 90,
-        renderCell: ({ value }) => (
-          <ElementIcon elementId={value} width={75} title="Memory" />
-        ),
-      } as ObservableDataGridColumnDef<BookModel>,
-      textColumnDef<BookModel>("Memory", "memory", "memoryLabel$", {
-        width: 150,
-      }),
-      aspectsObservableColumnDef<BookModel>(
-        "memoryAspects",
-        (element) => element.memoryAspects$,
-        powerAspects,
-        {
-          headerName: "Memory Aspects",
-          width: 210,
-        }
-      ),
-      aspectsPresenceColumnDef<BookModel>(
-        (aspectId) => aspectId.startsWith("w."),
-        { display: "none" },
-        {
-          headerName: "Language",
-          width: 150,
-          filter: aspectsFilter("language", "auto"),
-        }
-      ),
-      aspectsPresenceColumnDef<BookModel>(
-        ["film", "record.phonograph"],
-        { display: "none" },
-        {
-          headerName: "Type",
-          width: 125,
-          filter: aspectsFilter("type", ["film", "record.phonograph"]),
-        }
-      ),
-      aspectsPresenceColumnDef<BookModel>(
-        (aspectId) => aspectId.startsWith("contamination."),
-        { display: "none" },
-        {
-          headerName: "Contamination",
-          width: 200,
-          filter: aspectsFilter("contamination", "auto"),
-        }
-      ),
+      locationColumnDef<BookModel>(),
+      mysteryColumn(),
+      masteryColumn(),
+      memoryCommandsColumn(),
+      memoryIconColumn(),
+      memoryLabelColumn(),
+      memoryAspectsColumn(),
+      languageColumn(),
+      typeColumn(),
+      contaminationColumn(),
       descriptionColumnDef<BookModel>(),
     ],
-    [locations]
+    []
   );
 
   const [filter, onFiltersChanged] = useQueryObjectState();
@@ -352,16 +74,5 @@ const BookCatalogPage = () => {
     </PageContainer>
   );
 };
-
-function extractMysteryAspect(aspects: Aspects): string | null {
-  let mystery = Object.keys(aspects).find((aspectId) =>
-    aspectId.startsWith("mystery.")
-  );
-  if (!mystery) {
-    return null;
-  }
-
-  return mystery.substring(8);
-}
 
 export default BookCatalogPage;

@@ -32,11 +32,11 @@ export function multiselectOptionsFilter<TValue>(
   };
 }
 
-interface MultiselectOptionsFilterProps<T>
+export interface MultiselectOptionsFilterProps<T>
   extends FilterComponentProps<T[], T> {
   allowedValues: any[];
 }
-function MultiselectOptionsFilter<T>({
+export function MultiselectOptionsFilter<T>({
   allowedValues,
   value: selectedValues,
   onChange,

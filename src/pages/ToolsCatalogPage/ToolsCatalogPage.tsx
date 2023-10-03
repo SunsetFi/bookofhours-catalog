@@ -1,11 +1,8 @@
 import * as React from "react";
-import { map } from "rxjs";
 
 import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
-
-import { observeAll, useObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
@@ -27,7 +24,6 @@ import ObservableDataGrid, {
   iconColumnDef,
   labelColumnDef,
   locationColumnDef,
-  multiselectOptionsFilter,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
@@ -39,16 +35,6 @@ const ToolsCatalogPage = () => {
     () => tokensSource.visibleElementStacks$.pipe(filterHasAspect("tool")),
     [tokensSource]
   );
-
-  const locations =
-    useObservation(
-      () =>
-        tokensSource.unlockedTerrains$.pipe(
-          map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
-        ),
-      [tokensSource]
-    ) ?? [];
 
   const columns = React.useMemo(
     () => [
@@ -70,9 +56,7 @@ const ToolsCatalogPage = () => {
       } as ObservableDataGridColumnDef<ElementStackModel>,
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>({
-        filter: multiselectOptionsFilter("location", locations),
-      }),
+      locationColumnDef<ElementStackModel>(),
       aspectsColumnDef<ElementStackModel>(powerAspects),
       aspectsPresenceColumnDef<ElementStackModel>(
         ["device"],
@@ -81,7 +65,7 @@ const ToolsCatalogPage = () => {
       ),
       descriptionColumnDef<ElementStackModel>(),
     ],
-    [locations]
+    []
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
