@@ -20,29 +20,21 @@ import { Compendium } from "@/services/sh-compendium";
 
 import {
   ElementStackModel,
-  ModelWithAspects,
-  ModelWithDescription,
-  ModelWithIconUrl,
-  ModelWithLabel,
-  ModelWithParentTerrain,
   Orchestrator,
   TokensSource,
   filterHasAspect,
 } from "@/services/sh-game";
+import { decorateClassInstance } from "@/class-decorator";
 
-export interface BookModel
-  extends ModelWithAspects,
-    ModelWithDescription,
-    ModelWithIconUrl,
-    ModelWithLabel,
-    ModelWithParentTerrain {
+export interface BookModelDecorations {
   id: string;
-  token: ElementStackModel;
   memoryElementId$: Observable<string | null>;
   memoryLabel$: Observable<string | null>;
   memoryAspects$: Observable<Aspects>;
   read(): void;
 }
+
+export type BookModel = ElementStackModel & BookModelDecorations;
 
 function elementStackToBook(
   elementStack: ElementStackModel,
@@ -91,30 +83,14 @@ function elementStackToBook(
     )
   );
 
-  return {
+  return decorateClassInstance(elementStack, {
     get id() {
       return elementStack.id;
-    },
-    token: elementStack,
-    get label$() {
-      return elementStack.label$;
-    },
-    get description$() {
-      return elementStack.description$;
-    },
-    get iconUrl() {
-      return elementStack.iconUrl;
-    },
-    get aspects$() {
-      return elementStack.aspects$;
-    },
-    get parentTerrain$() {
-      return elementStack.parentTerrain$;
     },
     memoryElementId$,
     memoryLabel$,
     memoryAspects$,
-    read: () => {
+    read() {
       const mystery = extractMysteryAspect(elementStack.aspects);
       const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
         aspectId.startsWith("mastery.")
@@ -126,7 +102,7 @@ function elementStackToBook(
         desiredElementIds: [elementStack.elementId],
       });
     },
-  };
+  });
 }
 
 function extractMysteryAspect(aspects: Aspects): string | null {

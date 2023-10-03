@@ -8,7 +8,9 @@ import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
 import HarvestCatalogPage from "./pages/HarvestCatalogPage";
 import MaterialsCatalogPage from "./pages/MaterialsCatalogPage";
 import MemoriesCompendiumPage from "./pages/MemoriesCompendiumPage";
-import ProvisionsCatalog from "./pages/ProvisionsCatalog";
+import ProvisionsCatalog, {
+  provisionsSearchProvider,
+} from "./pages/ProvisionsCatalog";
 import SkillsCatalogPage from "./pages/SkillsCatalogPage";
 import ThingsCatalogPage from "./pages/ThingsCatalogPage";
 import ToolsCatalogPage from "./pages/ToolsCatalogPage";
@@ -34,6 +36,10 @@ const sitemap: SiteMapItem[] = [
     label: "Provisions",
     aspectIcon: "beverage",
     path: "/provisions",
+    searchProvider: pageProviderFromPath(
+      provisionsSearchProvider,
+      "/provisions"
+    ),
     Component: ProvisionsCatalog,
   },
   {

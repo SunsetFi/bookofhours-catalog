@@ -1,5 +1,5 @@
 import * as React from "react";
-import { map } from "rxjs";
+import { map, mergeMap } from "rxjs";
 
 import Box from "@mui/material/Box";
 
@@ -7,13 +7,18 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects, provisionsAspects } from "@/aspects";
 
-import { observeAll, useObservation } from "@/observables";
+import { filterItemObservations } from "@/observables";
 
 import {
   ElementStackModel,
   TokensSource,
   filterHasAnyAspect,
 } from "@/services/sh-game";
+import {
+  PageSearchProviderPipe,
+  elementStackMatchesQuery,
+  mapElementStacksToSearchItems,
+} from "@/services/search";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
@@ -21,7 +26,6 @@ import ObservableDataGrid, {
   iconColumnDef,
   labelColumnDef,
   locationColumnDef,
-  multiselectOptionsFilter,
   aspectsColumnDef,
   aspectsPresenceColumnDef,
   ObservableDataGridColumnDef,
@@ -29,6 +33,26 @@ import ObservableDataGrid, {
 import PageContainer from "@/components/PageContainer";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import FocusIconButton from "@/components/FocusIconButton";
+
+export const provisionsSearchProvider: PageSearchProviderPipe = (
+  query$,
+  container
+) =>
+  query$.pipe(
+    mergeMap((query) =>
+      container.get(TokensSource).visibleElementStacks$.pipe(
+        filterHasAnyAspect(provisionsAspects),
+        filterItemObservations((item) => elementStackMatchesQuery(query, item)),
+        mapElementStacksToSearchItems((element) =>
+          element.label$.pipe(
+            map((label) =>
+              label ? `name=\"${encodeURIComponent(label)}\"` : null
+            )
+          )
+        )
+      )
+    )
+  );
 
 const ProvisionsCatalog = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -40,16 +64,6 @@ const ProvisionsCatalog = () => {
       ),
     [tokensSource]
   );
-
-  const locations =
-    useObservation(
-      () =>
-        tokensSource.unlockedTerrains$.pipe(
-          map((terrains) => terrains.map((terrain) => terrain.label$)),
-          observeAll()
-        ),
-      [tokensSource]
-    ) ?? [];
 
   const columns = React.useMemo(
     () => [
@@ -71,9 +85,7 @@ const ProvisionsCatalog = () => {
       } as ObservableDataGridColumnDef<ElementStackModel>,
       iconColumnDef<ElementStackModel>(),
       labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>({
-        filter: multiselectOptionsFilter("location", locations),
-      }),
+      locationColumnDef<ElementStackModel>(),
       aspectsPresenceColumnDef<ElementStackModel>(
         provisionsAspects,
         { display: "none", orientation: "horizontal" },
@@ -82,7 +94,7 @@ const ProvisionsCatalog = () => {
       aspectsColumnDef<ElementStackModel>(powerAspects),
       descriptionColumnDef<ElementStackModel>(),
     ],
-    [locations]
+    []
   );
 
   return (

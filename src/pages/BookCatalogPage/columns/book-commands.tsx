@@ -13,17 +13,19 @@ export function bookCommandsColumn(): ObservableDataGridColumnDef<BookModel> {
     headerName: "",
     width: 50,
     field: "$item",
-    renderCell: ({ value }) => (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <FocusIconButton token={value.token} />
-        <CraftIconButton onClick={() => value.read()} />
-      </Box>
-    ),
+    renderCell: ({ value }) => {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <FocusIconButton token={value} />
+          <CraftIconButton onClick={() => value.read()} />
+        </Box>
+      );
+    },
   };
 }
