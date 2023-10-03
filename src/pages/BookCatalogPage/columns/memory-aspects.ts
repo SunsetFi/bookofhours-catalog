@@ -2,7 +2,7 @@ import { powerAspects } from "@/aspects";
 
 import { aspectsObservableColumnDef } from "@/components/ObservableDataGrid";
 
-import { BookModel } from "../BookDataSource";
+import { BookModel } from "../books-data-source";
 
 export function memoryAspectsColumn() {
   return aspectsObservableColumnDef<BookModel>(

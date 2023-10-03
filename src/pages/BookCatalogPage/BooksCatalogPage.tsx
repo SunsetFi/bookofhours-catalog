@@ -25,7 +25,7 @@ import { languageColumn } from "./columns/language";
 import { typeColumn } from "./columns/type";
 import { contaminationColumn } from "./columns/contamination";
 
-import { BookModel, useBooks } from "./BookDataSource";
+import { BookModel, useBooks } from "./books-data-source";
 
 const BookCatalogPage = () => {
   const items$ = useBooks();

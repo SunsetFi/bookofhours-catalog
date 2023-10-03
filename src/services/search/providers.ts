@@ -1,9 +1,11 @@
-import { map } from "rxjs";
+import { Observable, map } from "rxjs";
 
 import sitemap from "@/sitemap";
 
-import { SearchProviderPipe } from "./types";
+import { PageSearchProviderPipe, SearchProviderPipe } from "./types";
 import { isNotNull } from "@/utils";
+import { mapArrayItems } from "@/observables";
+import { Container } from "microinject";
 
 const pagesSearchProvider: SearchProviderPipe = (query) => {
   return query.pipe(
@@ -23,7 +25,20 @@ const pagesSearchProvider: SearchProviderPipe = (query) => {
 
 const providers = [
   pagesSearchProvider,
-  ...sitemap.map((x) => x.searchProvider).filter(isNotNull),
+  ...sitemap
+    .filter((x) => x.searchProvider != null)
+    .map((x) => pageProviderFromPath(x.searchProvider!, x.path)),
 ];
+
+function pageProviderFromPath(
+  pageProvider: PageSearchProviderPipe,
+  path: string
+) {
+  return (query: Observable<string>, container: Container) => {
+    return pageProvider(query, container).pipe(
+      mapArrayItems((item) => ({ ...item, path }))
+    );
+  };
+}
 
 export default providers;

@@ -3,7 +3,7 @@ import {
   aspectsPresenceColumnDef,
 } from "@/components/ObservableDataGrid";
 
-import { BookModel } from "../BookDataSource";
+import { BookModel } from "../books-data-source";
 
 export function typeColumn() {
   return aspectsPresenceColumnDef<BookModel>(

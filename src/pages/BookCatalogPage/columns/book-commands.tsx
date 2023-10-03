@@ -6,7 +6,7 @@ import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid";
 import FocusIconButton from "@/components/FocusIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
 
-import { BookModel } from "../BookDataSource";
+import { BookModel } from "../books-data-source";
 
 export function bookCommandsColumn(): ObservableDataGridColumnDef<BookModel> {
   return {

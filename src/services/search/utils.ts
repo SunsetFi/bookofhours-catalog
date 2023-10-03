@@ -2,20 +2,8 @@ import { Observable, combineLatest, map, filter } from "rxjs";
 
 import { ElementStackModel } from "../sh-game";
 
-import { PageSearchItemResult, PageSearchProviderPipe } from "./types";
-import { mapArrayItems, mapArrayItemsCached, observeAll } from "@/observables";
-import { Container } from "microinject";
-
-export function pageProviderFromPath(
-  pageProvider: PageSearchProviderPipe,
-  path: string
-) {
-  return (query: Observable<string>, container: Container) => {
-    return pageProvider(query, container).pipe(
-      mapArrayItems((item) => ({ ...item, path }))
-    );
-  };
-}
+import { PageSearchItemResult } from "./types";
+import { mapArrayItemsCached, observeAll } from "@/observables";
 
 export function mapElementStacksToSearchItems(
   produceQuery: (elementStack: ElementStackModel) => Observable<string | null>

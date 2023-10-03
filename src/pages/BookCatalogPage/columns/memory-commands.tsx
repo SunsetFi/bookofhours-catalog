@@ -6,7 +6,7 @@ import { useObservation } from "@/observables";
 
 import PinElementIconButton from "@/components/PinElementIconButton";
 
-import { BookModel } from "../BookDataSource";
+import { BookModel } from "../books-data-source";
 import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid";
 
 export function memoryCommandsColumn(): ObservableDataGridColumnDef<BookModel> {

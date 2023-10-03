@@ -3,7 +3,7 @@ import * as React from "react";
 import { ObservableDataGridColumnDef } from "@/components/ObservableDataGrid";
 import ElementIcon from "@/components/ElementIcon";
 
-import { BookModel } from "../BookDataSource";
+import { BookModel } from "../books-data-source";
 
 export function memoryIconColumn(): ObservableDataGridColumnDef<BookModel> {
   return {
