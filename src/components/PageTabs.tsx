@@ -6,65 +6,9 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
-import { useAspect } from "@/services/sh-compendium";
+import sitemap from "@/sitemap";
 
-const tabData = [
-  {
-    label: "Books",
-    aspectIcon: "readable",
-    path: "/books",
-  },
-  {
-    label: "Provisions",
-    aspectIcon: "beverage",
-    path: "/provisions",
-  },
-  {
-    label: "Tools",
-    aspectIcon: "tool",
-    path: "/tools",
-  },
-  {
-    label: "Materials",
-    aspectIcon: "material",
-    path: "/materials",
-  },
-  {
-    label: "Things",
-    aspectIcon: "thing",
-    path: "/things",
-  },
-  {
-    label: "Furnishings",
-    aspectIcon: "comfort",
-    path: "/furnishings",
-  },
-  {
-    label: "Skills",
-    aspectIcon: "skill",
-    path: "/skills",
-  },
-  {
-    label: "Craftables",
-    aspectIcon: "difficulty.keeper",
-    path: "/craftables",
-  },
-  {
-    label: "Workstations",
-    aspectIcon: "forge",
-    path: "/workstations",
-  },
-  {
-    label: "Harvest",
-    aspectIcon: "nectar",
-    path: "/harvest",
-  },
-  {
-    label: "Memories",
-    aspectIcon: "memory",
-    path: "/memories",
-  },
-];
+import { useAspect } from "@/services/sh-compendium";
 
 const PageTabs = () => {
   return (
@@ -81,7 +25,7 @@ const PageTabs = () => {
         gap: 1,
       }}
     >
-      {tabData.map(({ label, aspectIcon, path }) => (
+      {sitemap.map(({ label, aspectIcon, path }) => (
         <PageTab key={path} label={label} aspectId={aspectIcon} path={path} />
       ))}
     </Box>
