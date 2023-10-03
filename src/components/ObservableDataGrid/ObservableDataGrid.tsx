@@ -1,5 +1,13 @@
 import * as React from "react";
-import { Observable, combineLatest, map, of as observableOf } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  asapScheduler,
+  combineLatest,
+  map,
+  of as observableOf,
+  throttleTime,
+} from "rxjs";
 
 import type { SxProps } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -76,6 +84,8 @@ function rowIsNotFallback<T>(row: T | typeof FallbackItem): row is T {
   return row !== FallbackItem;
 }
 
+const emptyObject: Record<string, any> = {};
+
 function ObservableDataGrid<T>({
   sx,
   filters,
@@ -83,11 +93,17 @@ function ObservableDataGrid<T>({
   items$,
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
+  // used to debounce filter.
   const [internalFilterValue, internalFilterDispatch] = React.useState<
     Record<string, any>
   >({});
 
-  const filterValue = React.useMemo(() => {
+  const appliedFilterValue$ = React.useMemo(
+    () => new BehaviorSubject<Record<string, any>>({}),
+    []
+  );
+
+  const inputFilterValue = React.useMemo(() => {
     const value = { ...(filters ?? internalFilterValue) };
 
     // Apply defaults for filters that are not set.
@@ -105,13 +121,45 @@ function ObservableDataGrid<T>({
     }
 
     return value;
-  }, [columns, filters, internalFilterValue]);
+  }, [filters, internalFilterValue, columns]);
+
+  React.useEffect(() => {
+    appliedFilterValue$.next(inputFilterValue);
+  }, [inputFilterValue]);
+
+  const finalFilterValue =
+    useObservation(
+      () =>
+        appliedFilterValue$.pipe(
+          throttleTime(1000, asapScheduler, { leading: false, trailing: true }),
+          map((inputValue) => {
+            const value = { ...inputValue };
+
+            // Apply defaults for filters that are not set.
+            for (const column of columns) {
+              if (!column.filter) {
+                continue;
+              }
+
+              if (
+                value[column.filter.key] === undefined &&
+                column.filter?.defaultFilterValue != null
+              ) {
+                value[column.filter.key] = column.filter.defaultFilterValue;
+              }
+            }
+
+            return value;
+          })
+        ),
+      [appliedFilterValue$, columns]
+    ) ?? inputFilterValue;
 
   const filterDispatch = React.useCallback(
     (key: string, value: any) => {
       const forward = onFiltersChanged ?? internalFilterDispatch;
 
-      const newValue = { ...(filters ?? internalFilterValue) };
+      const newValue = { ...(filters ?? appliedFilterValue$.value) };
 
       let isDifferent = false;
       for (const filter of columns
@@ -133,7 +181,7 @@ function ObservableDataGrid<T>({
     },
     [
       filters,
-      internalFilterValue,
+      appliedFilterValue$,
       onFiltersChanged,
       internalFilterDispatch,
       columns,
@@ -201,7 +249,10 @@ function ObservableDataGrid<T>({
           }
 
           if (
-            !filter.filterValue(element[`column_${i}`], filterValue[filter.key])
+            !filter.filterValue(
+              element[`column_${i}`],
+              finalFilterValue[filter.key]
+            )
           ) {
             return false;
           }
@@ -209,14 +260,14 @@ function ObservableDataGrid<T>({
 
         return true;
       }),
-    [columns, rows, filterValue]
+    [columns, rows, finalFilterValue]
   );
 
   return (
     // Stupid box because stupid datagrid expands bigger than its 100% size.
     <Box sx={{ overflow: "hidden", ...sx }}>
       <FilterDispatchContext.Provider value={filterDispatch}>
-        <FilterValueContext.Provider value={filterValue}>
+        <FilterValueContext.Provider value={inputFilterValue}>
           {!filteredRows && (
             <Box
               sx={{

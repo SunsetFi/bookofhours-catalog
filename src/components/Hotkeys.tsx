@@ -11,7 +11,6 @@ const Hotkeys = ({ children }: HotkeysProps) => {
   const searchService = useDIDependency(SearchService);
   const onKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
-      console.log("key", e.key, e.ctrlKey);
       if (e.key === "k" && e.ctrlKey) {
         e.preventDefault();
         e.stopPropagation();

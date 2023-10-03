@@ -17,7 +17,6 @@ const SearchButtonHeader = ({ sx }: SearchButtonHeaderProps) => {
   const searchService = useDIDependency(SearchService);
   const onClick = React.useCallback(
     (e: React.MouseEvent) => {
-      console.log("on click");
       e.preventDefault();
       e.stopPropagation();
       searchService.open();

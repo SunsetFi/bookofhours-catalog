@@ -32,7 +32,6 @@ const SearchDialog = () => {
 
   const onTextFieldMount = React.useCallback(
     (ref: HTMLDivElement) => {
-      console.log("Text field mount", ref, isOpen);
       if (isOpen && ref) {
         ref.focus();
       }
@@ -70,6 +69,8 @@ const SearchDialog = () => {
       onClose={() => searchService.close()}
       fullWidth
       maxWidth="md"
+      // I dont know why this needs to be disabled for autoFocus to work, but it apparently does.
+      // FIXME: We definitely dont want disableRestoreFocus if we are making this arrow key + screen reader accessible.
       disableRestoreFocus
       sx={{
         pt: 10,
