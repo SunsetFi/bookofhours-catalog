@@ -130,11 +130,8 @@ const SearchDialog = () => {
         )}
         {searchQuery != "" && (
           <List component="nav" sx={{ pt: 1 }}>
-            {searchResults.map((item) => (
-              <SearchResultItem
-                key={`${item.path}?${item.pathQuery}`}
-                {...item}
-              />
+            {searchResults.map((item, i) => (
+              <SearchResultItem key={i} {...item} />
             ))}
           </List>
         )}

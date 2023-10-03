@@ -1,5 +1,4 @@
 import * as React from "react";
-import { map, mergeMap } from "rxjs";
 
 import Box from "@mui/material/Box";
 
@@ -7,18 +6,13 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects, provisionsAspects } from "@/aspects";
 
-import { filterItemObservations } from "@/observables";
+import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import {
   ElementStackModel,
   TokensSource,
   filterHasAnyAspect,
 } from "@/services/sh-game";
-import {
-  PageSearchProviderPipe,
-  elementStackMatchesQuery,
-  mapElementStacksToSearchItems,
-} from "@/services/search";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
@@ -33,26 +27,6 @@ import ObservableDataGrid, {
 import PageContainer from "@/components/PageContainer";
 import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import FocusIconButton from "@/components/FocusIconButton";
-
-export const provisionsSearchProvider: PageSearchProviderPipe = (
-  query$,
-  container
-) =>
-  query$.pipe(
-    mergeMap((query) =>
-      container.get(TokensSource).visibleElementStacks$.pipe(
-        filterHasAnyAspect(provisionsAspects),
-        filterItemObservations((item) => elementStackMatchesQuery(query, item)),
-        mapElementStacksToSearchItems((element) =>
-          element.label$.pipe(
-            map((label) =>
-              label ? `name=\"${encodeURIComponent(label)}\"` : null
-            )
-          )
-        )
-      )
-    )
-  );
 
 const ProvisionsCatalog = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -97,6 +71,8 @@ const ProvisionsCatalog = () => {
     []
   );
 
+  const [filter, onFiltersChanged] = useQueryObjectState();
+
   return (
     <PageContainer title="Stores and Provisions" backTo="/">
       <Box
@@ -112,6 +88,8 @@ const ProvisionsCatalog = () => {
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
+          filters={filter}
+          onFiltersChanged={onFiltersChanged}
         />
       </Box>
     </PageContainer>
