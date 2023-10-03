@@ -26,7 +26,7 @@ export class Scheduler implements Initializable {
 
   onInitialize(): void {
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
+      if (!document.hidden) {
         this.updateNow();
       } else {
         this._cancelPoll();
