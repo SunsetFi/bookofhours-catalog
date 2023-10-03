@@ -16,6 +16,8 @@ export class Scheduler implements Initializable {
 
   addTask(task: () => Promise<void>): () => void {
     this._tasks.push(task);
+    // Execute the new task now so it has data asap.
+    task();
     return () => {
       const index = this._tasks.indexOf(task);
       if (index >= 0) {
