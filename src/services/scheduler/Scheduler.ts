@@ -25,14 +25,19 @@ export class Scheduler implements Initializable {
   }
 
   onInitialize(): void {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        this.updateNow();
+      } else {
+        this._cancelPoll();
+      }
+    });
+
     this._scheduleNextPoll(0);
   }
 
   async updateNow() {
-    if (this._pollingTimeout) {
-      clearTimeout(this._pollingTimeout);
-      this._pollingTimeout = null;
-    }
+    this._cancelPoll();
 
     try {
       await Promise.all(this._tasks.map((task) => task()));
@@ -42,11 +47,19 @@ export class Scheduler implements Initializable {
     }
   }
 
-  private _scheduleNextPoll(reduceBy: number) {
+  private _cancelPoll() {
     if (this._pollingTimeout) {
       clearTimeout(this._pollingTimeout);
       this._pollingTimeout = null;
     }
+  }
+
+  private _scheduleNextPoll(reduceBy: number) {
+    if (document.hidden) {
+      return;
+    }
+
+    this._cancelPoll();
 
     if (this._tasks.length === 0) {
       this._pollingTimeout = setTimeout(() => this._scheduleNextPoll(0), 100);
