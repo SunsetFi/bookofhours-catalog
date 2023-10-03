@@ -11,6 +11,7 @@ import ThemeProvider from "./theme";
 import AppRouter from "./services/history/AppRouter";
 
 import RecipeOrchestratorDialog from "./components/RecipeOrchestratorDialog";
+import Favicon from "./components/Favicon";
 
 import AppRoutes from "./routes";
 
@@ -20,6 +21,7 @@ root.render(
   <React.StrictMode>
     <ContainerProvider>
       <AppRouter>
+        <Favicon />
         <ThemeProvider>
           <CssBaseline />
           <AppRoutes />

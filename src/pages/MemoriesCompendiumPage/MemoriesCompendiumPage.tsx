@@ -6,7 +6,14 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects } from "@/aspects";
 
-import { CharacterSource, filterHasAnyAspect } from "@/services/sh-game";
+import {
+  CharacterSource,
+  ModelWithAspects,
+  ModelWithDescription,
+  ModelWithIconUrl,
+  ModelWithLabel,
+  filterHasAnyAspect,
+} from "@/services/sh-game";
 import { ElementModel } from "@/services/sh-compendium";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
@@ -19,24 +26,43 @@ import ObservableDataGrid, {
   labelColumnDef,
 } from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
+import { map } from "rxjs";
 
+interface MemoriesRow
+  extends ModelWithIconUrl,
+    ModelWithLabel,
+    ModelWithAspects,
+    ModelWithDescription {
+  id: string;
+}
+
+function elementToMemoryRow(element: ElementModel): MemoriesRow {
+  return {
+    id: element.elementId,
+    iconUrl: element.iconUrl,
+    label$: element.label$,
+    aspects$: element.aspects$,
+    description$: element.description$,
+  };
+}
 const MemoriesCompendiumPage = () => {
   const characterSource = useDIDependency(CharacterSource);
 
   const elements$ = React.useMemo(
     () =>
       characterSource.uniqueElementsManifested$.pipe(
-        filterHasAnyAspect(["memory"])
+        filterHasAnyAspect(["memory"]),
+        map((items) => items.map(elementToMemoryRow))
       ),
     [characterSource]
   );
 
   const columns = React.useMemo(
     () => [
-      iconColumnDef<ElementModel>(),
-      labelColumnDef<ElementModel>(),
-      aspectsColumnDef<ElementModel>(powerAspects),
-      descriptionColumnDef<ElementModel>(),
+      iconColumnDef<MemoriesRow>(),
+      labelColumnDef<MemoriesRow>(),
+      aspectsColumnDef<MemoriesRow>(powerAspects),
+      descriptionColumnDef<MemoriesRow>(),
     ],
     []
   );
