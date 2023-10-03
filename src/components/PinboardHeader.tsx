@@ -10,12 +10,12 @@ import { useObservation, mergeMapIfNotNull } from "@/observables";
 
 import { useDIDependency } from "@/container";
 
-import { Pinboard } from "@/services/sh-pins/Pinboard";
+import { Pinboard } from "@/services/pins/Pinboard";
 import {
   PinnedElementItemModel,
   PinnedItemModel,
   isPinnedElementItemModel,
-} from "@/services/sh-pins/PinnedItemModel";
+} from "@/services/pins/PinnedItemModel";
 
 import ElementIcon from "./ElementIcon";
 import AspectsList from "./AspectsList";

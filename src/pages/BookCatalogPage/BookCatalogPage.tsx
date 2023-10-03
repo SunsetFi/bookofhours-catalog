@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Observable, combineLatest, map, mergeMap } from "rxjs";
+import { pick, first } from "lodash";
 
 import { Aspects } from "secrethistories-api";
-import { pick, first } from "lodash";
 
 import Box from "@mui/material/Box";
 
@@ -12,6 +12,7 @@ import { useDIDependency } from "@/container";
 
 import {
   Null$,
+  filterItemObservations,
   mapArrayItemsCached,
   mergeMapIfNotNull,
   observableObjectOrEmpty,
@@ -31,6 +32,11 @@ import {
   ModelWithParentTerrain,
   TokensSource,
 } from "@/services/sh-game";
+import {
+  mapElementStacksToSearchItems,
+  elementStackMatchesQuery,
+  PageSearchProviderPipe,
+} from "@/services/search";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
@@ -125,7 +131,6 @@ function elementStackToBook(
   );
   const memoryLabel$ = memory$.pipe(
     mergeMapIfNotNull((memory) => memory.label$)
-    // map((label) => (label?.startsWith("Memory: ") ? label.substring(8) : label))
   );
 
   const memoryAspects$ = memory$.pipe(
@@ -174,16 +179,25 @@ function elementStackToBook(
   };
 }
 
-function extractMysteryAspect(aspects: Aspects): string | null {
-  let mystery = Object.keys(aspects).find((aspectId) =>
-    aspectId.startsWith("mystery.")
+export const bookCatalogSearchProvider: PageSearchProviderPipe = (
+  query$,
+  container
+) =>
+  query$.pipe(
+    mergeMap((query) =>
+      container.get(TokensSource).visibleElementStacks$.pipe(
+        filterHasAspect("readable"),
+        filterItemObservations((item) => elementStackMatchesQuery(query, item)),
+        mapElementStacksToSearchItems((element) =>
+          element.label$.pipe(
+            map((label) =>
+              label ? `name=\"${encodeURIComponent(label)}\"` : null
+            )
+          )
+        )
+      )
+    )
   );
-  if (!mystery) {
-    return null;
-  }
-
-  return mystery.substring(8);
-}
 
 const BookCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -338,5 +352,16 @@ const BookCatalogPage = () => {
     </PageContainer>
   );
 };
+
+function extractMysteryAspect(aspects: Aspects): string | null {
+  let mystery = Object.keys(aspects).find((aspectId) =>
+    aspectId.startsWith("mystery.")
+  );
+  if (!mystery) {
+    return null;
+  }
+
+  return mystery.substring(8);
+}
 
 export default BookCatalogPage;

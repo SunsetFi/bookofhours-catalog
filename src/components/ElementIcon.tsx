@@ -86,6 +86,7 @@ const ElementIcon = ({
         }}
       >
         <img
+          loading="lazy"
           src={iconUrl}
           alt={label}
           title={title}

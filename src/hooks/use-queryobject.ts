@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { useLocation } from "react-router";
 
-import { useHistory } from "@/services/history/hooks";
+import { useHistory } from "@/services/history";
 
 export function useQueryObjectState(): [
   obj: Record<string, any>,

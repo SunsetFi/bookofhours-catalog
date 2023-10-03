@@ -1,17 +1,19 @@
 import { composeModules } from "microinject";
 
 import historyModule from "./history/module";
+import pinsModule from "./pins/module";
 import schedulerModule from "./scheduler/module";
-import csCompendiumModule from "./sh-compendium/module";
-import csMonitorModule from "./sh-game/module";
-import csApiModule from "./sh-api/module";
-import pinsModule from "./sh-pins/module";
+import searchModule from "./search/module";
+import shCompendiumModule from "./sh-compendium/module";
+import shMonitorModule from "./sh-game/module";
+import shApiModule from "./sh-api/module";
 
 export default composeModules(
   historyModule,
+  pinsModule,
   schedulerModule,
-  csCompendiumModule,
-  csMonitorModule,
-  csApiModule,
-  pinsModule
+  searchModule,
+  shCompendiumModule,
+  shMonitorModule,
+  shApiModule
 );

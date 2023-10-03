@@ -1,15 +1,13 @@
 import React from "react";
 import { Router } from "react-router";
 
-import { useDIDependency } from "@/container";
-
-import { History } from "./History";
+import { useHistory } from "./hooks";
 
 export interface AppRouterProps {
   children: React.ReactNode;
 }
 const AppRouter = ({ children }: AppRouterProps) => {
-  const history = useDIDependency(History);
+  const history = useHistory();
   let [state, setState] = React.useState({
     action: history.action,
     location: history.location,

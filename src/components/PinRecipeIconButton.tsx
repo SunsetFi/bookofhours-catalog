@@ -7,7 +7,7 @@ import type { SxProps } from "@mui/material/styles";
 import { useObservation } from "@/observables";
 import { useDIDependency } from "@/container";
 
-import { Pinboard } from "@/services/sh-pins/Pinboard";
+import { Pinboard } from "@/services/pins/Pinboard";
 
 export interface PinElementIconButtonProps {
   sx?: SxProps;

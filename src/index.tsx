@@ -11,7 +11,9 @@ import ThemeProvider from "./theme";
 import AppRouter from "./services/history/AppRouter";
 
 import RecipeOrchestratorDialog from "./components/RecipeOrchestratorDialog";
+import SearchDialog from "./components/SearchDialog";
 import Favicon from "./components/Favicon";
+import Hotkeys from "./components/Hotkeys";
 
 import AppRoutes from "./routes";
 
@@ -20,14 +22,17 @@ const root = ReactDOM.createRoot(rootEl!);
 root.render(
   <React.StrictMode>
     <ContainerProvider>
-      <AppRouter>
-        <Favicon />
-        <ThemeProvider>
-          <CssBaseline />
-          <AppRoutes />
-          <RecipeOrchestratorDialog />
-        </ThemeProvider>
-      </AppRouter>
+      <Hotkeys>
+        <AppRouter>
+          <Favicon />
+          <ThemeProvider>
+            <CssBaseline />
+            <AppRoutes />
+            <RecipeOrchestratorDialog />
+            <SearchDialog />
+          </ThemeProvider>
+        </AppRouter>
+      </Hotkeys>
     </ContainerProvider>
   </React.StrictMode>
 );

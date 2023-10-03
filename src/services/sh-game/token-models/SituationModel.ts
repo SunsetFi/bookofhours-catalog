@@ -264,6 +264,22 @@ export class SituationModel extends TokenModel {
     }
   }
 
+  async conclude() {
+    try {
+      await this._api.concludeTokenAtPath(this.path);
+      // TODO: Could ping TokensSource with our new tokens.
+
+      this._situation$.next({
+        ...this._situation$.value,
+        currentRecipeId: null,
+        currentRecipeLabel: null,
+        state: "Unstarted",
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+
   _onUpdate(situation: ISituation) {
     if (situation.id !== this.id) {
       throw new Error("Invalid situation update: Wrong ID.");

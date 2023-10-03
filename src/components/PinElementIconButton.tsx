@@ -6,7 +6,7 @@ import PushPin from "@mui/icons-material/PushPin";
 import { False$, useObservation } from "@/observables";
 import { useDIDependency } from "@/container";
 
-import { Pinboard } from "@/services/sh-pins/Pinboard";
+import { Pinboard } from "@/services/pins/Pinboard";
 
 export interface PinElementIconButtonProps {
   title?: string;

@@ -30,8 +30,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: "0.9em",
-          // fontSize: "0.6em",
-          // fontWeight: "bold",
+        },
+      },
+    },
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          backdropFilter: "blur(2px)",
         },
       },
     },

@@ -1,4 +1,8 @@
-import BookCatalogPage from "./pages/BookCatalogPage";
+import { SearchProviderPipe, pageProviderFromPath } from "./services/search";
+
+import BookCatalogPage, {
+  bookCatalogSearchProvider,
+} from "./pages/BookCatalogPage";
 import CraftingCatalogPage from "./pages/CraftingCatalogPage";
 import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
 import HarvestCatalogPage from "./pages/HarvestCatalogPage";
@@ -14,6 +18,7 @@ interface SiteMapItem {
   label: string;
   aspectIcon: string;
   path: string;
+  searchProvider?: SearchProviderPipe;
   Component: React.ComponentType<{}>;
 }
 
@@ -22,6 +27,7 @@ const sitemap: SiteMapItem[] = [
     label: "Books",
     aspectIcon: "readable",
     path: "/books",
+    searchProvider: pageProviderFromPath(bookCatalogSearchProvider, "/books"),
     Component: BookCatalogPage,
   },
   {

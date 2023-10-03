@@ -11,7 +11,10 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import type { SxProps } from "@mui/material/styles";
+
 import SkipNextIcon from "@mui/icons-material/SkipNext";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import DownloadIcon from "@mui/icons-material/Download";
 
 import { useDIDependency } from "@/container";
 import {
@@ -70,58 +73,58 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
         map((seconds) => Math.max(...seconds.filter((x) => x > 0)))
       )
     ) ?? Number.NaN;
+  const hasSecondsToTomorrow = !Number.isNaN(secondsToTomorrow);
   const hasNextEvent =
     !Number.isNaN(secondsToNextEvent) && secondsToNextEvent > 0;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 1,
-        ...sx,
-      }}
-    >
-      {hasNextEvent && (
-        <Typography
-          component="span"
-          variant="body2"
-          title="Seconds to Next Event"
-        >
-          {secondsToNextEvent}
-        </Typography>
-      )}
-      {!Number.isNaN(secondsToTomorrow) && (
-        <>
-          {" "}
-          /{" "}
+    <>
+      <Box
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 1,
+          cursor: "pointer",
+          ...sx,
+        }}
+      >
+        {(hasNextEvent || hasSecondsToTomorrow) && <HourglassBottomIcon />}
+        {hasNextEvent && (
+          <Typography
+            component="span"
+            variant="body2"
+            title="Seconds to Next Event"
+          >
+            {secondsToNextEvent}s
+          </Typography>
+        )}
+        {hasNextEvent && hasSecondsToTomorrow && " / "}
+        {!Number.isNaN(secondsToTomorrow) && (
           <Typography
             component="span"
             variant="body2"
             title="Seconds Left in Day"
           >
-            {secondsToTomorrowStr}
+            {secondsToTomorrowStr}s
           </Typography>
-        </>
-      )}
-      <Badge
-        badgeContent={executingSituations.length}
-        color="primary"
-        sx={{
-          ["& .MuiBadge-badge"]: {
-            right: 10,
-            top: 10,
-          },
-        }}
-      >
-        <IconButton
-          title="Recipe Executions"
-          onClick={(e) => setAnchorEl(e.currentTarget)}
+        )}
+        <Badge
+          badgeContent={executingSituations.length}
+          color="primary"
+          sx={{
+            ["& .MuiBadge-badge"]: {
+              right: 10,
+              top: 10,
+            },
+          }}
         >
-          <PlayCircle />
-        </IconButton>
-      </Badge>
+          <IconButton title="Recipe Executions">
+            <PlayCircle />
+          </IconButton>
+        </Badge>
+      </Box>
       <Popover
         action={actionsRef}
         open={!!anchorEl}
@@ -141,7 +144,7 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
           <ListItem>
             <ListItemText sx={{ ml: 1 }} primary="Skip to Tomorrow" />
             <Box sx={{ ml: "auto" }}>
-              <Typography variant="caption">{secondsToTomorrowStr}</Typography>
+              <Typography variant="caption">{secondsToTomorrowStr}s</Typography>
               <IconButton
                 title="Fast Forward to Next Day"
                 onClick={() => timeSource.passDay()}
@@ -158,7 +161,7 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
           ))}
         </List>
       </Popover>
-    </Box>
+    </>
   );
 };
 
@@ -174,22 +177,36 @@ const ExecutingSituationListItem = ({
   const label = useObservation(situation.verbLabel$);
   const recipeLabel = useObservation(situation.recipeLabel$);
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
+  const state = useObservation(situation.state$);
 
   const timeRemainingStr = timeRemaining.toFixed(1);
+
+  if (state !== "Ongoing" && state !== "Complete") {
+    return null;
+  }
 
   return (
     <ListItem>
       <FocusIconButton token={situation} />
       <ListItemText sx={{ ml: 1 }} primary={label} secondary={recipeLabel} />
       <Box sx={{ ml: "auto" }}>
-        <Typography variant="caption">{timeRemainingStr}</Typography>
-        <IconButton
-          title="Fast Forward to Completion"
-          // Tick one tick past the end of the situation, so we dont hang on 0.0
-          onClick={() => timeSource.passTime(timeRemaining + 0.1)}
-        >
-          <SkipNextIcon />
-        </IconButton>
+        {state === "Ongoing" && (
+          <>
+            <Typography variant="caption">{timeRemainingStr}s</Typography>
+            <IconButton
+              title="Fast Forward to Completion"
+              // Tick one tick past the end of the situation, so we dont hang on 0.0
+              onClick={() => timeSource.passTime(timeRemaining + 0.1)}
+            >
+              <SkipNextIcon />
+            </IconButton>
+          </>
+        )}
+        {state === "Complete" && (
+          <IconButton title="Complete" onClick={() => situation.conclude()}>
+            <DownloadIcon />
+          </IconButton>
+        )}
       </Box>
     </ListItem>
   );
