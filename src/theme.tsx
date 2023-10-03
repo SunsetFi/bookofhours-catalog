@@ -34,11 +34,14 @@ const theme = createTheme({
       },
     },
     MuiBackdrop: {
-      styleOverrides: {
-        root: {
-          backdropFilter: "blur(1px)",
+      variants: [
+        {
+          props: { invisible: false },
+          style: {
+            backdropFilter: "blur(1px)",
+          },
         },
-      },
+      ],
     },
   },
 });

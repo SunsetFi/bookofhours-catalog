@@ -13,7 +13,9 @@ import ProvisionsCatalog, {
 } from "./pages/ProvisionsCatalog";
 import SkillsCatalogPage from "./pages/SkillsCatalogPage";
 import ThingsCatalogPage from "./pages/ThingsCatalogPage";
-import ToolsCatalogPage from "./pages/ToolsCatalogPage";
+import ToolsCatalogPage, {
+  toolsSearchProvider,
+} from "./pages/ToolsCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 
 interface SiteMapItem {
@@ -46,6 +48,7 @@ const sitemap: SiteMapItem[] = [
     label: "Tools",
     aspectIcon: "tool",
     path: "/tools",
+    searchProvider: pageProviderFromPath(toolsSearchProvider, "/tools"),
     Component: ToolsCatalogPage,
   },
   {
