@@ -1,5 +1,6 @@
 import { map, mergeMap } from "rxjs";
 
+import { materialAspects } from "@/aspects";
 import { filterItemObservations } from "@/observables";
 
 import {
@@ -7,16 +8,16 @@ import {
   elementStackMatchesQuery,
   mapElementStacksToSearchItems,
 } from "@/services/search";
-import { TokensSource, filterHasAspect } from "@/services/sh-game";
+import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-export const toolsSearchProvider: PageSearchProviderPipe = (
+export const materialsSearchProvider: PageSearchProviderPipe = (
   query$,
   container
 ) =>
   query$.pipe(
     mergeMap((query) =>
       container.get(TokensSource).visibleElementStacks$.pipe(
-        filterHasAspect("tool"),
+        filterHasAnyAspect(materialAspects),
         filterItemObservations((item) => elementStackMatchesQuery(query, item)),
         mapElementStacksToSearchItems((element) =>
           element.label$.pipe(

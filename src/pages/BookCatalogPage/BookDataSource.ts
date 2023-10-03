@@ -22,7 +22,7 @@ import {
   ElementStackModel,
   Orchestrator,
   TokensSource,
-  filterHasAspect,
+  filterHasAnyAspect,
 } from "@/services/sh-game";
 import { decorateClassInstance } from "@/class-decorator";
 
@@ -124,7 +124,7 @@ export function getBooksObservable(
   const tokensSource = container.get(TokensSource);
 
   return tokensSource.visibleElementStacks$.pipe(
-    filterHasAspect("readable"),
+    filterHasAnyAspect("readable"),
     mapArrayItemsCached((item) =>
       elementStackToBook(item, compendium, orchestrator)
     )

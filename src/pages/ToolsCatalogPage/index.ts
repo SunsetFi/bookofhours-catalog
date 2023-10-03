@@ -1,4 +1,4 @@
 import ToolsCatalogPage from "./ToolsCatalogPage";
 export default ToolsCatalogPage;
 
-export * from "./ToolsSearchProvider";
+export * from "./tools-search-provider";

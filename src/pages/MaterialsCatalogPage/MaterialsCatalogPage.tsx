@@ -9,7 +9,7 @@ import { materialAspects, powerAspects } from "@/aspects";
 import {
   ElementStackModel,
   TokensSource,
-  filterHasAspect,
+  filterHasAnyAspect,
 } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
@@ -35,7 +35,9 @@ const MaterialsCatalogPage = () => {
   const elements$ = React.useMemo(
     // Much more than just materials.  This is whatever I find useful to Make Things With
     () =>
-      tokensSource.visibleElementStacks$.pipe(filterHasAspect(materialAspects)),
+      tokensSource.visibleElementStacks$.pipe(
+        filterHasAnyAspect(materialAspects)
+      ),
     [tokensSource]
   );
 

@@ -7,7 +7,7 @@ import { ModelWithAspects } from "./types";
 
 import { ElementStackModel } from "./token-models/ElementStackModel";
 
-export function filterHasAspect(
+export function filterHasAnyAspect(
   aspect: string | readonly string[] | ((aspectId: string) => boolean)
 ) {
   return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
@@ -29,18 +29,6 @@ export function filterHasAspect(
 
             return false;
           })
-        )
-      )
-    );
-  };
-}
-
-export function filterHasAnyAspect(match: readonly string[]) {
-  return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
-    return source.pipe(
-      filterItemObservations((element) =>
-        element.aspects$.pipe(
-          map((aspects) => match.some((item) => aspects[item] > 0))
         )
       )
     );

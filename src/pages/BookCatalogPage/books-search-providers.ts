@@ -8,7 +8,7 @@ import {
   elementStackMatchesQuery,
   mapElementStacksToSearchItems,
 } from "@/services/search";
-import { TokensSource, filterHasAspect } from "@/services/sh-game";
+import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 export const bookCatalogSearchProvider: PageSearchProviderPipe = (
   query$,
@@ -25,7 +25,7 @@ function createQueryObservable(
   tokensSource: TokensSource
 ): Observable<PageSearchItemResult[]> {
   return tokensSource.visibleElementStacks$.pipe(
-    filterHasAspect("readable"),
+    filterHasAnyAspect("readable"),
     filterItemObservations((item) => elementStackMatchesQuery(query, item)),
     mapElementStacksToSearchItems((element) =>
       element.label$.pipe(

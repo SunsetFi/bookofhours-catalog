@@ -9,7 +9,7 @@ import { powerAspects } from "@/aspects";
 import {
   ElementStackModel,
   TokensSource,
-  filterHasAspect,
+  filterHasAnyAspect,
 } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
@@ -31,7 +31,7 @@ const ThingsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
-    () => tokensSource.visibleElementStacks$.pipe(filterHasAspect("thing")),
+    () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("thing")),
     [tokensSource]
   );
 

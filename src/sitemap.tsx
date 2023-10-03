@@ -6,7 +6,9 @@ import BookCatalogPage, {
 import CraftingCatalogPage from "./pages/CraftingCatalogPage";
 import FurnishingsCatalogPage from "./pages/FurnishingsCatalogPage";
 import HarvestCatalogPage from "./pages/HarvestCatalogPage";
-import MaterialsCatalogPage from "./pages/MaterialsCatalogPage";
+import MaterialsCatalogPage, {
+  materialsSearchProvider,
+} from "./pages/MaterialsCatalogPage";
 import MemoriesCompendiumPage from "./pages/MemoriesCompendiumPage";
 import ProvisionsCatalog, {
   provisionsSearchProvider,
@@ -55,6 +57,7 @@ const sitemap: SiteMapItem[] = [
     label: "Materials",
     aspectIcon: "material",
     path: "/materials",
+    searchProvider: pageProviderFromPath(materialsSearchProvider, "/materials"),
     Component: MaterialsCatalogPage,
   },
   {

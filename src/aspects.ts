@@ -29,7 +29,6 @@ export const materialAspects = [
   "fabric",
   "glass",
   "ink", // not really a material, but it needs to be somewhere.
-  "metal",
   "egg",
   "candle",
 ] as const;
