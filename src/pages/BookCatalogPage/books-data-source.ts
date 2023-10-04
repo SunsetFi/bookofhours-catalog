@@ -6,8 +6,8 @@ import { Observable, combineLatest, map, mergeMap } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
 import { useDIContainer } from "@/container";
-
 import { powerAspects } from "@/aspects";
+import { decorateClassInstance } from "@/class-decorator";
 
 import {
   Null$,
@@ -24,7 +24,6 @@ import {
   TokensSource,
   filterHasAnyAspect,
 } from "@/services/sh-game";
-import { decorateClassInstance } from "@/class-decorator";
 
 export interface BookModelDecorations {
   id: string;
@@ -55,10 +54,12 @@ function elementStackToBook(
 
       return element.xtriggers$.pipe(
         map((xtriggers) => {
-          for (var key of Object.keys(xtriggers).filter((x) =>
+          const readingTrigger = Object.keys(xtriggers).find((x) =>
             x.startsWith("reading.")
-          )) {
-            return first(xtriggers[key])?.id ?? null;
+          );
+
+          if (readingTrigger) {
+            return first(xtriggers[readingTrigger])?.id ?? null;
           }
 
           return null;

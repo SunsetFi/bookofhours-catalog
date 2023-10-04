@@ -7,7 +7,7 @@ import Card from "@mui/material/Card";
 import Popper from "@mui/material/Popper";
 import Typography from "@mui/material/Typography";
 
-import { useObservation } from "@/observables";
+import { useLayoutObservation } from "@/observables";
 
 import { useAspect } from "@/services/sh-compendium";
 
@@ -31,9 +31,9 @@ const AspectIcon = ({
   );
 
   const aspect = useAspect(aspectId);
-  const label = useObservation(aspect.label$) ?? "";
-  const description = useObservation(aspect.description$) ?? "";
-  const iconUrl = useObservation(aspect.iconUrl$);
+  const label = useLayoutObservation(aspect.label$) ?? "";
+  const description = useLayoutObservation(aspect.description$) ?? "";
+  const iconUrl = useLayoutObservation(aspect.iconUrl$);
 
   const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     setPopupAnchor(e.currentTarget);

@@ -4,7 +4,7 @@ import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { useObservation } from "@/observables";
+import { useLayoutObservation } from "@/observables";
 
 import { ElementModel } from "@/services/sh-compendium";
 
@@ -16,9 +16,9 @@ export interface ElementDetailsProps {
 
 const ElementDetails = React.forwardRef<HTMLDivElement, ElementDetailsProps>(
   ({ element }, ref) => {
-    const label = useObservation(element.label$) ?? "";
-    const aspects = useObservation(element.aspects$) ?? {};
-    const iconUrl = useObservation(element.iconUrl$);
+    const label = useLayoutObservation(element.label$) ?? "";
+    const aspects = useLayoutObservation(element.aspects$) ?? {};
+    const iconUrl = useLayoutObservation(element.iconUrl$);
     return (
       <Card
         ref={ref}
