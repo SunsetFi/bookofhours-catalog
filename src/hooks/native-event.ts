@@ -4,7 +4,7 @@ export function useNativeEvent<
   T extends GlobalEventHandlers,
   K extends keyof GlobalEventHandlersEventMap
 >(
-  ref: React.RefObject<T | null>,
+  element: T,
   type: K,
   listener: (
     this: GlobalEventHandlers,
@@ -13,16 +13,14 @@ export function useNativeEvent<
   options?: boolean | AddEventListenerOptions
 ) {
   React.useEffect(() => {
-    if (!ref.current) {
+    if (!element) {
       return;
     }
 
     // De-reference the target so we remove from the right element.
-    const listenTarget = ref.current;
-
-    listenTarget.addEventListener(type, listener, options);
+    element.addEventListener(type, listener, options);
     return () => {
-      listenTarget.removeEventListener(type, listener, options);
+      element.removeEventListener(type, listener, options);
     };
-  }, [type, listener, ref, options]);
+  }, [type, listener, element, options]);
 }
