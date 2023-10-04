@@ -5,10 +5,10 @@ import Typography from "@mui/material/Typography";
 
 import { delay, of } from "rxjs";
 
-import { useObservation } from "@/observables";
+import { useDeferredObservation } from "@/observables";
 
 const GameNotRunningView = () => {
-  const timedOut = useObservation(() => of(true).pipe(delay(5000)), []);
+  const timedOut = useDeferredObservation(() => of(true).pipe(delay(5000)), []);
 
   return (
     <Box

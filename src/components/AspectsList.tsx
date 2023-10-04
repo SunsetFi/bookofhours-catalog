@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { SxProps } from "@mui/material/styles";
 
-import { useLayoutObservation } from "@/observables";
+import { useObservation } from "@/observables";
 import { aspectOrder } from "@/aspects";
 
 import { useAspect } from "@/services/sh-compendium";
@@ -48,8 +48,8 @@ interface AspectListItemProps {
 
 const AspectListItem = ({ aspectId, size, children }: AspectListItemProps) => {
   const aspect = useAspect(aspectId);
-  const label = useLayoutObservation(aspect.label$);
-  const isHidden = useLayoutObservation(aspect.isHidden$) ?? true;
+  const label = useObservation(aspect.label$);
+  const isHidden = useObservation(aspect.isHidden$) ?? true;
 
   if (isHidden || !label) {
     return null;

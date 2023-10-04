@@ -6,7 +6,7 @@ import type { Instance as PopperInstance } from "@popperjs/core";
 
 import { useDIDependency } from "@/container";
 
-import { Null$, useLayoutObservation } from "@/observables";
+import { Null$, useObservation } from "@/observables";
 
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 
@@ -51,8 +51,8 @@ const ElementIcon = ({
     element = compendium.getElementById(elementId);
   }
 
-  const iconUrl = useLayoutObservation(element?.iconUrl$ ?? Null$) ?? "";
-  const label = useLayoutObservation(element?.label$ ?? Null$) ?? "";
+  const iconUrl = useObservation(element?.iconUrl$ ?? Null$) ?? "";
+  const label = useObservation(element?.label$ ?? Null$) ?? "";
 
   const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     // FIXME: Popper is appearing off screen, despite the preventOverflow, and jumps back on screen if the screen is scrolled.

@@ -6,7 +6,7 @@ import type { SxProps } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 
-import { useLayoutObservation } from "@/observables";
+import { useObservation } from "@/observables";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
@@ -19,7 +19,7 @@ export interface HandOverviewIconsProps {
 const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
   const tokensSource = useDIDependency(TokensSource);
   const elements =
-    useLayoutObservation(
+    useObservation(
       () =>
         tokensSource.visibleElementStacks$.pipe(
           filterHasAnyAspect(["memory", "weather", "assistance"])

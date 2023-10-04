@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import UpgradeIcon from "@mui/icons-material/Upgrade";
 
 import { useDIDependency } from "@/container";
-import { useObservation } from "@/observables";
+import { useDeferredObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
@@ -45,7 +45,7 @@ const SkillsCatalogPage = () => {
         width: 50,
         field: "$item",
         renderCell: ({ value }) => {
-          const aspects = useObservation<Aspects>(value.aspects$) ?? {};
+          const aspects = useDeferredObservation<Aspects>(value.aspects$) ?? {};
           const skillLevel = aspects["skill"] ?? 0;
           if (skillLevel <= 0 || skillLevel >= 9) {
             return null;

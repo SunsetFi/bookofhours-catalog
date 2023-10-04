@@ -36,12 +36,16 @@ export function observableObjectOrEmpty<T extends {}>(
   return EmptyObject$ as any;
 }
 
-export function useObservation<T>(observable: Observable<T>): T | undefined;
-export function useObservation<T>(
+// Using useEffect will subscribe after our render outside the layout process.
+// This prevents us blocking the render, but means we will have one render pass where our returned value is undefined.
+export function useDeferredObservation<T>(
+  observable: Observable<T>
+): T | undefined;
+export function useDeferredObservation<T>(
   factory: () => Observable<T>,
   deps?: any[]
 ): T | undefined;
-export function useObservation<T>(
+export function useDeferredObservation<T>(
   observableOrFactory: Observable<T> | (() => Observable<T>),
   deps?: any[]
 ) {
@@ -65,14 +69,12 @@ export function useObservation<T>(
 
 // Using LayoutEffect guarentees we get a value before render.
 // This is useful when we know the observable is warmed up and we want the value on the very first render.
-export function useLayoutObservation<T>(
-  observable: Observable<T>
-): T | undefined;
-export function useLayoutObservation<T>(
+export function useObservation<T>(observable: Observable<T>): T | undefined;
+export function useObservation<T>(
   factory: () => Observable<T>,
   deps?: any[]
 ): T | undefined;
-export function useLayoutObservation<T>(
+export function useObservation<T>(
   observableOrFactory: Observable<T> | (() => Observable<T>),
   deps?: any[]
 ) {

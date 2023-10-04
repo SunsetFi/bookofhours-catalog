@@ -166,6 +166,7 @@ export class ElementStackModel
         shareReplay(1)
       );
     }
+
     return this._iconUrl$;
   }
 

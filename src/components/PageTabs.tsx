@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import sitemap from "@/sitemap";
 
 import { useAspect } from "@/services/sh-compendium";
-import { useLayoutObservation, useObservation } from "@/observables";
+import { useObservation, useDeferredObservation } from "@/observables";
 
 const PageTabs = () => {
   return (
@@ -40,7 +40,7 @@ interface PageTab {
 }
 const PageTab = ({ label, aspectId, path }: PageTab) => {
   const aspect = useAspect(aspectId);
-  const iconUrl = useLayoutObservation(aspect.iconUrl$);
+  const iconUrl = useObservation(aspect.iconUrl$);
   const { pathname } = useLocation();
   const value = firstPathPart(pathname);
   return (

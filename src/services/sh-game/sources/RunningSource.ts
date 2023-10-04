@@ -3,7 +3,7 @@ import { BehaviorSubject, distinctUntilChanged } from "rxjs";
 
 import { useDIDependency } from "@/container";
 
-import { useObservation } from "@/observables";
+import { useDeferredObservation } from "@/observables";
 
 import { Scheduler } from "@/services/scheduler";
 import { API } from "@/services/sh-api";
@@ -44,5 +44,7 @@ export class RunningSource {
 
 export function useIsRunning(): boolean | undefined {
   const runningSource = useDIDependency(RunningSource);
-  return useObservation(runningSource.isRunning$) ?? runningSource.isRunning;
+  return (
+    useDeferredObservation(runningSource.isRunning$) ?? runningSource.isRunning
+  );
 }

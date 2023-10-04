@@ -24,7 +24,7 @@ import {
   observeAll,
   profileEnd,
   profileStart,
-  useObservation,
+  useDeferredObservation,
 } from "@/observables";
 
 import ColumnHeader from "./components/ColumnHeader";
@@ -124,7 +124,7 @@ function ObservableDataGrid<T>({
 
   // Final debounced filter value to apply to the rows.
   const finalFilterValue =
-    useObservation(
+    useDeferredObservation(
       () =>
         appliedFilterValue$.pipe(
           throttleTime(1000, asapScheduler, { leading: false, trailing: true }),
@@ -187,7 +187,7 @@ function ObservableDataGrid<T>({
   );
 
   const rows =
-    useObservation(
+    useDeferredObservation(
       () =>
         items$.pipe(
           mapArrayItemsCached((element) => itemToRow(element, columns)),

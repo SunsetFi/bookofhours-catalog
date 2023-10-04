@@ -20,7 +20,6 @@ import { useDIDependency } from "@/container";
 import {
   filterItemObservations,
   observeAll,
-  useLayoutObservation,
   useObservation,
 } from "@/observables";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
@@ -48,7 +47,7 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
 
   const tokensSource = useDIDependency(TokensSource);
   const executingSituations =
-    useLayoutObservation(
+    useObservation(
       () =>
         tokensSource.visibleSituations$.pipe(
           filterItemObservations((s) =>
@@ -61,13 +60,13 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
   const timeSource = useDIDependency(TimeSource);
 
   const secondsToTomorrow =
-    useLayoutObservation(timeSource.secondsUntilTomorrow$) ?? Number.NaN;
+    useObservation(timeSource.secondsUntilTomorrow$) ?? Number.NaN;
   const secondsToTomorrowStr = secondsToTomorrow.toFixed(
     secondsToTomorrow > 60 ? 0 : 1
   );
 
   const secondsToNextEvent =
-    useLayoutObservation(() =>
+    useObservation(() =>
       tokensSource.visibleSituations$.pipe(
         map((situations) => situations.map((s) => s.timeRemaining$)),
         observeAll(),

@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 
 import { GridRenderCellParams } from "@mui/x-data-grid";
 
-import { useLayoutObservation } from "@/observables";
+import { useObservation } from "@/observables";
 
 import { useAspect } from "@/services/sh-compendium";
 
@@ -50,7 +50,7 @@ interface AspectPresenceItemProps {
 
 const AspectPresenseItem = ({ aspectId, display }: AspectPresenceItemProps) => {
   const aspect = useAspect(aspectId);
-  const label = useLayoutObservation(aspect.label$);
+  const label = useObservation(aspect.label$);
 
   if (!label) {
     return null;
