@@ -51,7 +51,7 @@ const ElementIcon = ({
     element = compendium.getElementById(elementId);
   }
 
-  const iconUrl = element?.iconUrl;
+  const iconUrl = useObservation(element?.iconUrl$ ?? Null$) ?? "";
   const label = useObservation(element?.label$ ?? Null$) ?? "";
 
   const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {

@@ -19,6 +19,7 @@ const ElementStackDetails = ({ elementStack }: ElementStackDetails) => {
   const label = useObservation(elementStack.label$) ?? "";
   const quantity = useObservation(elementStack.quantity$) ?? 1;
   const aspects = useObservation(elementStack.aspects$) ?? {};
+  const iconUrl = useObservation(elementStack.iconUrl$);
   return (
     <Card
       sx={{
@@ -44,7 +45,7 @@ const ElementStackDetails = ({ elementStack }: ElementStackDetails) => {
         >
           <img
             loading="lazy"
-            src={elementStack.iconUrl}
+            src={iconUrl}
             alt={label}
             title={label}
             style={{ width: "50px" }}

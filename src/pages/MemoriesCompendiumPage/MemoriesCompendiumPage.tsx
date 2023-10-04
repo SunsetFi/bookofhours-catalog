@@ -39,7 +39,7 @@ interface MemoriesRow
 function elementToMemoryRow(element: ElementModel): MemoriesRow {
   return {
     id: element.elementId,
-    iconUrl: element.iconUrl,
+    iconUrl$: element.iconUrl$,
     label$: element.label$,
     aspects$: element.aspects$,
     description$: element.description$,

@@ -22,13 +22,18 @@ function elementStackToSearchItem(
   elementStack: ElementStackModel,
   produceQuery: (elementStack: ElementStackModel) => Observable<string | null>
 ): Observable<PageSearchItemResult> {
-  return combineLatest([elementStack.label$, produceQuery(elementStack)]).pipe(
+  return combineLatest([
+    elementStack.iconUrl$,
+    elementStack.label$,
+    produceQuery(elementStack),
+  ]).pipe(
     filter(
-      ([label, searchFragment]) => label != null && searchFragment != null
+      ([iconUrl, label, searchFragment]) =>
+        iconUrl != null && label != null && searchFragment != null
     ),
-    map(([label, pathQuery]) => {
+    map(([iconUrl, label, pathQuery]) => {
       return {
-        iconUrl: elementStack.iconUrl,
+        iconUrl: iconUrl,
         label: label!,
         pathQuery: pathQuery!,
       };

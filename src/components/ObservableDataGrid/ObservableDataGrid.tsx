@@ -8,6 +8,7 @@ import {
   of as observableOf,
   throttleTime,
 } from "rxjs";
+import { isEqual } from "lodash";
 
 import type { SxProps } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -21,19 +22,17 @@ import type { GridColDef } from "@mui/x-data-grid/models";
 import {
   mapArrayItemsCached,
   observeAll,
-  profileDownstream,
   profileEnd,
   profileStart,
   useObservation,
 } from "@/observables";
 
+import ColumnHeader from "./components/ColumnHeader";
+
 import { renderCellTextWrap } from "./cells/text-wrap";
 
 import { ObservableDataGridColumnDef } from "./types";
-
-import ColumnHeader from "./components/ColumnHeader";
 import { FilterDispatchContext, FilterValueContext } from "./context";
-import { isEqual, pickBy } from "lodash";
 
 export interface ObservableDataGridProps<T> {
   sx?: SxProps;
@@ -79,13 +78,6 @@ function itemToRow(
   );
 }
 
-const FallbackItem = Symbol("ObservableDataGrid.FallbackItem");
-function rowIsNotFallback<T>(row: T | typeof FallbackItem): row is T {
-  return row !== FallbackItem;
-}
-
-const emptyObject: Record<string, any> = {};
-
 function ObservableDataGrid<T>({
   sx,
   filters,
@@ -93,16 +85,18 @@ function ObservableDataGrid<T>({
   items$,
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
-  // used to debounce filter.
+  // Uncontrolled filter value.
   const [internalFilterValue, internalFilterDispatch] = React.useState<
     Record<string, any>
   >({});
 
+  // Pipe for debouncing the actual filter value to apply to the rows.
   const appliedFilterValue$ = React.useMemo(
     () => new BehaviorSubject<Record<string, any>>({}),
     []
   );
 
+  // Filter value currently active, with defaults applied.
   const inputFilterValue = React.useMemo(() => {
     const value = { ...(filters ?? internalFilterValue) };
 
@@ -123,10 +117,12 @@ function ObservableDataGrid<T>({
     return value;
   }, [filters, internalFilterValue, columns]);
 
+  // Run the filter through a debounce to allow performant typing.
   React.useEffect(() => {
     appliedFilterValue$.next(inputFilterValue);
   }, [inputFilterValue]);
 
+  // Final debounced filter value to apply to the rows.
   const finalFilterValue =
     useObservation(
       () =>
@@ -155,12 +151,14 @@ function ObservableDataGrid<T>({
       [appliedFilterValue$, columns]
     ) ?? inputFilterValue;
 
+  // Filter setter function
   const filterDispatch = React.useCallback(
     (key: string, value: any) => {
       const forward = onFiltersChanged ?? internalFilterDispatch;
 
       const newValue = { ...(filters ?? appliedFilterValue$.value) };
 
+      // Do not store default filter values.
       let isDifferent = false;
       for (const filter of columns
         .map((x) => x.filter)
@@ -193,17 +191,9 @@ function ObservableDataGrid<T>({
       () =>
         items$.pipe(
           mapArrayItemsCached((element) => itemToRow(element, columns)),
-          // We could use fallbacks here to get data earlier, but in practice the constant changes of rows
-          // causes the table to rerender much more often, which gets caught up in our deferred rendering and causes
-          // it to flicker to greyscale like mad.
-          // The proper solution to this is to have the item remain a model with observable props, and subscribe each cell to the observable.
-          // This would be ideal, except the third party datagrid is not in any way intended to be used this way.  We could absolutely still do this,
-          // but we need to implement sorting ourselves.  Which is fine, as we implemented filtering ourselves already.
-          // TODO: Make an observable-row-aware datagrid.
           profileStart("ObservableDataGrid.observeAll"),
-          observeAll(/*FallbackItem*/),
+          observeAll(),
           profileEnd("ObservableDataGrid.observeAll")
-          // map((rows) => rows.filter(rowIsNotFallback))
         ),
       [items$, columns]
     ) ?? undefined;
@@ -301,8 +291,8 @@ function ObservableDataGrid<T>({
 const DeferredDataGrid = ({ sx, ...props }: DataGridProps) => {
   const deferredColumns = React.useDeferredValue(props.columns);
   const deferredRows = React.useDeferredValue(props.rows);
-  const isStale =
-    deferredColumns !== props.columns || deferredRows !== props.rows;
+  const isStale = false;
+  // deferredColumns !== props.columns || deferredRows !== props.rows;
   return (
     <Box
       sx={{

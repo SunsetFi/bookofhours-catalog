@@ -3,7 +3,7 @@ import * as React from "react";
 import Popper from "@mui/material/Popper";
 import Badge from "@mui/material/Badge";
 
-import { useObservation } from "@/observables";
+import { useLayoutObservation } from "@/observables";
 
 import { ElementStackModel } from "@/services/sh-game";
 
@@ -18,9 +18,9 @@ const ElementStackIcon = ({ elementStack }: ElementStackIconProps) => {
     null
   );
 
-  const iconUrl = elementStack.iconUrl;
-  const label = useObservation(elementStack.label$) ?? "";
-  const quantity = useObservation(elementStack.quantity$) ?? 1;
+  const iconUrl = useLayoutObservation(elementStack.iconUrl$);
+  const label = useLayoutObservation(elementStack.label$) ?? "";
+  const quantity = useLayoutObservation(elementStack.quantity$) ?? 1;
 
   const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     setPopupAnchor(e.currentTarget);

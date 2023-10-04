@@ -4,8 +4,8 @@ import { Aspects } from "secrethistories-api";
 import { ElementModel } from "../sh-compendium";
 
 export interface PinnedItemModel {
-  readonly iconUrl: string;
   readonly elementId: string | null;
+  readonly iconUrl$: Observable<string>;
   readonly elementId$: Observable<string | null>;
   readonly label$: Observable<string | null>;
   readonly aspects$: Observable<Readonly<Aspects>>;
@@ -32,8 +32,8 @@ export class PinnedElementItemModel implements PinnedItemModel {
     return this._item.elementId;
   }
 
-  get iconUrl(): string {
-    return this._item.iconUrl;
+  get iconUrl$(): Observable<string> {
+    return this._item.iconUrl$;
   }
 
   get element$(): Observable<ElementModel> {

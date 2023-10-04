@@ -17,7 +17,7 @@ export interface ModelWithAspects {
 }
 
 export interface ModelWithIconUrl {
-  iconUrl: string;
+  iconUrl$: Observable<string>;
 }
 
 export interface ModelWithParentTerrain {

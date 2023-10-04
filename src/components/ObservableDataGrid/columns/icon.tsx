@@ -34,6 +34,8 @@ export function iconColumnDef<T extends ModelWithIconUrl>(
       </Box>
     ),
     ...additional,
-    field: "iconUrl",
+    // FIXME: string keys havent been working for a lot of these
+    // observable: "iconUrl$",
+    observable: (item) => item.iconUrl$,
   };
 }

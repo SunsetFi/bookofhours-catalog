@@ -1,5 +1,5 @@
 import { Aspects, Element, SphereSpec, XTrigger } from "secrethistories-api";
-import { Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, map } from "rxjs";
 
 import { promiseFuncToObservable } from "@/observables";
 
@@ -21,15 +21,15 @@ export class ElementModel
   private readonly _element$: Observable<Element | null>;
 
   constructor(
-    private readonly _id: string,
+    private readonly _elementId: string,
     resolve: (id: string) => Promise<Element | null>,
     private readonly _api: API
   ) {
-    this._element$ = promiseFuncToObservable(() => resolve(_id));
+    this._element$ = promiseFuncToObservable(() => resolve(_elementId));
   }
 
   get elementId() {
-    return this._id;
+    return this._elementId;
   }
 
   private _exists$: Observable<boolean> | null = null;
@@ -70,8 +70,15 @@ export class ElementModel
     return this._description$;
   }
 
-  get iconUrl() {
-    return `${this._api.baseUrl}/api/compendium/elements/${this.elementId}/icon.png`;
+  private _iconUrl$: Observable<string> | null = null;
+  get iconUrl$() {
+    if (!this._iconUrl$) {
+      this._iconUrl$ = new BehaviorSubject(
+        `${this._api.baseUrl}/api/compendium/elements/${this.elementId}/icon.png`
+      );
+    }
+
+    return this._iconUrl$;
   }
 
   private _aspects$: Observable<Readonly<Aspects>> | null = null;

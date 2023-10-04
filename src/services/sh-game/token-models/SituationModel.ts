@@ -54,8 +54,20 @@ export class SituationModel extends TokenModel {
     return "Situation";
   }
 
-  get iconUrl(): string {
-    return `${this._api.baseUrl}/api/by-path/${this._situation$.value.path}/icon.png`;
+  private _iconUrl$: Observable<string> | null = null;
+  get iconUrl$() {
+    if (!this._iconUrl$) {
+      this._iconUrl$ = this._situation$.pipe(
+        map(
+          (situation) =>
+            `${this._api.baseUrl}/api/compendium/verbs/${situation.verbId}/icon.png`
+        ),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._iconUrl$;
   }
 
   get verbId() {

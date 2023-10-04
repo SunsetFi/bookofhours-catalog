@@ -63,6 +63,37 @@ export function useObservation<T>(
   return value;
 }
 
+// Using LayoutEffect guarentees we get a value before render.
+// This is useful when we know the observable is warmed up and we want the value on the very first render.
+export function useLayoutObservation<T>(
+  observable: Observable<T>
+): T | undefined;
+export function useLayoutObservation<T>(
+  factory: () => Observable<T>,
+  deps?: any[]
+): T | undefined;
+export function useLayoutObservation<T>(
+  observableOrFactory: Observable<T> | (() => Observable<T>),
+  deps?: any[]
+) {
+  const factory = React.useMemo(
+    () =>
+      typeof observableOrFactory === "function"
+        ? observableOrFactory
+        : () => observableOrFactory,
+    deps ? [...deps] : [observableOrFactory]
+  );
+
+  const [value, setValue] = React.useState<T | undefined>(undefined);
+
+  React.useLayoutEffect(() => {
+    const sub = factory().subscribe((value) => setValue(value));
+    return () => sub.unsubscribe();
+  }, [factory]);
+
+  return value;
+}
+
 export function promiseFuncToObservable<T>(
   func: () => Promise<T>
 ): Observable<T> {

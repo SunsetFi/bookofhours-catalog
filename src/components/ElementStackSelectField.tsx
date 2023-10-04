@@ -105,6 +105,7 @@ const ElementStackSelectItem = ({
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
   let aspects = useObservation(elementStack.aspects$);
+  const iconUrl = useObservation(elementStack.iconUrl$);
 
   if (!label || !aspects) {
     return null;
@@ -136,7 +137,7 @@ const ElementStackSelectItem = ({
         >
           <img
             loading="lazy"
-            src={elementStack.iconUrl}
+            src={iconUrl}
             alt={label ?? ""}
             style={{
               display: "block",

@@ -33,6 +33,7 @@ const AspectIcon = ({
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$) ?? "";
   const description = useObservation(aspect.description$) ?? "";
+  const iconUrl = useObservation(aspect.iconUrl$);
 
   const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     setPopupAnchor(e.currentTarget);
@@ -51,14 +52,16 @@ const AspectIcon = ({
         }}
         onClick={onClick}
       >
-        <img
-          loading="lazy"
-          style={{ display: "block" }}
-          src={aspect.iconUrl}
-          alt={title ?? label ?? ""}
-          width={size}
-          height={size}
-        />
+        {iconUrl && (
+          <img
+            loading="lazy"
+            style={{ display: "block" }}
+            src={iconUrl}
+            alt={title ?? label ?? ""}
+            width={size}
+            height={size}
+          />
+        )}
       </Box>
       <Popper
         open={popupAnchor != null}
@@ -91,7 +94,7 @@ const AspectIcon = ({
           >
             <img
               loading="lazy"
-              src={aspect.iconUrl}
+              src={iconUrl}
               alt={label}
               title={label}
               style={{ width: "50px" }}

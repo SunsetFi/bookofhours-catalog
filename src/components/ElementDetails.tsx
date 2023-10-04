@@ -18,6 +18,7 @@ const ElementDetails = React.forwardRef<HTMLDivElement, ElementDetailsProps>(
   ({ element }, ref) => {
     const label = useObservation(element.label$) ?? "";
     const aspects = useObservation(element.aspects$) ?? {};
+    const iconUrl = useObservation(element.iconUrl$);
     return (
       <Card
         ref={ref}
@@ -39,7 +40,7 @@ const ElementDetails = React.forwardRef<HTMLDivElement, ElementDetailsProps>(
         >
           <img
             loading="lazy"
-            src={element.iconUrl}
+            src={iconUrl}
             alt={label}
             title={label}
             style={{ width: "50px" }}

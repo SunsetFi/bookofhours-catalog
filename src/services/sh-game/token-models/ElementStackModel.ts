@@ -154,8 +154,19 @@ export class ElementStackModel
     return this._quantity$;
   }
 
-  get iconUrl(): string {
-    return `${this._api.baseUrl}/api/by-path/${this.path}/icon.png`;
+  private _iconUrl$: Observable<string> | null = null;
+  get iconUrl$() {
+    if (!this._iconUrl$) {
+      this._iconUrl$ = this._elementStack$.pipe(
+        map(
+          (stack) =>
+            `${this._api.baseUrl}/api/compendium/elements/${stack.elementId}/icon.png`
+        ),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+    return this._iconUrl$;
   }
 
   private _lifetimeRemaining$: Observable<number> | null = null;

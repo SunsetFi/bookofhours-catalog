@@ -1,5 +1,5 @@
 import { Element } from "secrethistories-api";
-import { Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, map } from "rxjs";
 
 import { promiseFuncToObservable } from "@/observables";
 
@@ -9,15 +9,15 @@ export class AspectModel {
   private readonly _element$: Observable<Element | null>;
 
   constructor(
-    private readonly _id: string,
+    private readonly _aspectId: string,
     resolve: (id: string) => Promise<Element | null>,
     private readonly _api: API
   ) {
-    this._element$ = promiseFuncToObservable(() => resolve(_id));
+    this._element$ = promiseFuncToObservable(() => resolve(_aspectId));
   }
 
-  get id() {
-    return this._id;
+  get aspectId() {
+    return this._aspectId;
   }
 
   private _exists$: Observable<boolean> | null = null;
@@ -58,7 +58,14 @@ export class AspectModel {
     return this._description$;
   }
 
-  get iconUrl() {
-    return `${this._api.baseUrl}/api/compendium/elements/${this.id}/icon.png`;
+  private _iconUrl$: Observable<string> | null = null;
+  get iconUrl$() {
+    if (!this._iconUrl$) {
+      this._iconUrl$ = new BehaviorSubject(
+        `${this._api.baseUrl}/api/compendium/elements/${this.aspectId}/icon.png`
+      );
+    }
+
+    return this._iconUrl$;
   }
 }
