@@ -5,11 +5,14 @@ import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import MuiLink from "@mui/material/Link";
+import GithubIcon from "@mui/icons-material/GitHub";
 
 import sitemap from "@/sitemap";
 
+import { useObservation } from "@/observables";
+
 import { useAspect } from "@/services/sh-compendium";
-import { useObservation, useDeferredObservation } from "@/observables";
 
 const PageTabs = () => {
   return (
@@ -29,6 +32,19 @@ const PageTabs = () => {
       {sitemap.map(({ label, aspectIcon, path }) => (
         <PageTab key={path} label={label} aspectId={aspectIcon} path={path} />
       ))}
+      <Box sx={{ mt: "auto" }}>
+        <Tooltip
+          title="View Project on Github"
+          PopperProps={{ sx: { pointerEvents: "none" }, placement: "right" }}
+        >
+          <MuiLink
+            href="https://github.com/SunsetFi/bookofhours-catalog"
+            target="_blank"
+          >
+            <GithubIcon fontSize="large" sx={{ mr: 1 }} />
+          </MuiLink>
+        </Tooltip>
+      </Box>
     </Box>
   );
 };

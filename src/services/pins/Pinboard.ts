@@ -6,6 +6,7 @@ import {
   shareReplay,
   combineLatest,
 } from "rxjs";
+import { intersection } from "lodash";
 
 import { Compendium, RecipeModel } from "../sh-compendium";
 
@@ -62,10 +63,19 @@ export class Pinboard {
         map(([aspectArray, recipeReqs]) => {
           const result: Record<string, PinnedAspect> = {};
 
+          const commonAspects = intersection(
+            ...aspectArray.map((x) => Object.keys(x))
+          );
+
           for (const aspects of aspectArray) {
             for (const aspect of Object.keys(aspects)) {
-              // Don't show aspects that aren't in the recipe.
-              if (recipeReqs && !recipeReqs[aspect]) {
+              if (recipeReqs) {
+                // Don't show aspects that aren't in the recipe.
+                if (!recipeReqs[aspect]) {
+                  continue;
+                }
+              } else if (!commonAspects.includes(aspect)) {
+                // Don't show aspects that arent common to the pins.
                 continue;
               }
 
