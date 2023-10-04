@@ -1,16 +1,17 @@
 import * as React from "react";
 
-import Box from "@mui/material/Box";
 import { useDIDependency } from "@/container";
 import { SearchService } from "@/services/search";
+import { useNativeEvent } from "@/hooks/native-event";
 
 export interface HotkeysProps {
   children: React.ReactNode;
 }
 const Hotkeys = ({ children }: HotkeysProps) => {
+  const docRef = React.useRef(document);
   const searchService = useDIDependency(SearchService);
   const onKeyDown = React.useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (e.key === "k" && e.ctrlKey) {
         e.preventDefault();
         e.stopPropagation();
@@ -26,17 +27,9 @@ const Hotkeys = ({ children }: HotkeysProps) => {
     }
   }, []);
 
-  return (
-    <Box
-      ref={onBoxMount}
-      tabIndex={-1}
-      autoFocus
-      sx={{ width: "100%", height: "100%" }}
-      onKeyDown={onKeyDown}
-    >
-      {children}
-    </Box>
-  );
+  useNativeEvent(docRef, "keydown", onKeyDown);
+
+  return <>{children}</>;
 };
 
 export default Hotkeys;
