@@ -13,6 +13,7 @@ import HandOverviewIcons from "./HandOverviewIcons";
 import PinboardHeader from "./PinboardHeader";
 import TimeAndRecipeHeader from "./TimeAndRecipeHeader";
 import SearchButtonHeader from "./SearchButtonHeader";
+import SeasonHeader from "./SeasonHeader";
 
 export interface PageHeaderProps {
   title: string;
@@ -47,20 +48,23 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
         >
           {title}
         </Typography>
-        {backTo && (
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            onClick={onBackClicked}
-          >
-            <ArrowBack />
-          </IconButton>
-        )}
+        <Box sx={{ width: "40px" }}>
+          {backTo && (
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              onClick={onBackClicked}
+            >
+              <ArrowBack />
+            </IconButton>
+          )}
+        </Box>
         <HandOverviewIcons sx={{ ml: 2 }} />
         <Box sx={{ ml: "auto" }} />
         <PinboardHeader sx={{ py: 1 }} />
         <SearchButtonHeader sx={{ ml: 2 }} />
+        <SeasonHeader sx={{ ml: 2 }} />
         <TimeAndRecipeHeader sx={{ ml: 2 }} />
       </Toolbar>
     </AppBar>

@@ -27,13 +27,14 @@ const timeRemainingFromRecipeExclusive: Record<string, number> = {
   "day.night": 0,
 };
 
-const totalDayLength = 2 + 58 + 60 + 60 + 60 + 60 + 60;
+const secondsPerDay = 2 + 58 + 60 + 60 + 60 + 60 + 60;
 
 @injectable()
 @singleton()
 export class TimeSource {
   private readonly _gameSpeedSource$ = new Subject<GameSpeed>();
   private readonly _timeSituationSource$ = new Subject<Situation>();
+  private readonly _yearSituationSource$ = new Subject<Situation>();
 
   constructor(
     @inject(API) private readonly _api: API,
@@ -67,19 +68,6 @@ export class TimeSource {
     return this._timeOfDay$;
   }
 
-  private _secondsUntilNextTimeOfDay$: Observable<number> | null = null;
-  get secondsUntilNextTimeOfDay$() {
-    if (!this._secondsUntilNextTimeOfDay$) {
-      this._secondsUntilNextTimeOfDay$ = this._timeSituationSource$.pipe(
-        map((situation) => situation.timeRemaining),
-        distinctUntilChanged(),
-        shareReplay(1)
-      );
-    }
-
-    return this._secondsUntilNextTimeOfDay$;
-  }
-
   private _secondsUntilTomorrow$: Observable<number> | null = null;
   get secondsUntilTomorrow$() {
     if (!this._secondsUntilTomorrow$) {
@@ -102,6 +90,54 @@ export class TimeSource {
     return this._secondsUntilTomorrow$;
   }
 
+  private _daysUntilNextSeason$: Observable<number> | null = null;
+  get daysUntilNextSeason$() {
+    if (!this._daysUntilNextSeason$) {
+      this._daysUntilNextSeason$ = this._yearSituationSource$.pipe(
+        map((situation) => {
+          const timeRemaining = situation.timeRemaining;
+          if (timeRemaining == null) {
+            return Number.NaN;
+          }
+
+          return Math.ceil(timeRemaining / secondsPerDay);
+        }),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._daysUntilNextSeason$;
+  }
+
+  private _seasonName$: Observable<string> | null = null;
+  get seasonName$() {
+    if (!this._seasonName$) {
+      this._seasonName$ = this._yearSituationSource$.pipe(
+        map((situation) => situation.recipeLabel),
+        filter(isNotNull),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._seasonName$;
+  }
+
+  private _seasonDescription$: Observable<string> | null = null;
+  get seasonDescription$() {
+    if (!this._seasonDescription$) {
+      this._seasonDescription$ = this._yearSituationSource$.pipe(
+        map((situation) => situation.description),
+        filter(isNotNull),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._seasonDescription$;
+  }
+
   async passTime(seconds: number) {
     await this._api.passTime(seconds);
     this._scheduler.updateNow();
@@ -115,18 +151,28 @@ export class TimeSource {
   }
 
   private async _pollTime() {
-    const [speed, [daySituation]] = await Promise.all([
+    const [speed, [daySituation], [yearSituation]] = await Promise.all([
       this._api.getSpeed(),
       this._api.getTokensAtPath("~/day", { payloadType: "Situation" }),
+      this._api.getTokensAtPath("~/year", { payloadType: "Situation" }),
     ]);
 
     this._gameSpeedSource$.next(speed);
+
     if (
       daySituation &&
       isSituation(daySituation) &&
       daySituation.verbId === "time"
     ) {
       this._timeSituationSource$.next(daySituation);
+    }
+
+    if (
+      yearSituation &&
+      isSituation(yearSituation) &&
+      yearSituation.verbId === "season"
+    ) {
+      this._yearSituationSource$.next(yearSituation);
     }
   }
 }
