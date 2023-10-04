@@ -8,6 +8,7 @@ import { ModelWithDescription } from "@/services/sh-game";
 import { ObservableDataGridColumnDef } from "../types";
 
 import { textFilter } from "../filters";
+import AspectIcon from "@/components/AspectIcon";
 
 export function descriptionColumnDef<T extends ModelWithDescription>(
   additional: Partial<
@@ -37,11 +38,10 @@ const DescriptionRenderer = ({ children }: DescriptionRendererProps) => {
   }
 
   const parts = parseSprites(children, (name) => (
-    <img
-      loading="lazy"
-      src={`http://localhost:8081/api/compendium/elements/${name}/icon.png`}
-      alt={name}
-      style={{ width: "30px", margin: "3px", verticalAlign: "middle" }}
+    <AspectIcon
+      size={30}
+      aspectId={name}
+      sx={{ display: "inline-block", m: "3px", verticalAlign: "middle" }}
     />
   ));
 

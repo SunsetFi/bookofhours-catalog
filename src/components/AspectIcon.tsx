@@ -44,12 +44,15 @@ const AspectIcon = ({
   }, []);
 
   return (
-    <div onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+    <>
       <Box
+        component="span"
         sx={{
           cursor: onClick ? "pointer" : undefined,
           ...sx,
         }}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
         onClick={onClick}
       >
         {iconUrl && (
@@ -104,7 +107,7 @@ const AspectIcon = ({
           <Typography variant="body2">{description}</Typography>
         </Card>
       </Popper>
-    </div>
+    </>
   );
 };
 
