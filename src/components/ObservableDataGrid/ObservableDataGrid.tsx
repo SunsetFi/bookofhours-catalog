@@ -288,6 +288,7 @@ function ObservableDataGrid<T>({
   );
 }
 
+const dataGridExperimentalFeatures = { ariaV7: true } as const;
 const DeferredDataGrid = ({ sx, ...props }: DataGridProps) => {
   const deferredColumns = React.useDeferredValue(props.columns);
   const deferredRows = React.useDeferredValue(props.rows);
@@ -300,7 +301,12 @@ const DeferredDataGrid = ({ sx, ...props }: DataGridProps) => {
         filter: isStale ? "grayscale(1) brightness(75%)" : undefined,
       }}
     >
-      <MemoDataGrid {...props} columns={deferredColumns} rows={deferredRows} />
+      <MemoDataGrid
+        {...props}
+        experimentalFeatures={dataGridExperimentalFeatures}
+        columns={deferredColumns}
+        rows={deferredRows}
+      />
     </Box>
   );
 };

@@ -11,20 +11,19 @@ import { useObservation } from "@/observables";
 
 import { useAspect } from "@/services/sh-compendium";
 
-export interface AspectIconProps {
+export interface AspectIconProps extends React.HTMLAttributes<HTMLSpanElement> {
   aspectId: string;
-  title?: string;
   size?: number;
   sx?: SxProps;
   onClick?(e: React.MouseEvent<HTMLElement>): void;
 }
 
 const AspectIcon = ({
-  title,
   aspectId,
   size = 40,
   sx,
   onClick,
+  ...props
 }: AspectIconProps) => {
   const [popupAnchor, setPopupAnchor] = React.useState<HTMLElement | null>(
     null
@@ -46,7 +45,9 @@ const AspectIcon = ({
   return (
     <>
       <Box
+        {...props}
         component="span"
+        aria-label={label}
         sx={{
           cursor: onClick ? "pointer" : undefined,
           ...sx,
@@ -57,10 +58,11 @@ const AspectIcon = ({
       >
         {iconUrl && (
           <img
+            aria-hidden="true"
             loading="lazy"
             style={{ display: "block" }}
             src={iconUrl}
-            alt={title ?? label ?? ""}
+            alt={label ?? ""}
             width={size}
             height={size}
           />

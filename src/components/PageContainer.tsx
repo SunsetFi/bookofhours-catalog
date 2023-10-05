@@ -35,7 +35,10 @@ const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
         }}
       >
         <PageTabs />
-        <Box sx={{ flexGrow: 1, width: "100%", height: "100%" }}>
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, width: "100%", height: "100%" }}
+        >
           {children}
         </Box>
       </Box>

@@ -30,6 +30,7 @@ const ElementStackTray = ({ elementStacks$, sx }: ElementStackTrayProps) => {
         justifyContent: "flex-start",
         alignItems: "flex-start",
         alignContent: "flex-start",
+        isolation: "isolate",
         gap: 1,
         ...sx,
       }}

@@ -31,6 +31,9 @@ const AspectSelectionGrid = ({
     >
       {items.map((aspectId) => (
         <AspectIcon
+          role="button"
+          aria-pressed={value.includes(aspectId) ? "true" : "false"}
+          tabIndex={0}
           key={aspectId}
           aspectId={aspectId}
           size={40}

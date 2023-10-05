@@ -17,6 +17,8 @@ export function iconColumnDef<T extends ModelWithIconUrl>(
     width: 90,
     renderCell: ({ value }) => (
       <Box
+        // These are always followed by proper name columns
+        aria-hidden="true"
         sx={{
           width: "100%",
           height: "100%",
@@ -27,6 +29,9 @@ export function iconColumnDef<T extends ModelWithIconUrl>(
         }}
       >
         <img
+          // These are always followed by proper name columns
+          aria-hidden="true"
+          alt="Icon"
           loading="lazy"
           src={value}
           style={{ maxWidth: "75px", maxHeight: "75px" }}

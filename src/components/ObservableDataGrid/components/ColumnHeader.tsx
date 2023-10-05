@@ -39,7 +39,11 @@ const ColumnHeader = ({ colDef, filter, columnValues }: ColumnHeaderProps) => {
       <Typography variant="body1">{colDef.headerName}</Typography>
       {FilterComponent && (
         <>
-          <IconButton size="small" onClick={onOpen}>
+          <IconButton
+            size="small"
+            onClick={onOpen}
+            aria-label={`Filter ${colDef.headerName}`}
+          >
             <FilterAlt
               opacity={isEqual(value, filter.defaultFilterValue) ? 0.5 : 1}
             />

@@ -17,6 +17,7 @@ import { useAspect } from "@/services/sh-compendium";
 const PageTabs = () => {
   return (
     <Box
+      component="nav"
       sx={{
         // This is stupid, but its what the titlebar does. and probably what tabs do too.
         backgroundImage:

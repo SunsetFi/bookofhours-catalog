@@ -51,6 +51,7 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
         <Box sx={{ width: "40px" }}>
           {backTo && (
             <IconButton
+              aria-label="Back"
               size="large"
               edge="start"
               color="inherit"

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { mergeMap } from "rxjs";
 
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
@@ -11,17 +12,31 @@ import { ElementStackModel } from "@/services/sh-game";
 
 import AspectsList from "./AspectsList";
 
-export interface ElementStackDetails {
+export interface ElementStackDetailsProps {
   elementStack: ElementStackModel;
 }
 
-const ElementStackDetails = ({ elementStack }: ElementStackDetails) => {
-  const label = useObservation(elementStack.label$) ?? "";
+const ElementStackDetails = React.forwardRef<
+  HTMLDivElement,
+  ElementStackDetailsProps
+>(({ elementStack }, ref) => {
+  const label = useObservation(elementStack.label$);
   const quantity = useObservation(elementStack.quantity$) ?? 1;
   const aspects = useObservation(elementStack.aspects$) ?? {};
   const iconUrl = useObservation(elementStack.iconUrl$);
+  const description = useObservation(
+    () =>
+      elementStack.element$.pipe(mergeMap((element) => element.description$)),
+    [elementStack]
+  );
+
+  if (!label) {
+    return null;
+  }
+
   return (
     <Card
+      ref={ref}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -53,9 +68,14 @@ const ElementStackDetails = ({ elementStack }: ElementStackDetails) => {
         </Badge>
         <Typography variant="body1">{label}</Typography>
       </Box>
+      {description && (
+        <Typography variant="body2" sx={{ mb: 2 }}>
+          {description}
+        </Typography>
+      )}
       <AspectsList aspects={aspects} />
     </Card>
   );
-};
+});
 
 export default ElementStackDetails;

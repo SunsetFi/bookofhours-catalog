@@ -1,12 +1,18 @@
 import * as React from "react";
+import { Instance as PopperInstance } from "@popperjs/core";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Popper from "@mui/material/Popper";
 import { useTheme, type SxProps } from "@mui/material/styles";
 
-import { ElementStackModel } from "@/services/sh-game";
 import { useObservation } from "@/observables";
+import { useMutationObserver } from "@/hooks/use-mutation-observer";
+
+import { ElementStackModel } from "@/services/sh-game";
+
 import AutosizeTypography from "../AutosizeText";
+import ElementStackDetails from "../ElementStackDetails";
 
 export interface ElementStackTrayCardProps {
   sx?: SxProps;
@@ -19,6 +25,7 @@ export interface ElementStackTrayCardProps {
 const aspectRatio = 1.59;
 
 const textBackgroundColor = "#444";
+
 const ElementStackTrayCard = ({
   elementStack,
   width = 125,
@@ -26,9 +33,20 @@ const ElementStackTrayCard = ({
 }: ElementStackTrayCardProps) => {
   const theme = useTheme();
   const widthPx = `${width}px`;
+
   const iconUrl = useObservation(elementStack.iconUrl$);
   const label = useObservation(elementStack.label$) ?? "";
   const quantity = useObservation(elementStack.quantity$) ?? 0;
+
+  const [popupAnchor, setPopupAnchor] = React.useState<HTMLElement | null>(
+    null
+  );
+  const popperRef = React.useRef<PopperInstance | null>(null);
+  const [popperContent, setPopperContent] = React.useState<HTMLElement | null>(
+    null
+  );
+
+  useMutationObserver(popperContent, () => popperRef.current?.update());
 
   if (!iconUrl) {
     return null;
@@ -36,13 +54,29 @@ const ElementStackTrayCard = ({
 
   return (
     <Box sx={{ position: "relative", ...sx }}>
+      <Popper
+        popperRef={popperRef}
+        open={popupAnchor != null}
+        anchorEl={popupAnchor!}
+        sx={{
+          pointerEvents: "none",
+        }}
+      >
+        <ElementStackDetails
+          ref={setPopperContent}
+          elementStack={elementStack}
+        />
+      </Popper>
       <Box
+        onMouseOver={(e) => setPopupAnchor(e.currentTarget)}
+        onMouseOut={() => setPopupAnchor(null)}
         sx={{
           borderRadius: 2,
           display: "flex",
           flexDirection: "column",
           width: widthPx,
           height: `${width * aspectRatio}px`,
+          overflow: "hidden",
         }}
       >
         <img
