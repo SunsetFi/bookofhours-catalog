@@ -5,7 +5,7 @@ import {
   map,
   shareReplay,
 } from "rxjs";
-import { Token } from "secrethistories-api";
+import { Token, SpaceOccupation } from "secrethistories-api";
 
 import { API } from "@/services/sh-api";
 
@@ -63,6 +63,19 @@ export abstract class TokenModel {
 
   get spherePath() {
     return this._token$.value.spherePath;
+  }
+
+  private _occupiesSpaceAs$: Observable<SpaceOccupation | null> | null = null;
+  get occupiesSpaceAs$() {
+    if (!this._occupiesSpaceAs$) {
+      this._occupiesSpaceAs$ = this._token$.pipe(
+        map((t) => t.occupiesSpaceAs),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._occupiesSpaceAs$;
   }
 
   focus() {

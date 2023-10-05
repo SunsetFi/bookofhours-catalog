@@ -8,16 +8,17 @@ import {
 } from "rxjs";
 import { intersection } from "lodash";
 
-import { Compendium, RecipeModel } from "../sh-compendium";
-
-import { PinItemRequest } from "./types";
-import { PinnedElementItemModel, PinnedItemModel } from "./PinnedItemModel";
 import {
   mapArrayItems,
   mapArrayItemsCached,
   mergeMapIfNotNull,
   observeAll,
 } from "@/observables";
+
+import { Compendium, RecipeModel } from "../sh-compendium";
+
+import { PinItemRequest } from "./types";
+import { PinnedElementItemModel, PinnedItemModel } from "./PinnedItemModel";
 
 export interface PinnedAspect {
   readonly current: number;

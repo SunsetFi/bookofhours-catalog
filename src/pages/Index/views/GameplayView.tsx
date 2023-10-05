@@ -4,12 +4,20 @@ import { Navigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
+import { useDIDependency } from "@/container";
 import { useQueryString } from "@/hooks/use-querystring";
 
+import {
+  TokensSource,
+  filterDoesNotOccupySpace,
+  filterElementId,
+  filterHasAnyAspect,
+  filterHasNoneOfAspect,
+} from "@/services/sh-game";
+
 import PageContainer from "@/components/PageContainer";
-import { useDIDependency } from "@/container";
-import { TimeSource } from "@/services/sh-game";
-import { useObservation } from "@/observables";
+import ElementStackTray from "@/components/ElementStackTray";
+import { tap } from "rxjs";
 
 const GameplayView = () => {
   const redirect = useQueryString("redirect");
@@ -32,31 +40,94 @@ const GameplayView = () => {
 };
 
 const Overview = () => {
-  const timeSource = useDIDependency(TimeSource);
-  const seasonName = useObservation(timeSource.seasonName$);
-  const seasonDescription = useObservation(timeSource.seasonDescription$);
-  const daysInSeason = useObservation(timeSource.daysUntilNextSeason$);
+  const tokensSource = useDIDependency(TokensSource);
+
+  const memories$ = React.useMemo(
+    () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("memory")),
+    [tokensSource.visibleElementStacks$]
+  );
+
+  const abilities$ = React.useMemo(
+    () =>
+      tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("ability")),
+    [tokensSource.visibleElementStacks$]
+  );
+
+  const skills$ = React.useMemo(
+    () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("skill")),
+    [tokensSource.visibleElementStacks$]
+  );
+
+  const misc$ = React.useMemo(
+    () =>
+      tokensSource.visibleElementStacks$.pipe(
+        filterDoesNotOccupySpace(["PhysicalObject"]),
+        // We pick up tons of notes, which are text tokens that show up in situations.
+        filterElementId((x) => x !== "tlg.note"),
+        filterHasNoneOfAspect(["memory", "ability", "skill"]),
+        tap((items) => console.log("misc items", items))
+      ),
+    [tokensSource.visibleElementStacks$]
+  );
+
   return (
     <Box
       sx={{
-        pt: 4,
         width: "100%",
         height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        display: "grid",
+        gridTemplateRows: `[start] max-content [dividier] 1fr [end]`,
+        gridTemplateColumns: `[start] 15% [memories-soul] 20% [soul-skill] 45% [skill-misc] 20% [end]`,
       }}
     >
-      <Typography variant="h1" sx={{ textAlign: "middle" }}>
-        Welcome, Librarian
-      </Typography>
-      <Typography variant="h6" sx={{ textAlign: "middle" }}>
-        Everything is accounted for, Hush House endures.
-      </Typography>
-      <Typography variant="h4">
-        {seasonName}, {seasonDescription}
-      </Typography>
-      <Typography variant="h6">{daysInSeason} days remain.</Typography>
+      <Box
+        sx={{
+          gridRow: "start / dividier",
+          gridColumn: "start / end",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "baseline",
+          gap: 3,
+        }}
+      >
+        <Typography variant="h1" sx={{ gridColumn: "start end" }}>
+          Welcome, Librarian
+        </Typography>
+        <Typography
+          variant="h6"
+          sx={{ textAlign: "middle", color: "text.secondary" }}
+        >
+          Everything is accounted for, Hush House endures.
+        </Typography>
+      </Box>
+      <ElementStackTray
+        sx={{
+          gridRow: "dividier / end",
+          gridColumn: "start / memories-soul",
+        }}
+        elementStacks$={memories$}
+      />
+      <ElementStackTray
+        sx={{
+          gridRow: "dividier / end",
+          gridColumn: "memories-soul / soul-skill",
+        }}
+        elementStacks$={abilities$}
+      />
+      <ElementStackTray
+        sx={{
+          gridRow: "dividier / end",
+          gridColumn: "soul-skill / skill-misc",
+        }}
+        elementStacks$={skills$}
+      />
+      <ElementStackTray
+        sx={{
+          gridRow: "dividier / end",
+          gridColumn: "skill-misc / end",
+        }}
+        elementStacks$={misc$}
+      />
     </Box>
   );
 };
