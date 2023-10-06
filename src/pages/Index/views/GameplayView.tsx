@@ -64,8 +64,7 @@ const Overview = () => {
         filterDoesNotOccupySpace(["PhysicalObject"]),
         // We pick up tons of notes, which are text tokens that show up in situations.
         filterElementId((x) => x !== "tlg.note"),
-        filterHasNoneOfAspect(["memory", "ability", "skill"]),
-        tap((items) => console.log("misc items", items))
+        filterHasNoneOfAspect(["memory", "ability", "skill"])
       ),
     [tokensSource.visibleElementStacks$]
   );

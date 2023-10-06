@@ -12,18 +12,23 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import Popover from "@mui/material/Popover";
 
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import FilterAlt from "@mui/icons-material/FilterAlt";
 
 import { useTheme, type SxProps } from "@mui/material/styles";
 
 import {
+  Column,
   ColumnDef,
   Header,
   SortingState,
   flexRender,
   getCoreRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -44,6 +49,7 @@ import {
 
 // TODO: Virtual
 // https://tanstack.com/virtual/v3/docs/examples/react/table
+// TODO: Pagination.  MUI has a component for this, and I bet tanstack has that functionality as well.
 
 export interface ObservableDataGridProps<T extends {}> {
   sx?: SxProps;
@@ -145,8 +151,6 @@ function ObservableDataGrid<T extends {}>({
   items$,
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
-  const theme = useTheme();
-
   const tableColumns = React.useMemo(
     // FIXME: These columns can be nested, which will throw off ID calculation.
     () => columns.map(observableToColumnDef),
@@ -180,8 +184,10 @@ function ObservableDataGrid<T extends {}>({
     columns: tableColumns,
     state,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
+    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
   return (
@@ -203,19 +209,10 @@ function ObservableDataGrid<T extends {}>({
         <Table
           sx={{
             tableLayout: "fixed",
-            isolation: "isolate",
-            borderCollapse: "separate",
-            ...sx,
           }}
+          stickyHeader
         >
-          <TableHead
-            sx={{
-              position: "sticky",
-              top: 0,
-              backgroundColor: theme.palette.background.default,
-              zIndex: 1,
-            }}
-          >
+          <TableHead>
             {table.getHeaderGroups().map((group) => (
               <TableRow key={group.id}>
                 {group.headers.map((header) => (
@@ -227,7 +224,7 @@ function ObservableDataGrid<T extends {}>({
           <TableBody>
             {table.getRowModel().rows.map((row) => {
               return (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} sx={{ height: "40px" }}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -264,7 +261,7 @@ const HeaderCell = ({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Typography variant="h6" fontWeight="bold">
+        <Typography variant="h6" sx={{ mr: 1 }}>
           {!header.isPlaceholder &&
             flexRender(header.column.columnDef.header, header.getContext())}
         </Typography>
@@ -282,8 +279,67 @@ const HeaderCell = ({
             )}
           </IconButton>
         )}
+        {header.column.getCanFilter() && (
+          <HeaderFilter column={header.column} />
+        )}
       </Box>
     </TableCell>
+  );
+};
+
+const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const onOpen = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setAnchorEl(e.currentTarget);
+  }, []);
+
+  const Filter = column.columnDef.meta?.filterComponent;
+
+  if (!Filter) {
+    return null;
+  }
+
+  const uniqueValues =
+    anchorEl != null ? Array.from(column.getFacetedUniqueValues().keys()) : [];
+
+  return (
+    <>
+      <IconButton
+        aria-label={`Filter ${column.columnDef.header}`}
+        onClick={onOpen}
+      >
+        <FilterAlt
+          sx={{
+            opacity:
+              // Not sure how to reset the filter, so we just pass null for now.
+              column.getIsFiltered() && column.getFilterValue() != null
+                ? 1
+                : 0.4,
+          }}
+        />
+      </IconButton>
+      {anchorEl && (
+        <Popover
+          open
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          onClose={() => {
+            setAnchorEl(null);
+          }}
+        >
+          <Filter
+            columnValues={uniqueValues}
+            filterValue={column.getFilterValue()}
+            onChange={column.setFilterValue}
+          />
+        </Popover>
+      )}
+    </>
   );
 };
 

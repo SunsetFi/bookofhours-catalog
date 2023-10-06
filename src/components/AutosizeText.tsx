@@ -31,21 +31,7 @@ const AutosizeTypography = ({ sx, ...props }: TypographyProps) => {
     const widthScale = outerWidth / innerWidth;
     const heightScale = outerHeight / innerHeight;
 
-    if (innerWidth > outerWidth) {
-      console.log("Using width scale", widthScale, "for", props.children);
-    }
-
-    if (innerHeight > outerHeight) {
-      console.log("Using height scale", heightScale, "for", props.children);
-    }
-
-    const final = Math.min(1, widthScale, heightScale);
-
-    if (final < 1) {
-      console.log("Final scale is", final, "for", props.children);
-    }
-
-    return final;
+    return Math.min(1, widthScale, heightScale);
   }, [outerWidth, outerHeight, innerWidth, innerHeight]);
 
   return (

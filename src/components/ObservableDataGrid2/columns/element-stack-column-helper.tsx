@@ -12,6 +12,7 @@ import ElementIcon from "@/components/ElementIcon";
 import AspectsList from "@/components/AspectsList";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
+import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
 
 const columnHelper = createObservableColumnHelper<ElementStackModel>();
 export const elementStackColumnHelper = Object.assign(columnHelper, {
@@ -51,6 +52,12 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
         sortingFn: (a, b, columnId) =>
           aspectsMagnitude(a.getValue(columnId)) -
           aspectsMagnitude(b.getValue(columnId)),
+        filterFn: aspectsFilter,
+        meta: {
+          filterComponent: (props) => (
+            <AspectsFilter allowedAspectIds={aspects} {...props} />
+          ),
+        },
         ...def,
       }
     ),

@@ -67,8 +67,9 @@ const columns = [
     size: 200,
   }),
   elementStackColumnHelper.aspectsList("skill", ["skill"], {
-    header: "Skill Level",
-    size: 170,
+    header: "Level",
+    size: 180,
+    enableColumnFilter: false,
   }),
   elementStackColumnHelper.aspectsList("aspects", powerAspects, {
     header: "Aspects",
