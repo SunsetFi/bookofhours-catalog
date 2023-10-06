@@ -197,8 +197,6 @@ function ObservableDataGrid<T extends {}>({
     [sorting, onFiltersChanged, filters]
   );
 
-  console.log("state is now", state);
-
   const data = useObservation(
     () =>
       items$.pipe(
