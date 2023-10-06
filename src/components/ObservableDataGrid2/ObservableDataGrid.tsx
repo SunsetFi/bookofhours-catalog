@@ -20,6 +20,7 @@ import { useTheme, type SxProps } from "@mui/material/styles";
 
 import {
   ColumnDef,
+  Header,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -47,6 +48,7 @@ import {
 export interface ObservableDataGridProps<T extends {}> {
   sx?: SxProps;
   filters?: Record<string, any>;
+  defaultSortColumn?: string;
   columns: ObservableColumnDef<T, any>[];
   items$: Observable<readonly T[]>;
   onFiltersChanged?(filters: Record<string, any>): void;
@@ -138,6 +140,7 @@ function itemToRow<T extends {}>(
 function ObservableDataGrid<T extends {}>({
   sx,
   filters,
+  defaultSortColumn,
   columns,
   items$,
   onFiltersChanged,
@@ -150,7 +153,16 @@ function ObservableDataGrid<T extends {}>({
     [columns]
   );
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>(
+    defaultSortColumn
+      ? [
+          {
+            id: defaultSortColumn,
+            desc: false,
+          },
+        ]
+      : []
+  );
 
   const state = React.useMemo(() => ({ sorting }), [sorting]);
 
@@ -180,6 +192,8 @@ function ObservableDataGrid<T extends {}>({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            width: "100%",
+            height: "100%",
           }}
         >
           <CircularProgress />
@@ -205,46 +219,8 @@ function ObservableDataGrid<T extends {}>({
             {table.getHeaderGroups().map((group) => (
               <TableRow key={group.id}>
                 {group.headers.map((header) => (
-                  <TableCell
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    // TODO: Figure out flex.  It was supported at one point but seems to have been lost with v8.
-                    sx={{
-                      width:
-                        header.getSize() === Number.MAX_SAFE_INTEGER
-                          ? "100%"
-                          : header.getSize(),
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Typography variant="h6" fontWeight="bold">
-                        {!header.isPlaceholder &&
-                          flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      </Typography>
-                      {header.column.getCanSort() && (
-                        <IconButton
-                          sx={{
-                            opacity:
-                              header.column.getIsSorted() === false ? 0.4 : 1,
-                          }}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {header.column.getIsSorted() == false ||
-                          header.column.getIsSorted() == "asc" ? (
-                            <ArrowUpwardIcon />
-                          ) : (
-                            <ArrowDownwardIcon />
-                          )}
-                        </IconButton>
-                      )}
-                    </Box>
-                  </TableCell>
+                  <HeaderCell key={header.id} header={header} />
                 ))}
-                {/* Blank cell to tell css its ok to shrink our previous cells, this cell will take up the remaining space */}
-                {/* <TableCell aria-hidden="true" /> */}
               </TableRow>
             ))}
           </TableHead>
@@ -260,7 +236,6 @@ function ObservableDataGrid<T extends {}>({
                       )}
                     </TableCell>
                   ))}
-                  {/* <TableCell /> */}
                 </TableRow>
               );
             })}
@@ -270,5 +245,46 @@ function ObservableDataGrid<T extends {}>({
     </TableContainer>
   );
 }
+
+const HeaderCell = ({
+  header,
+}: {
+  header: Header<Record<string, any>, unknown>;
+}) => {
+  const isSorted = header.column.getIsSorted();
+  return (
+    <TableCell
+      colSpan={header.colSpan}
+      // TODO: Figure out flex.  It was supported at one point but seems to have been lost with v8.
+      sx={{
+        width:
+          header.getSize() === Number.MAX_SAFE_INTEGER
+            ? "100%"
+            : header.getSize(),
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography variant="h6" fontWeight="bold">
+          {!header.isPlaceholder &&
+            flexRender(header.column.columnDef.header, header.getContext())}
+        </Typography>
+        {header.column.getCanSort() && (
+          <IconButton
+            sx={{
+              opacity: isSorted === false ? 0.4 : 1,
+            }}
+            onClick={header.column.getToggleSortingHandler()}
+          >
+            {isSorted === false || isSorted === "asc" ? (
+              <ArrowUpwardIcon />
+            ) : (
+              <ArrowDownwardIcon />
+            )}
+          </IconButton>
+        )}
+      </Box>
+    </TableCell>
+  );
+};
 
 export default ObservableDataGrid;

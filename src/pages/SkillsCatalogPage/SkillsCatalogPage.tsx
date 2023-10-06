@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Aspects } from "secrethistories-api";
+import { map } from "rxjs";
+import { pick } from "lodash";
 
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -23,8 +25,7 @@ import ObservableDataGrid, {
   createObservableColumnHelper,
 } from "@/components/ObservableDataGrid2";
 import ElementIcon from "@/components/ElementIcon";
-import { map } from "rxjs";
-import { pick } from "lodash";
+
 import AspectsList from "@/components/AspectsList";
 
 const columnHelper = createObservableColumnHelper<ElementStackModel>();
@@ -77,6 +78,7 @@ const columns = [
     ),
   }),
   columnHelper.observe("label$", {
+    id: "label",
     header: "Skill",
     size: 200,
   }),
@@ -88,15 +90,20 @@ const columns = [
       cell: (context) => <AspectsList aspects={context.getValue()} />,
     }
   ),
-  columnHelper.observe("aspects$", {
-    id: "aspects",
-    header: "Aspects",
-    size: 350,
-    sortingFn: (a, b, columnId) =>
-      aspectsMagnitude(a.getValue(columnId)) -
-      aspectsMagnitude(b.getValue(columnId)),
-    cell: (context) => <AspectsList aspects={context.getValue()} />,
-  }),
+  columnHelper.observe(
+    (model) =>
+      // TODO: Also pick wisdom tree type.
+      model.aspects$.pipe(map((aspects) => pick(aspects, powerAspects))),
+    {
+      id: "aspects",
+      header: "Aspects",
+      size: 200,
+      sortingFn: (a, b, columnId) =>
+        aspectsMagnitude(a.getValue(columnId)) -
+        aspectsMagnitude(b.getValue(columnId)),
+      cell: (context) => <AspectsList aspects={context.getValue()} />,
+    }
+  ),
   columnHelper.observe("description$", {
     size: Number.MAX_SAFE_INTEGER,
     header: "Description",
@@ -118,6 +125,7 @@ const SkillsCatalogPage = () => {
       <ObservableDataGrid
         sx={{ height: "100%" }}
         columns={columns}
+        defaultSortColumn="label"
         items$={skills$}
       />
     </PageContainer>
