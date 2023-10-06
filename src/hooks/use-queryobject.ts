@@ -27,6 +27,7 @@ export function useQueryObjectState(): [
 
   const setValue = React.useCallback(
     (value: Record<string, any>) => {
+      console.log("useQueryObjectState.setValue", value);
       const newParams = new URLSearchParams();
       for (const key in value) {
         newParams.set(key, JSON.stringify(value[key]));

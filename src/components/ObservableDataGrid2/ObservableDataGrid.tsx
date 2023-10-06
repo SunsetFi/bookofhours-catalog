@@ -23,8 +23,11 @@ import { useTheme, type SxProps } from "@mui/material/styles";
 import {
   Column,
   ColumnDef,
+  ColumnFiltersState,
   Header,
   SortingState,
+  TableState,
+  Updater,
   flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
@@ -143,6 +146,23 @@ function itemToRow<T extends {}>(
   );
 }
 
+function recordToFilter(record: Record<string, any>): ColumnFiltersState {
+  return Object.keys(record).map((key) => ({
+    id: key,
+    value: record[key],
+  }));
+}
+function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
+  const result = {} as Record<string, any>;
+  for (const { id, value } of filter) {
+    if (value) {
+      result[id] = value;
+    }
+  }
+
+  return result;
+}
+
 function ObservableDataGrid<T extends {}>({
   sx,
   filters,
@@ -168,7 +188,16 @@ function ObservableDataGrid<T extends {}>({
       : []
   );
 
-  const state = React.useMemo(() => ({ sorting }), [sorting]);
+  const state = React.useMemo<Partial<TableState>>(
+    () => ({
+      sorting,
+      columnFilters:
+        onFiltersChanged && filters ? recordToFilter(filters) : undefined,
+    }),
+    [sorting, onFiltersChanged, filters]
+  );
+
+  console.log("state is now", state);
 
   const data = useObservation(
     () =>
@@ -179,12 +208,28 @@ function ObservableDataGrid<T extends {}>({
     [items$, columns]
   );
 
+  const onTableFiltersChanged = React.useCallback(
+    (value: Updater<ColumnFiltersState>) => {
+      if (filters == null || onFiltersChanged == null) {
+        return;
+      }
+
+      if (typeof value === "function") {
+        value = value(recordToFilter(filters));
+      }
+
+      onFiltersChanged(filterToRecord(value));
+    },
+    [onFiltersChanged, filters]
+  );
+
   const table = useReactTable({
     data: data ?? [],
     columns: tableColumns,
     state,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onColumnFiltersChange: onTableFiltersChanged,
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     getFacetedUniqueValues: getFacetedUniqueValues(),

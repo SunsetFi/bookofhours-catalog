@@ -22,6 +22,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   elementStackColumnHelper,
 } from "@/components/ObservableDataGrid2";
+import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -88,6 +89,8 @@ const SkillsCatalogPage = () => {
     [tokensSource]
   );
 
+  const [filter, onFiltersChanged] = useQueryObjectState();
+
   return (
     <PageContainer title="Esoteric Wisdoms" backTo="/">
       <RequireRunning />
@@ -95,6 +98,8 @@ const SkillsCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         defaultSortColumn="label"
+        filters={filter}
+        onFiltersChanged={onFiltersChanged}
         items$={skills$}
       />
     </PageContainer>
