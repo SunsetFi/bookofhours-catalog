@@ -11,7 +11,7 @@ import {
 
 import { ObservableKeys, Observation } from "@/observables";
 
-import { ObservableAccessorFn, ObservableColumnDef } from "./types";
+import { ObservableAccessorFn, ObservableColumnDef } from "../types";
 
 export interface ObservableColumnHelper<TData extends RowData>
   extends BaseColumnHelper<TData> {
