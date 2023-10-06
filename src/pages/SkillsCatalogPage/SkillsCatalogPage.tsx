@@ -8,7 +8,7 @@ import UpgradeIcon from "@mui/icons-material/Upgrade";
 import { useDIDependency } from "@/container";
 import { useDeferredObservation } from "@/observables";
 
-import { powerAspects } from "@/aspects";
+import { aspectsMagnitude, powerAspects } from "@/aspects";
 
 import {
   ElementStackModel,
@@ -17,20 +17,94 @@ import {
   filterHasAnyAspect,
 } from "@/services/sh-game";
 
+import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
-  descriptionColumnDef,
-  iconColumnDef,
-  labelColumnDef,
-  aspectsColumnDef,
-  ObservableDataGridColumnDef,
-  aspectsObservableColumnDef,
-} from "@/components/ObservableDataGrid";
-import PageContainer from "@/components/PageContainer";
+  createObservableColumnHelper,
+} from "@/components/ObservableDataGrid2";
+import ElementIcon from "@/components/ElementIcon";
+import { map } from "rxjs";
+import { pick } from "lodash";
+import AspectsList from "@/components/AspectsList";
+
+const columnHelper = createObservableColumnHelper<ElementStackModel>();
+
+const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
+  const orchestrator = useDIDependency(Orchestrator);
+  const aspects = useDeferredObservation<Aspects>(model.aspects$) ?? {};
+  const skillLevel = aspects["skill"] ?? 0;
+  if (skillLevel <= 0 || skillLevel >= 9) {
+    return null;
+  }
+
+  const recipeId = `u.skill.to${skillLevel + 1}`;
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <IconButton
+        onClick={() =>
+          orchestrator.requestOrchestration({
+            recipeId,
+            desiredElementIds: [model.elementId],
+          })
+        }
+      >
+        <UpgradeIcon />
+      </IconButton>
+    </Box>
+  );
+};
+
+const columns = [
+  columnHelper.display({
+    id: "upgrade-button",
+    header: "",
+    size: 30,
+    cell: (context) => <SkillUpgradeButton model={context.row.original} />,
+  }),
+  columnHelper.observe("elementId$", {
+    id: "icon",
+    header: "",
+    size: 100,
+    enableSorting: false,
+    cell: (context) => (
+      <ElementIcon width={75} elementId={context.getValue()} />
+    ),
+  }),
+  columnHelper.observe("label$", {
+    header: "Skill",
+    size: 200,
+  }),
+  columnHelper.observe(
+    (model) => model.aspects$.pipe(map((aspects) => pick(aspects, ["skill"]))),
+    {
+      header: "Skill Level",
+      size: 170,
+      cell: (context) => <AspectsList aspects={context.getValue()} />,
+    }
+  ),
+  columnHelper.observe("aspects$", {
+    id: "aspects",
+    header: "Aspects",
+    size: 350,
+    sortingFn: (a, b, columnId) =>
+      aspectsMagnitude(a.getValue(columnId)) -
+      aspectsMagnitude(b.getValue(columnId)),
+    cell: (context) => <AspectsList aspects={context.getValue()} />,
+  }),
+  columnHelper.observe("description$", {
+    size: Number.MAX_SAFE_INTEGER,
+    header: "Description",
+  }),
+];
 
 const SkillsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
-  const orchestrator = useDIDependency(Orchestrator);
 
   const skills$ = React.useMemo(
     () =>
@@ -38,76 +112,14 @@ const SkillsCatalogPage = () => {
     [tokensSource]
   );
 
-  const columns = React.useMemo(
-    () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => {
-          const aspects = useDeferredObservation<Aspects>(value.aspects$) ?? {};
-          const skillLevel = aspects["skill"] ?? 0;
-          if (skillLevel <= 0 || skillLevel >= 9) {
-            return null;
-          }
-
-          const recipeId = `u.skill.to${skillLevel + 1}`;
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <IconButton
-                onClick={() =>
-                  orchestrator.requestOrchestration({
-                    recipeId,
-                    desiredElementIds: [value.elementId],
-                  })
-                }
-              >
-                <UpgradeIcon />
-              </IconButton>
-            </Box>
-          );
-        },
-      } as ObservableDataGridColumnDef<ElementStackModel>,
-      iconColumnDef<ElementStackModel>(),
-      labelColumnDef<ElementStackModel>(),
-      aspectsObservableColumnDef<ElementStackModel>(
-        "skillLevel",
-        (element) => element.aspects$,
-        ["skill"],
-        {
-          headerName: "Skill Level",
-          width: 170,
-        }
-      ),
-      aspectsColumnDef<ElementStackModel>(powerAspects, { width: 200 }),
-      descriptionColumnDef<ElementStackModel>(),
-    ],
-    [orchestrator]
-  );
-
   return (
     <PageContainer title="Esoteric Wisdoms" backTo="/">
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <RequireRunning />
-        <ObservableDataGrid
-          sx={{ height: "100%" }}
-          columns={columns}
-          items$={skills$}
-        />
-      </Box>
+      <RequireRunning />
+      <ObservableDataGrid
+        sx={{ height: "100%" }}
+        columns={columns}
+        items$={skills$}
+      />
     </PageContainer>
   );
 };

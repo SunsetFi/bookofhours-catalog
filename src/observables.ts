@@ -275,7 +275,7 @@ export function mergeMapIfNotNull<T, K>(mapping: (value: T) => Observable<K>) {
 }
 
 export function mapArrayItemsCached<T, R>(
-  fn: (value: T) => R
+  fn: (value: T, index: number) => R
 ): OperatorFunction<readonly T[], R[]> {
   return (source: Observable<readonly T[]>): Observable<R[]> => {
     const cache = new Map<T, R>();
@@ -285,13 +285,13 @@ export function mapArrayItemsCached<T, R>(
         // Temporary set to track items in the current array.
         const currentSet = new Set<T>();
 
-        const result = arr.map((item) => {
+        const result = arr.map((item, index) => {
           currentSet.add(item);
 
           if (cache.has(item)) {
             return cache.get(item)!;
           } else {
-            const newValue = fn(item);
+            const newValue = fn(item, index);
             cache.set(item, newValue);
             return newValue;
           }

@@ -49,14 +49,6 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
         ...sx,
       }}
     >
-      {recipeLabel && (
-        <>
-          <Typography variant="body2">{recipeLabel}</Typography>
-          {(hasPins || hasAspects) && (
-            <Divider orientation="vertical" sx={{ my: 2 }} />
-          )}
-        </>
-      )}
       {hasPins && (
         <>
           <Box
@@ -72,18 +64,29 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
               <PinnedItemModelIcon key={i} model={pin} />
             ))}
           </Box>
-          {hasAspects && <Divider orientation="vertical" sx={{ my: 2 }} />}
+          {(hasAspects || recipeLabel) && (
+            <Divider orientation="vertical" sx={{ my: 2 }} />
+          )}
         </>
       )}
-      <AspectsList
-        sx={{ justifyContent: "center" }}
-        aspects={mapValues(aspects, (value) =>
-          value.desired > 0
-            ? `${value.current} / ${value.desired}`
-            : value.current
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        {recipeLabel && (
+          <Typography variant="caption">{recipeLabel}</Typography>
         )}
-        iconSize={30}
-      />
+        <Box
+          sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
+        >
+          <AspectsList
+            sx={{ justifyContent: "center" }}
+            aspects={mapValues(aspects, (value) =>
+              value.desired > 0
+                ? `${value.current} / ${value.desired}`
+                : value.current
+            )}
+            iconSize={30}
+          />
+        </Box>
+      </Box>
     </Box>
   );
 };

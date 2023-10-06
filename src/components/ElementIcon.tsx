@@ -2,6 +2,8 @@ import * as React from "react";
 
 import Popper from "@mui/material/Popper";
 import Box from "@mui/material/Box";
+import { type SxProps } from "@mui/material/styles";
+
 import type { Instance as PopperInstance } from "@popperjs/core";
 
 import { useDIDependency } from "@/container";
@@ -15,6 +17,7 @@ import { Compendium, ElementModel } from "@/services/sh-compendium";
 import ElementDetails from "./ElementDetails";
 
 export type ElementIconProps = {
+  sx?: SxProps;
   title?: string;
   width?: number;
 } & (
@@ -27,11 +30,13 @@ export type ElementIconProps = {
 );
 
 const ElementIcon = ({
+  sx,
   title,
   width,
   element,
   elementId,
 }: {
+  sx?: SxProps;
   width?: number;
   title?: string;
   element?: ElementModel;
@@ -83,6 +88,7 @@ const ElementIcon = ({
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          ...sx,
         }}
       >
         <img

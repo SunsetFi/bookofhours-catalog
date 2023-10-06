@@ -10,7 +10,7 @@ import { mapArrayItemsCached } from "@/observables";
 import { powerAspects } from "@/aspects";
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
-import { decorateClassInstance } from "@/class-decorator";
+import { decorateObjectInstance } from "@/object-decorator";
 
 import { SituationModel, TokensSource } from "@/services/sh-game";
 
@@ -36,7 +36,7 @@ interface WorkstationModelDecorators {
 function situationToWorkstationModel(
   situation: SituationModel
 ): WorkstationModel {
-  return decorateClassInstance(situation, {
+  return decorateObjectInstance(situation, {
     thresholdAspects$: situation.thresholds$.pipe(
       map((thresholds) => {
         const slotTypes: Aspects = {};

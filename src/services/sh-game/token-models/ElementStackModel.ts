@@ -11,7 +11,7 @@ import {
   shareReplay,
   combineLatest,
 } from "rxjs";
-import { isEqual } from "lodash";
+import { isEqual, pickBy } from "lodash";
 
 import { Compendium, ElementModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
@@ -216,7 +216,9 @@ export class ElementStackModel
   get aspects$() {
     if (!this._aspects$) {
       this._aspects$ = this._elementStack$.pipe(
-        map((e) => combineAspects(e.elementAspects, e.mutations)),
+        map((e) =>
+          pickBy(combineAspects(e.elementAspects, e.mutations), (v) => v !== 0)
+        ),
         distinctUntilChanged(isEqual),
         shareReplay(1)
       );

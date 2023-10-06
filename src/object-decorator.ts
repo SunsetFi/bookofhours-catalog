@@ -1,4 +1,4 @@
-export function decorateClassInstance<
+export function decorateObjectInstance<
   TClass extends object,
   TAdditional extends Record<string, any>
 >(target: TClass, additional: TAdditional): TClass & TAdditional {

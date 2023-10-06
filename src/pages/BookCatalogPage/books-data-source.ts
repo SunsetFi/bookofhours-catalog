@@ -7,7 +7,7 @@ import { Aspects } from "secrethistories-api";
 
 import { useDIContainer } from "@/container";
 import { powerAspects } from "@/aspects";
-import { decorateClassInstance } from "@/class-decorator";
+import { decorateObjectInstance } from "@/object-decorator";
 
 import {
   Null$,
@@ -84,7 +84,7 @@ function elementStackToBook(
     )
   );
 
-  return decorateClassInstance(elementStack, {
+  return decorateObjectInstance(elementStack, {
     get id() {
       return elementStack.id;
     },
