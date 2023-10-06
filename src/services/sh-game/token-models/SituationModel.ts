@@ -9,6 +9,7 @@ import {
   Aspects,
   Situation as ISituation,
   SituationState,
+  SphereSpec,
 } from "secrethistories-api";
 import { isEqual } from "lodash";
 
@@ -86,7 +87,7 @@ export class SituationModel extends TokenModel {
   get label$() {
     if (!this._label$) {
       this._label$ = this._situation$.pipe(
-        map((s) => s.label),
+        map((s) => s.verbLabel),
         distinctUntilChanged(),
         shareReplay(1)
       );
@@ -99,26 +100,13 @@ export class SituationModel extends TokenModel {
   get description$() {
     if (!this._description$) {
       this._description$ = this._situation$.pipe(
-        map((s) => s.description),
+        map((s) => s.verbDescription),
         distinctUntilChanged(),
         shareReplay(1)
       );
     }
 
     return this._description$;
-  }
-
-  private _verbLabel$: Observable<string | null> | null = null;
-  get verbLabel$() {
-    if (!this._verbLabel$) {
-      this._verbLabel$ = this._situation$.pipe(
-        map((s) => s.verbLabel),
-        distinctUntilChanged(),
-        shareReplay(1)
-      );
-    }
-
-    return this._verbLabel$;
   }
 
   private _aspects$: Observable<Aspects> | null = null;
@@ -147,37 +135,21 @@ export class SituationModel extends TokenModel {
     return this._hints$;
   }
 
-  get thresholds() {
-    return this._situation$.value.thresholds;
-  }
-
-  // This is a bit wonky, but thankfully workstation thresholds all require at least 1 aspect rather than any limits.
-  // Because of this, we can sum up the aspects into one object to get an idea of how many cards of that type you can slot.
-  // This kinda breaks down with 'essential' aspects, but those are rare enough for workstations that I'm not going to worry about it.
-  private _thresholdAspects$: Observable<Aspects> | null = null;
-  get thresholdAspects$() {
-    if (!this._thresholdAspects$) {
-      this._thresholdAspects$ = this._situation$.pipe(
-        map((s) => {
-          const thresholds = s.thresholds;
-          const slotTypes: Aspects = {};
-          for (const t of thresholds) {
-            for (const type in t.required) {
-              if (slotTypes[type] === undefined) {
-                slotTypes[type] = 0;
-              }
-              slotTypes[type] += t.required[type];
-            }
-          }
-
-          return slotTypes;
-        }),
+  private _thresholds$: Observable<readonly SphereSpec[]> | null = null;
+  get thresholds$() {
+    if (!this._thresholds$) {
+      this._thresholds$ = this._situation$.pipe(
+        map((s) => Object.freeze([...s.thresholds])),
         distinctUntilChanged(isEqual),
         shareReplay(1)
       );
     }
 
-    return this._thresholdAspects$;
+    return this._thresholds$;
+  }
+
+  get thresholds() {
+    return this._situation$.value.thresholds;
   }
 
   private _state$: Observable<SituationState> | null = null;

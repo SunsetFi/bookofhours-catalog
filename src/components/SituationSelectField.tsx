@@ -32,7 +32,7 @@ interface SituationAutocompleteItem {
 function observeSituationAutocomplete(
   model: SituationModel
 ): Observable<SituationAutocompleteItem> {
-  return combineLatest([model.verbLabel$, model.state$]).pipe(
+  return combineLatest([model.label$, model.state$]).pipe(
     map(([label, state]) => ({
       label,
       state,

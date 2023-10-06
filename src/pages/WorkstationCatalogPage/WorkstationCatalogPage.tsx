@@ -1,14 +1,18 @@
 import * as React from "react";
+import { Aspects } from "secrethistories-api";
+import { isEqual } from "lodash";
+import { Observable, distinctUntilChanged, map, shareReplay } from "rxjs";
 
 import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
-
+import { mapArrayItemsCached } from "@/observables";
 import { powerAspects } from "@/aspects";
+import { useQueryObjectState } from "@/hooks/use-queryobject";
+
+import { decorateClassInstance } from "@/class-decorator";
 
 import { SituationModel, TokensSource } from "@/services/sh-game";
-
-import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
@@ -23,11 +27,44 @@ import ObservableDataGrid, {
 } from "@/components/ObservableDataGrid";
 import FocusIconButton from "@/components/FocusIconButton";
 
+type WorkstationModel = SituationModel & WorkstationModelDecorators;
+
+interface WorkstationModelDecorators {
+  thresholdAspects$: Observable<Aspects>;
+}
+
+function situationToWorkstationModel(
+  situation: SituationModel
+): WorkstationModel {
+  return decorateClassInstance(situation, {
+    thresholdAspects$: situation.thresholds$.pipe(
+      map((thresholds) => {
+        const slotTypes: Aspects = {};
+        for (const t of thresholds) {
+          for (const type in t.required) {
+            if (slotTypes[type] === undefined) {
+              slotTypes[type] = 0;
+            }
+            slotTypes[type] += t.required[type];
+          }
+        }
+
+        return slotTypes;
+      }),
+      distinctUntilChanged(isEqual),
+      shareReplay(1)
+    ),
+  });
+}
+
 const WorkstationCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
-    () => tokensSource.unlockedWorkstations$,
+    () =>
+      tokensSource.unlockedWorkstations$.pipe(
+        mapArrayItemsCached(situationToWorkstationModel)
+      ),
     [tokensSource]
   );
 
@@ -48,10 +85,10 @@ const WorkstationCatalogPage = () => {
             <FocusIconButton token={value} />
           </Box>
         ),
-      } as ObservableDataGridColumnDef<SituationModel>,
-      labelColumnDef<SituationModel>(),
-      locationColumnDef<SituationModel>(),
-      aspectsPresenceColumnDef<SituationModel>(
+      } as ObservableDataGridColumnDef<WorkstationModel>,
+      labelColumnDef<WorkstationModel>(),
+      locationColumnDef<WorkstationModel>(),
+      aspectsPresenceColumnDef<WorkstationModel>(
         powerAspects,
         { display: "none", orientation: "horizontal" },
         {
@@ -61,7 +98,7 @@ const WorkstationCatalogPage = () => {
           width: 275,
         }
       ),
-      aspectsPresenceColumnDef<SituationModel>(
+      aspectsPresenceColumnDef<WorkstationModel>(
         (aspect) => aspect.startsWith("e."),
         { display: "none" },
         // TODO: Dont use auto, find all possible evolutions
@@ -70,7 +107,7 @@ const WorkstationCatalogPage = () => {
           filter: aspectsPresenceFilter("evolves", "auto"),
         }
       ),
-      aspectsObservableColumnDef<SituationModel>(
+      aspectsObservableColumnDef<WorkstationModel>(
         "threshold",
         (situation) => situation.thresholdAspects$,
         (aspectId) => !powerAspects.includes(aspectId as any),
@@ -78,7 +115,7 @@ const WorkstationCatalogPage = () => {
           headerName: "Accepts",
         }
       ),
-      descriptionColumnDef<SituationModel>(),
+      descriptionColumnDef<WorkstationModel>(),
     ],
     []
   );

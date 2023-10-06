@@ -22,6 +22,7 @@ import {
 import { flatten, isEqual, omit, pick, sortBy } from "lodash";
 
 import {
+  Null$,
   distinctUntilShallowArrayChanged,
   filterItemObservations,
   mapArrayItemsCached,
@@ -62,7 +63,11 @@ export class RecipeOrchestration
     readonly ElementStackModel[]
   >;
 
-  // This is hackish, and really only exists for 'consider' and skill level ups.
+  // Hack: Our elements have slots as well.  We need to take that into account when
+  // choosing available situations.
+  // This will observe all slots added by our desiredElements, and use them in our
+  // available situations check to see if that situation can have these slots.
+  // This is here entirely for "consider", particularly for considering skills.
   private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
 
   constructor(
@@ -116,11 +121,12 @@ export class RecipeOrchestration
     if (!this._executionPlan$) {
       this._executionPlan$ = combineLatest([
         this.situation$,
+        this.situation$.pipe(mergeMap((s) => s?.state$ ?? Null$)),
         this.slots$,
         this._slotAssignments$,
       ]).pipe(
-        map(([situation, slots, assignments]) => {
-          if (!situation || situation.state !== "Unstarted") {
+        map(([situation, situationState, slots, assignments]) => {
+          if (!situation || situationState !== "Unstarted") {
             return null;
           }
 
@@ -215,7 +221,8 @@ export class RecipeOrchestration
         shareReplay(1)
       );
       this._slots$ = combineLatest([
-        this._situation$,
+        this._situation$.pipe(map((s) => s?.verbId)),
+        this._situation$.pipe(map((s) => s?.thresholds ?? [])),
         // Cards can add slots too, so we need this mess to watch all assignments,
         // get the elements, and get the slots.
         // Honestly, it amazes me that this whole thing hasn't collapsed in on itself with the egregious
@@ -241,16 +248,16 @@ export class RecipeOrchestration
         // What we really want is the null / concurrent scheduler, but this won't take null as an argument and the rxjs
         // docs dont specify how else to get it.
         observeOn(asapScheduler),
-        map(([situation, inputThresholds, aspects]) => {
-          if (!situation) {
+        map(([verbId, situationThresholds, inputThresholds, aspects]) => {
+          if (!verbId) {
             return [];
           }
 
           const thresholds = [
-            ...situation.thresholds,
+            ...situationThresholds,
             ...flatten(inputThresholds),
           ].filter((spec) => {
-            if (!actionIdMatches(spec.actionId, situation.verbId)) {
+            if (!actionIdMatches(spec.actionId, verbId)) {
               return false;
             }
 

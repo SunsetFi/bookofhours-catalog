@@ -174,7 +174,7 @@ const ExecutingSituationListItem = ({
   situation,
 }: ExecutingSituationListItemProps) => {
   const timeSource = useDIDependency(TimeSource);
-  const label = useObservation(situation.verbLabel$);
+  const label = useObservation(situation.label$);
   const recipeLabel = useObservation(situation.recipeLabel$);
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const state = useObservation(situation.state$);
