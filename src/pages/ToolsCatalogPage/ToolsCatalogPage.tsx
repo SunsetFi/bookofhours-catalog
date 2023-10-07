@@ -15,8 +15,10 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import ObservableDataGrid, {
-  elementStackColumnHelper,
+  createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid2";
+
+const columnHelper = createElementStackColumnHelper();
 
 const ToolsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -28,7 +30,7 @@ const ToolsCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
-      elementStackColumnHelper.display({
+      columnHelper.display({
         id: "focus-button",
         header: "",
         size: 50,
@@ -44,18 +46,18 @@ const ToolsCatalogPage = () => {
           </Box>
         ),
       }),
-      elementStackColumnHelper.elementIcon(),
-      elementStackColumnHelper.label(),
-      elementStackColumnHelper.location(),
-      elementStackColumnHelper.aspectsList("power-aspects", powerAspects, {
+      columnHelper.elementIcon(),
+      columnHelper.label(),
+      columnHelper.location(),
+      columnHelper.aspectsList("power-aspects", powerAspects, {
         size: 300,
       }),
-      elementStackColumnHelper.aspectsList("device", ["device"], {
+      columnHelper.aspectsList("device", ["device"], {
         header: "Consumable",
         size: 200,
         showLevel: false,
       }),
-      elementStackColumnHelper.description(),
+      columnHelper.description(),
     ],
     []
   );

@@ -1,35 +1,23 @@
 import * as React from "react";
 
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-
-import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import { useDIDependency } from "@/container";
 
 import { furnishingAspects, powerAspects } from "@/aspects";
 
-import {
-  ElementStackModel,
-  TokensSource,
-  filterHasAnyAspect,
-} from "@/services/sh-game";
+import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-
-import ObservableDataGrid, {
-  ObservableDataGridColumnDef,
-  aspectsColumnDef,
-  aspectsPresenceColumnDef,
-  aspectsPresenceFilter,
-  descriptionColumnDef,
-  iconColumnDef,
-  labelColumnDef,
-  locationColumnDef,
-} from "@/components/ObservableDataGrid";
+import FocusIconButton from "@/components/FocusIconButton";
 import PageContainer from "@/components/PageContainer";
+import ObservableDataGrid, {
+  createElementStackColumnHelper,
+} from "@/components/ObservableDataGrid2";
+
+const columnHelper = createElementStackColumnHelper();
 
 const FurnishingsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -44,11 +32,11 @@ const FurnishingsCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => (
+      columnHelper.display({
+        id: "focus-button",
+        header: "",
+        size: 50,
+        cell: ({ row }) => (
           <Box
             sx={{
               display: "flex",
@@ -56,26 +44,22 @@ const FurnishingsCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <IconButton onClick={() => value.focus()}>
-              <VisibilityIcon />
-            </IconButton>
+            <FocusIconButton token={row.original} />
           </Box>
         ),
-      } as ObservableDataGridColumnDef<ElementStackModel>,
-      iconColumnDef<ElementStackModel>(),
-      labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>(),
-      aspectsColumnDef<ElementStackModel>(powerAspects),
-      aspectsPresenceColumnDef<ElementStackModel>(
-        furnishingAspects,
-        { display: "none" },
-        {
-          headerName: "Type",
-          width: 150,
-          filter: aspectsPresenceFilter("type", furnishingAspects),
-        }
-      ),
-      descriptionColumnDef<ElementStackModel>(),
+      }),
+      columnHelper.elementIcon(),
+      columnHelper.label(),
+      columnHelper.location(),
+      columnHelper.aspectsList("power-aspects", powerAspects, {
+        size: 175,
+      }),
+      columnHelper.aspectsList("type", furnishingAspects, {
+        header: "Type",
+        size: 175,
+        showLevel: false,
+      }),
+      columnHelper.description(),
     ],
     []
   );

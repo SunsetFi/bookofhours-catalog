@@ -20,9 +20,11 @@ import {
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
-  elementStackColumnHelper,
+  createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid2";
 import { useQueryObjectState } from "@/hooks/use-queryobject";
+
+const columnHelper = createElementStackColumnHelper();
 
 const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -56,28 +58,28 @@ const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
 };
 
 const columns = [
-  elementStackColumnHelper.display({
+  columnHelper.display({
     id: "upgrade-button",
     header: "",
     size: 30,
     cell: (context) => <SkillUpgradeButton model={context.row.original} />,
   }),
-  elementStackColumnHelper.elementIcon(),
-  elementStackColumnHelper.label({
+  columnHelper.elementIcon(),
+  columnHelper.label({
     header: "Skill",
     size: 200,
   }),
-  elementStackColumnHelper.aspectsList("skill", ["skill"], {
+  columnHelper.aspectsList("skill", ["skill"], {
     header: "Level",
     size: 180,
     enableColumnFilter: false,
   }),
-  elementStackColumnHelper.aspectsList("aspects", powerAspects, {
+  columnHelper.aspectsList("aspects", powerAspects, {
     header: "Aspects",
     size: 200,
   }),
   // TODO: Pick wisdom tree aspects
-  elementStackColumnHelper.description(),
+  columnHelper.description(),
 ];
 
 const SkillsCatalogPage = () => {

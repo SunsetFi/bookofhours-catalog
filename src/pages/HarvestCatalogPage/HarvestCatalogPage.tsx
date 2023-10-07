@@ -10,24 +10,23 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import PageContainer from "@/components/PageContainer";
-import ObservableDataGrid, {
-  ObservableDataGridColumnDef,
-  descriptionColumnDef,
-  labelColumnDef,
-  locationColumnDef,
-} from "@/components/ObservableDataGrid";
 import FocusIconButton from "@/components/FocusIconButton";
+import ObservableDataGrid, {
+  createSituationColumnHelper,
+} from "@/components/ObservableDataGrid2";
+
+const columnHelper = createSituationColumnHelper();
 
 const HarvestCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
 
   const columns = React.useMemo(
     () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => (
+      columnHelper.display({
+        id: "focus-button",
+        header: "",
+        size: 50,
+        cell: ({ row }) => (
           <Box
             sx={{
               display: "flex",
@@ -35,13 +34,13 @@ const HarvestCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <FocusIconButton token={value} />
+            <FocusIconButton token={row.original} />
           </Box>
         ),
-      } as ObservableDataGridColumnDef<SituationModel>,
-      labelColumnDef<SituationModel>(),
-      locationColumnDef<SituationModel>(),
-      descriptionColumnDef<SituationModel>(),
+      }),
+      columnHelper.label(),
+      columnHelper.location(),
+      columnHelper.description(),
     ],
     []
   );

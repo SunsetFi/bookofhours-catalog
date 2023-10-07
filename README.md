@@ -41,13 +41,33 @@ This project is best used in the browser of your choice while the game runs in w
 
 This mod provides a sortable, filterable interface for various aspects. Where possible, it also provides a button to zoom the camera in on the item in question.
 
-It has the following pages:
+### Item tracking
 
-### Bibliographical Collection
+Various pages are provided to track the contents of the house, and filter them by
+
+### Time tracking
+
+The header always shows how many days are left in the season, and how many seconds are left in the day. Additionally, it shows a breakdown of all executing recipes
+and how long they have left on their current cycle.
+
+### Recipe queuing and execution
+
+Recipes can be either slotted into workstations, or directly executed, where relevant to the items being listed.
+
+Currently, this primarily exists on the books page (read or re-read a book), and the crafting page (craft the specified item)
+
+### Global Search
+
+Hit Ctrl+K to find any item from any page. Selecting the item will take you to more details about it.
+
+### Page Breakdown
+
+#### Bibliographical Collection
 
 Displays books, phonographs, and films
 
 - Navigate to Item
+- Execute the "read a book" recipe
 - Name
 - Location
 - Mystery
@@ -59,7 +79,7 @@ Displays books, phonographs, and films
 - Contamination
 - Description
 
-### Stores and Provisions
+#### Stores and Provisions
 
 Displays consumables, servables, brewables, and drinkables
 
@@ -70,7 +90,7 @@ Displays consumables, servables, brewables, and drinkables
 - Aspects
 - Description
 
-### Toolshed
+#### Toolshed
 
 Displays all available tools through the house
 
@@ -81,7 +101,7 @@ Displays all available tools through the house
 - Consumable (device)
 - Description
 
-### Malleary Shelf
+#### Malleary Shelf
 
 Displays general crafting items
 
@@ -92,7 +112,7 @@ Displays general crafting items
 - Type (various aspects like liquid, gem, flower, and so on)
 - Description
 
-### Antiquities and Knicknacks
+#### Antiquities and Knicknacks
 
 Displays 'things'
 
@@ -102,7 +122,7 @@ Displays 'things'
 - Aspects
 - Description
 
-### An Accounting of the Walls and Floors
+#### An Accounting of the Walls and Floors
 
 Displays comforts and wall art around the house
 
@@ -113,7 +133,7 @@ Displays comforts and wall art around the house
 - Type (comfort or wall art)
 - Description
 
-### The Fruits of Knoweldge
+#### The Fruits of Knoweldge
 
 Displays all discovered crafting recipes and what they craft.
 
@@ -123,7 +143,7 @@ Displays all discovered crafting recipes and what they craft.
 - Skill (the skill card needed to craft it)
 - Description
 
-### Workstations
+#### Workstations
 
 Displays all unlocked workstations through the house
 
@@ -135,7 +155,7 @@ Displays all unlocked workstations through the house
 - Accepts (What aspect types can be accepted by the 2 additional workstation slots)
 - Description
 
-### Gardens and Glades
+#### Gardens and Glades
 
 Displays all unlocked gardens and other spots of harvest
 
@@ -143,7 +163,7 @@ Displays all unlocked gardens and other spots of harvest
 - Location
 - Description
 
-### Memories
+#### Memories
 
 Displays all memories that have been encountered in the current save file
 

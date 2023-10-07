@@ -8,18 +8,16 @@ import { powerAspects, provisionsAspects } from "@/aspects";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
-import {
-  ElementStackModel,
-  TokensSource,
-  filterHasAnyAspect,
-} from "@/services/sh-game";
+import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import ObservableDataGrid, {
-  elementStackColumnHelper,
+  createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid2";
+
+const columnHelper = createElementStackColumnHelper();
 
 const ProvisionsCatalog = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -34,7 +32,7 @@ const ProvisionsCatalog = () => {
 
   const columns = React.useMemo(
     () => [
-      elementStackColumnHelper.display({
+      columnHelper.display({
         id: "focus-button",
         header: "",
         size: 50,
@@ -50,18 +48,18 @@ const ProvisionsCatalog = () => {
           </Box>
         ),
       }),
-      elementStackColumnHelper.elementIcon(),
-      elementStackColumnHelper.label(),
-      elementStackColumnHelper.location(),
-      elementStackColumnHelper.aspectsList("type", provisionsAspects, {
+      columnHelper.elementIcon(),
+      columnHelper.label(),
+      columnHelper.location(),
+      columnHelper.aspectsList("type", provisionsAspects, {
         header: "Type",
         size: 200,
         showLevel: false,
       }),
-      elementStackColumnHelper.aspectsList("power-aspects", powerAspects, {
+      columnHelper.aspectsList("power-aspects", powerAspects, {
         size: 300,
       }),
-      elementStackColumnHelper.description(),
+      columnHelper.description(),
     ],
     []
   );
