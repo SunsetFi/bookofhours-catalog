@@ -11,7 +11,7 @@ export function memoryIconColumn(): ObservableDataGridColumnDef<BookModel> {
     observable: "memoryElementId$",
     width: 90,
     renderCell: ({ value }) => (
-      <ElementIcon elementId={value} width={75} title="Memory" />
+      <ElementIcon elementId={value} maxWidth={75} title="Memory" />
     ),
   };
 }

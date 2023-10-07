@@ -4,15 +4,20 @@ import { map } from "rxjs";
 import { pick } from "lodash";
 import { Aspects } from "secrethistories-api";
 
+import { mergeMapIfNotNull } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
 
 import { ElementStackModel } from "@/services/sh-game";
+import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
 
 import ElementIcon from "@/components/ElementIcon";
 import AspectsList from "@/components/AspectsList";
 
-import { createObservableColumnHelper } from "./observable-column-helper";
 import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
+import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
+
+import { createObservableColumnHelper } from "./observable-column-helper";
+import { RowHeight } from "../constants";
 
 const columnHelper = createObservableColumnHelper<ElementStackModel>();
 export const elementStackColumnHelper = Object.assign(columnHelper, {
@@ -22,6 +27,8 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
     columnHelper.observe("label$", {
       id: "label",
       size: 200,
+      header: "Name",
+      filterFn: "includesString",
       ...def,
     }),
   elementIcon: () =>
@@ -31,7 +38,11 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
       size: 100,
       enableSorting: false,
       cell: (context) => (
-        <ElementIcon width={75} elementId={context.getValue()} />
+        <ElementIcon
+          maxWidth={75}
+          maxHeight={RowHeight}
+          elementId={context.getValue()}
+        />
       ),
     }),
   aspectsList: (
@@ -66,4 +77,24 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
       size: Number.MAX_SAFE_INTEGER,
       header: "Description",
     }),
+  location: () =>
+    columnHelper.observe(
+      (item) =>
+        item.parentTerrain$.pipe(
+          mergeMapIfNotNull((terrain) => terrain.label$)
+        ),
+      {
+        header: "Location",
+        size: 170,
+        filterFn: "arrIncludesSome",
+        meta: {
+          filterComponent: (props) => {
+            const locations = useUnlockedLocationLabels() ?? [];
+            return (
+              <MultiselectOptionsFilter allowedValues={locations} {...props} />
+            );
+          },
+        },
+      }
+    ),
 });

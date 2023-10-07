@@ -5,7 +5,7 @@ export interface FilterComponentProps<
   TItemValue = TFilterValue
 > {
   columnValues: TItemValue[];
-  filterValue: TFilterValue;
+  filterValue: TFilterValue | null;
   onChange(value: TFilterValue | null): void;
 }
 

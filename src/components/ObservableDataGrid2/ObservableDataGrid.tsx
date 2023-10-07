@@ -49,6 +49,7 @@ import {
   isObservableAccessorFnColumnDef,
   isObservableAccessorKeyColumnDef,
 } from "./types";
+import { RowHeight } from "./constants";
 
 // TODO: Virtual
 // https://tanstack.com/virtual/v3/docs/examples/react/table
@@ -91,6 +92,9 @@ function observableToColumnDef<T extends {}>(
     } as any;
   }
 
+  // TODO: Process group columns.
+  // This will throw off our index.
+
   return observableColumn as any;
 }
 
@@ -112,23 +116,25 @@ function observeColumn<TData extends {}>(
   return Null$;
 }
 
+function flattenColumn<T>(
+  column: ObservableColumnDef<T>
+): ObservableColumnDef<T>[] {
+  if ("columns" in column && Array.isArray(column.columns)) {
+    return column.columns.flatMap(flattenColumn);
+  }
+
+  return [column];
+}
+
 function itemToRow<T extends {}>(
   item: T,
   itemIndex: number,
   columns: ObservableColumnDef<T>[]
 ): Observable<Record<string, any>> {
-  function flattenColumn(
-    column: ObservableColumnDef<T>
-  ): ObservableColumnDef<T>[] {
-    if ("columns" in column && Array.isArray(column.columns)) {
-      return column.columns.flatMap(flattenColumn);
-    }
-
-    return [column];
-  }
-
   columns = columns.flatMap(flattenColumn);
 
+  // Note: In practice we don't use the observations for non-observables.
+  // We need to have them passed in to make the indexes align though.
   return combineLatest(
     columns.map((column) => observeColumn(column, item, itemIndex))
   ).pipe(
@@ -172,7 +178,7 @@ function ObservableDataGrid<T extends {}>({
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
   const tableColumns = React.useMemo(
-    // FIXME: These columns can be nested, which will throw off ID calculation.
+    // FIXME: We need to process the observables in group columns too.
     () => columns.map(observableToColumnDef),
     [columns]
   );
@@ -267,7 +273,7 @@ function ObservableDataGrid<T extends {}>({
           <TableBody>
             {table.getRowModel().rows.map((row) => {
               return (
-                <TableRow key={row.id} sx={{ height: "40px" }}>
+                <TableRow key={row.id} sx={{ height: `${RowHeight}px` }}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -308,6 +314,9 @@ const HeaderCell = ({
           {!header.isPlaceholder &&
             flexRender(header.column.columnDef.header, header.getContext())}
         </Typography>
+        {header.column.getCanFilter() && (
+          <HeaderFilter column={header.column} />
+        )}
         {header.column.getCanSort() && (
           <IconButton
             sx={{
@@ -321,9 +330,6 @@ const HeaderCell = ({
               <ArrowDownwardIcon />
             )}
           </IconButton>
-        )}
-        {header.column.getCanFilter() && (
-          <HeaderFilter column={header.column} />
         )}
       </Box>
     </TableCell>

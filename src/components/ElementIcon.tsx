@@ -16,29 +16,30 @@ import { Compendium, ElementModel } from "@/services/sh-compendium";
 
 import ElementDetails from "./ElementDetails";
 
-export type ElementIconProps = {
+export interface ElementIconBaseProps {
   sx?: SxProps;
   title?: string;
-  width?: number;
-} & (
-  | {
-      element: ElementModel;
-    }
-  | {
-      elementId: string;
-    }
-);
+  maxWidth?: number;
+  maxHeight?: number;
+}
+export type ElementIconProps = ElementIconBaseProps &
+  (
+    | {
+        element: ElementModel;
+      }
+    | {
+        elementId: string;
+      }
+  );
 
 const ElementIcon = ({
   sx,
   title,
-  width,
+  maxWidth,
+  maxHeight,
   element,
   elementId,
-}: {
-  sx?: SxProps;
-  width?: number;
-  title?: string;
+}: ElementIconBaseProps & {
   element?: ElementModel;
   elementId?: string;
 }) => {
@@ -80,11 +81,16 @@ const ElementIcon = ({
     return null;
   }
 
+  if (!maxWidth && !maxHeight) {
+    maxWidth = 40;
+  }
+
   return (
     <>
       <Box
         sx={{
-          maxWidth: `${width ?? 40}px`,
+          width: maxWidth ? `${maxWidth}px` : undefined,
+          height: maxHeight ? `${maxHeight}px` : undefined,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -98,7 +104,7 @@ const ElementIcon = ({
           title={title}
           onMouseOver={onMouseOver}
           onMouseOut={onMouseOut}
-          style={{ maxWidth: "100%" }}
+          style={{ maxWidth: "100%", maxHeight: "100%" }}
         />
       </Box>
       <Popper

@@ -10,11 +10,11 @@ export function useQueryObjectState(): [
 ] {
   const location = useLocation();
   const history = useHistory();
-  const params = new URLSearchParams(location.search);
 
   const [obj, setObj] = React.useState<Record<string, any>>({});
 
   React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
     const obj: Record<string, any> = {};
     for (const [key, value] of params.entries()) {
       try {
@@ -27,7 +27,6 @@ export function useQueryObjectState(): [
 
   const setValue = React.useCallback(
     (value: Record<string, any>) => {
-      console.log("useQueryObjectState.setValue", value);
       const newParams = new URLSearchParams();
       for (const key in value) {
         newParams.set(key, JSON.stringify(value[key]));
