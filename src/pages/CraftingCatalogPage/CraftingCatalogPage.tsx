@@ -1,4 +1,6 @@
 import * as React from "react";
+import { map } from "rxjs";
+import { pickBy } from "lodash";
 
 import Box from "@mui/material/Box";
 
@@ -6,44 +8,97 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
+import PinRecipeIconButton from "@/components/PinRecipeIconButton";
+import CraftIconButton from "@/components/CraftIconButton";
 import ObservableDataGrid, {
-  aspectsColumnDef,
-  aspectsObservableColumnDef,
-  descriptionColumnDef,
-  labelColumnDef,
-  textColumnDef,
-} from "@/components/ObservableDataGrid";
+  createObservableColumnHelper,
+} from "@/components/ObservableDataGrid2";
+import ElementIconCell from "@/components/ObservableDataGrid2/cells/ElementIconCell";
+import TextWrapCell from "@/components/ObservableDataGrid2/cells/TextWrapCell";
+import AspectsListCell from "@/components/ObservableDataGrid2/cells/AspectsListCell";
 
 import { CraftableModel, useCraftables } from "./crafting-data-source";
-import { craftableCommandsColumn } from "./columns/craftable-commands";
-import { craftableIconColumn } from "./columns/craftable-icon";
-import { skillIconColumn } from "./columns/skill-icon";
+
+const columnHelper = createObservableColumnHelper<CraftableModel>();
 
 const CraftingCatalogPage = () => {
   const craftables$ = useCraftables();
 
   const columns = React.useMemo(
     () => [
-      craftableCommandsColumn(),
-      craftableIconColumn(),
-      labelColumnDef<CraftableModel>({ width: 200 }),
-      aspectsColumnDef<CraftableModel>(filterCraftableAspect, {
-        width: 300,
+      columnHelper.display({
+        id: "commands",
+        header: "",
+        size: 50,
+        cell: (props) => {
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <PinRecipeIconButton recipeId={props.row.original.id} />
+              <CraftIconButton onClick={() => props.row.original.craft()} />
+            </Box>
+          );
+        },
       }),
-      skillIconColumn(),
-      textColumnDef<CraftableModel>("Skill", "skill", "skillLabel$", {
-        width: 200,
+      columnHelper.observe("elementId$", {
+        id: "icon",
+        header: "",
+        size: 75,
+        enableColumnFilter: false,
+        enableSorting: false,
+        cell: ElementIconCell,
       }),
-      aspectsObservableColumnDef<CraftableModel>(
-        "requirements",
-        (value) => value.requirements$,
-        (x) => x != "ability",
+      columnHelper.observe("label$", {
+        id: "label",
+        header: "Name",
+        size: 120,
+        cell: TextWrapCell,
+      }),
+      columnHelper.observe(
+        (item) =>
+          item.aspects$.pipe(
+            map((aspects) =>
+              pickBy(aspects, (_v, k) => filterCraftableAspect(k))
+            )
+          ),
         {
-          headerName: "Requirements",
-          width: 200,
+          id: "aspects",
+          header: "Aspects",
+          size: 200,
+          cell: AspectsListCell,
         }
       ),
-      descriptionColumnDef<CraftableModel>(),
+      columnHelper.observe("skillElementId$", {
+        id: "skill_icon",
+        header: "",
+        size: 75,
+        enableColumnFilter: false,
+        enableSorting: false,
+        cell: ElementIconCell,
+      }),
+      columnHelper.observe("skillLabel$", {
+        id: "skill",
+        header: "Skill",
+        size: 200,
+        cell: TextWrapCell,
+      }),
+      columnHelper.observe("requirements$", {
+        id: "requirements",
+        header: "Requirements",
+        size: 200,
+        cell: AspectsListCell,
+      }),
+      columnHelper.observe("description$", {
+        id: "description",
+        header: "Description",
+        size: 300,
+        cell: TextWrapCell,
+      }),
     ],
     []
   );

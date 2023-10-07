@@ -9,13 +9,12 @@ import { aspectsMagnitude } from "@/aspects";
 import { ElementStackModel } from "@/services/sh-game";
 import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
 
-import AspectsList from "@/components/AspectsList";
-
-import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
 import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
+import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
 
 import TextWrapCell from "../cells/TextWrapCell";
 import ElementIconCell from "../cells/ElementIconCell";
+import AspectsListCell from "../cells/AspectsListCell";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
 
@@ -64,21 +63,16 @@ export function createElementStackColumnHelper<
               } else {
                 return pick(modelAspects, aspects);
               }
-            })
+            }),
+            map((aspects) =>
+              showLevel ? aspects : mapValues(aspects, () => null)
+            )
           ),
         {
           id,
           header: "Aspects",
           size: 200,
-          cell: (context) => (
-            <AspectsList
-              aspects={
-                showLevel
-                  ? context.getValue()
-                  : mapValues(context.getValue(), () => null)
-              }
-            />
-          ),
+          cell: AspectsListCell,
           sortingFn: (a, b, columnId) =>
             aspectsMagnitude(a.getValue(columnId)) -
             aspectsMagnitude(b.getValue(columnId)),
