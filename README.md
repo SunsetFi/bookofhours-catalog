@@ -170,3 +170,9 @@ Displays all memories that have been encountered in the current save file
 - Name
 - Aspects
 - Description
+
+## Known Issues
+
+- Scrolling performance on tables is bad with the Chrome browser when on a secondary monitor with a different DPI than the primary monitor.
+  - Yes, really. I don't know why. Its baffling.
+  - Firefox is unaffected.
