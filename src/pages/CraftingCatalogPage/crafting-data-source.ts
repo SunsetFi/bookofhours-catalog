@@ -14,7 +14,7 @@ import {
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
-import { mapArrayItemsCached } from "@/observables";
+import { Null$, mapArrayItemsCached } from "@/observables";
 import { useDIContainer } from "@/container";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
@@ -22,6 +22,7 @@ import { CharacterSource, Orchestrator } from "@/services/sh-game";
 
 export interface CraftableModel {
   id: string;
+  iconUrl$: Observable<string | null>;
   elementId$: Observable<string | null>;
   label$: Observable<string | null>;
   aspects$: Observable<Readonly<Aspects>>;
@@ -66,6 +67,9 @@ function recipeToCraftableModel(
 
   return {
     id: recipeModel.recipeId,
+    iconUrl$: craftable$.pipe(
+      mergeMap((element) => element?.iconUrl$ ?? Null$)
+    ),
     elementId$: craftable$.pipe(map((element) => element?.elementId ?? null)),
     label$: craftable$.pipe(
       mergeMap((element) => element?.label$ ?? nullStringObservable)
