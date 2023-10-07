@@ -2,6 +2,7 @@ import * as React from "react";
 
 import Box from "@mui/material/Box";
 
+import { powerAspects } from "@/aspects";
 import { useObservation } from "@/observables";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
@@ -12,13 +13,12 @@ import FocusIconButton from "@/components/FocusIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
 import PinElementIconButton from "@/components/PinElementIconButton";
 import ObservableDataGrid, {
+  ElementIconCell,
+  TextWrapCell,
   createElementStackColumnHelper,
-} from "@/components/ObservableDataGrid2";
+} from "@/components/ObservableDataGrid";
 
 import { BookModel, useBooks } from "./books-data-source";
-import ElementIconCell from "@/components/ObservableDataGrid2/cells/ElementIconCell";
-import TextWrapCell from "@/components/ObservableDataGrid2/cells/TextWrapCell";
-import { powerAspects } from "@/aspects";
 
 const columnHelper = createElementStackColumnHelper<BookModel>();
 

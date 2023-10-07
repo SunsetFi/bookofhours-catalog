@@ -13,7 +13,7 @@ import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import ObservableDataGrid, {
   createSituationColumnHelper,
-} from "@/components/ObservableDataGrid2";
+} from "@/components/ObservableDataGrid";
 
 const columnHelper = createSituationColumnHelper();
 

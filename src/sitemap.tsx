@@ -11,7 +11,6 @@ import HarvestCatalogPage from "./pages/HarvestCatalogPage";
 import MaterialsCatalogPage, {
   materialsSearchProvider,
 } from "./pages/MaterialsCatalogPage";
-import MemoriesCompendiumPage from "./pages/MemoriesCompendiumPage";
 import ProvisionsCatalog, {
   provisionsSearchProvider,
 } from "./pages/ProvisionsCatalog";
@@ -103,12 +102,6 @@ const sitemap: SiteMapItem[] = [
     aspectIcon: "nectar",
     path: "/harvest",
     Component: HarvestCatalogPage,
-  },
-  {
-    label: "Memories",
-    aspectIcon: "memory",
-    path: "/memories",
-    Component: MemoriesCompendiumPage,
   },
 ];
 

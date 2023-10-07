@@ -15,7 +15,7 @@ import FocusIconButton from "@/components/FocusIconButton";
 import PageContainer from "@/components/PageContainer";
 import ObservableDataGrid, {
   createElementStackColumnHelper,
-} from "@/components/ObservableDataGrid2";
+} from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
 

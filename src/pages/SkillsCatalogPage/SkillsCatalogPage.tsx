@@ -21,7 +21,7 @@ import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   createElementStackColumnHelper,
-} from "@/components/ObservableDataGrid2";
+} from "@/components/ObservableDataGrid";
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 const columnHelper = createElementStackColumnHelper();

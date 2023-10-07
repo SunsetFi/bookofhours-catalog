@@ -19,7 +19,7 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
 import ObservableDataGrid, {
   createSituationColumnHelper,
-} from "@/components/ObservableDataGrid2";
+} from "@/components/ObservableDataGrid";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
 interface WorkstationModelDecorators {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router";
+import { Route, Routes, Navigate } from "react-router";
 
 import IndexPage from "@/pages/Index";
 
@@ -11,6 +11,7 @@ const AppRoutes = () => (
     {sitemap.map(({ path, Component }) => (
       <Route key={path} path={path} Component={Component} />
     ))}
+    <Route path="*" Component={() => <Navigate to="/" />} />
   </Routes>
 );
 

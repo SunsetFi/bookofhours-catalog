@@ -12,8 +12,7 @@ import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
 import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
 import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
 
-import TextWrapCell from "../cells/TextWrapCell";
-import AspectsListCell from "../cells/AspectsListCell";
+import { AspectsListCell, TextWrapCell } from "../cells";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
 

@@ -11,11 +11,11 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import PinRecipeIconButton from "@/components/PinRecipeIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
 import ObservableDataGrid, {
+  ElementIconCell,
+  TextWrapCell,
+  AspectsListCell,
   createObservableColumnHelper,
-} from "@/components/ObservableDataGrid2";
-import ElementIconCell from "@/components/ObservableDataGrid2/cells/ElementIconCell";
-import TextWrapCell from "@/components/ObservableDataGrid2/cells/TextWrapCell";
-import AspectsListCell from "@/components/ObservableDataGrid2/cells/AspectsListCell";
+} from "@/components/ObservableDataGrid";
 
 import { CraftableModel, useCraftables } from "./crafting-data-source";
 
