@@ -419,25 +419,25 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
           }}
         />
       </IconButton>
-      {anchorEl && (
-        <Popover
-          open
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          onClose={() => {
-            setAnchorEl(null);
-          }}
-        >
+      <Popover
+        open={anchorEl != null}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        onClose={() => {
+          setAnchorEl(null);
+        }}
+      >
+        {anchorEl != null && (
           <Filter
             columnValues={uniqueValues}
             filterValue={column.getFilterValue()}
             onChange={column.setFilterValue}
           />
-        </Popover>
-      )}
+        )}
+      </Popover>
     </>
   );
 };
