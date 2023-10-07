@@ -3,7 +3,6 @@ import { mergeMap } from "rxjs";
 
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import Badge from "@mui/material/Badge";
 
 import { useObservation } from "@/observables";
@@ -11,6 +10,7 @@ import { useObservation } from "@/observables";
 import { ElementStackModel } from "@/services/sh-game";
 
 import AspectsList from "./AspectsList";
+import GameTypography from "./GameTypography";
 
 export interface ElementStackDetailsProps {
   elementStack: ElementStackModel;
@@ -66,12 +66,12 @@ const ElementStackDetails = React.forwardRef<
             style={{ width: "50px" }}
           />
         </Badge>
-        <Typography variant="body1">{label}</Typography>
+        <GameTypography variant="body1">{label}</GameTypography>
       </Box>
       {description && (
-        <Typography variant="body2" sx={{ mb: 2 }}>
+        <GameTypography variant="body2" sx={{ mb: 2 }}>
           {description}
-        </Typography>
+        </GameTypography>
       )}
       <AspectsList aspects={aspects} />
     </Card>
