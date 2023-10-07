@@ -15,18 +15,11 @@ import {
 } from "@/services/sh-game";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-import ObservableDataGrid, {
-  descriptionColumnDef,
-  iconColumnDef,
-  labelColumnDef,
-  locationColumnDef,
-  aspectsColumnDef,
-  aspectsPresenceColumnDef,
-  ObservableDataGridColumnDef,
-} from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
-import { aspectsFilter } from "@/components/ObservableDataGrid/filters/aspects";
 import FocusIconButton from "@/components/FocusIconButton";
+import ObservableDataGrid, {
+  elementStackColumnHelper,
+} from "@/components/ObservableDataGrid2";
 
 const ProvisionsCatalog = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -41,11 +34,11 @@ const ProvisionsCatalog = () => {
 
   const columns = React.useMemo(
     () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => (
+      elementStackColumnHelper.display({
+        id: "focus-button",
+        header: "",
+        size: 50,
+        cell: ({ row }) => (
           <Box
             sx={{
               display: "flex",
@@ -53,20 +46,22 @@ const ProvisionsCatalog = () => {
               alignItems: "center",
             }}
           >
-            <FocusIconButton token={value} />
+            <FocusIconButton token={row.original} />
           </Box>
         ),
-      } as ObservableDataGridColumnDef<ElementStackModel>,
-      iconColumnDef<ElementStackModel>(),
-      labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>(),
-      aspectsPresenceColumnDef<ElementStackModel>(
-        provisionsAspects,
-        { display: "none", orientation: "horizontal" },
-        { headerName: "Type", filter: aspectsFilter("type", provisionsAspects) }
-      ),
-      aspectsColumnDef<ElementStackModel>(powerAspects),
-      descriptionColumnDef<ElementStackModel>(),
+      }),
+      elementStackColumnHelper.elementIcon(),
+      elementStackColumnHelper.label(),
+      elementStackColumnHelper.location(),
+      elementStackColumnHelper.aspectsList("type", provisionsAspects, {
+        header: "Type",
+        size: 200,
+        showLevel: false,
+      }),
+      elementStackColumnHelper.aspectsList("power-aspects", powerAspects, {
+        size: 300,
+      }),
+      elementStackColumnHelper.description(),
     ],
     []
   );

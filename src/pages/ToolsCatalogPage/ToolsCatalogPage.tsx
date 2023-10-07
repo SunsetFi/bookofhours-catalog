@@ -6,27 +6,17 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects } from "@/aspects";
 
-import {
-  ElementStackModel,
-  TokensSource,
-  filterHasAnyAspect,
-} from "@/services/sh-game";
+import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
 
-import ObservableDataGrid, {
-  ObservableDataGridColumnDef,
-  aspectsColumnDef,
-  aspectsPresenceColumnDef,
-  descriptionColumnDef,
-  iconColumnDef,
-  labelColumnDef,
-  locationColumnDef,
-} from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
+import ObservableDataGrid, {
+  elementStackColumnHelper,
+} from "@/components/ObservableDataGrid2";
 
 const ToolsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -38,11 +28,11 @@ const ToolsCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => (
+      elementStackColumnHelper.display({
+        id: "focus-button",
+        header: "",
+        size: 50,
+        cell: ({ row }) => (
           <Box
             sx={{
               display: "flex",
@@ -50,20 +40,22 @@ const ToolsCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <FocusIconButton token={value} />
+            <FocusIconButton token={row.original} />
           </Box>
         ),
-      } as ObservableDataGridColumnDef<ElementStackModel>,
-      iconColumnDef<ElementStackModel>(),
-      labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>(),
-      aspectsColumnDef<ElementStackModel>(powerAspects),
-      aspectsPresenceColumnDef<ElementStackModel>(
-        ["device"],
-        { display: "none" },
-        { headerName: "Consumable", width: 200 }
-      ),
-      descriptionColumnDef<ElementStackModel>(),
+      }),
+      elementStackColumnHelper.elementIcon(),
+      elementStackColumnHelper.label(),
+      elementStackColumnHelper.location(),
+      elementStackColumnHelper.aspectsList("power-aspects", powerAspects, {
+        size: 300,
+      }),
+      elementStackColumnHelper.aspectsList("device", ["device"], {
+        header: "Consumable",
+        size: 200,
+        showLevel: false,
+      }),
+      elementStackColumnHelper.description(),
     ],
     []
   );

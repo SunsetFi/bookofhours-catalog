@@ -6,28 +6,16 @@ import { useDIDependency } from "@/container";
 
 import { materialAspects, powerAspects } from "@/aspects";
 
-import {
-  ElementStackModel,
-  TokensSource,
-  filterHasAnyAspect,
-} from "@/services/sh-game";
+import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { RequireRunning } from "@/components/RequireLegacy";
-
-import ObservableDataGrid, {
-  ObservableDataGridColumnDef,
-  aspectsColumnDef,
-  aspectsPresenceColumnDef,
-  aspectsPresenceFilter,
-  descriptionColumnDef,
-  iconColumnDef,
-  labelColumnDef,
-  locationColumnDef,
-} from "@/components/ObservableDataGrid";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
+import ObservableDataGrid, {
+  elementStackColumnHelper,
+} from "@/components/ObservableDataGrid2";
 
 const MaterialsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
@@ -43,11 +31,11 @@ const MaterialsCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => (
+      elementStackColumnHelper.display({
+        id: "focus-button",
+        header: "",
+        size: 50,
+        cell: ({ row }) => (
           <Box
             sx={{
               display: "flex",
@@ -55,24 +43,22 @@ const MaterialsCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <FocusIconButton token={value} />
+            <FocusIconButton token={row.original} />
           </Box>
         ),
-      } as ObservableDataGridColumnDef<ElementStackModel>,
-      iconColumnDef<ElementStackModel>(),
-      labelColumnDef<ElementStackModel>(),
-      locationColumnDef<ElementStackModel>(),
-      aspectsColumnDef<ElementStackModel>(powerAspects),
-      aspectsPresenceColumnDef<ElementStackModel>(
-        materialAspects,
-        { display: "none" },
-        {
-          headerName: "Type",
-          width: 175,
-          filter: aspectsPresenceFilter("type", materialAspects),
-        }
-      ),
-      descriptionColumnDef<ElementStackModel>(),
+      }),
+      elementStackColumnHelper.elementIcon(),
+      elementStackColumnHelper.label(),
+      elementStackColumnHelper.location(),
+      elementStackColumnHelper.aspectsList("power-aspects", powerAspects, {
+        size: 300,
+      }),
+      elementStackColumnHelper.aspectsList("material", materialAspects, {
+        header: "Type",
+        size: 175,
+        showLevel: false,
+      }),
+      elementStackColumnHelper.description(),
     ],
     []
   );

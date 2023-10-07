@@ -1,8 +1,7 @@
 import React from "react";
 import { IdentifiedColumnDef } from "@tanstack/react-table";
-import { map } from "rxjs";
-import { pick } from "lodash";
-import { Aspects } from "secrethistories-api";
+import { Observable, map } from "rxjs";
+import { mapValues, pick, pickBy } from "lodash";
 
 import { mergeMapIfNotNull } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
@@ -16,9 +15,10 @@ import AspectsList from "@/components/AspectsList";
 import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
 import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
 
-import { createObservableColumnHelper } from "./observable-column-helper";
 import { RowHeight, RowPaddingY } from "../constants";
 import TextWrapCell from "../cells/TextWrapCell";
+
+import { createObservableColumnHelper } from "./observable-column-helper";
 
 const columnHelper = createObservableColumnHelper<ElementStackModel>();
 export const elementStackColumnHelper = Object.assign(columnHelper, {
@@ -49,26 +49,56 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
     }),
   aspectsList: (
     id: string,
-    aspects: readonly string[],
-    def?: Partial<IdentifiedColumnDef<ElementStackModel, Aspects>>
+    aspects: readonly string[] | ((aspectId: string) => boolean),
+    {
+      showLevel = true,
+      aspectsSource = (model) => model.aspects$,
+      ...def
+    }: Partial<
+      IdentifiedColumnDef<ElementStackModel, Record<string, React.ReactNode>>
+    > & {
+      showLevel?: boolean;
+      aspectsSource?: (
+        model: ElementStackModel
+      ) => Observable<Record<string, React.ReactNode>>;
+    } = {}
   ) =>
     columnHelper.observe(
       (model) =>
-        model.aspects$.pipe(
-          map((modelAspects) => pick(modelAspects, aspects) as Aspects)
+        aspectsSource(model).pipe(
+          map((modelAspects) => {
+            if (typeof aspects === "function") {
+              return pickBy(modelAspects, (_v, k) => aspects(k));
+            } else {
+              return pick(modelAspects, aspects);
+            }
+          })
         ),
       {
         id,
         header: "Aspects",
         size: 200,
-        cell: (context) => <AspectsList aspects={context.getValue()} />,
+        cell: (context) => (
+          <AspectsList
+            aspects={
+              showLevel
+                ? context.getValue()
+                : mapValues(context.getValue(), () => null)
+            }
+          />
+        ),
         sortingFn: (a, b, columnId) =>
           aspectsMagnitude(a.getValue(columnId)) -
           aspectsMagnitude(b.getValue(columnId)),
         filterFn: aspectsFilter,
         meta: {
           filterComponent: (props) => (
-            <AspectsFilter allowedAspectIds={aspects} {...props} />
+            <AspectsFilter
+              allowedAspectIds={
+                typeof aspects === "function" ? "auto" : aspects
+              }
+              {...props}
+            />
           ),
         },
         ...def,
