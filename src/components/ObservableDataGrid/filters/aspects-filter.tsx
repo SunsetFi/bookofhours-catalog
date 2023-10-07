@@ -131,7 +131,7 @@ export const AspectsFilter = ({
           width: "100%",
         }}
       >
-        <Button size="small" onClick={() => onChange({ $mode: "any" })}>
+        <Button size="small" onClick={() => onChange(null)}>
           Clear
         </Button>
         <Button

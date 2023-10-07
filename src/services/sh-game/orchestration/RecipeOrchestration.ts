@@ -3,6 +3,7 @@ import {
   Observable,
   asapScheduler,
   combineLatest,
+  debounceTime,
   distinctUntilChanged,
   firstValueFrom,
   map,
@@ -10,7 +11,6 @@ import {
   of as observableOf,
   observeOn,
   shareReplay,
-  throttleTime,
 } from "rxjs";
 import {
   Aspects,
@@ -109,11 +109,9 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
-    this.slots$
-      .pipe(throttleTime(5, asapScheduler, { leading: false, trailing: true }))
-      .subscribe((slots) => {
-        this._pickDefaults(Object.values(slots));
-      });
+    this.slots$.pipe(debounceTime(5)).subscribe((slots) => {
+      this._pickDefaults(Object.values(slots));
+    });
   }
 
   private _executionPlan$: Observable<ExecutionPlan | null> | null = null;

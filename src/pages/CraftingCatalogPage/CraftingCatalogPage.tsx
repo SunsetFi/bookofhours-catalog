@@ -4,6 +4,8 @@ import { pickBy } from "lodash";
 
 import Box from "@mui/material/Box";
 
+import { aspectsMagnitude } from "@/aspects";
+
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
@@ -20,7 +22,6 @@ import ObservableDataGrid, {
 } from "@/components/ObservableDataGrid";
 
 import { CraftableModel, useCraftables } from "./crafting-data-source";
-import { aspectsMagnitude } from "@/aspects";
 
 const columnHelper = createObservableColumnHelper<CraftableModel>();
 

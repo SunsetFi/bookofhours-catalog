@@ -9,8 +9,12 @@ import { aspectsMagnitude } from "@/aspects";
 import { SituationModel } from "@/services/sh-game";
 import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
 
-import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
-import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
+import {
+  MultiselectOptionsFilter,
+  AspectsFilter,
+  aspectsFilter,
+  TextFilter,
+} from "../filters";
 
 import { AspectsListCell, TextWrapCell } from "../cells";
 
@@ -28,6 +32,9 @@ export function createSituationColumnHelper<
         header: "Name",
         cell: TextWrapCell,
         filterFn: "includesString",
+        meta: {
+          filterComponent: TextFilter,
+        },
         ...def,
       }),
     aspectsList: (
@@ -84,6 +91,11 @@ export function createSituationColumnHelper<
       columnHelper.observe("description$" as any, {
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
+        enableSorting: false,
+        filterFn: "includesString",
+        meta: {
+          filterComponent: TextFilter,
+        },
         cell: TextWrapCell,
       }),
     location: () =>

@@ -51,6 +51,7 @@ function TextWrapCell<T extends RowData>(props: CellContext<T, string | null>) {
           : undefined,
       }}
     >
+      {/* TODO: Pop open on mouse position.  This is popping on the bottom of the typography, which can be significantly offset due to our masking.*/}
       <Tooltip open={open} title={value}>
         <GameTypography
           ref={setTextRef}

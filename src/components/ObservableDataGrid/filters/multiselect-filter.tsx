@@ -43,7 +43,7 @@ export function MultiselectOptionsFilter<T>({
           width: "100%",
         }}
       >
-        <Button size="small" onClick={() => onChange([])}>
+        <Button size="small" onClick={() => onChange(null)}>
           Clear
         </Button>
         <Button

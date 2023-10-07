@@ -54,7 +54,9 @@ const BookCatalogPage = () => {
       }),
       columnHelper.aspectsList("mastery", (s) => s.startsWith("mastery."), {
         header: "Mastery",
-        size: 175,
+        size: 125,
+        showLevel: false,
+        enableSorting: false,
       }),
       columnHelper.display({
         id: "memory-commands",
@@ -88,31 +90,34 @@ const BookCatalogPage = () => {
       columnHelper.observe("memoryLabel$", {
         id: "memory",
         header: "Memory",
-        size: 200,
+        size: 160,
         cell: TextWrapCell,
       }),
       columnHelper.aspectsList("memory-aspects", powerAspects, {
         header: "Memory Aspects",
-        size: 275,
+        size: 260,
         aspectsSource: (model) => model.memoryAspects$,
       }),
       columnHelper.aspectsList("language", (s) => s.startsWith("w."), {
         header: "Language",
-        size: 175,
+        size: 140,
         showLevel: false,
+        enableSorting: false,
       }),
       columnHelper.aspectsList("type", ["film", "record.phonograph"], {
         header: "Type",
-        size: 150,
+        size: 100,
         showLevel: false,
+        enableSorting: false,
       }),
       columnHelper.aspectsList(
         "contamination",
         (s) => s.startsWith("contamination."),
         {
           header: "Contamination",
-          size: 250,
+          size: 180,
           showLevel: false,
+          enableSorting: false,
         }
       ),
       columnHelper.description(),

@@ -2,12 +2,11 @@ import { Container, inject, injectable, singleton } from "microinject";
 import {
   BehaviorSubject,
   Observable,
-  asyncScheduler,
   combineLatest,
   filter,
   map,
   shareReplay,
-  throttleTime,
+  debounceTime,
 } from "rxjs";
 
 import { isNotNull } from "@/utils";
@@ -25,7 +24,7 @@ export class SearchService {
   );
 
   private readonly _searchQueryResponse$ = this._searchQueryInput$.pipe(
-    throttleTime(1000, asyncScheduler, { leading: false, trailing: true })
+    debounceTime(1000)
   );
 
   private readonly _searchQueryResponseNotEmpty$ =

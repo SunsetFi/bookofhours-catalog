@@ -9,8 +9,12 @@ import { aspectsMagnitude } from "@/aspects";
 import { ElementStackModel } from "@/services/sh-game";
 import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
 
-import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
-import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
+import {
+  MultiselectOptionsFilter,
+  AspectsFilter,
+  aspectsFilter,
+  TextFilter,
+} from "../filters";
 
 import { AspectsListCell, TextWrapCell, ElementIconCell } from "../cells";
 
@@ -28,6 +32,9 @@ export function createElementStackColumnHelper<
         header: "Name",
         cell: TextWrapCell,
         filterFn: "includesString",
+        meta: {
+          filterComponent: TextFilter,
+        },
         ...def,
       }),
     elementIcon: () =>
@@ -92,6 +99,11 @@ export function createElementStackColumnHelper<
       columnHelper.observe("description$" as any, {
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
+        enableSorting: false,
+        filterFn: "includesString",
+        meta: {
+          filterComponent: TextFilter,
+        },
         cell: TextWrapCell,
       }),
     location: () =>

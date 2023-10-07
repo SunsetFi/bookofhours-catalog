@@ -5,27 +5,33 @@ import AspectIcon from "./AspectIcon";
 
 export type GameTypographyProps = TypographyProps;
 
-const GameTypography = ({ children, ...props }: GameTypographyProps) => {
-  const parts = React.useMemo(
-    () =>
-      React.Children.toArray(children).flatMap((child) => {
-        if (typeof child === "string") {
-          return parseSprites(child, (name) => (
-            <AspectIcon
-              size={30}
-              aspectId={name}
-              sx={{ display: "inline-block", verticalAlign: "middle" }}
-            />
-          ));
-        }
+const GameTypography = React.forwardRef<HTMLSpanElement, GameTypographyProps>(
+  ({ children, ...props }, ref) => {
+    const parts = React.useMemo(
+      () =>
+        React.Children.toArray(children).flatMap((child) => {
+          if (typeof child === "string") {
+            return parseSprites(child, (name) => (
+              <AspectIcon
+                size={30}
+                aspectId={name}
+                sx={{ display: "inline-block", verticalAlign: "middle" }}
+              />
+            ));
+          }
 
-        return child;
-      }),
-    [children]
-  );
+          return child;
+        }),
+      [children]
+    );
 
-  return <Typography {...props}>{parts}</Typography>;
-};
+    return (
+      <Typography ref={ref} {...props}>
+        {parts}
+      </Typography>
+    );
+  }
+);
 
 export default GameTypography;
 
