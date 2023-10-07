@@ -139,7 +139,6 @@ const BookCatalogPage = () => {
         }}
       >
         <ObservableDataGrid
-          sx={{ height: "100%" }}
           columns={columns}
           items$={items$}
           filters={filter}

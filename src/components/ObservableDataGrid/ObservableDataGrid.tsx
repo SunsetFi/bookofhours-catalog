@@ -203,10 +203,9 @@ function ObservableDataGrid<T extends {}>({
   const state = React.useMemo<Partial<TableState>>(
     () => ({
       sorting,
-      columnFilters:
-        onFiltersChanged && filters ? recordToFilter(filters) : undefined,
+      columnFilters: filters ? recordToFilter(filters) : undefined,
     }),
-    [sorting, onFiltersChanged, filters]
+    [sorting, filters]
   );
 
   const data = useObservation(
@@ -245,12 +244,10 @@ function ObservableDataGrid<T extends {}>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
-  const { rows } = table.getRowModel();
-
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
-    count: rows.length,
+    count: table.getRowModel().rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: RowHeightFunc,
     overscan: 20,
@@ -258,23 +255,105 @@ function ObservableDataGrid<T extends {}>({
 
   const virtualRows = virtualizer.getVirtualItems();
 
-  // Docs are pitiful for virtualizer...
-  // The only functioning example (on react-table, not on react-virtual) has us use translateY() and
-  // size the outer scrollbar content to be the total size.
-  // We cannot use that with sticky headers as we will scroll past the table bounds well before we
-  // get a fraction of the way into scrolling the table itself, causing the stickyness to go away.
-  // We cannot fix this by setting the table height directly, as the stupid thing will try to stretch its rows out,
-  // even though we set the table layout to fixed.
-  // Anyway, this is the 'old way' of doing things (which currently is the only way documented on react-virtual's docs), which is slower and jankier
-  // but makes the table be the correct height, preserving our sticky header.
-  const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
-  const paddingBottom =
-    virtualRows.length > 0
-      ? virtualizer.getTotalSize() -
-        (virtualRows?.[virtualRows.length - 1]?.end || 0)
-      : 0;
+  const headerGroups = table.getHeaderGroups();
 
-  const totalColumns = table.getHeaderGroups()[0].headers.length;
+  const rows = table.getRowModel().rows;
+
+  const tableElement = React.useMemo(() => {
+    const totalColumns = table.getHeaderGroups()[0].headers.length;
+
+    // Docs are pitiful for virtualizer...
+    // The only functioning example (on react-table, not on react-virtual) has us use translateY() and
+    // size the outer scrollbar content to be the total size.
+    // We cannot use that with sticky headers as we will scroll past the table bounds well before we
+    // get a fraction of the way into scrolling the table itself, causing the stickyness to go away.
+    // We cannot fix this by setting the table height directly, as the stupid thing will try to stretch its rows out,
+    // even though we set the table layout to fixed.
+    // Anyway, this is the 'old way' of doing things (which currently is the only way documented on react-virtual's docs), which is slower and jankier
+    // but makes the table be the correct height, preserving our sticky header.
+    const paddingTop =
+      virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
+    const paddingBottom =
+      virtualRows.length > 0
+        ? virtualizer.getTotalSize() -
+          (virtualRows?.[virtualRows.length - 1]?.end || 0)
+        : 0;
+
+    return (
+      <Table
+        sx={{
+          tableLayout: "fixed",
+        }}
+        stickyHeader
+      >
+        <TableHead>
+          {headerGroups.map((group) => (
+            <TableRow key={group.id}>
+              {group.headers.map((header) => (
+                <HeaderCell key={header.id} header={header} />
+              ))}
+            </TableRow>
+          ))}
+        </TableHead>
+        <TableBody>
+          {paddingTop > 0 && (
+            // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
+            <TableRow style={{ height: `${paddingTop}px` }} />
+          )}
+          {virtualRows.map((virtualRow) => {
+            const row = rows[virtualRow.index];
+            return (
+              <TableRow
+                key={row.id}
+                sx={{
+                  height: `${virtualRow.size}px`,
+                }}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            );
+          })}
+          {paddingBottom > 0 && (
+            // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
+            <TableRow style={{ height: `${paddingBottom}px` }} />
+          )}
+        </TableBody>
+        <TableFooter
+          sx={{
+            position: "sticky",
+            bottom: 0,
+            backgroundColor: theme.palette.background.default,
+          }}
+        >
+          {virtualRows.length > 0 && (
+            <TableRow>
+              <TableCell colSpan={totalColumns}>
+                <Box
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="caption" sx={{ ml: "auto" }}>
+                    {/* This doesn't take into account overscan. */}
+                    {/* Showing items {virtualRows[0].index + 1} to{" "}
+              {virtualRows[virtualRows.length - 1].index + 1} of{" "}
+              {rows.length} */}
+                    Showing {rows.length} items
+                  </Typography>
+                </Box>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableFooter>
+      </Table>
+    );
+  }, [rows, headerGroups, virtualRows]);
 
   return (
     <TableContainer
@@ -294,86 +373,12 @@ function ObservableDataGrid<T extends {}>({
           <CircularProgress />
         </Box>
       )}
-      {data && (
-        <Table
-          sx={{
-            tableLayout: "fixed",
-          }}
-          stickyHeader
-        >
-          <TableHead>
-            {table.getHeaderGroups().map((group) => (
-              <TableRow key={group.id}>
-                {group.headers.map((header) => (
-                  <HeaderCell key={header.id} header={header} />
-                ))}
-              </TableRow>
-            ))}
-          </TableHead>
-          <TableBody>
-            {paddingTop > 0 && (
-              // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
-              <TableRow style={{ height: `${paddingTop}px` }} />
-            )}
-            {virtualRows.map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              return (
-                <TableRow
-                  key={row.id}
-                  sx={{
-                    height: `${virtualRow.size}px`,
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
-            {paddingBottom > 0 && (
-              // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
-              <TableRow style={{ height: `${paddingBottom}px` }} />
-            )}
-          </TableBody>
-          <TableFooter
-            sx={{
-              position: "sticky",
-              bottom: 0,
-              backgroundColor: theme.palette.background.default,
-            }}
-          >
-            {virtualRows.length > 0 && (
-              <TableRow>
-                <TableCell colSpan={totalColumns}>
-                  <Box
-                    sx={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ ml: "auto" }}>
-                      {/* This doesn't take into account overscan. */}
-                      {/* Showing items {virtualRows[0].index + 1} to{" "}
-                    {virtualRows[virtualRows.length - 1].index + 1} of{" "}
-                    {rows.length} */}
-                      Showing {rows.length} items
-                    </Typography>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableFooter>
-        </Table>
-      )}
+      {data && <>{tableElement}</>}
     </TableContainer>
   );
 }
+
+export default ObservableDataGrid;
 
 const HeaderCell = ({
   header,
@@ -476,5 +481,3 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
     </>
   );
 };
-
-export default ObservableDataGrid;

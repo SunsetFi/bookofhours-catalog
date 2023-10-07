@@ -10,6 +10,8 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
 
+import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
+
 import { FilterComponentProps } from "./types";
 
 export interface MultiselectOptionsFilterProps<T>
@@ -17,14 +19,24 @@ export interface MultiselectOptionsFilterProps<T>
   allowedValues: any[];
 }
 
+const defaultFilterValue: any[] = [];
+
 export function MultiselectOptionsFilter<T>({
   allowedValues,
   filterValue,
   onChange,
 }: MultiselectOptionsFilterProps<T>) {
-  if (filterValue == null) {
-    filterValue = [];
+  const [localValue, setLocalValue] = useDebounceCommitValue(1000, onChange);
+
+  // This nonsense is so null localValue is respected but undefined is delegated to filterValue.
+  let currentValue = localValue;
+  if (currentValue === undefined) {
+    currentValue = filterValue;
   }
+  if (currentValue == null) {
+    currentValue = defaultFilterValue as any;
+  }
+
   const [search, setSearch] = React.useState<string>("");
   return (
     <Box
@@ -43,13 +55,13 @@ export function MultiselectOptionsFilter<T>({
           width: "100%",
         }}
       >
-        <Button size="small" onClick={() => onChange(null)}>
+        <Button size="small" onClick={() => setLocalValue(null)}>
           Clear
         </Button>
         <Button
           size="small"
           sx={{ pl: 1, ml: "auto" }}
-          onClick={() => onChange(allowedValues)}
+          onClick={() => setLocalValue(allowedValues)}
         >
           Select All
         </Button>
@@ -76,7 +88,7 @@ export function MultiselectOptionsFilter<T>({
                   e.preventDefault();
                   e.stopPropagation();
 
-                  let newValue = filterValue!;
+                  let newValue = currentValue!;
                   if (newValue.includes(value)) {
                     newValue = newValue.filter((x) => x !== value);
                   } else {
@@ -84,16 +96,16 @@ export function MultiselectOptionsFilter<T>({
                   }
 
                   if (newValue.length === 0) {
-                    onChange(null);
+                    setLocalValue(null);
                   } else {
-                    onChange(newValue);
+                    setLocalValue(newValue);
                   }
                 }}
               >
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    checked={filterValue!.includes(value)}
+                    checked={currentValue!.includes(value)}
                     tabIndex={-1}
                     disableRipple
                   />

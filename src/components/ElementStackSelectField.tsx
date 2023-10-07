@@ -77,7 +77,7 @@ const ElementStackSelectField = ({
       fullWidth={fullWidth}
       options={elementStacks}
       autoHighlight
-      getOptionLabel={(option) => option.label ?? ""}
+      getOptionLabel={(option) => option.label!}
       renderInput={(params) => (
         <TextField
           {...params}

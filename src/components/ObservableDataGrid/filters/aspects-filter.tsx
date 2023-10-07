@@ -9,6 +9,8 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 
+import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
+
 import AspectSelectionGrid from "@/components/AspectSelectionGrid";
 
 import { FilterComponentProps } from "./types";
@@ -67,19 +69,26 @@ export const AspectsFilter = ({
 }: FilterComponentProps<FilterValue, Aspects> & {
   allowedAspectIds: readonly string[] | "auto";
 }) => {
-  if (!filterValue) {
-    filterValue = defaultFilterValue;
-  }
-
-  const matchMode = (filterValue as any)["$mode"] ?? "any";
-  const aspects = Object.keys(filterValue).filter((k) => k !== "$mode");
-
   let choices: readonly string[] = [];
   if (allowedAspectIds === "auto") {
     choices = uniq(flatten(columnValues.map((x) => Object.keys(x))));
   } else {
     choices = allowedAspectIds;
   }
+
+  const [localValue, setLocalValue] = useDebounceCommitValue(1000, onChange);
+
+  // This nonsense is so null localValue is respected but undefined is delegated to filterValue.
+  let currentValue = localValue;
+  if (currentValue === undefined) {
+    currentValue = filterValue;
+  }
+  if (currentValue == null) {
+    currentValue = defaultFilterValue;
+  }
+
+  const matchMode = (currentValue as any)["$mode"] ?? "any";
+  const aspects = Object.keys(currentValue).filter((k) => k !== "$mode");
 
   const onAspectsChanged = React.useCallback(
     (selectedAspects: readonly string[]) => {
@@ -92,27 +101,27 @@ export const AspectsFilter = ({
       };
 
       if (isEqual(newFilter, defaultFilterValue)) {
-        onChange(null);
+        setLocalValue(null);
       } else {
-        onChange(newFilter);
+        setLocalValue(newFilter);
       }
     },
-    [matchMode, onChange]
+    [matchMode, setLocalValue]
   );
 
   const onModeChanged = React.useCallback(
     (mode: "any" | "all" | "none") => {
-      const newFilter = { ...filterValue, $mode: mode };
+      const newFilter = { ...currentValue, $mode: mode };
       if (isEqual(newFilter, defaultFilterValue)) {
-        onChange(null);
+        setLocalValue(null);
       } else {
-        onChange({
-          ...filterValue,
+        setLocalValue({
+          ...currentValue,
           $mode: mode,
         });
       }
     },
-    [onChange, filterValue]
+    [setLocalValue, currentValue]
   );
 
   return (

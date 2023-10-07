@@ -8,8 +8,9 @@ export function useQueryObjectState(): [
   obj: Record<string, any>,
   setValue: (value: Record<string, any>) => void
 ] {
-  const location = useLocation();
   const history = useHistory();
+
+  const location = useLocation();
 
   const [obj, setObj] = React.useState<Record<string, any>>({});
 
@@ -31,6 +32,7 @@ export function useQueryObjectState(): [
       for (const key in value) {
         newParams.set(key, JSON.stringify(value[key]));
       }
+
       history.replace(`${location.pathname}?${newParams.toString()}`);
     },
     [location, history]

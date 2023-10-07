@@ -1,11 +1,10 @@
 import * as React from "react";
-import { BehaviorSubject, debounceTime } from "rxjs";
 
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 
-import { useObservation } from "@/observables";
+import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 
 import { FilterComponentProps } from "./types";
 
@@ -13,30 +12,18 @@ export const TextFilter = ({
   filterValue,
   onChange,
 }: FilterComponentProps<string | null, string | null>) => {
-  // Theres probably a cleaner way to do this, but currently rxjs is my hammer and this looks pretty nail shaped to me.
-  const localValue$ = React.useMemo(
-    () => new BehaviorSubject<string | null>(null),
-    []
+  const onCommit = React.useCallback(
+    (value: string) => {
+      if (value === "") {
+        onChange(null);
+      } else {
+        onChange(value);
+      }
+    },
+    [onChange]
   );
-  const localValue = useObservation(localValue$);
-  React.useEffect(() => {
-    const subscription = localValue$
-      .pipe(debounceTime(1000))
-      .subscribe((value) => {
-        if (value !== null) {
-          if (value === "") {
-            onChange(null);
-          } else {
-            onChange(value);
-          }
-          localValue$.next(null);
-        }
-      });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const [localValue, setLocalValue] = useDebounceCommitValue(1000, onCommit);
 
   return (
     <Box
@@ -63,8 +50,8 @@ export const TextFilter = ({
         sx={{ m: 1 }}
         autoFocus
         label="Search"
-        value={localValue}
-        onChange={(e) => localValue$.next(e.target.value)}
+        value={localValue ?? filterValue ?? ""}
+        onChange={(e) => setLocalValue(e.target.value)}
       />
     </Box>
   );
