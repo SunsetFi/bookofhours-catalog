@@ -248,7 +248,7 @@ function ObservableDataGrid<T extends {}>({
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
-    count: data?.length ?? 0,
+    count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: RowHeightFunc,
     overscan: 20,
@@ -294,7 +294,6 @@ function ObservableDataGrid<T extends {}>({
         <Table
           sx={{
             tableLayout: "fixed",
-            height: "100%",
           }}
           stickyHeader
         >
