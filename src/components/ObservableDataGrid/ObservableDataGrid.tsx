@@ -402,6 +402,7 @@ const HeaderCell = ({
         )}
         {header.column.getCanSort() && (
           <IconButton
+            size="small"
             sx={{
               opacity: isSorted === false ? 0.4 : 1,
             }}
@@ -439,6 +440,7 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
   return (
     <>
       <IconButton
+        size="small"
         aria-label={`Filter ${column.columnDef.header}`}
         onClick={onOpen}
       >

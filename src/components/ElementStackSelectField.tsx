@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
+import InputAdornment from "@mui/material/InputAdornment";
 
 import { observeAll, useObservation } from "@/observables";
 
@@ -15,6 +16,7 @@ import { ElementStackModel } from "@/services/sh-game";
 
 import AspectsList from "./AspectsList";
 import ElementStackDetails from "./ElementStackDetails";
+import ElementIcon from "./ElementIcon";
 
 export interface ElementStackSelectFieldProps {
   label: string;
@@ -68,13 +70,44 @@ const ElementStackSelectField = ({
   const selectedValue =
     elementStacks.find(({ elementStack }) => elementStack === value) ?? null;
 
+  const selectedElementId = selectedValue?.elementStack.elementId ?? null;
+
   return (
     <Autocomplete
       fullWidth={fullWidth}
       options={elementStacks}
       autoHighlight
       getOptionLabel={(option) => option.label ?? ""}
-      renderInput={(params) => <TextField {...params} label={label} />}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          InputProps={{
+            ...params.InputProps,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Box
+                  sx={{
+                    display: "flex",
+                    height: "100%",
+                    width: "30px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {selectedElementId && (
+                    <ElementIcon
+                      maxWidth={30}
+                      maxHeight={30}
+                      elementId={selectedElementId}
+                    />
+                  )}
+                </Box>
+              </InputAdornment>
+            ),
+          }}
+        />
+      )}
       value={selectedValue}
       onChange={(_, value) => onChange(value?.elementStack ?? null)}
       renderOption={(props, option) => (
