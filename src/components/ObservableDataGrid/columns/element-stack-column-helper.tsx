@@ -23,7 +23,7 @@ export function createElementStackColumnHelper<
   return Object.assign(columnHelper, {
     label: (def?: Partial<IdentifiedColumnDef<T, string | null>>) =>
       columnHelper.observe("label$" as any, {
-        id: "label",
+        id: "name",
         size: 200,
         header: "Name",
         cell: TextWrapCell,

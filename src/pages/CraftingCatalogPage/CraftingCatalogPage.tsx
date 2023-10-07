@@ -15,9 +15,12 @@ import ObservableDataGrid, {
   TextWrapCell,
   AspectsListCell,
   createObservableColumnHelper,
+  aspectsFilter,
+  AspectsFilter,
 } from "@/components/ObservableDataGrid";
 
 import { CraftableModel, useCraftables } from "./crafting-data-source";
+import { aspectsMagnitude } from "@/aspects";
 
 const columnHelper = createObservableColumnHelper<CraftableModel>();
 
@@ -54,9 +57,10 @@ const CraftingCatalogPage = () => {
         cell: ElementIconCell,
       }),
       columnHelper.observe("label$", {
-        id: "label",
+        id: "name",
         header: "Name",
         size: 120,
+        filterFn: "includesString",
         cell: TextWrapCell,
       }),
       columnHelper.observe(
@@ -70,6 +74,15 @@ const CraftingCatalogPage = () => {
           id: "aspects",
           header: "Aspects",
           size: 200,
+          sortingFn: (a, b, columnId) =>
+            aspectsMagnitude(a.getValue(columnId)) -
+            aspectsMagnitude(b.getValue(columnId)),
+          filterFn: aspectsFilter,
+          meta: {
+            filterComponent: (props) => (
+              <AspectsFilter allowedAspectIds="auto" {...props} />
+            ),
+          },
           cell: AspectsListCell,
         }
       ),
@@ -85,18 +98,29 @@ const CraftingCatalogPage = () => {
         id: "skill",
         header: "Skill",
         size: 200,
+        filterFn: "includesString",
         cell: TextWrapCell,
       }),
       columnHelper.observe("requirements$", {
         id: "requirements",
         header: "Requirements",
         size: 200,
+        sortingFn: (a, b, columnId) =>
+          aspectsMagnitude(a.getValue(columnId)) -
+          aspectsMagnitude(b.getValue(columnId)),
+        filterFn: aspectsFilter,
+        meta: {
+          filterComponent: (props) => (
+            <AspectsFilter allowedAspectIds="auto" {...props} />
+          ),
+        },
         cell: AspectsListCell,
       }),
       columnHelper.observe("description$", {
         id: "description",
         header: "Description",
         size: 300,
+        filterFn: "includesString",
         cell: TextWrapCell,
       }),
     ],
