@@ -49,6 +49,18 @@ export const workstationFilterAspects = [
 
 export const furnishingAspects = ["comfort", "wallart"] as const;
 
+export const evolutionAspects = [
+  "e.illumination",
+  "e.horomachistry",
+  "e.ithastry",
+  "e.hushery",
+  "e.nyctodromy",
+  "e.skolekosophy",
+  "e.birdsong",
+  "e.bosk",
+  "e.preservation",
+] as const;
+
 export function aspectsMagnitude(aspects: Aspects): number {
   return Math.sqrt(
     Object.values(aspects).reduce((sum, value) => sum + value * value, 0)

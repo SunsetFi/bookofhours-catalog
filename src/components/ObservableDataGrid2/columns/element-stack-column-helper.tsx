@@ -18,6 +18,7 @@ import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
 import { RowHeight, RowPaddingY } from "../constants";
+import TextWrapCell from "../cells/TextWrapCell";
 
 const columnHelper = createObservableColumnHelper<ElementStackModel>();
 export const elementStackColumnHelper = Object.assign(columnHelper, {
@@ -28,6 +29,7 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
       id: "label",
       size: 200,
       header: "Name",
+      cell: TextWrapCell,
       filterFn: "includesString",
       ...def,
     }),
@@ -76,6 +78,7 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
     columnHelper.observe("description$", {
       size: Number.MAX_SAFE_INTEGER,
       header: "Description",
+      cell: TextWrapCell,
     }),
   location: () =>
     columnHelper.observe(
@@ -86,6 +89,7 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
       {
         header: "Location",
         size: 170,
+        cell: TextWrapCell,
         filterFn: "arrIncludesSome",
         meta: {
           filterComponent: (props) => {

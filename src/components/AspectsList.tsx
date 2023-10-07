@@ -61,9 +61,11 @@ const AspectListItem = ({ aspectId, size, children }: AspectListItemProps) => {
       sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
     >
       <AspectIcon aspectId={aspectId} size={size} />
-      <Typography variant="body2" sx={{ pl: 1 }}>
-        {children}
-      </Typography>
+      {children && (
+        <Typography variant="body2" sx={{ pl: 1 }}>
+          {children}
+        </Typography>
+      )}
     </Box>
   );
 };

@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
 import { mapArrayItemsCached } from "@/observables";
-import { powerAspects } from "@/aspects";
+import { evolutionAspects, powerAspects } from "@/aspects";
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { decorateObjectInstance } from "@/object-decorator";
@@ -16,22 +16,17 @@ import { SituationModel, TokensSource } from "@/services/sh-game";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
-import ObservableDataGrid, {
-  ObservableDataGridColumnDef,
-  aspectsObservableColumnDef,
-  aspectsPresenceColumnDef,
-  aspectsPresenceFilter,
-  descriptionColumnDef,
-  labelColumnDef,
-  locationColumnDef,
-} from "@/components/ObservableDataGrid";
 import FocusIconButton from "@/components/FocusIconButton";
+import ObservableDataGrid, {
+  createSituationColumnHelper,
+} from "@/components/ObservableDataGrid2";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
-
 interface WorkstationModelDecorators {
   thresholdAspects$: Observable<Aspects>;
 }
+
+const columnHelper = createSituationColumnHelper<WorkstationModel>();
 
 function situationToWorkstationModel(
   situation: SituationModel
@@ -70,11 +65,11 @@ const WorkstationCatalogPage = () => {
 
   const columns = React.useMemo(
     () => [
-      {
-        headerName: "",
-        width: 50,
-        field: "$item",
-        renderCell: ({ value }) => (
+      columnHelper.display({
+        id: "focus-button",
+        header: "",
+        size: 50,
+        cell: ({ row }) => (
           <Box
             sx={{
               display: "flex",
@@ -82,40 +77,40 @@ const WorkstationCatalogPage = () => {
               alignItems: "center",
             }}
           >
-            <FocusIconButton token={value} />
+            <FocusIconButton token={row.original} />
           </Box>
         ),
-      } as ObservableDataGridColumnDef<WorkstationModel>,
-      labelColumnDef<WorkstationModel>(),
-      locationColumnDef<WorkstationModel>(),
-      aspectsPresenceColumnDef<WorkstationModel>(
-        powerAspects,
-        { display: "none", orientation: "horizontal" },
-        {
-          headerName: "Attunement",
-          observable: "hints$",
-          filter: aspectsPresenceFilter("attunement", powerAspects),
-          width: 275,
-        }
-      ),
-      aspectsPresenceColumnDef<WorkstationModel>(
-        (aspect) => aspect.startsWith("e."),
-        { display: "none" },
-        // TODO: Dont use auto, find all possible evolutions
-        {
-          headerName: "Evolves",
-          filter: aspectsPresenceFilter("evolves", "auto"),
-        }
-      ),
-      aspectsObservableColumnDef<WorkstationModel>(
-        "threshold",
-        (situation) => situation.thresholdAspects$,
+      }),
+      columnHelper.label(),
+      columnHelper.location(),
+      columnHelper.aspectsList("attunement", powerAspects, {
+        header: "Attunement",
+        size: 200,
+        aspectsSource: (model) =>
+          model.hints$.pipe(
+            map((h) =>
+              h.reduce(
+                (obj, h) => ({ ...obj, [h]: null }),
+                {} as Record<string, React.ReactNode>
+              )
+            )
+          ),
+      }),
+      columnHelper.aspectsList("evolves", evolutionAspects, {
+        header: "Evolves",
+        size: 100,
+        showLevel: false,
+      }),
+      columnHelper.aspectsList(
+        "accepts",
         (aspectId) => !powerAspects.includes(aspectId as any),
         {
-          headerName: "Accepts",
+          header: "Accepts",
+          size: 400,
+          aspectsSource: (model) => model.thresholdAspects$,
         }
       ),
-      descriptionColumnDef<WorkstationModel>(),
+      columnHelper.description(),
     ],
     []
   );

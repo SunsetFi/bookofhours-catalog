@@ -36,6 +36,7 @@ export function MultiselectOptionsFilter<T>({
     >
       <Box
         sx={{
+          pt: 1,
           px: 1,
           display: "flex",
           flexDirection: "row",

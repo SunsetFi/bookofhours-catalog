@@ -8,6 +8,7 @@ import Table from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableBody from "@mui/material/TableBody";
+import TableFooter from "@mui/material/TableFooter";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
@@ -18,7 +19,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import FilterAlt from "@mui/icons-material/FilterAlt";
 
-import { type SxProps } from "@mui/material/styles";
+import { useTheme, type SxProps } from "@mui/material/styles";
 
 import {
   Column,
@@ -53,8 +54,6 @@ import {
 } from "./types";
 import { RowHeight } from "./constants";
 
-// TODO: Virtual
-// https://tanstack.com/virtual/v3/docs/examples/react/table
 // TODO: Pagination.  MUI has a component for this, and I bet tanstack has that functionality as well.
 
 export interface ObservableDataGridProps<T extends {}> {
@@ -95,7 +94,8 @@ function observableToColumnDef<T extends {}>(
   }
 
   // TODO: Process group columns.
-  // This will throw off our index.
+  // This will throw off our index, so we need to track index
+  // externally.
 
   return observableColumn as any;
 }
@@ -181,6 +181,8 @@ function ObservableDataGrid<T extends {}>({
   items$,
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
+  const theme = useTheme();
+
   const tableColumns = React.useMemo(
     // FIXME: We need to process the observables in group columns too.
     () => columns.map(observableToColumnDef),
@@ -262,7 +264,7 @@ function ObservableDataGrid<T extends {}>({
   // We cannot use that with sticky headers as we will scroll past the table bounds well before we
   // get a fraction of the way into scrolling the table itself, causing the stickyness to go away.
   // We cannot fix this by setting the table height directly, as the stupid thing will try to stretch its rows out,
-  // even though I thought we solved that by specifying tr heights...
+  // even though we set the table layout to fixed.
   // Anyway, this is the 'old way' of doing things (which currently is the only way documented on react-virtual's docs), which is slower and jankier
   // but makes the table be the correct height, preserving our sticky header.
   const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
@@ -271,6 +273,8 @@ function ObservableDataGrid<T extends {}>({
       ? virtualizer.getTotalSize() -
         (virtualRows?.[virtualRows.length - 1]?.end || 0)
       : 0;
+
+  const totalColumns = table.getHeaderGroups()[0].headers.length;
 
   return (
     <TableContainer
@@ -336,6 +340,35 @@ function ObservableDataGrid<T extends {}>({
               <TableRow style={{ height: `${paddingBottom}px` }} />
             )}
           </TableBody>
+          <TableFooter
+            sx={{
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: theme.palette.background.default,
+            }}
+          >
+            {virtualRows.length > 0 && (
+              <TableRow>
+                <TableCell colSpan={totalColumns}>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ ml: "auto" }}>
+                      {/* This doesn't take into account overscan. */}
+                      {/* Showing items {virtualRows[0].index + 1} to{" "}
+                    {virtualRows[virtualRows.length - 1].index + 1} of{" "}
+                    {rows.length} */}
+                      Showing {rows.length} items
+                    </Typography>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableFooter>
         </Table>
       )}
     </TableContainer>

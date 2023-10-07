@@ -1,0 +1,69 @@
+import * as React from "react";
+
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import { CellContext, RowData } from "@tanstack/react-table";
+
+import { RowHeight, RowPaddingY } from "../constants";
+import { useComponentBounds } from "@/hooks/use-component-bounds";
+
+function TextWrapCell<T extends RowData>(props: CellContext<T, string | null>) {
+  const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(
+    null
+  );
+  const [textRef, setTextRef] = React.useState<HTMLSpanElement | null>(null);
+
+  const { height: containerHeight } = useComponentBounds(containerRef);
+  const { height: textHeight } = useComponentBounds(textRef);
+
+  const [open, setOpen] = React.useState(false);
+
+  const value = props.getValue();
+  if (!value) {
+    return null;
+  }
+
+  const textTooBig = textHeight > containerHeight;
+
+  const onMouseOver = React.useCallback(() => {
+    if (!textTooBig) {
+      return;
+    }
+
+    setOpen(true);
+  }, [textTooBig]);
+
+  return (
+    <Box
+      ref={setContainerRef}
+      sx={{
+        position: "relative",
+        height: `${RowHeight - RowPaddingY * 2}px`,
+        width: "100%",
+        display: "flex",
+        py: 1,
+        overflow: "hidden",
+        maskImage: textTooBig
+          ? "linear-gradient(to bottom, black 75%, transparent 90%)"
+          : undefined,
+      }}
+    >
+      <Tooltip open={open} title={value}>
+        <Typography
+          ref={setTextRef}
+          sx={{
+            my: "auto",
+          }}
+          textOverflow="ellipsis"
+          onMouseOver={onMouseOver}
+          onMouseOut={() => setOpen(false)}
+        >
+          {value}
+        </Typography>
+      </Tooltip>
+    </Box>
+  );
+}
+
+export default TextWrapCell;
