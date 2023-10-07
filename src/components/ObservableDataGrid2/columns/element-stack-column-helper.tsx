@@ -17,7 +17,7 @@ import { AspectsFilter, aspectsFilter } from "../filters/aspects-filter";
 import { MultiselectOptionsFilter } from "../filters/multiselect-filter";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
-import { RowHeight } from "../constants";
+import { RowHeight, RowPaddingY } from "../constants";
 
 const columnHelper = createObservableColumnHelper<ElementStackModel>();
 export const elementStackColumnHelper = Object.assign(columnHelper, {
@@ -40,7 +40,7 @@ export const elementStackColumnHelper = Object.assign(columnHelper, {
       cell: (context) => (
         <ElementIcon
           maxWidth={75}
-          maxHeight={RowHeight}
+          maxHeight={RowHeight - RowPaddingY * 2}
           elementId={context.getValue()}
         />
       ),

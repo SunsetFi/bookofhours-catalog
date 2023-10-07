@@ -18,7 +18,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import FilterAlt from "@mui/icons-material/FilterAlt";
 
-import { useTheme, type SxProps } from "@mui/material/styles";
+import { type SxProps } from "@mui/material/styles";
 
 import {
   Column,
@@ -35,6 +35,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 import {
   Null$,
@@ -169,6 +171,8 @@ function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
   return result;
 }
 
+const RowHeightFunc = () => RowHeight;
+
 function ObservableDataGrid<T extends {}>({
   sx,
   filters,
@@ -239,8 +243,40 @@ function ObservableDataGrid<T extends {}>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const { rows } = table.getRowModel();
+
+  const parentRef = React.useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: data?.length ?? 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: RowHeightFunc,
+    overscan: 20,
+  });
+
+  const virtualRows = virtualizer.getVirtualItems();
+
+  // Docs are pitiful for virtualizer...
+  // The only functioning example (on react-table, not on react-virtual) has us use translateY() and
+  // size the outer scrollbar content to be the total size.
+  // We cannot use that with sticky headers as we will scroll past the table bounds well before we
+  // get a fraction of the way into scrolling the table itself, causing the stickyness to go away.
+  // We cannot fix this by setting the table height directly, as the stupid thing will try to stretch its rows out,
+  // even though I thought we solved that by specifying tr heights...
+  // Anyway, this is the 'old way' of doing things (which currently is the only way documented on react-virtual's docs), which is slower and jankier
+  // but makes the table be the correct height, preserving our sticky header.
+  const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
+  const paddingBottom =
+    virtualRows.length > 0
+      ? virtualizer.getTotalSize() -
+        (virtualRows?.[virtualRows.length - 1]?.end || 0)
+      : 0;
+
   return (
-    <TableContainer sx={sx}>
+    <TableContainer
+      ref={parentRef}
+      sx={{ width: "100%", height: "100%", ...sx }}
+    >
       {!data && (
         <Box
           sx={{
@@ -258,6 +294,7 @@ function ObservableDataGrid<T extends {}>({
         <Table
           sx={{
             tableLayout: "fixed",
+            height: "100%",
           }}
           stickyHeader
         >
@@ -271,9 +308,19 @@ function ObservableDataGrid<T extends {}>({
             ))}
           </TableHead>
           <TableBody>
-            {table.getRowModel().rows.map((row) => {
+            {paddingTop > 0 && (
+              // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
+              <TableRow style={{ height: `${paddingTop}px` }} />
+            )}
+            {virtualRows.map((virtualRow) => {
+              const row = rows[virtualRow.index];
               return (
-                <TableRow key={row.id} sx={{ height: `${RowHeight}px` }}>
+                <TableRow
+                  key={row.id}
+                  sx={{
+                    height: `${virtualRow.size}px`,
+                  }}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -285,6 +332,10 @@ function ObservableDataGrid<T extends {}>({
                 </TableRow>
               );
             })}
+            {paddingBottom > 0 && (
+              // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
+              <TableRow style={{ height: `${paddingBottom}px` }} />
+            )}
           </TableBody>
         </Table>
       )}
