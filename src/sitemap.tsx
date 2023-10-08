@@ -3,7 +3,9 @@ import { PageSearchProviderPipe } from "./services/search";
 import BookCatalogPage, {
   bookCatalogSearchProvider,
 } from "./pages/BookCatalogPage";
-import CraftingCatalogPage from "./pages/CraftingCatalogPage";
+import CraftingCatalogPage, {
+  craftingSearchProvider,
+} from "./pages/CraftingCatalogPage";
 import FurnishingsCatalogPage, {
   furnishingsSearchProvider,
 } from "./pages/FurnishingsCatalogPage";
@@ -24,7 +26,7 @@ import ToolsCatalogPage, {
   toolsSearchProvider,
 } from "./pages/ToolsCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
-import { craftingSearchProvider } from "./pages/CraftingCatalogPage/crafting-search-provider";
+import LocationsCatalogPage from "./pages/LocationsCatalogPage";
 
 interface SiteMapItem {
   label: string;
@@ -41,6 +43,12 @@ const sitemap: SiteMapItem[] = [
     path: "/books",
     searchProvider: bookCatalogSearchProvider,
     Component: BookCatalogPage,
+  },
+  {
+    label: "Locations",
+    aspectIcon: "knock",
+    path: "/locations",
+    Component: LocationsCatalogPage,
   },
   {
     label: "Provisions",

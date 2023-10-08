@@ -135,12 +135,28 @@ export class TokensSource {
     return this._visibleSituations$;
   }
 
+  private _unsealedTerrains$: Observable<
+    readonly ConnectedTerrainModel[]
+  > | null = null;
+  get unsealedTerrains$() {
+    if (!this._unsealedTerrains$) {
+      this._unsealedTerrains$ = this._tokens$.pipe(
+        filterItems(isConnectedTerrainModel),
+        filterItemObservations((t) => t.sealed$.pipe(map((sealed) => !sealed))),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._unsealedTerrains$;
+  }
+
   private _unlockedTerrains$: Observable<
     readonly ConnectedTerrainModel[]
   > | null = null;
   get unlockedTerrains$(): Observable<readonly ConnectedTerrainModel[]> {
     if (!this._unlockedTerrains$) {
-      this._unlockedTerrains$ = this._visibleTokens$.pipe(
+      this._unlockedTerrains$ = this._tokens$.pipe(
         filterItems(isConnectedTerrainModel),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)

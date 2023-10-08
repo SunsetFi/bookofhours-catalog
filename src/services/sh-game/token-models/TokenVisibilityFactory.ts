@@ -45,7 +45,11 @@ export class TokenVisibilityFactory {
       this.__visiblePaths$ = this._container.get(TokensSource).tokens$.pipe(
         filterItems(isConnectedTerrainModel),
         distinctUntilShallowArrayChanged(),
-        filterItemObservations((t) => t.visible$),
+        filterItemObservations((t) =>
+          combineLatest([t.shrouded$, t.sealed$]).pipe(
+            map(([shrouded, sealed]) => !shrouded && !sealed)
+          )
+        ),
         mapArrayItems((t) => t.path$),
         observeAll(),
         shareReplay(1)

@@ -81,6 +81,17 @@ export class ConnectedTerrainModel extends TokenModel {
     return nullTerrain;
   }
 
+  private _sealed$: Observable<boolean> | null = null;
+  get sealed$() {
+    if (!this._sealed$) {
+      this._sealed$ = this._connectedTerrain$.pipe(
+        map((t) => t.sealed),
+        shareReplay(1)
+      );
+    }
+    return this._sealed$;
+  }
+
   private _shrouded$: Observable<boolean> | null = null;
   get shrouded$() {
     if (!this._shrouded$) {

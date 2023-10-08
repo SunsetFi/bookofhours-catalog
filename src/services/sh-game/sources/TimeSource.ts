@@ -17,6 +17,8 @@ import { isNotNull } from "@/utils";
 import { API } from "@/services/sh-api";
 import { Scheduler } from "@/services/scheduler";
 
+import { RunningSource } from "./RunningSource";
+
 const timeRemainingFromRecipeExclusive: Record<string, number> = {
   "day.daybreak": /*2 + */ 58 + 60 + 60 + 60 + 60 + 60,
   "day.dawn": /*2 + 58 +*/ 60 + 60 + 60 + 60 + 60,
@@ -37,10 +39,23 @@ export class TimeSource {
   private readonly _yearSituationSource$ = new Subject<Situation>();
 
   constructor(
+    @inject(RunningSource) runningSource: RunningSource,
     @inject(API) private readonly _api: API,
     @inject(Scheduler) private _scheduler: Scheduler
   ) {
-    this._scheduler.addTask(() => this._pollTime());
+    let schedulerSubscription: (() => void) | null = null;
+    runningSource.isRunning$
+      .pipe(distinctUntilChanged())
+      .subscribe((isRunning) => {
+        if (isRunning) {
+          schedulerSubscription = this._scheduler.addTask(() =>
+            this._pollTime()
+          );
+        } else if (schedulerSubscription) {
+          schedulerSubscription();
+          schedulerSubscription = null;
+        }
+      });
   }
 
   private _gameSpeed$: Observable<GameSpeed> | null = null;

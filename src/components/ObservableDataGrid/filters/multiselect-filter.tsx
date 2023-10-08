@@ -88,7 +88,7 @@ export function MultiselectOptionsFilter<T>({
                   e.preventDefault();
                   e.stopPropagation();
 
-                  let newValue = currentValue ?? [];
+                  let newValue = currentValue!;
                   if (newValue.includes(value)) {
                     newValue = newValue.filter((x) => x !== value);
                   } else {
@@ -105,9 +105,7 @@ export function MultiselectOptionsFilter<T>({
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    checked={
-                      currentValue != null && currentValue.includes(value)
-                    }
+                    checked={currentValue!.includes(value)}
                     tabIndex={-1}
                     disableRipple
                   />

@@ -98,7 +98,8 @@ const WorkstationCatalogPage = () => {
       }),
       columnHelper.aspectsList("evolves", evolutionAspects, {
         header: "Evolves",
-        size: 100,
+        size: 125,
+        enableSorting: false,
         showLevel: false,
       }),
       columnHelper.aspectsList(
