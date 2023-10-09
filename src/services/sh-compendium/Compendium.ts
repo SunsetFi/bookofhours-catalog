@@ -7,6 +7,18 @@ import { AspectModel } from "./models/AspectModel";
 import { ElementModel } from "./models/ElementModel";
 import { RecipeModel } from "./models/RecipeModel";
 
+// These started out as models so we could get immediate references rather than promises.
+// However, this required the propogation of string | null values for labels and descriptions as
+// we often have ElementModel and ElementStackModel interchanges.  This is messy and weird.
+// Instead, we should switch to having the get functions return promises.
+// I tried to convert them over briefly, but we end up chaining observables in lots of places,
+// and also have added info like iconUrl.
+// Ultimately its Pinboard / PinnedItemModel that wants interchangability between ElementModel and
+// ElementStackModel, so that should be reviewed and possibly deconnected.
+// At the moment Pinboard doesnt even allow stack pinning anyway, so observability is currently pointless.
+// Note: the cheif problem with promises is they delay a frame to report their value even if they have one,
+// meaning UI elements will render rapidly twice if they have to await on a value, even if that value is cached.
+
 @injectable()
 @singleton()
 export class Compendium {
