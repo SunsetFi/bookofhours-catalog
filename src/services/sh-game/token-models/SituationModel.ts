@@ -71,6 +71,19 @@ export class SituationModel extends TokenModel {
     return this._iconUrl$;
   }
 
+  private _verbId$: Observable<string> | null = null;
+  get verbId$() {
+    if (!this._verbId$) {
+      this._verbId$ = this._situation$.pipe(
+        map((s) => s.verbId),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._verbId$;
+  }
+
   get verbId() {
     return this._situation$.value.verbId;
   }

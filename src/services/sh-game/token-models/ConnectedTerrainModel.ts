@@ -1,6 +1,7 @@
 import {
   BehaviorSubject,
   Observable,
+  combineLatest,
   distinctUntilChanged,
   map,
   shareReplay,
@@ -9,6 +10,7 @@ import { ConnectedTerrain } from "secrethistories-api";
 import { isEqual } from "lodash";
 
 import { API } from "@/services/sh-api";
+import { RecipeModel } from "@/services/sh-compendium";
 
 import { TokenModel } from "./TokenModel";
 
@@ -26,26 +28,17 @@ export class ConnectedTerrainModel extends TokenModel {
   private readonly _connectedTerrainInternal$: BehaviorSubject<ConnectedTerrain>;
   private readonly _connectedTerrain$: Observable<ConnectedTerrain>;
 
-  private readonly _label$: Observable<string>;
-  private readonly _description$: Observable<string>;
-
-  constructor(terrain: ConnectedTerrain, api: API) {
+  constructor(
+    terrain: ConnectedTerrain,
+    api: API,
+    private readonly _infoRecipe: RecipeModel
+  ) {
     super(terrain, api);
 
     this._connectedTerrainInternal$ = new BehaviorSubject(terrain);
 
     this._connectedTerrain$ = this._connectedTerrainInternal$.pipe(
       distinctUntilChanged(isEqual)
-    );
-
-    this._label$ = this._connectedTerrain$.pipe(map((t) => t.label));
-    this._description$ = this._connectedTerrain$.pipe(
-      map((t) => t.description),
-      shareReplay(1)
-    );
-    this._shrouded$ = this._connectedTerrain$.pipe(
-      map((t) => t.shrouded),
-      shareReplay(1)
     );
   }
 
@@ -58,11 +51,47 @@ export class ConnectedTerrainModel extends TokenModel {
     return this._connectedTerrainInternal$.value.id;
   }
 
+  // Null label inherited from RecipeModel maybe not existing and returning null.
+  // Messy, please fix this.
+  private _label$: Observable<string | null> | null = null;
   get label$() {
+    if (!this._label$) {
+      this._label$ = combineLatest([
+        this._connectedTerrain$,
+        this._infoRecipe.startLabel$,
+      ]).pipe(
+        map(([terrain, infoRecipeLabel]) => {
+          if (terrain.shrouded) {
+            return infoRecipeLabel;
+          }
+
+          return terrain.label;
+        }),
+        shareReplay(1)
+      );
+    }
+
     return this._label$;
   }
 
+  private _description$: Observable<string | null> | null = null;
   get description$() {
+    if (!this._description$) {
+      this._label$ = combineLatest([
+        this._connectedTerrain$,
+        this._infoRecipe.startDescription$,
+      ]).pipe(
+        map(([terrain, infoRecipeDescription]) => {
+          if (terrain.shrouded) {
+            return infoRecipeDescription;
+          }
+
+          return terrain.description;
+        }),
+        shareReplay(1)
+      );
+    }
+
     return this._description$;
   }
 

@@ -28,7 +28,7 @@ const LocationsCatalogPage = () => {
         filterFn: "includesString",
         cell: TextWrapCell,
       }),
-      columnHelper.observe((item) => item.shrouded$, {
+      columnHelper.observe("shrouded$", {
         header: "Shrouded",
       }),
     ],

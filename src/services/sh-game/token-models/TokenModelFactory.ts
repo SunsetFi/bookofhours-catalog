@@ -27,7 +27,11 @@ export class TokenModelFactory {
           this._container.get(TokenParentTerrainFactory)
         );
       case "ConnectedTerrain":
-        return new ConnectedTerrainModel(token, this._container.get(API));
+        return new ConnectedTerrainModel(
+          token,
+          this._container.get(API),
+          this._container.get(Compendium).getRecipeById(token.infoRecipeId)
+        );
       case "Situation":
       case "WorkstationSituation" as any:
         return new SituationModel(

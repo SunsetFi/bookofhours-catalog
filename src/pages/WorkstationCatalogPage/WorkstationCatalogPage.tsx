@@ -81,6 +81,7 @@ const WorkstationCatalogPage = () => {
           </Box>
         ),
       }),
+      columnHelper.verbIcon(),
       columnHelper.label(),
       columnHelper.location(),
       columnHelper.aspectsList("attunement", powerAspects, {

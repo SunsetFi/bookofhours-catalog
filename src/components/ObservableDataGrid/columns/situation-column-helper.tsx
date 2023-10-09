@@ -16,7 +16,7 @@ import {
   TextFilter,
 } from "../filters";
 
-import { AspectsListCell, TextWrapCell } from "../cells";
+import { AspectsListCell, TextWrapCell, VerbIconCell } from "../cells";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
 
@@ -36,6 +36,14 @@ export function createSituationColumnHelper<
           filterComponent: TextFilter,
         },
         ...def,
+      }),
+    verbIcon: () =>
+      columnHelper.observe("verbId$" as any, {
+        id: "icon",
+        header: "",
+        size: 100,
+        enableSorting: false,
+        cell: VerbIconCell,
       }),
     aspectsList: (
       id: string,

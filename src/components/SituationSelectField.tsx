@@ -7,12 +7,14 @@ import Typography from "@mui/material/Typography";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
+import InputAdornment from "@mui/material/InputAdornment";
 
 import { observeAll, useObservation } from "@/observables";
 
 import { SituationModel } from "@/services/sh-game";
 
 import AspectIcon from "./AspectIcon";
+import VerbIcon from "./VerbIcon";
 
 export interface SituationSelectFieldProps {
   label: string;
@@ -66,6 +68,7 @@ const SituationSelectField = ({
   situations = situations.filter((x) => x.label !== null);
 
   const selectedValue = situations.find((x) => x.situation === value) ?? null;
+  const selectedVerbId = selectedValue ? selectedValue.situation.verbId : null;
 
   return (
     <Autocomplete
@@ -76,7 +79,36 @@ const SituationSelectField = ({
       getOptionDisabled={(option) =>
         requireUnstarted ? option.state !== "Unstarted" : false
       }
-      renderInput={(params) => <TextField {...params} label={label} />}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          InputProps={{
+            ...params.InputProps,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Box
+                  sx={{
+                    display: "flex",
+                    height: "100%",
+                    width: "30px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {selectedVerbId && (
+                    <VerbIcon
+                      maxWidth={30}
+                      maxHeight={30}
+                      verbId={selectedVerbId}
+                    />
+                  )}
+                </Box>
+              </InputAdornment>
+            ),
+          }}
+        />
+      )}
       value={selectedValue}
       onChange={(_, value) => onChange(value?.situation ?? null)}
       renderOption={(props, option) => (
@@ -101,6 +133,7 @@ const SituationSelectItem = ({
   label,
   situation,
 }: SituationSelectItemProps) => {
+  const iconUrl = useObservation(situation.iconUrl$);
   const hints = useObservation(situation.hints$);
   const recipeLabel = useObservation(situation.recipeLabel$);
 
@@ -114,6 +147,26 @@ const SituationSelectItem = ({
       sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
       {...props}
     >
+      <Box
+        sx={{
+          width: "30px",
+          height: "30px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <img
+          loading="lazy"
+          src={iconUrl}
+          alt={label ?? ""}
+          style={{
+            display: "block",
+            maxWidth: "30px",
+            maxHeight: "30px",
+          }}
+        />
+      </Box>
       <Typography variant="body1">
         {label}
         {recipeLabel ? ` - ${recipeLabel}` : null}

@@ -1,5 +1,5 @@
 import { inject, injectable, singleton } from "microinject";
-import { Element, Recipe } from "secrethistories-api";
+import { Element, Recipe, Verb } from "secrethistories-api";
 
 import { API } from "../sh-api";
 
@@ -13,6 +13,7 @@ export class Compendium {
   private readonly _aspectModels = new Map<string, AspectModel>();
   private readonly _elementModels = new Map<string, ElementModel>();
   private readonly _recipeModels = new Map<string, RecipeModel>();
+  private readonly _verbCache = new Map<string, Promise<Verb | null>>();
 
   constructor(@inject(API) private readonly _api: API) {}
 
@@ -49,6 +50,15 @@ export class Compendium {
     }
 
     return this._recipeModels.get(id)!;
+  }
+
+  getVerbById(id: string): Promise<Verb | null> {
+    if (!this._verbCache.has(id)) {
+      const promise = this._api.getVerbById(id);
+      this._verbCache.set(id, promise);
+    }
+
+    return this._verbCache.get(id)!;
   }
 
   private async _resolveAspectById(id: string): Promise<Element | null> {
