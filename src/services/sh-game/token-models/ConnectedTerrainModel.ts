@@ -9,6 +9,8 @@ import {
 import { ConnectedTerrain } from "secrethistories-api";
 import { isEqual } from "lodash";
 
+import { filterItemObservations } from "@/observables";
+
 import { API } from "@/services/sh-api";
 import { RecipeModel } from "@/services/sh-compendium";
 
@@ -28,10 +30,13 @@ export class ConnectedTerrainModel extends TokenModel {
   private readonly _connectedTerrainInternal$: BehaviorSubject<ConnectedTerrain>;
   private readonly _connectedTerrain$: Observable<ConnectedTerrain>;
 
+  private readonly _childTokens$: Observable<readonly TokenModel[]>;
+
   constructor(
     terrain: ConnectedTerrain,
     api: API,
-    private readonly _infoRecipe: RecipeModel
+    private readonly _infoRecipe: RecipeModel,
+    visibleTokens$: Observable<readonly TokenModel[]>
   ) {
     super(terrain, api);
 
@@ -39,6 +44,14 @@ export class ConnectedTerrainModel extends TokenModel {
 
     this._connectedTerrain$ = this._connectedTerrainInternal$.pipe(
       distinctUntilChanged(isEqual)
+    );
+
+    this._childTokens$ = visibleTokens$.pipe(
+      // Thankfully, terrains never move, so we don't have to observe our own path here.
+      filterItemObservations((token) =>
+        token.path$.pipe(map((tokenPath) => tokenPath.startsWith(this.path)))
+      ),
+      shareReplay(1)
     );
   }
 
@@ -77,7 +90,7 @@ export class ConnectedTerrainModel extends TokenModel {
   private _description$: Observable<string | null> | null = null;
   get description$() {
     if (!this._description$) {
-      this._label$ = combineLatest([
+      this._description$ = combineLatest([
         this._connectedTerrain$,
         this._infoRecipe.startDescription$,
       ]).pipe(
@@ -130,6 +143,10 @@ export class ConnectedTerrainModel extends TokenModel {
       );
     }
     return this._shrouded$;
+  }
+
+  get children$() {
+    return this._childTokens$;
   }
 
   _onUpdate(terrain: ConnectedTerrain) {

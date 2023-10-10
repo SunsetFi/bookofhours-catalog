@@ -4,6 +4,8 @@ import { Situation, Token } from "secrethistories-api";
 import { API } from "@/services/sh-api";
 import { Compendium } from "@/services/sh-compendium";
 
+import { TokensSource } from "../sources/TokensSource";
+
 import { TokenModel } from "./TokenModel";
 import { ElementStackModel } from "./ElementStackModel";
 import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
@@ -30,7 +32,8 @@ export class TokenModelFactory {
         return new ConnectedTerrainModel(
           token,
           this._container.get(API),
-          this._container.get(Compendium).getRecipeById(token.infoRecipeId)
+          this._container.get(Compendium).getRecipeById(token.infoRecipeId),
+          this._container.get(TokensSource).visibleTokens$
         );
       case "Situation":
       case "WorkstationSituation" as any:

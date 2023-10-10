@@ -96,6 +96,10 @@ export class TokensSource {
     return this._tokens$;
   }
 
+  get visibleTokens$(): Observable<readonly TokenModel[]> {
+    return this._visibleTokens$;
+  }
+
   private _considerSituation$: Observable<SituationModel | null> | null = null;
   get considerSituation$() {
     if (this._considerSituation$ == null) {
