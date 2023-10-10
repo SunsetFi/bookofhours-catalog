@@ -7,7 +7,7 @@ import Card from "@mui/material/Card";
 import Popper from "@mui/material/Popper";
 import Typography from "@mui/material/Typography";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { useAspect } from "@/services/sh-compendium";
 

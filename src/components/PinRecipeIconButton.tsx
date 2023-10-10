@@ -4,7 +4,7 @@ import IconButton from "@mui/material/IconButton";
 import PushPin from "@mui/icons-material/PushPin";
 import type { SxProps } from "@mui/material/styles";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 import { useDIDependency } from "@/container";
 
 import { Pinboard } from "@/services/pins/Pinboard";

@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import Popper from "@mui/material/Popper";
 import { useTheme, type SxProps } from "@mui/material/styles";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 
 import { ElementStackModel } from "@/services/sh-game";

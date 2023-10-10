@@ -3,7 +3,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 
 import { powerAspects } from "@/aspects";
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 

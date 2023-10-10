@@ -1,7 +1,9 @@
 import { map } from "rxjs";
 
 import { useDIDependency } from "@/container";
-import { observeAll, useObservation } from "@/observables";
+import { observeAll } from "@/observables";
+
+import { useObservation } from "@/hooks/use-observation";
 
 import { TokensSource } from "./sources/TokensSource";
 

@@ -3,7 +3,7 @@ import * as React from "react";
 import Popper from "@mui/material/Popper";
 import Badge from "@mui/material/Badge";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { ElementStackModel } from "@/services/sh-game";
 

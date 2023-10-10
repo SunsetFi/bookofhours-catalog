@@ -7,7 +7,7 @@ import type { SxProps } from "@mui/material/styles";
 
 import { useDIDependency } from "@/container";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 import { TimeSource } from "@/services/sh-game";
 
 export interface SeasonHeaderProps {

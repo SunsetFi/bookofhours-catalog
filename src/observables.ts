@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import {
   OperatorFunction,
   Observable,
@@ -34,66 +32,6 @@ export function observableObjectOrEmpty<T extends {}>(
   }
 
   return EmptyObject$ as any;
-}
-
-// Using useEffect will subscribe after our render outside the layout process.
-// This prevents us blocking the render, but means we will have one render pass where our returned value is undefined.
-export function useDeferredObservation<T>(
-  observable: Observable<T>
-): T | undefined;
-export function useDeferredObservation<T>(
-  factory: () => Observable<T>,
-  deps?: any[]
-): T | undefined;
-export function useDeferredObservation<T>(
-  observableOrFactory: Observable<T> | (() => Observable<T>),
-  deps?: any[]
-) {
-  const factory = React.useMemo(
-    () =>
-      typeof observableOrFactory === "function"
-        ? observableOrFactory
-        : () => observableOrFactory,
-    deps ? [...deps] : [observableOrFactory]
-  );
-
-  const [value, setValue] = React.useState<T | undefined>(undefined);
-
-  React.useEffect(() => {
-    const sub = factory().subscribe((value) => setValue(value));
-    return () => sub.unsubscribe();
-  }, [factory]);
-
-  return value;
-}
-
-// Using LayoutEffect guarentees we get a value before render.
-// This is useful when we know the observable is warmed up and we want the value on the very first render.
-export function useObservation<T>(observable: Observable<T>): T | undefined;
-export function useObservation<T>(
-  factory: () => Observable<T>,
-  deps?: any[]
-): T | undefined;
-export function useObservation<T>(
-  observableOrFactory: Observable<T> | (() => Observable<T>),
-  deps?: any[]
-) {
-  const factory = React.useMemo(
-    () =>
-      typeof observableOrFactory === "function"
-        ? observableOrFactory
-        : () => observableOrFactory,
-    deps ? [...deps] : [observableOrFactory]
-  );
-
-  const [value, setValue] = React.useState<T | undefined>(undefined);
-
-  React.useLayoutEffect(() => {
-    const sub = factory().subscribe((value) => setValue(value));
-    return () => sub.unsubscribe();
-  }, [factory]);
-
-  return value;
 }
 
 export function promiseFuncToObservable<T>(

@@ -4,7 +4,7 @@ import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { ElementModel } from "@/services/sh-compendium";
 

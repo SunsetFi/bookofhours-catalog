@@ -9,9 +9,11 @@ import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import InputAdornment from "@mui/material/InputAdornment";
 
-import { observeAll, useObservation } from "@/observables";
+import { observeAll } from "@/observables";
 
 import { SituationModel } from "@/services/sh-game";
+
+import { useObservation } from "@/hooks/use-observation";
 
 import AspectIcon from "./AspectIcon";
 import VerbIcon from "./VerbIcon";

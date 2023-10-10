@@ -11,11 +11,12 @@ import {
 import { GameSpeed, Situation, isSituation } from "secrethistories-api";
 
 import { useDIDependency } from "@/container";
-import { useDeferredObservation } from "@/observables";
 import { isNotNull } from "@/utils";
 
 import { API } from "@/services/sh-api";
 import { Scheduler } from "@/services/scheduler";
+
+import { useObservation } from "@/hooks/use-observation";
 
 import { RunningSource } from "./RunningSource";
 
@@ -194,5 +195,5 @@ export class TimeSource {
 
 export function useGameSpeed(): GameSpeed | null {
   const model = useDIDependency(TimeSource);
-  return useDeferredObservation(model.gameSpeed$) ?? null;
+  return useObservation(model.gameSpeed$) ?? null;
 }

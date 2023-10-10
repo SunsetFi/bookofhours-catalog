@@ -3,10 +3,12 @@ import * as React from "react";
 import IconButton from "@mui/material/IconButton";
 import PushPin from "@mui/icons-material/PushPin";
 
-import { False$, useObservation } from "@/observables";
+import { False$ } from "@/observables";
 import { useDIDependency } from "@/container";
 
 import { Pinboard } from "@/services/pins/Pinboard";
+
+import { useObservation } from "@/hooks/use-observation";
 
 export interface PinElementIconButtonProps {
   title?: string;

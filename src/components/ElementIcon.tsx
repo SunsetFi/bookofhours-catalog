@@ -8,7 +8,8 @@ import type { Instance as PopperInstance } from "@popperjs/core";
 
 import { useDIDependency } from "@/container";
 
-import { Null$, useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
+import { Null$ } from "@/observables";
 
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 

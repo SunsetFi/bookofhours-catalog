@@ -3,8 +3,12 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import Typography from "@mui/material/Typography";
+
+import { CellContext } from "@tanstack/react-table";
 
 import { useDIDependency } from "@/container";
+import { filterItems } from "@/observables";
 
 import {
   ConnectedTerrainModel,
@@ -14,6 +18,7 @@ import {
 } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
+import { useObservation } from "@/hooks/use-observation";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
@@ -23,14 +28,11 @@ import ObservableDataGrid, {
   TextWrapCell,
   createObservableColumnHelper,
 } from "@/components/ObservableDataGrid";
-import { filterItems, useObservation } from "@/observables";
 import VerbIcon from "@/components/VerbIcon";
 import {
   RowHeight,
   RowPaddingY,
 } from "@/components/ObservableDataGrid/constants";
-import { CellContext } from "@tanstack/react-table";
-import Typography from "@mui/material/Typography";
 
 const columnHelper = createObservableColumnHelper<ConnectedTerrainModel>();
 

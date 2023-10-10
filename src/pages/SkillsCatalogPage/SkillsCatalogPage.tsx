@@ -6,7 +6,6 @@ import IconButton from "@mui/material/IconButton";
 import UpgradeIcon from "@mui/icons-material/Upgrade";
 
 import { useDIDependency } from "@/container";
-import { useDeferredObservation } from "@/observables";
 
 import { powerAspects } from "@/aspects";
 
@@ -16,6 +15,8 @@ import {
   TokensSource,
   filterHasAnyAspect,
 } from "@/services/sh-game";
+
+import { useObservation } from "@/hooks/use-observation";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
@@ -28,7 +29,7 @@ const columnHelper = createElementStackColumnHelper();
 
 const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
   const orchestrator = useDIDependency(Orchestrator);
-  const aspects = useDeferredObservation<Aspects>(model.aspects$) ?? {};
+  const aspects = useObservation<Aspects>(model.aspects$) ?? {};
   const skillLevel = aspects["skill"] ?? 0;
   if (skillLevel <= 0 || skillLevel >= 9) {
     return null;

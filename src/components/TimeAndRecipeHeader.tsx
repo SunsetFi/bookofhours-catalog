@@ -17,11 +17,9 @@ import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import DownloadIcon from "@mui/icons-material/Download";
 
 import { useDIDependency } from "@/container";
-import {
-  filterItemObservations,
-  observeAll,
-  useObservation,
-} from "@/observables";
+import { filterItemObservations, observeAll } from "@/observables";
+
+import { useObservation } from "@/hooks/use-observation";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 
 import { SituationModel, TimeSource, TokensSource } from "@/services/sh-game";

@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 import Box from "@mui/material/Box";
 import type { SxProps } from "@mui/material/styles";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { ElementStackModel } from "@/services/sh-game";
 import ElementStackTrayCard from "./ElementStackTrayCard";

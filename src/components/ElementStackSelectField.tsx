@@ -10,9 +10,11 @@ import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import InputAdornment from "@mui/material/InputAdornment";
 
-import { observeAll, useObservation } from "@/observables";
+import { observeAll } from "@/observables";
 
 import { ElementStackModel } from "@/services/sh-game";
+
+import { useObservation } from "@/hooks/use-observation";
 
 import AspectsList from "./AspectsList";
 import ElementStackDetails from "./ElementStackDetails";

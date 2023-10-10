@@ -6,7 +6,7 @@ import type { SxProps } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 

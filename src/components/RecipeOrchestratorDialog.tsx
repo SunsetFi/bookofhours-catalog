@@ -15,13 +15,15 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useDIDependency } from "@/container";
-import { Null$, observableObjectOrEmpty, useObservation } from "@/observables";
+import { Null$, observableObjectOrEmpty } from "@/observables";
 
 import {
   OrchestrationSlot,
   Orchestrator,
   isVariableSituationOrchestration,
 } from "@/services/sh-game/orchestration";
+
+import { useObservation } from "@/hooks/use-observation";
 
 import SituationSelectField from "./SituationSelectField";
 import AspectsList from "./AspectsList";

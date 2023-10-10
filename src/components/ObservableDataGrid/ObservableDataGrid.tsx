@@ -39,13 +39,10 @@ import {
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import {
-  Null$,
-  mapArrayItemsCached,
-  observeAll,
-  useObservation,
-} from "@/observables";
+import { Null$, mapArrayItemsCached, observeAll } from "@/observables";
 import { decorateObjectInstance } from "@/object-decorator";
+
+import { useObservation } from "@/hooks/use-observation";
 
 import {
   ObservableColumnDef,

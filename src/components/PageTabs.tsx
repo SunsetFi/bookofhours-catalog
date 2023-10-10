@@ -10,7 +10,7 @@ import GithubIcon from "@mui/icons-material/GitHub";
 
 import sitemap from "@/sitemap";
 
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { useAspect } from "@/services/sh-compendium";
 

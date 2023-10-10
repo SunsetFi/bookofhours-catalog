@@ -15,7 +15,7 @@ import ListItemText from "@mui/material/ListItemText";
 import SearchIcon from "@mui/icons-material/Search";
 
 import { useDIDependency } from "@/container";
-import { useObservation } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
 
 import { SearchService, SearchItemResult } from "@/services/search";
 import { useHistory } from "@/services/history";

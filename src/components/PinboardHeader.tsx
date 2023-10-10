@@ -6,7 +6,8 @@ import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 
-import { useObservation, mergeMapIfNotNull } from "@/observables";
+import { useObservation } from "@/hooks/use-observation";
+import { mergeMapIfNotNull } from "@/observables";
 
 import { useDIDependency } from "@/container";
 
