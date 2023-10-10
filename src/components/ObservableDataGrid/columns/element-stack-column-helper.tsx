@@ -68,16 +68,13 @@ export function createElementStackColumnHelper<
               } else {
                 return pick(modelAspects, aspects);
               }
-            }),
-            map((aspects) =>
-              showLevel ? aspects : mapValues(aspects, () => null)
-            )
+            })
           ),
         {
           id,
           header: "Aspects",
           size: 200,
-          cell: AspectsListCell,
+          cell: (props) => <AspectsListCell {...props} showLevel={showLevel} />,
           sortingFn: (a, b, columnId) =>
             aspectsMagnitude(a.getValue(columnId)) -
             aspectsMagnitude(b.getValue(columnId)),

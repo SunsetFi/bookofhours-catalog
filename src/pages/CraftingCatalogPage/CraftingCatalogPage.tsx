@@ -84,7 +84,7 @@ const CraftingCatalogPage = () => {
               <AspectsFilter allowedAspectIds="auto" {...props} />
             ),
           },
-          cell: AspectsListCell,
+          cell: (props) => <AspectsListCell {...props} showLevel />,
         }
       ),
       columnHelper.observe("skillElementId$", {
@@ -115,7 +115,7 @@ const CraftingCatalogPage = () => {
             <AspectsFilter allowedAspectIds="auto" {...props} />
           ),
         },
-        cell: AspectsListCell,
+        cell: (props) => <AspectsListCell {...props} showLevel />,
       }),
       columnHelper.observe("description$", {
         id: "description",

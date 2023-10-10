@@ -14,6 +14,7 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
+import Pagination from "@mui/material/Pagination";
 
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -33,6 +34,7 @@ import {
   getCoreRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -238,11 +240,15 @@ function ObservableDataGrid<T extends {}>({
     onColumnFiltersChange: onTableFiltersChanged,
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
+    getPaginationRowModel: getPaginationRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
+  // This is superflous now that we are using pagination, but leaving it in.
+  // Maybe we can have an option for show all at some point.
+  // However, this is a disaster for accessibility, we really need limited items per page.
   const virtualizer = useVirtualizer({
     count: table.getRowModel().rows.length,
     getScrollElement: () => parentRef.current,
@@ -334,14 +340,34 @@ function ObservableDataGrid<T extends {}>({
                     width: "100%",
                     display: "flex",
                     alignItems: "center",
+                    position: "relative",
                   }}
                 >
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      top: 0,
+                      bottom: 0,
+                    }}
+                  >
+                    <Pagination
+                      count={table.getPageCount()}
+                      page={table.getState().pagination.pageIndex + 1}
+                      onChange={(_, value) => table.setPageIndex(value - 1)}
+                      variant="outlined"
+                      shape="rounded"
+                      showFirstButton
+                      showLastButton
+                    />
+                  </Box>
                   <Typography variant="caption" sx={{ ml: "auto" }}>
                     {/* This doesn't take into account overscan. */}
                     {/* Showing items {virtualRows[0].index + 1} to{" "}
               {virtualRows[virtualRows.length - 1].index + 1} of{" "}
               {rows.length} */}
-                    Showing {rows.length} items
+                    Showing {rows.length} of {data?.length} items.
                   </Typography>
                 </Box>
               </TableCell>
