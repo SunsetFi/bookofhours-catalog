@@ -429,6 +429,7 @@ const HeaderCell = ({
     <TableCell
       scope="col"
       colSpan={header.colSpan}
+      tabIndex={0}
       // TODO: Figure out flex.  It was supported at one point but seems to have been lost with v8.
       sx={{
         width:
@@ -437,9 +438,7 @@ const HeaderCell = ({
             : header.getSize(),
       }}
     >
-      {!header.isPlaceholder &&
-        flexRender(header.column.columnDef.header, header.getContext())}
-      {/* <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
+      <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
         <Typography sx={{ mr: 1 }}>
           {!header.isPlaceholder &&
             flexRender(header.column.columnDef.header, header.getContext())}
@@ -448,7 +447,7 @@ const HeaderCell = ({
           <HeaderFilter column={header.column} />
         )}
         {header.column.getCanSort() && <HeaderSort header={header} />}
-      </Box> */}
+      </Box>
     </TableCell>
   );
 };
@@ -459,12 +458,19 @@ const HeaderSort = ({
   header: Header<Record<string, any>, unknown>;
 }) => {
   const isSorted = header.column.getIsSorted();
+  let sortModeDescription: string;
+  if (isSorted == false) {
+    sortModeDescription = "disabled";
+  } else if (isSorted === "asc") {
+    sortModeDescription = "ascending";
+  } else {
+    sortModeDescription = "descending";
+  }
+
   return (
     <IconButton
       size="small"
-      aria-label={`Sort ${header.column.columnDef.header} ${
-        isSorted === "asc" ? "descending" : "ascending"
-      }`}
+      aria-label={`Sort ${sortModeDescription}`}
       sx={{
         opacity: isSorted === false ? 0.4 : 1,
       }}
@@ -487,6 +493,9 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
     setAnchorEl(e.currentTarget);
   }, []);
 
+  const filterActive =
+    column.getIsFiltered() && column.getFilterValue() != null;
+
   const Filter = column.columnDef.meta?.filterComponent;
 
   if (!Filter) {
@@ -500,16 +509,14 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
     <>
       <IconButton
         size="small"
-        aria-label={`Filter ${column.columnDef.header}`}
+        aria-label={`Filter ${filterActive ? "active" : "inactive"}`}
         onClick={onOpen}
       >
         <FilterAlt
           sx={{
             opacity:
               // Not sure how to reset the filter, so we just pass null for now.
-              column.getIsFiltered() && column.getFilterValue() != null
-                ? 1
-                : 0.4,
+              filterActive ? 1 : 0.4,
           }}
         />
       </IconButton>
