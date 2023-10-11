@@ -27,6 +27,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
   Header,
+  InitialTableState,
   SortingState,
   TableState,
   Updater,
@@ -172,6 +173,12 @@ function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
 
 const RowHeightFunc = () => RowHeight;
 
+const initialState: InitialTableState = {
+  pagination: {
+    pageSize: 25,
+  },
+};
+
 function ObservableDataGrid<T extends {}>({
   sx,
   filters,
@@ -180,6 +187,8 @@ function ObservableDataGrid<T extends {}>({
   items$,
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
+  const tableId = React.useId();
+
   const theme = useTheme();
 
   const tableColumns = React.useMemo(
@@ -235,6 +244,7 @@ function ObservableDataGrid<T extends {}>({
     data: data ?? [],
     columns: tableColumns,
     state,
+    initialState,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: onTableFiltersChanged,
@@ -284,6 +294,7 @@ function ObservableDataGrid<T extends {}>({
 
     return (
       <Table
+        id={tableId}
         sx={{
           tableLayout: "fixed",
         }}
@@ -293,7 +304,7 @@ function ObservableDataGrid<T extends {}>({
           {headerGroups.map((group) => (
             <TableRow key={group.id}>
               {group.headers.map((header) => (
-                <HeaderCell key={header.id} header={header} />
+                <HeaderCell key={header.id} header={header} tableId={tableId} />
               ))}
             </TableRow>
           ))}
@@ -313,7 +324,11 @@ function ObservableDataGrid<T extends {}>({
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    // TODO HACK: Make this an option per column.  We really, really want this for screen readers to know what this row represents.
+                    component={cell.column.id === "name" ? "th" : "td"}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -405,12 +420,14 @@ export default ObservableDataGrid;
 
 const HeaderCell = ({
   header,
+  tableId,
 }: {
   header: Header<Record<string, any>, unknown>;
+  tableId: string;
 }) => {
-  const isSorted = header.column.getIsSorted();
   return (
     <TableCell
+      scope="col"
       colSpan={header.colSpan}
       // TODO: Figure out flex.  It was supported at one point but seems to have been lost with v8.
       sx={{
@@ -420,31 +437,45 @@ const HeaderCell = ({
             : header.getSize(),
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Typography variant="h6" sx={{ mr: 1 }}>
+      {!header.isPlaceholder &&
+        flexRender(header.column.columnDef.header, header.getContext())}
+      {/* <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
+        <Typography sx={{ mr: 1 }}>
           {!header.isPlaceholder &&
             flexRender(header.column.columnDef.header, header.getContext())}
         </Typography>
         {header.column.getCanFilter() && (
           <HeaderFilter column={header.column} />
         )}
-        {header.column.getCanSort() && (
-          <IconButton
-            size="small"
-            sx={{
-              opacity: isSorted === false ? 0.4 : 1,
-            }}
-            onClick={header.column.getToggleSortingHandler()}
-          >
-            {isSorted === false || isSorted === "asc" ? (
-              <ArrowUpwardIcon />
-            ) : (
-              <ArrowDownwardIcon />
-            )}
-          </IconButton>
-        )}
-      </Box>
+        {header.column.getCanSort() && <HeaderSort header={header} />}
+      </Box> */}
     </TableCell>
+  );
+};
+
+const HeaderSort = ({
+  header,
+}: {
+  header: Header<Record<string, any>, unknown>;
+}) => {
+  const isSorted = header.column.getIsSorted();
+  return (
+    <IconButton
+      size="small"
+      aria-label={`Sort ${header.column.columnDef.header} ${
+        isSorted === "asc" ? "descending" : "ascending"
+      }`}
+      sx={{
+        opacity: isSorted === false ? 0.4 : 1,
+      }}
+      onClick={header.column.getToggleSortingHandler()}
+    >
+      {isSorted === false || isSorted === "asc" ? (
+        <ArrowUpwardIcon />
+      ) : (
+        <ArrowDownwardIcon />
+      )}
+    </IconButton>
   );
 };
 

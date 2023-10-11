@@ -176,3 +176,6 @@ Displays all memories that have been encountered in the current save file
 - Scrolling performance on tables is bad with the Chrome browser when on a secondary monitor with a different DPI than the primary monitor.
   - Yes, really. I don't know why. Its baffling.
   - Firefox is unaffected.
+- Accessibility
+  - Firefox and Windows Narrator both struggle on the tables. NVDA with Chrome seems much more pleasent when navigating the data tables.
+  - In particular Narrator does not read out row or column headers in the table.

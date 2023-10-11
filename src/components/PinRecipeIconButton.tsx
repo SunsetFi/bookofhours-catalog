@@ -8,18 +8,17 @@ import { useObservation } from "@/hooks/use-observation";
 import { useDIDependency } from "@/container";
 
 import { Pinboard } from "@/services/pins/Pinboard";
+import { useRecipe } from "@/services/sh-compendium";
 
 export interface PinElementIconButtonProps {
   sx?: SxProps;
-  title?: string;
   recipeId: string;
 }
-const PinRecipeIconButton = ({
-  sx,
-  title,
-  recipeId,
-}: PinElementIconButtonProps) => {
+const PinRecipeIconButton = ({ sx, recipeId }: PinElementIconButtonProps) => {
+  const recipe = useRecipe(recipeId);
   const pinboard = useDIDependency(Pinboard);
+
+  const recipeLabel = useObservation(recipe.label$);
 
   const pinnedRecipe = useObservation(pinboard.pinnedRecipe$) ?? {
     recipeId: null,
@@ -35,8 +34,17 @@ const PinRecipeIconButton = ({
     }
   }, [isRecipePinned, recipeId]);
 
+  if (!recipeLabel) {
+    return null;
+  }
+
   return (
-    <IconButton sx={sx} title={title ?? "Pin Recipe"} onClick={onClick}>
+    <IconButton
+      sx={sx}
+      title={`Pin recipe ${recipeLabel}`}
+      onClick={onClick}
+      aria-pressed={isRecipePinned ? "true" : "false"}
+    >
       <PushPin
         sx={{ transform: isRecipePinned ? "rotate(-90deg)" : "rotate(0deg)" }}
       />
