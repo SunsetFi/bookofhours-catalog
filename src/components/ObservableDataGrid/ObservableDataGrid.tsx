@@ -51,6 +51,7 @@ import {
   ObservableColumnDef,
   isObservableAccessorFnColumnDef,
   isObservableAccessorKeyColumnDef,
+  isRowHeaderColumn,
 } from "./types";
 import { RowHeight } from "./constants";
 
@@ -187,8 +188,6 @@ function ObservableDataGrid<T extends {}>({
   items$,
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
-  const tableId = React.useId();
-
   const theme = useTheme();
 
   const tableColumns = React.useMemo(
@@ -256,9 +255,9 @@ function ObservableDataGrid<T extends {}>({
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
-  // This is superflous now that we are using pagination, but leaving it in.
-  // Maybe we can have an option for show all at some point.
-  // However, this is a disaster for accessibility, we really need limited items per page.
+  // This is vestiegal now that we are using pagination, but i'm leaving it in.
+  // It might yet come back into use if we add options to show more items per page, which will be useful outside of
+  // a screen reader / accessibility context.
   const virtualizer = useVirtualizer({
     count: table.getRowModel().rows.length,
     getScrollElement: () => parentRef.current,
@@ -292,9 +291,11 @@ function ObservableDataGrid<T extends {}>({
           (virtualRows?.[virtualRows.length - 1]?.end || 0)
         : 0;
 
+    // FIXME: Because of the way firefox accessibility works, highlighting an item with a screen reader will scroll it to the top of its container.
+    // This is actually a problem, as the top of the container has our stick header overlayed.
+    // We want then to have our body scroll, not our table.  But i'm not sure as of yet how to pull that off, as table styling is a strange and fickle thing.
     return (
       <Table
-        id={tableId}
         sx={{
           tableLayout: "fixed",
         }}
@@ -304,7 +305,7 @@ function ObservableDataGrid<T extends {}>({
           {headerGroups.map((group) => (
             <TableRow key={group.id}>
               {group.headers.map((header) => (
-                <HeaderCell key={header.id} header={header} tableId={tableId} />
+                <HeaderCell key={header.id} header={header} />
               ))}
             </TableRow>
           ))}
@@ -326,8 +327,9 @@ function ObservableDataGrid<T extends {}>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    // TODO HACK: Make this an option per column.  We really, really want this for screen readers to know what this row represents.
-                    component={cell.column.id === "name" ? "th" : "td"}
+                    component={
+                      isRowHeaderColumn(cell.column.columnDef) ? "th" : "td"
+                    }
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -378,10 +380,6 @@ function ObservableDataGrid<T extends {}>({
                     />
                   </Box>
                   <Typography variant="caption" sx={{ ml: "auto" }}>
-                    {/* This doesn't take into account overscan. */}
-                    {/* Showing items {virtualRows[0].index + 1} to{" "}
-              {virtualRows[virtualRows.length - 1].index + 1} of{" "}
-              {rows.length} */}
                     Showing {rows.length} of {data?.length} items.
                   </Typography>
                 </Box>
@@ -420,10 +418,8 @@ export default ObservableDataGrid;
 
 const HeaderCell = ({
   header,
-  tableId,
 }: {
   header: Header<Record<string, any>, unknown>;
-  tableId: string;
 }) => {
   return (
     <TableCell

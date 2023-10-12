@@ -32,6 +32,7 @@ export function createElementStackColumnHelper<
         header: "Name",
         cell: TextWrapCell,
         filterFn: "includesString",
+        rowHeader: true,
         meta: {
           filterComponent: TextFilter,
         },

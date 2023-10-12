@@ -62,6 +62,7 @@ const CraftingCatalogPage = () => {
         header: "Name",
         size: 120,
         filterFn: "includesString",
+        rowHeader: true,
         cell: TextWrapCell,
       }),
       columnHelper.observe(

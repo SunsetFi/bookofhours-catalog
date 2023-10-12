@@ -1,27 +1,26 @@
 import {
   ColumnHelper as BaseColumnHelper,
-  ColumnDef,
-  DeepKeys,
-  DeepValue,
-  DisplayColumnDef,
-  IdentifiedColumnDef,
   RowData,
   createColumnHelper as createBase,
 } from "@tanstack/react-table";
 
 import { ObservableKeys, Observation } from "@/observables";
 
-import { ObservableAccessorFn, ObservableColumnDef } from "../types";
+import {
+  EnhancedDisplayColumnDef,
+  ObservableAccessorFn,
+  ObservableColumnDef,
+} from "../types";
 
 export interface ObservableColumnHelper<TData extends RowData>
   extends BaseColumnHelper<TData> {
   observe<TProp extends ObservableKeys<TData>>(
     accessor: TProp,
-    column: IdentifiedColumnDef<TData, Observation<TData[TProp]>>
+    column: EnhancedDisplayColumnDef<TData, Observation<TData[TProp]>>
   ): ObservableColumnDef<TData, Observation<TData[TProp]>>;
   observe<TValue>(
     accessor: ObservableAccessorFn<TData, TValue>,
-    column: DisplayColumnDef<TData, TValue>
+    column: EnhancedDisplayColumnDef<TData, TValue>
   ): ObservableColumnDef<TData, TValue>;
 }
 export function createObservableColumnHelper<

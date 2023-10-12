@@ -1,7 +1,7 @@
 import React from "react";
 import { IdentifiedColumnDef } from "@tanstack/react-table";
 import { Observable, map } from "rxjs";
-import { mapValues, pick, pickBy } from "lodash";
+import { pick, pickBy } from "lodash";
 
 import { mergeMapIfNotNull } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
@@ -32,6 +32,7 @@ export function createSituationColumnHelper<
         header: "Name",
         cell: TextWrapCell,
         filterFn: "includesString",
+        rowHeader: true,
         meta: {
           filterComponent: TextFilter,
         },

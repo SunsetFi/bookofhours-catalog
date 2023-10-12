@@ -62,6 +62,7 @@ const LocationsCatalogPage = () => {
         header: "Location",
         size: 200,
         filterFn: "includesString",
+        rowHeader: true,
         cell: TextWrapCell,
       }),
       columnHelper.observe("shrouded$", {
