@@ -1,20 +1,16 @@
 import * as React from "react";
 
-import Popper from "@mui/material/Popper";
 import Box from "@mui/material/Box";
 import { type SxProps } from "@mui/material/styles";
-
-import type { Instance as PopperInstance } from "@popperjs/core";
 
 import { useDIDependency } from "@/container";
 
 import { useObservation } from "@/hooks/use-observation";
 import { Null$ } from "@/observables";
 
-import { useMutationObserver } from "@/hooks/use-mutation-observer";
-
 import { Compendium, ElementModel } from "@/services/sh-compendium";
 
+import Tooltip from "./Tooltip";
 import ElementDetails from "./ElementDetails";
 
 export interface ElementIconBaseProps {
@@ -46,37 +42,12 @@ const ElementIcon = ({
 }) => {
   const compendium = useDIDependency(Compendium);
 
-  const popperRef = React.useRef<PopperInstance>(null);
-  const [elementDetailsRef, setElementDetailsRef] =
-    React.useState<HTMLDivElement | null>(null);
-
-  const [popupAnchor, setPopupAnchor] = React.useState<HTMLElement | null>(
-    null
-  );
-
   if (!element && elementId) {
     element = compendium.getElementById(elementId);
   }
 
   const iconUrl = useObservation(element?.iconUrl$ ?? Null$) ?? "";
   const label = useObservation(element?.label$ ?? Null$) ?? "";
-
-  const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
-    // FIXME: Popper is appearing off screen, despite the preventOverflow, and jumps back on screen if the screen is scrolled.
-    setPopupAnchor(e.currentTarget);
-  }, []);
-
-  const onMouseOut = React.useCallback(() => {
-    setPopupAnchor(null);
-  }, []);
-
-  useMutationObserver(elementDetailsRef, () => {
-    if (popperRef.current == null) {
-      return;
-    }
-
-    popperRef.current.update();
-  });
 
   if (!element) {
     return null;
@@ -87,7 +58,7 @@ const ElementIcon = ({
   }
 
   return (
-    <>
+    <Tooltip title={<ElementDetails element={element} />}>
       <Box
         sx={{
           width: maxWidth ? `${maxWidth}px` : undefined,
@@ -103,33 +74,10 @@ const ElementIcon = ({
           src={iconUrl}
           alt={label}
           title={title}
-          onMouseOver={onMouseOver}
-          onMouseOut={onMouseOut}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
+          style={{ display: "block", maxWidth: "100%", maxHeight: "100%" }}
         />
       </Box>
-      <Popper
-        popperRef={popperRef}
-        open={popupAnchor != null}
-        anchorEl={popupAnchor!}
-        modifiers={[
-          {
-            name: "preventOverflow",
-            options: {
-              mainAxis: true,
-              altAxis: true,
-              boundariesElement: "viewport",
-              padding: 8,
-            },
-          },
-        ]}
-        sx={{
-          pointerEvents: "none",
-        }}
-      >
-        <ElementDetails ref={setElementDetailsRef} element={element} />
-      </Popper>
-    </>
+    </Tooltip>
   );
 };
 

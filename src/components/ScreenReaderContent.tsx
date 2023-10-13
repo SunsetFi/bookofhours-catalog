@@ -1,13 +1,19 @@
 import * as React from "react";
 
-interface ScreenReaderContentProps {
+interface ScreenReaderContentProps
+  extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
 }
 
-const ScreenReaderContent = ({ children }: ScreenReaderContentProps) => {
+const ScreenReaderContent = ({
+  children,
+  ...props
+}: ScreenReaderContentProps) => {
   return (
     <span
+      {...props}
       style={{
+        ...props.style,
         clip: "rect(1px, 1px, 1px, 1px)",
         clipPath: "inset(50%)",
         height: "1px",

@@ -61,7 +61,7 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
             </IconButton>
           )}
         </Box>
-        <HandOverviewIcons sx={{ ml: 2 }} />
+        <HandOverviewIcons />
         <Box sx={{ ml: "auto" }} />
         <PinboardHeader sx={{ py: 1 }} />
         <SearchButtonHeader sx={{ ml: 2 }} />

@@ -113,7 +113,7 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
           <ListItem>
             <ListItemText sx={{ ml: 1 }} primary="Skip to Tomorrow" />
             <Box sx={{ ml: "auto" }}>
-              <Typography variant="caption">
+              <Typography variant="caption" role="timer">
                 <ScreenReaderContent>
                   {secondsToTomorrowStr} seconds to tomorrow
                 </ScreenReaderContent>
@@ -171,7 +171,7 @@ const ExecutingSituationListItem = ({
       <Box sx={{ ml: "auto" }}>
         {state === "Ongoing" && (
           <>
-            <Typography variant="caption">
+            <Typography variant="caption" role="timer">
               <ScreenReaderContent>
                 {timeRemainingStr} seconds left in recipe
               </ScreenReaderContent>

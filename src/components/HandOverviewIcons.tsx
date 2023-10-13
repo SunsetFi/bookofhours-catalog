@@ -34,6 +34,7 @@ const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
       sx={{
         display: "flex",
         flexDirection: "row",
+        alignItems: "center",
         gap: 1,
         ...sx,
       }}

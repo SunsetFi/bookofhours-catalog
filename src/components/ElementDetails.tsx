@@ -39,11 +39,12 @@ const ElementDetails = React.forwardRef<HTMLDivElement, ElementDetailsProps>(
           }}
         >
           <img
+            aria-hidden="true"
             loading="lazy"
             src={iconUrl}
             alt={label}
             title={label}
-            style={{ width: "50px" }}
+            style={{ display: "block", width: "50px" }}
           />
           <Typography variant="body1">{label}</Typography>
         </Box>

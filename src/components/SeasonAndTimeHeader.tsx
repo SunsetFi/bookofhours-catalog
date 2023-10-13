@@ -66,6 +66,7 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
         <Box sx={{ display: "flex" }}>
           {hasNextEvent && (
             <Typography
+              role="timer"
               component="div"
               variant="body2"
               title="Time to Next Event"
@@ -83,6 +84,7 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
           )}
           {!Number.isNaN(secondsToTomorrow) && (
             <Typography
+              role="timer"
               component="span"
               variant="body2"
               title="Seconds Left in Day"

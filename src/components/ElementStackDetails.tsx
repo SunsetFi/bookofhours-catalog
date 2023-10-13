@@ -59,11 +59,12 @@ const ElementStackDetails = React.forwardRef<
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           <img
+            aria-hidden="true"
             loading="lazy"
             src={iconUrl}
             alt={label}
             title={label}
-            style={{ width: "50px" }}
+            style={{ display: "block", width: "50px" }}
           />
         </Badge>
         <GameTypography variant="body1">{label}</GameTypography>
