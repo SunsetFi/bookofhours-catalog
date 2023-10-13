@@ -160,9 +160,13 @@ export class TimeSource {
   }
 
   async passDay() {
+    // FIXME: I don't trust that jumping over all the season recipes in one go lets the game run all its recipes appropriately.
     const time = await firstValueFrom(this.secondsUntilTomorrow$);
-    // Tick one min-tick past the end of the day to start the new one.
-    await this.passTime(time + 0.1);
+    // Tick past daybreak, to one tick past the end of the day to start the new one.
+    // TODO: What is the exact delay we need for weather to show up?  Came up with +7 by trial and error.
+    await this.passTime(time + 7 + 0.1);
+    // Re-pause, as daybreak will have reset time
+    await this._api.setSpeed("Paused");
     this._scheduler.updateNow();
   }
 
@@ -196,4 +200,8 @@ export class TimeSource {
 export function useGameSpeed(): GameSpeed | null {
   const model = useDIDependency(TimeSource);
   return useObservation(model.gameSpeed$) ?? null;
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

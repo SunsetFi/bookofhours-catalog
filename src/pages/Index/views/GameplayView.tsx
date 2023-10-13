@@ -74,6 +74,7 @@ const Overview = () => {
       sx={{
         width: "100%",
         height: "100%",
+        overflow: "auto",
         display: "grid",
         gridTemplateRows: `[start] max-content [dividier] 1fr [end]`,
         gridTemplateColumns: `[start] 15% [memories-soul] 20% [soul-skill] 45% [skill-misc] 20% [end]`,
