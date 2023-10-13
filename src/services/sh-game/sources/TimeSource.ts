@@ -164,7 +164,7 @@ export class TimeSource {
     const time = await firstValueFrom(this.secondsUntilTomorrow$);
     // Tick past daybreak, to one tick past the end of the day to start the new one.
     // TODO: What is the exact delay we need for weather to show up?  Came up with +7 by trial and error.
-    await this.passTime(time + 7 + 0.1);
+    await this._api.passTime(time + 7 + 0.1);
     // Re-pause, as daybreak will have reset time
     await this._api.setSpeed("Paused");
     this._scheduler.updateNow();
