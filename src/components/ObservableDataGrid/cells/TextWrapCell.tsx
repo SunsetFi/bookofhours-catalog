@@ -21,11 +21,6 @@ function TextWrapCell<T extends RowData>(props: CellContext<T, string | null>) {
 
   const [open, setOpen] = React.useState(false);
 
-  const value = props.getValue();
-  if (!value) {
-    return null;
-  }
-
   const textTooBig = textHeight > containerHeight;
 
   const onMouseOver = React.useCallback(() => {
@@ -35,6 +30,11 @@ function TextWrapCell<T extends RowData>(props: CellContext<T, string | null>) {
 
     setOpen(true);
   }, [textTooBig]);
+
+  const value = props.getValue();
+  if (!value) {
+    return null;
+  }
 
   return (
     <Box

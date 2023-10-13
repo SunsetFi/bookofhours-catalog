@@ -55,8 +55,6 @@ import {
 } from "./types";
 import { RowHeight } from "./constants";
 
-// TODO: Pagination.  MUI has a component for this, and I bet tanstack has that functionality as well.
-
 export interface ObservableDataGridProps<T extends {}> {
   sx?: SxProps;
   filters?: Record<string, any>;
@@ -313,7 +311,10 @@ function ObservableDataGrid<T extends {}>({
         <TableBody>
           {paddingTop > 0 && (
             // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
-            <TableRow style={{ height: `${paddingTop}px` }} />
+            <TableRow
+              aria-hidden="true"
+              style={{ height: `${paddingTop}px` }}
+            />
           )}
           {virtualRows.map((virtualRow) => {
             const row = rows[virtualRow.index];
@@ -339,7 +340,10 @@ function ObservableDataGrid<T extends {}>({
           })}
           {paddingBottom > 0 && (
             // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
-            <TableRow style={{ height: `${paddingBottom}px` }} />
+            <TableRow
+              aria-hidden="true"
+              style={{ height: `${paddingBottom}px` }}
+            />
           )}
         </TableBody>
         <TableFooter
@@ -456,7 +460,7 @@ const HeaderSort = ({
   const isSorted = header.column.getIsSorted();
   let sortModeDescription: string;
   if (isSorted == false) {
-    sortModeDescription = "disabled";
+    sortModeDescription = "inactive";
   } else if (isSorted === "asc") {
     sortModeDescription = "ascending";
   } else {

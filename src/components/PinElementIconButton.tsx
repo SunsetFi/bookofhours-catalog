@@ -34,7 +34,12 @@ const PinElementIconButton = ({
   }, [isElementPinned, elementId, pinboard]);
 
   return (
-    <IconButton title={title ?? "Pin Item"} onClick={onClick}>
+    <IconButton
+      role="button"
+      aria-pressed={isElementPinned ? "true" : "false"}
+      title={title ?? "Pin Item"}
+      onClick={onClick}
+    >
       <PushPin
         sx={{ transform: isElementPinned ? "rotate(-90deg)" : "rotate(0deg)" }}
       />

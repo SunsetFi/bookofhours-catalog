@@ -1,6 +1,8 @@
 import * as React from "react";
 import { map } from "rxjs";
 
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import Popover, { PopoverActions } from "@mui/material/Popover";
@@ -8,32 +10,37 @@ import PlayCircle from "@mui/icons-material/PlayCircle";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import type { SxProps } from "@mui/material/styles";
+import { type SxProps } from "@mui/material/styles";
 
 import SkipNextIcon from "@mui/icons-material/SkipNext";
-import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import DownloadIcon from "@mui/icons-material/Download";
 
 import { useDIDependency } from "@/container";
-import { filterItemObservations, observeAll } from "@/observables";
+import { filterItemObservations } from "@/observables";
 
 import { useObservation } from "@/hooks/use-observation";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 
-import { SituationModel, TimeSource, TokensSource } from "@/services/sh-game";
+import { TokensSource, TimeSource, SituationModel } from "@/services/sh-game";
 
 import FocusIconButton from "./FocusIconButton";
+import ScreenReaderContent from "./ScreenReaderContent";
 
-export interface RecipeExecutionHeaderProps {
+interface RecipeExecutionsHeaderProps {
   sx?: SxProps;
 }
-const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
+
+const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  const onClick = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    setAnchorEl(e.currentTarget);
+  }, []);
+
   const actionsRef = React.useRef<PopoverActions>(null);
   const [executingSituationsRef, setExecutingSituationsRef] =
     React.useState<HTMLElement | null>(null);
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
   useMutationObserver(executingSituationsRef, () => {
     if (actionsRef.current == null) {
@@ -42,6 +49,14 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
 
     actionsRef.current.updatePosition();
   });
+
+  const timeSource = useDIDependency(TimeSource);
+
+  const secondsToTomorrow =
+    useObservation(timeSource.secondsUntilTomorrow$) ?? Number.NaN;
+  const secondsToTomorrowStr = secondsToTomorrow.toFixed(
+    secondsToTomorrow > 60 ? 0 : 1
+  );
 
   const tokensSource = useDIDependency(TokensSource);
   const executingSituations =
@@ -55,74 +70,29 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
       [tokensSource]
     ) ?? [];
 
-  const timeSource = useDIDependency(TimeSource);
-
-  const secondsToTomorrow =
-    useObservation(timeSource.secondsUntilTomorrow$) ?? Number.NaN;
-  const secondsToTomorrowStr = secondsToTomorrow.toFixed(
-    secondsToTomorrow > 60 ? 0 : 1
-  );
-
-  const secondsToNextEvent =
-    useObservation(() =>
-      tokensSource.visibleSituations$.pipe(
-        map((situations) => situations.map((s) => s.timeRemaining$)),
-        observeAll(),
-        map((seconds) => Math.max(...seconds.filter((x) => x > 0)))
-      )
-    ) ?? Number.NaN;
-  const hasSecondsToTomorrow = !Number.isNaN(secondsToTomorrow);
-  const hasNextEvent =
-    !Number.isNaN(secondsToNextEvent) && secondsToNextEvent > 0;
-
   return (
     <>
-      <Box
-        onClick={(e) => setAnchorEl(e.currentTarget)}
+      <Badge
+        role="region"
+        aria-label="Recipe Executions"
+        badgeContent={executingSituations.length}
+        color="primary"
         sx={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 1,
-          cursor: "pointer",
+          ["& .MuiBadge-badge"]: {
+            right: 10,
+            top: 10,
+          },
           ...sx,
         }}
       >
-        {(hasNextEvent || hasSecondsToTomorrow) && <HourglassBottomIcon />}
-        {hasNextEvent && (
-          <Typography
-            component="span"
-            variant="body2"
-            title="Seconds to Next Event"
-          >
-            {secondsToNextEvent}s
-          </Typography>
-        )}
-        {hasNextEvent && hasSecondsToTomorrow && " / "}
-        {!Number.isNaN(secondsToTomorrow) && (
-          <Typography
-            component="span"
-            variant="body2"
-            title="Seconds Left in Day"
-          >
-            {secondsToTomorrowStr}s
-          </Typography>
-        )}
-        <Badge
-          badgeContent={executingSituations.length}
-          color="primary"
-          sx={{
-            ["& .MuiBadge-badge"]: {
-              right: 10,
-              top: 10,
-            },
-          }}
+        <IconButton
+          aria-haspopup="menu"
+          title="Recipe Executions"
+          onClick={onClick}
         >
-          <IconButton title="Recipe Executions">
-            <PlayCircle />
-          </IconButton>
-        </Badge>
-      </Box>
+          <PlayCircle />
+        </IconButton>
+      </Badge>
       <Popover
         action={actionsRef}
         open={!!anchorEl}
@@ -134,6 +104,7 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
         }}
       >
         <List
+          role="menu"
           ref={setExecutingSituationsRef}
           sx={{
             width: "400px",
@@ -142,7 +113,12 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
           <ListItem>
             <ListItemText sx={{ ml: 1 }} primary="Skip to Tomorrow" />
             <Box sx={{ ml: "auto" }}>
-              <Typography variant="caption">{secondsToTomorrowStr}s</Typography>
+              <Typography variant="caption">
+                <ScreenReaderContent>
+                  {secondsToTomorrowStr} seconds to tomorrow
+                </ScreenReaderContent>
+                <span aria-hidden="true">{secondsToTomorrowStr}s</span>
+              </Typography>
               <IconButton
                 title="Fast Forward to Next Day"
                 onClick={() => timeSource.passDay()}
@@ -163,7 +139,7 @@ const TimeAndRecipeHeader = ({ sx }: RecipeExecutionHeaderProps) => {
   );
 };
 
-export default TimeAndRecipeHeader;
+export default RecipeExecutionsHeader;
 
 interface ExecutingSituationListItemProps {
   situation: SituationModel;
@@ -186,11 +162,21 @@ const ExecutingSituationListItem = ({
   return (
     <ListItem>
       <FocusIconButton token={situation} />
-      <ListItemText sx={{ ml: 1 }} primary={label} secondary={recipeLabel} />
+      <ListItemText
+        id={`executing-situation-${situation.id}-label`}
+        sx={{ ml: 1 }}
+        primary={label}
+        secondary={recipeLabel}
+      />
       <Box sx={{ ml: "auto" }}>
         {state === "Ongoing" && (
           <>
-            <Typography variant="caption">{timeRemainingStr}s</Typography>
+            <Typography variant="caption">
+              <ScreenReaderContent>
+                {timeRemainingStr} seconds left in recipe
+              </ScreenReaderContent>
+              <span aria-hidden="true">{timeRemainingStr}s</span>
+            </Typography>
             <IconButton
               title="Fast Forward to Completion"
               // Tick one tick past the end of the situation, so we dont hang on 0.0

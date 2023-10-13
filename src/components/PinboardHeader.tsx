@@ -41,6 +41,8 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
 
   return (
     <Box
+      role="region"
+      aria-label="Pinboard"
       sx={{
         display: "flex",
         flexDirection: "row",

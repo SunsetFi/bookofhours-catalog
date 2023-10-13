@@ -58,6 +58,12 @@ const BookCatalogPage = () => {
         showLevel: false,
         enableSorting: false,
       }),
+      columnHelper.aspectsList("attributes", isBookAtributeAspect, {
+        header: "Attributes",
+        size: 200,
+        showLevel: false,
+        enableSorting: false,
+      }),
       columnHelper.display({
         id: "memory-commands",
         size: 50,
@@ -98,28 +104,28 @@ const BookCatalogPage = () => {
         size: 260,
         aspectsSource: (model) => model.memoryAspects$,
       }),
-      columnHelper.aspectsList("language", (s) => s.startsWith("w."), {
-        header: "Language",
-        size: 140,
-        showLevel: false,
-        enableSorting: false,
-      }),
-      columnHelper.aspectsList("type", ["film", "record.phonograph"], {
-        header: "Type",
-        size: 100,
-        showLevel: false,
-        enableSorting: false,
-      }),
-      columnHelper.aspectsList(
-        "contamination",
-        (s) => s.startsWith("contamination."),
-        {
-          header: "Contamination",
-          size: 180,
-          showLevel: false,
-          enableSorting: false,
-        }
-      ),
+      // columnHelper.aspectsList("language", (s) => s.startsWith("w."), {
+      //   header: "Language",
+      //   size: 140,
+      //   showLevel: false,
+      //   enableSorting: false,
+      // }),
+      // columnHelper.aspectsList("type", ["film", "record.phonograph"], {
+      //   header: "Type",
+      //   size: 100,
+      //   showLevel: false,
+      //   enableSorting: false,
+      // }),
+      // columnHelper.aspectsList(
+      //   "contamination",
+      //   (s) => s.startsWith("contamination."),
+      //   {
+      //     header: "Contamination",
+      //     size: 180,
+      //     showLevel: false,
+      //     enableSorting: false,
+      //   }
+      // ),
       columnHelper.description(),
     ],
     []
@@ -148,5 +154,21 @@ const BookCatalogPage = () => {
     </PageContainer>
   );
 };
+
+function isBookAtributeAspect(s: string): boolean {
+  if (["film", "record.phonograph"].includes(s)) {
+    return true;
+  }
+
+  if (s.startsWith("w.")) {
+    return true;
+  }
+
+  if (s.startsWith("contamination.")) {
+    return true;
+  }
+
+  return false;
+}
 
 export default BookCatalogPage;

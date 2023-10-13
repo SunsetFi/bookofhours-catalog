@@ -30,20 +30,31 @@ const ElementStackIcon = ({ elementStack }: ElementStackIconProps) => {
     setPopupAnchor(null);
   }, []);
 
-  return (
-    <div onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+  // This is stupid, but the screen reader is reading the invisible 0 from badge
+  let content = (
+    <img
+      loading="lazy"
+      src={iconUrl}
+      alt={label}
+      style={{ maxWidth: "40px" }}
+    />
+  );
+
+  if (quantity > 1) {
+    content = (
       <Badge
         badgeContent={quantity > 1 ? quantity : 0}
         color="primary"
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <img
-          loading="lazy"
-          src={iconUrl}
-          alt={label}
-          style={{ maxWidth: "40px" }}
-        />
+        {content}
       </Badge>
+    );
+  }
+
+  return (
+    <div onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+      {content}
       <Popper
         open={popupAnchor != null}
         anchorEl={popupAnchor!}

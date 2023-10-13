@@ -41,9 +41,10 @@ const PinRecipeIconButton = ({ sx, recipeId }: PinElementIconButtonProps) => {
   return (
     <IconButton
       sx={sx}
+      role="button"
+      aria-pressed={isRecipePinned ? "true" : "false"}
       title={`Pin recipe ${recipeLabel}`}
       onClick={onClick}
-      aria-pressed={isRecipePinned ? "true" : "false"}
     >
       <PushPin
         sx={{ transform: isRecipePinned ? "rotate(-90deg)" : "rotate(0deg)" }}
