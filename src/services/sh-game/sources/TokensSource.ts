@@ -1,5 +1,12 @@
 import { startTransition } from "react";
-import { Observable, Subject, combineLatest, map, shareReplay } from "rxjs";
+import {
+  Observable,
+  Subject,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+} from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
@@ -8,6 +15,7 @@ import {
   distinctUntilShallowArrayChanged,
   filterItemObservations,
   filterItems,
+  firstOrDefault,
 } from "@/observables";
 
 import { Scheduler, TaskUnsubscriber } from "../../scheduler";
@@ -118,16 +126,38 @@ export class TokensSource {
     return this._considerSituation$;
   }
 
+  private _unlockingTerrainSituation$: Observable<SituationModel | null> | null =
+    null;
+  get unlockingTerrainSituation$() {
+    if (!this._unlockingTerrainSituation$) {
+      this._unlockingTerrainSituation$ = this._tokens$.pipe(
+        // More nasty gnarly observable chains
+        filterItems(isSituationModel),
+        // This isnt an observable, but the situation is created and destroyed as it is used,
+        // so this is safe.
+        firstOrDefault((situation) => situation.verbId === "terrain.unlock"),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockingTerrainSituation$;
+  }
+
   private _visibleSituations$: Observable<SituationModel[]> | null = null;
   get visibleSituations$() {
     if (!this._visibleSituations$) {
       this._visibleSituations$ = combineLatest([
         this.considerSituation$,
+        this.unlockingTerrainSituation$,
         this.unlockedWorkstations$,
         this.unlockedHarvestStations$,
       ]).pipe(
-        map(([consider, workstations, harvestStations]) => {
+        map(([consider, unlock, workstations, harvestStations]) => {
           const situations = [...workstations, ...harvestStations];
+          if (unlock) {
+            situations.push(unlock);
+          }
           if (consider) {
             situations.push(consider);
           }

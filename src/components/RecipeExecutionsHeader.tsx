@@ -165,8 +165,8 @@ const ExecutingSituationListItem = ({
       <ListItemText
         id={`executing-situation-${situation.id}-label`}
         sx={{ ml: 1 }}
-        primary={label}
-        secondary={recipeLabel}
+        primary={label === "." ? recipeLabel : label}
+        secondary={label === "." ? null : recipeLabel}
       />
       <Box sx={{ ml: "auto" }}>
         {state === "Ongoing" && (

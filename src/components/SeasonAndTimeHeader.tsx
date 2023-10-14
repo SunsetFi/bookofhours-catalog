@@ -77,39 +77,41 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
               <span aria-hidden="true">{secondsToNextEventStr}s</span>
             </Typography>
           )}
-          {hasNextEvent && hasSecondsToTomorrow && (
-            <Box component="span" sx={{ mx: 1 }}>
-              /
-            </Box>
-          )}
-          {!Number.isNaN(secondsToTomorrow) && (
-            <Typography
-              role="timer"
-              component="span"
-              variant="body2"
-              title="Seconds Left in Day"
-            >
-              <ScreenReaderContent>
-                {secondsToTomorrowStr} seconds left in day
-              </ScreenReaderContent>
-              <span aria-hidden="true">{secondsToTomorrowStr}s</span>
-            </Typography>
+          {hasSecondsToTomorrow && (
+            <>
+              <Box component="span" sx={{ mx: 1 }}>
+                /
+              </Box>
+              <Typography
+                role="timer"
+                component="span"
+                variant="body2"
+                title="Seconds Left in Day"
+              >
+                <ScreenReaderContent>
+                  {secondsToTomorrowStr} seconds left in day
+                </ScreenReaderContent>
+                <span aria-hidden="true">{secondsToTomorrowStr}s</span>
+              </Typography>
+            </>
           )}
         </Box>
         <Box sx={{ display: "flex" }}>
           <Tooltip title={seasonDescription}>
             <Typography variant="body2" fontSize="0.8em" sx={{ mr: 1 }}>
-              {seasonName}
+              {seasonName ?? "Time stands still"}
             </Typography>
           </Tooltip>
-          <Typography
-            variant="body2"
-            fontSize="0.8em"
-            sx={{ color: "text.secondary" }}
-          >
-            {daysInSeason} day{daysInSeason != 1 ? "s" : ""} remain
-            {daysInSeason == 1 ? "s" : ""}
-          </Typography>
+          {daysInSeason != null && (
+            <Typography
+              variant="body2"
+              fontSize="0.8em"
+              sx={{ color: "text.secondary" }}
+            >
+              {daysInSeason} day{daysInSeason != 1 ? "s" : ""} remain
+              {daysInSeason == 1 ? "s" : ""}
+            </Typography>
+          )}
         </Box>
       </Box>
     </Box>
