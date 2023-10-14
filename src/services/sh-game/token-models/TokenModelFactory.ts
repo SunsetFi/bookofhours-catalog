@@ -37,6 +37,7 @@ export class TokenModelFactory {
         );
       case "Situation":
       case "WorkstationSituation" as any:
+      case "RoomWorkSituation" as any:
         return new SituationModel(
           token as Situation,
           this._container.get(API),

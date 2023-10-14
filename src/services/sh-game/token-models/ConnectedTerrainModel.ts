@@ -6,7 +6,7 @@ import {
   map,
   shareReplay,
 } from "rxjs";
-import { ConnectedTerrain } from "secrethistories-api";
+import { Aspects, ConnectedTerrain } from "secrethistories-api";
 import { isEqual } from "lodash";
 
 import { filterItemObservations } from "@/observables";
@@ -15,6 +15,7 @@ import { API } from "@/services/sh-api";
 import { RecipeModel } from "@/services/sh-compendium";
 
 import { TokenModel } from "./TokenModel";
+import { ElementStackModel } from "./ElementStackModel";
 
 export function isConnectedTerrainModel(
   model: TokenModel
@@ -145,8 +146,82 @@ export class ConnectedTerrainModel extends TokenModel {
     return this._shrouded$;
   }
 
+  private _unlockEssentials$: Observable<Aspects> | null = null;
+  get unlockEssentials$() {
+    if (!this._unlockEssentials$) {
+      this._unlockEssentials$ = this._connectedTerrain$.pipe(
+        map((t) => t.unlockEssentials),
+        distinctUntilChanged(isEqual),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockEssentials$;
+  }
+
+  private _unlockRequirements$: Observable<Aspects> | null = null;
+  get unlockRequirements$() {
+    if (!this._unlockRequirements$) {
+      this._unlockRequirements$ = this._connectedTerrain$.pipe(
+        map((t) => t.unlockRequirements),
+        distinctUntilChanged(isEqual),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockRequirements$;
+  }
+
+  private _unlockForbiddens$: Observable<Aspects> | null = null;
+  get unlockForbiddens$() {
+    if (!this._unlockForbiddens$) {
+      this._unlockForbiddens$ = this._connectedTerrain$.pipe(
+        map((t) => t.unlockForbiddens),
+        distinctUntilChanged(isEqual),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockForbiddens$;
+  }
+
   get children$() {
     return this._childTokens$;
+  }
+
+  openTerrainWindow() {
+    if (
+      this._connectedTerrainInternal$.value.sealed ||
+      !this._connectedTerrainInternal$.value.shrouded
+    ) {
+      return false;
+    }
+
+    try {
+      this._api.openTokenAtPath(this.path);
+    } catch {
+      return false;
+    }
+
+    return true;
+  }
+
+  async unlockTerrain(input: ElementStackModel) {
+    if (!this.openTerrainWindow()) {
+      return false;
+    }
+
+    if (!(await input.moveToSphere(`~/terraindetailinputsphere`))) {
+      return false;
+    }
+
+    try {
+      await this._api.executeTokenAtPath(this.path);
+    } catch {
+      return false;
+    }
+
+    return true;
   }
 
   _onUpdate(terrain: ConnectedTerrain) {

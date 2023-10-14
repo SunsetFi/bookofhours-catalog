@@ -11,6 +11,7 @@ import ThemeProvider from "./theme";
 import AppRouter from "./services/history/AppRouter";
 
 import RecipeOrchestratorDialog from "./components/RecipeOrchestratorDialog";
+import UnlockTerrainDialog from "./components/UnlockTerrainDialog";
 import SearchDialog from "./components/SearchDialog";
 import Favicon from "./components/Favicon";
 import Hotkeys from "./components/Hotkeys";
@@ -29,6 +30,7 @@ root.render(
             <CssBaseline />
             <AppRoutes />
             <RecipeOrchestratorDialog />
+            <UnlockTerrainDialog />
             <SearchDialog />
           </ThemeProvider>
         </AppRouter>

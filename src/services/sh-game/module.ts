@@ -10,6 +10,8 @@ import { TokenModelFactory } from "./token-models/TokenModelFactory";
 import { TokenVisibilityFactory } from "./token-models/TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./token-models/TokenParentTerrainFactory";
 
+import { TerrainUnlocker } from "./TerrainUnlocker";
+
 export default new ContainerModule((bind) => {
   bind(Orchestrator);
   bind(CharacterSource);
@@ -19,4 +21,5 @@ export default new ContainerModule((bind) => {
   bind(TokenModelFactory);
   bind(TokenVisibilityFactory);
   bind(TokenParentTerrainFactory);
+  bind(TerrainUnlocker);
 });

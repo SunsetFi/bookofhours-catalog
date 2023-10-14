@@ -71,6 +71,7 @@ const ElementIcon = ({
           cursor: onClick ? "pointer" : undefined,
           ...sx,
         }}
+        tabIndex={onClick ? 0 : undefined}
         onClick={onClick}
       >
         <img

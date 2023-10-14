@@ -1,1 +1,3 @@
 - Fix: Items in kitchen gardens report their location as "kitchen". See: beehives
+- Ongoing executions should show right-side verbs
+- Sorting available on URL for bookmarking

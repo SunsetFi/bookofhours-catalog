@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
 
 import { CellContext } from "@tanstack/react-table";
 
@@ -14,6 +15,7 @@ import {
   ConnectedTerrainModel,
   SituationModel,
   TokensSource,
+  TerrainUnlocker,
   isSituationModel,
 } from "@/services/sh-game";
 
@@ -69,7 +71,20 @@ const LocationsCatalogPage = () => {
         header: "Status",
         size: 100,
         filterFn: "equals",
-        cell: (props) => (props.getValue() ? <LockIcon /> : <LockOpenIcon />),
+        cell: (props) => {
+          const unlocker = useDIDependency(TerrainUnlocker);
+          const value = props.getValue();
+
+          if (value) {
+            return (
+              <IconButton onClick={() => unlocker.open(props.row.original)}>
+                <LockIcon />
+              </IconButton>
+            );
+          }
+
+          return <LockOpenIcon />;
+        },
       }),
       columnHelper.observe(
         (item) => item.children$.pipe(filterItems(isSituationModel)),

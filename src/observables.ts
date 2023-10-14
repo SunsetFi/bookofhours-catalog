@@ -58,6 +58,23 @@ export function filterItems(filter: (item: any) => boolean) {
   };
 }
 
+export function firstOrDefault<TIn, TOut extends TIn>(
+  filter: (item: TIn) => item is TOut
+): OperatorFunction<readonly TIn[], TOut | null>;
+export function firstOrDefault<TIn>(
+  filter: (item: TIn) => boolean
+): OperatorFunction<readonly TIn[], TIn | null>;
+export function firstOrDefault<TIn, TOut extends TIn>(
+  filter: (item: TIn) => boolean
+): OperatorFunction<readonly TIn[], any | null> {
+  return (source: Observable<readonly TIn[]>): Observable<any | null> => {
+    return source.pipe(
+      map((items) => items.find(filter) ?? null),
+      distinctUntilChanged()
+    );
+  };
+}
+
 export function filterItemObservations<T, K extends T>(
   filter: (item: T) => Observable<boolean>
 ) {

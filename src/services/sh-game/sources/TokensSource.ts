@@ -49,6 +49,7 @@ const supportedPayloadTypes = [
   "ElementStack",
   "Situation",
   "WorkstationSituation",
+  "RoomWorkSituation",
 ];
 
 @injectable()
