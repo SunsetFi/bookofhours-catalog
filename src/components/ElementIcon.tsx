@@ -18,6 +18,7 @@ export interface ElementIconBaseProps {
   title?: string;
   maxWidth?: number;
   maxHeight?: number;
+  onClick?(): void;
 }
 export type ElementIconProps = ElementIconBaseProps &
   (
@@ -34,6 +35,7 @@ const ElementIcon = ({
   title,
   maxWidth,
   maxHeight,
+  onClick,
   element,
   elementId,
 }: ElementIconBaseProps & {
@@ -66,8 +68,10 @@ const ElementIcon = ({
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          cursor: onClick ? "pointer" : undefined,
           ...sx,
         }}
+        onClick={onClick}
       >
         <img
           loading="lazy"

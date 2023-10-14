@@ -243,18 +243,19 @@ export class Orchestrator {
       await this._api.openTokenAtPath(situation.path);
 
       for (const slotId of Object.keys(slots)) {
-        const slotPath = `${situation.path}/${slotId}`;
+        var token = slots[slotId];
         try {
-          var token = slots[slotId];
-          if (token) {
-            if (token.spherePath !== slotPath) {
-              await token.moveToSphere(slotPath);
-            }
-          } else {
-            await this._api.evictTokenAtPath(slotPath);
-          }
+          situation.setSlotContents(slotId, token);
         } catch (e) {
-          console.error("Failed to slot", slotId, "to", slotPath, e);
+          console.error(
+            "Failed to slot",
+            token?.id ?? "<clear>",
+            "to",
+            slotId,
+            "of situation",
+            situation.id,
+            e
+          );
           success = false;
         }
       }

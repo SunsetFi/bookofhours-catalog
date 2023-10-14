@@ -19,6 +19,7 @@ import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
 import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
+import { ElementStackModel } from "./ElementStackModel";
 
 export function isSituationModel(model: TokenModel): model is SituationModel {
   return model instanceof SituationModel;
@@ -245,6 +246,17 @@ export class SituationModel extends TokenModel {
     }
 
     return this._timeRemaining$;
+  }
+
+  async setSlotContents(slotId: string, token: ElementStackModel | null) {
+    const slotPath = `${this.path}/${slotId}`;
+    if (token) {
+      if (token.spherePath !== slotPath) {
+        await token.moveToSphere(slotPath);
+      }
+    } else {
+      await this._api.evictTokenAtPath(slotPath);
+    }
   }
 
   async execute() {

@@ -121,5 +121,5 @@ const PinnedElementItemHeaderIcon = ({
     return null;
   }
 
-  return <ElementIcon element={element} />;
+  return <ElementIcon element={element} onClick={() => model.remove()} />;
 };

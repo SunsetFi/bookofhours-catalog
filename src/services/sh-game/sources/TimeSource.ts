@@ -160,12 +160,13 @@ export class TimeSource {
   }
 
   async passDay() {
-    // FIXME: I don't trust that jumping over all the season recipes in one go lets the game run all its recipes appropriately.
     const time = await firstValueFrom(this.secondsUntilTomorrow$);
     // Tick past daybreak, to one tick past the end of the day to start the new one.
+    // Note: The api mod takes into account recipe timers and incrementally passes time around them so that all recipes
+    // execute as intended, despite the significant time gap we are jumping.
     // TODO: What is the exact delay we need for weather to show up?  Came up with +7 by trial and error.
     await this._api.passTime(time + 7 + 0.1);
-    // Re-pause, as daybreak will have reset time
+    // Re-pause, as daybreak will have reset the game speed.
     await this._api.setSpeed("Paused");
     this._scheduler.updateNow();
   }
