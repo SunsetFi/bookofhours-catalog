@@ -79,9 +79,11 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
           )}
           {hasSecondsToTomorrow && (
             <>
-              <Box component="span" sx={{ mx: 1 }}>
-                /
-              </Box>
+              {hasNextEvent && (
+                <Box component="span" sx={{ mx: 1 }}>
+                  /
+                </Box>
+              )}
               <Typography
                 role="timer"
                 component="span"

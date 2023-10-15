@@ -14,6 +14,7 @@ import { type SxProps } from "@mui/material/styles";
 
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import DownloadIcon from "@mui/icons-material/Download";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 
 import { useDIDependency } from "@/container";
 import { filterItemObservations } from "@/observables";
@@ -152,6 +153,8 @@ const ExecutingSituationListItem = ({
   const recipeLabel = useObservation(situation.recipeLabel$);
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const state = useObservation(situation.state$);
+  const notes = useObservation(situation.notes$) ?? [];
+  const output = useObservation(situation.output$) ?? [];
 
   const timeRemainingStr = timeRemaining.toFixed(1);
 
@@ -168,7 +171,13 @@ const ExecutingSituationListItem = ({
         primary={label === "." ? recipeLabel : label}
         secondary={label === "." ? null : recipeLabel}
       />
-      <Box sx={{ ml: "auto" }}>
+      <Box sx={{ ml: "auto", display: "flex" }}>
+        {/* FIXME: The backdrop is missing from this badge for some reason. */}
+        <Badge badgeContent={notes.length}>
+          <IconButton title="Inspect">
+            <AutoStoriesIcon />
+          </IconButton>
+        </Badge>
         {state === "Ongoing" && (
           <>
             <Typography variant="caption" role="timer">
@@ -187,9 +196,12 @@ const ExecutingSituationListItem = ({
           </>
         )}
         {state === "Complete" && (
-          <IconButton title="Complete" onClick={() => situation.conclude()}>
-            <DownloadIcon />
-          </IconButton>
+          <Badge badgeContent={output.length}>
+            {/* TODO: Show dialog of output. */}
+            <IconButton title="Complete" onClick={() => situation.conclude()}>
+              <DownloadIcon />
+            </IconButton>
+          </Badge>
         )}
       </Box>
     </ListItem>

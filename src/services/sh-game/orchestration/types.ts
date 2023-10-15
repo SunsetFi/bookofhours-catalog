@@ -15,11 +15,7 @@ export interface OrchestrationBase {
   readonly recipe$: Observable<RecipeModel | null>;
   readonly situation$: Observable<SituationModel | null>;
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
-  readonly aspectsFilter$: Observable<readonly string[]>;
-
   readonly executionPlan$: Observable<ExecutionPlan | null>;
-
-  setAspectsFilter(aspects: readonly string[]): void;
 }
 
 export interface VariableSituationOrchestration extends OrchestrationBase {

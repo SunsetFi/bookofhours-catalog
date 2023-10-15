@@ -10,7 +10,6 @@ import {
   map,
   mergeMap,
   shareReplay,
-  tap,
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
@@ -48,13 +47,13 @@ function recipeToCraftableModel(
     map((elementId) =>
       elementId ? compendium.getElementById(elementId) : null
     ),
-    tap((x) => {
-      if (!x) {
-        console.warn(
-          `Recipe ${recipeModel.recipeId} has no craftable element.`
-        );
-      }
-    }),
+    // tap((x) => {
+    //   if (!x) {
+    //     console.warn(
+    //       `Recipe ${recipeModel.recipeId} has no craftable element.`
+    //     );
+    //   }
+    // }),
     shareReplay(1)
   );
 

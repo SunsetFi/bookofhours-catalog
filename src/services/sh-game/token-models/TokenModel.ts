@@ -78,6 +78,10 @@ export abstract class TokenModel {
     return this._occupiesSpaceAs$;
   }
 
+  get occupiesSpaceAs() {
+    return this._token$.value.occupiesSpaceAs;
+  }
+
   focus() {
     this._api.focusTokenAtPath(this.path);
   }

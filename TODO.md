@@ -1,3 +1,7 @@
 - Fix: Items in kitchen gardens report their location as "kitchen". See: beehives
 - Ongoing executions should show right-side verbs
 - Sorting available on URL for bookmarking
+- Show notes and descriptions for situations (ongoing and new)
+- Support slotting cards in ongoing situations
+- Show output results in a dialog from recipe executions header
+  - Shift+click to conclude without viewing.

@@ -50,8 +50,6 @@ import {
 export class RecipeOrchestration
   implements OrchestrationBase, VariableSituationOrchestration
 {
-  private readonly _aspectsFilter$ = new BehaviorSubject<readonly string[]>([]);
-
   private readonly _situation$ = new BehaviorSubject<SituationModel | null>(
     null
   );
@@ -167,10 +165,6 @@ export class RecipeOrchestration
     return this._recipe$;
   }
 
-  get aspectsFilter$(): Observable<readonly string[]> {
-    return this._aspectsFilter$;
-  }
-
   get situation$(): Observable<SituationModel | null> {
     return this._situation$;
   }
@@ -182,17 +176,16 @@ export class RecipeOrchestration
       this._availableSituations$ = combineLatest([
         this._tokensSource.considerSituation$,
         this._tokensSource.unlockedWorkstations$,
-        this._aspectsFilter$,
         this._desiredElementThresholds$,
       ]).pipe(
-        map(([consider, workstations, aspectsFilter, elementThresholds]) => {
+        map(([consider, workstations, elementThresholds]) => {
           const verbs = [...workstations];
           if (consider) {
             verbs.push(consider);
           }
 
           return verbs.filter((verb) =>
-            this._situationIsAvailable(verb, aspectsFilter, elementThresholds)
+            this._situationIsAvailable(verb, elementThresholds)
           );
         }),
         shareReplay(1)
@@ -289,32 +282,9 @@ export class RecipeOrchestration
     return this._slots$;
   }
 
-  setAspectsFilter(aspects: readonly string[]): void {
-    this._aspectsFilter$.next(aspects);
-    this._tryClearSituation();
-  }
-
   selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
     this._slotAssignments$.next({});
-  }
-
-  private async _tryClearSituation() {
-    if (!this._situation$.value) {
-      return;
-    }
-
-    const [filter, thresholds] = await Promise.all([
-      firstValueFrom(this._aspectsFilter$),
-      firstValueFrom(this._desiredElementThresholds$),
-    ]);
-
-    if (
-      !this._situationIsAvailable(this._situation$.value, filter, thresholds)
-    ) {
-      this._situation$.next(null);
-      this._slotAssignments$.next({});
-    }
   }
 
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
@@ -397,11 +367,9 @@ export class RecipeOrchestration
 
   private _situationIsAvailable(
     situation: SituationModel,
-    aspectsFilter: readonly string[],
     additionalThresholds: SphereSpec[]
   ): boolean {
     const requiredAspects = [
-      ...aspectsFilter,
       ...Object.keys(this._recipe.requirements).filter((x) =>
         workstationFilterAspects.includes(x)
       ),
