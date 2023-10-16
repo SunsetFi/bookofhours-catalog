@@ -22,6 +22,7 @@ import {
 import { flatten, isEqual, omit, pick, sortBy } from "lodash";
 
 import {
+  EmptyObject$,
   Null$,
   distinctUntilShallowArrayChanged,
   filterItemObservations,
@@ -46,14 +47,17 @@ import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
 
 import {
-  ExecutionPlan,
+  ExecutableOrchestration,
   OrchestrationBase,
   OrchestrationSlot,
   VariableSituationOrchestration,
 } from "./types";
 
 export class RecipeOrchestration
-  implements OrchestrationBase, VariableSituationOrchestration
+  implements
+    OrchestrationBase,
+    ExecutableOrchestration,
+    VariableSituationOrchestration
 {
   private readonly _situation$ = new BehaviorSubject<SituationModel | null>(
     null
@@ -118,49 +122,49 @@ export class RecipeOrchestration
     });
   }
 
-  private _executionPlan$: Observable<ExecutionPlan | null> | null = null;
-  get executionPlan$() {
-    if (!this._executionPlan$) {
-      this._executionPlan$ = combineLatest([
-        this.situation$,
-        this.situation$.pipe(mergeMap((s) => s?.state$ ?? Null$)),
-        this.slots$,
-        this._slotAssignments$,
-      ]).pipe(
-        map(([situation, situationState, slots, assignments]) => {
-          if (!situation || situationState !== "Unstarted") {
-            return null;
-          }
+  // private _executionPlan$: Observable<ExecutionPlan | null> | null = null;
+  // get executionPlan$() {
+  //   if (!this._executionPlan$) {
+  //     this._executionPlan$ = combineLatest([
+  //       this.situation$,
+  //       this.situation$.pipe(mergeMap((s) => s?.state$ ?? Null$)),
+  //       this.slots$,
+  //       this._slotAssignments$,
+  //     ]).pipe(
+  //       map(([situation, situationState, slots, assignments]) => {
+  //         if (!situation || situationState !== "Unstarted") {
+  //           return null;
+  //         }
 
-          const recipe = this._recipe;
-          const plan: ExecutionPlan = {
-            situation,
-            recipe,
-            slots: {},
-          };
+  //         const recipe = this._recipe;
+  //         const plan: ExecutionPlan = {
+  //           situation,
+  //           recipe,
+  //           slots: {},
+  //         };
 
-          for (const slotId of Object.keys(slots)) {
-            const slot = slots[slotId];
-            if (!slot) {
-              continue;
-            }
+  //         for (const slotId of Object.keys(slots)) {
+  //           const slot = slots[slotId];
+  //           if (!slot) {
+  //             continue;
+  //           }
 
-            const assignment = assignments[slotId];
-            if (!assignment) {
-              continue;
-            }
+  //           const assignment = assignments[slotId];
+  //           if (!assignment) {
+  //             continue;
+  //           }
 
-            plan.slots[slotId] = assignment;
-          }
+  //           plan.slots[slotId] = assignment;
+  //         }
 
-          return plan;
-        }),
-        shareReplay(1)
-      );
-    }
+  //         return plan;
+  //       }),
+  //       shareReplay(1)
+  //     );
+  //   }
 
-    return this._executionPlan$;
-  }
+  //   return this._executionPlan$;
+  // }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
   get recipe$(): Observable<RecipeModel | null> {
@@ -169,6 +173,34 @@ export class RecipeOrchestration
     }
 
     return this._recipe$;
+  }
+
+  private _requirements$: Observable<Readonly<Aspects>> | null = null;
+  get requirements$(): Observable<Readonly<Aspects>> {
+    if (!this._requirements$) {
+      this._requirements$ = combineLatest([
+        this._recipe.requirements$,
+        this.aspects$,
+      ]).pipe(
+        map(([requirements, aspects]) => {
+          const result: Aspects = {};
+          for (const aspect of Object.keys(requirements)) {
+            const reqValue = requirements[aspect];
+            let required = Number(reqValue);
+
+            if (Number.isNaN(required)) {
+              required = aspects[reqValue] ?? 0;
+            }
+
+            result[aspect] = required;
+          }
+
+          return result;
+        })
+      );
+    }
+
+    return this._requirements$;
   }
 
   get situation$(): Observable<SituationModel | null> {
@@ -320,9 +352,133 @@ export class RecipeOrchestration
     return this._slots$;
   }
 
+  private _aspects$: Observable<Readonly<Aspects>> | null = null;
+  get aspects$() {
+    if (!this._aspects$) {
+      this._aspects$ = this._slotAssignments$.pipe(
+        map((slots) => {
+          if (!slots) {
+            return [];
+          }
+
+          return Object.values(slots).map((x) =>
+            x != null ? x.aspectsAndSelf$ : EmptyObject$
+          );
+        }),
+        observeAll(),
+        map((aspectArray) => {
+          // This looks like a simple reduce(), but vite throws baffling errors when we use reduce.
+          // It also is totally happy to use it, but only the first time, and starts erroring on it when
+          // the project rebuilds from totally unrelated areas of the code.
+          let result = {} as Aspects;
+          for (const aspects of aspectArray) {
+            result = combineAspects(result, aspects);
+          }
+          return result;
+        })
+      );
+    }
+
+    return this._aspects$;
+  }
+
+  private _canExecute$: Observable<boolean> | null = null;
+  get canExecute$(): Observable<boolean> {
+    if (!this._canExecute$) {
+      this._canExecute$ = combineLatest([
+        this._recipe.requirements$,
+        this.aspects$,
+      ]).pipe(
+        map(([requirements, aspects]) => {
+          for (const aspect of Object.keys(requirements)) {
+            const reqValue = requirements[aspect];
+            let required = Number(reqValue);
+
+            if (Number.isNaN(required)) {
+              required = aspects[reqValue] ?? 0;
+            }
+
+            if ((aspects[aspect] ?? 0) < required) {
+              return false;
+            }
+          }
+
+          return true;
+        })
+      );
+    }
+
+    return this._canExecute$;
+  }
+
   selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
     this._slotAssignments$.next({});
+  }
+
+  async prepare() {
+    const [situation, slots] = await Promise.all([
+      firstValueFrom(this._situation$),
+      firstValueFrom(this._slotAssignments$),
+    ]);
+
+    if (!situation || !slots) {
+      return false;
+    }
+
+    var success = true;
+    try {
+      // hack: Don't do this for fixedVerbs, they aren't focusable.
+      // FIXME: Put this into the api mod logic.
+      if (!situation.path.startsWith("~/fixedVerbs")) {
+        situation.focus();
+      }
+
+      situation.open();
+
+      for (const slotId of Object.keys(slots)) {
+        var token = slots[slotId];
+        try {
+          situation.setSlotContents(slotId, token);
+        } catch (e) {
+          console.error(
+            "Failed to slot",
+            token?.id ?? "<clear>",
+            "to",
+            slotId,
+            "of situation",
+            situation.id,
+            e
+          );
+          success = false;
+        }
+      }
+
+      // TODO: Select recipe
+    } catch (e) {
+      success = false;
+    }
+
+    return success;
+  }
+
+  async execute() {
+    if (!(await this.prepare())) {
+      return false;
+    }
+
+    const situation = await firstValueFrom(this._situation$);
+    if (!situation) {
+      return false;
+    }
+
+    try {
+      await situation.execute();
+      return true;
+    } catch (e) {
+      console.error("Failed to execute", situation.id, e);
+      return false;
+    }
   }
 
   private _createSlot(spec: SphereSpec): OrchestrationSlot {

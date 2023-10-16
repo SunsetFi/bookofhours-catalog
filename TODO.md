@@ -5,3 +5,7 @@
 - Support slotting cards in ongoing situations
 - Show output results in a dialog from recipe executions header
   - Shift+click to conclude without viewing.
+- Prompt / toast the user for empty slots or new notes in recipes after time skip.
+- Flip over element stacks. Before using them? Automatically on finding them?
+  - Recipe executor can make use of flipped over cards, confusing the game
+- RecipeOrchestration needs to select the recipe from the ambit list.

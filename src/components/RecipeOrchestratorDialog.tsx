@@ -17,8 +17,10 @@ import { useDIDependency } from "@/container";
 import { Null$, observableObjectOrEmpty } from "@/observables";
 
 import {
+  Orchestration,
   OrchestrationSlot,
   Orchestrator,
+  isExecutableOrchestration,
   isVariableSituationOrchestration,
 } from "@/services/sh-game/orchestration";
 
@@ -34,22 +36,48 @@ const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
 
   const orchestration = useObservation(orchestrator.orchestration$);
-  const aspectRequirements =
-    useObservation(orchestrator.aspectRequirements$) ?? {};
-  const canExecute = useObservation(orchestrator.canExecute$) ?? false;
-  const notes = useObservation(orchestration?.notes$ ?? Null$) ?? [];
-
-  const recipe = useObservation(orchestration?.recipe$ ?? Null$);
-  const recipeLabel = useObservation(recipe?.label$ ?? Null$);
-  const situation = useObservation(orchestration?.situation$ ?? Null$);
-  const situationLabel = useObservation(situation?.label$ ?? Null$);
-
-  const slots =
-    useObservation(observableObjectOrEmpty(orchestration?.slots$)) ?? {};
 
   if (!orchestration) {
     return null;
   }
+
+  return (
+    <Dialog open onClose={() => orchestrator.cancel()} fullWidth maxWidth="lg">
+      <RecipeOrchestrationDialogContent orchestration={orchestration} />
+    </Dialog>
+  );
+};
+
+interface RecipeOrchestrationDialogContentProps {
+  orchestration: Orchestration;
+}
+
+const RecipeOrchestrationDialogContent = ({
+  orchestration,
+}: RecipeOrchestrationDialogContentProps) => {
+  const orchestrator = useDIDependency(Orchestrator);
+
+  const recipe = useObservation(orchestration?.recipe$ ?? Null$);
+  const recipeLabel = useObservation(recipe?.label$ ?? Null$);
+
+  const situation = useObservation(orchestration?.situation$ ?? Null$);
+  const situationLabel = useObservation(situation?.label$ ?? Null$);
+
+  const requirements = useObservation(orchestration.requirements$) ?? {};
+  const aspects = useObservation(orchestration.aspects$) ?? {};
+
+  const canExecute =
+    useObservation(
+      () =>
+        isExecutableOrchestration(orchestration)
+          ? orchestration.canExecute$
+          : Null$,
+      [orchestration]
+    ) ?? false;
+  const notes = useObservation(orchestration?.notes$ ?? Null$) ?? [];
+
+  const slots =
+    useObservation(observableObjectOrEmpty(orchestration?.slots$)) ?? {};
 
   let label = recipeLabel ?? situationLabel;
   if (label === ".") {
@@ -57,28 +85,19 @@ const RecipeOrchestratorDialog = () => {
   }
 
   return (
-    <Dialog open onClose={() => orchestrator.cancel()} fullWidth maxWidth="lg">
+    <>
       <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Box sx={{ display: "flex", flexDirection: "row" }}>
-            <Typography variant="h5" sx={{ mr: 2 }}>
-              {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
-              {label?.toLocaleUpperCase()}
-            </Typography>
-            {recipe && (
-              <PinRecipeIconButton
-                sx={{ mt: "-4px" }}
-                recipeId={recipe.recipeId}
-              />
-            )}
-          </Box>
-          <AspectsList
-            aspects={mapValues(
-              aspectRequirements,
-              (value) => `${value.current} / ${value.required}`
-            )}
-            iconSize={30}
-          />
+        <Box sx={{ display: "flex", flexDirection: "row" }}>
+          <Typography variant="h5">
+            {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
+            {label?.toLocaleUpperCase()}
+          </Typography>
+          {recipe && (
+            <PinRecipeIconButton
+              sx={{ ml: 2, mt: "-4px" }}
+              recipeId={recipe.recipeId}
+            />
+          )}
         </Box>
         <IconButton
           sx={{ ml: "auto", alignSelf: "flex-start" }}
@@ -91,23 +110,40 @@ const RecipeOrchestratorDialog = () => {
         sx={{
           display: "flex",
           flexDirection: "row",
-          gap: 3,
+          gap: 1,
         }}
       >
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 1,
             width: 400,
-            overflow: "auto",
+            height: "100%",
           }}
         >
-          {notes.map((note) => (
-            <Typography component="div" variant="body2">
-              {note}
-            </Typography>
-          ))}
+          <AspectsList
+            sx={{ mb: 3 }}
+            aspects={mapValues(
+              requirements,
+              (value, key) => `${aspects[key] ?? 0} / ${value}`
+            )}
+            iconSize={30}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              overflow: "auto",
+              height: "100%",
+            }}
+          >
+            {notes.map((note) => (
+              <Typography component="div" variant="body2">
+                {note}
+              </Typography>
+            ))}
+          </Box>
         </Box>
         <Box
           sx={{
@@ -148,7 +184,7 @@ const RecipeOrchestratorDialog = () => {
               <SlotEditor
                 key={slotId}
                 slot={slots[slotId]}
-                recipeRequiredAspects={Object.keys(aspectRequirements)}
+                recipeRequiredAspects={Object.keys(requirements)}
               />
             ))}
           </Box>
@@ -159,13 +195,22 @@ const RecipeOrchestratorDialog = () => {
           Cancel
         </Button>
         <ButtonGroup>
-          <Button onClick={() => orchestrator.apply()}>Prepare Recipe</Button>
-          <Button disabled={!canExecute} onClick={() => orchestrator.execute()}>
-            Start Recipe
-          </Button>
+          {isExecutableOrchestration(orchestration) && (
+            <>
+              <Button onClick={() => orchestration.prepare()}>
+                Prepare Recipe
+              </Button>
+              <Button
+                disabled={!canExecute}
+                onClick={() => orchestration.execute()}
+              >
+                Start Recipe
+              </Button>
+            </>
+          )}
         </ButtonGroup>
       </DialogActions>
-    </Dialog>
+    </>
   );
 };
 

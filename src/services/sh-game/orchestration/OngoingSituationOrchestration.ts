@@ -4,7 +4,8 @@ import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
 import { SituationModel } from "../token-models/SituationModel";
 
-import { ExecutionPlan, OrchestrationBase, OrchestrationSlot } from "./types";
+import { OrchestrationBase, OrchestrationSlot } from "./types";
+import { Aspects } from "secrethistories-api";
 
 export class OngoingSituationOrchestration implements OrchestrationBase {
   constructor(
@@ -26,6 +27,15 @@ export class OngoingSituationOrchestration implements OrchestrationBase {
     return this._recipe$;
   }
 
+  private _requirements$: Observable<Readonly<Aspects>> | null = null;
+  get requirements$(): Observable<Readonly<Aspects>> {
+    if (!this._requirements$) {
+      this._requirements$ = new BehaviorSubject({});
+    }
+
+    return this._requirements$;
+  }
+
   private _situation$: Observable<SituationModel | null> | null = null;
   get situation$(): Observable<SituationModel | null> {
     if (!this._situation$) {
@@ -38,14 +48,26 @@ export class OngoingSituationOrchestration implements OrchestrationBase {
   }
 
   get notes$(): Observable<readonly string[]> {
-    throw new Error("Not implemented");
+    return this._situation.notes$;
   }
 
+  private _slots$: Observable<
+    Readonly<Record<string, OrchestrationSlot>>
+  > | null = null;
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
-    throw new Error("Not implemented");
+    if (!this._slots$) {
+      this._slots$ = new BehaviorSubject({});
+    }
+
+    return this._slots$;
   }
 
-  get executionPlan$(): Observable<ExecutionPlan | null> {
-    throw new Error("Not implemented");
+  private _aspects$: Observable<Readonly<Record<string, number>>> | null = null;
+  get aspects$(): Observable<Readonly<Record<string, number>>> {
+    if (!this._aspects$) {
+      this._aspects$ = new BehaviorSubject({});
+    }
+
+    return this._aspects$;
   }
 }

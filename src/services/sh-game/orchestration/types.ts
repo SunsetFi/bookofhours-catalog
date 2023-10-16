@@ -1,22 +1,51 @@
 import { Observable } from "rxjs";
-import { SphereSpec } from "secrethistories-api";
+import { Aspects, SphereSpec } from "secrethistories-api";
 
 import { RecipeModel } from "@/services/sh-compendium";
 
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
 
-export interface OrchestrationRequest {
+export type OrchestrationRequest =
+  | RecipeOrchestrationRequest
+  | SituationOrchestrationRequest;
+export interface RecipeOrchestrationRequest {
   recipeId: string;
   desiredElementIds?: string[];
+}
+export function isRecipeOrchestrationRequest(
+  request: OrchestrationRequest
+): request is RecipeOrchestrationRequest {
+  return "recipeId" in request;
+}
+
+export interface SituationOrchestrationRequest {
+  situation: SituationModel;
+}
+export function isSituationOrchestrationRequest(
+  request: OrchestrationRequest
+): request is SituationOrchestrationRequest {
+  return "situation" in request;
 }
 
 export interface OrchestrationBase {
   readonly recipe$: Observable<RecipeModel | null>;
+  readonly requirements$: Observable<Readonly<Aspects>>;
   readonly situation$: Observable<SituationModel | null>;
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
+  readonly aspects$: Observable<Readonly<Aspects>>;
   readonly notes$: Observable<readonly string[]>;
-  readonly executionPlan$: Observable<ExecutionPlan | null>;
+}
+
+export interface ExecutableOrchestration extends OrchestrationBase {
+  readonly canExecute$: Observable<boolean>;
+  prepare(): Promise<boolean>;
+  execute(): Promise<boolean>;
+}
+export function isExecutableOrchestration(
+  orchestration: Orchestration
+): orchestration is ExecutableOrchestration {
+  return "canExecute$" in orchestration;
 }
 
 export interface VariableSituationOrchestration extends OrchestrationBase {
@@ -44,15 +73,4 @@ export interface OrchestrationSlot {
   readonly assignment$: Observable<ElementStackModel | null>;
   readonly availableElementStacks$: Observable<readonly ElementStackModel[]>;
   assign(element: ElementStackModel | null): void;
-}
-
-export interface AspectRequirement {
-  current: number;
-  required: number;
-}
-
-export interface ExecutionPlan {
-  situation: SituationModel;
-  recipe: RecipeModel;
-  slots: Record<string, ElementStackModel | null>;
 }
