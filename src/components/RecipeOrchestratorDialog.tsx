@@ -138,8 +138,8 @@ const RecipeOrchestrationDialogContent = ({
               height: "100%",
             }}
           >
-            {notes.map((note) => (
-              <Typography component="div" variant="body2">
+            {notes.map((note, index) => (
+              <Typography key={index} component="div" variant="body2">
                 {note}
               </Typography>
             ))}
