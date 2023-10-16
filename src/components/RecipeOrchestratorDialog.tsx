@@ -37,6 +37,7 @@ const RecipeOrchestratorDialog = () => {
   const aspectRequirements =
     useObservation(orchestrator.aspectRequirements$) ?? {};
   const canExecute = useObservation(orchestrator.canExecute$) ?? false;
+  const notes = useObservation(orchestration?.notes$ ?? Null$) ?? [];
 
   const recipe = useObservation(orchestration?.recipe$ ?? Null$);
   const recipeLabel = useObservation(recipe?.label$ ?? Null$);
@@ -56,7 +57,7 @@ const RecipeOrchestratorDialog = () => {
   }
 
   return (
-    <Dialog open onClose={() => orchestrator.cancel()} fullWidth maxWidth="md">
+    <Dialog open onClose={() => orchestrator.cancel()} fullWidth maxWidth="lg">
       <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Box sx={{ display: "flex", flexDirection: "row" }}>
@@ -89,43 +90,68 @@ const RecipeOrchestratorDialog = () => {
       <DialogContent
         sx={{
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           gap: 3,
-          height: 460,
         }}
       >
-        {isVariableSituationOrchestration(orchestration) ? (
-          <SituationSelectField
-            label="Workstation"
-            fullWidth
-            requireUnstarted
-            situations$={orchestration.availableSituations$}
-            value={situation ?? null}
-            onChange={(s) => orchestration.selectSituation(s)}
-          />
-        ) : (
-          <TextField
-            label="Workstation"
-            fullWidth
-            value={situationLabel ?? ""}
-          />
-        )}
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            rowGap: 2,
-            columnGap: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            width: 400,
             overflow: "auto",
           }}
         >
-          {Object.keys(slots).map((slotId) => (
-            <SlotEditor
-              key={slotId}
-              slot={slots[slotId]}
-              recipeRequiredAspects={Object.keys(aspectRequirements)}
-            />
+          {notes.map((note) => (
+            <Typography component="div" variant="body2">
+              {note}
+            </Typography>
           ))}
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+            height: 460,
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
+          {isVariableSituationOrchestration(orchestration) ? (
+            <SituationSelectField
+              label="Workstation"
+              fullWidth
+              requireUnstarted
+              situations$={orchestration.availableSituations$}
+              value={situation ?? null}
+              onChange={(s) => orchestration.selectSituation(s)}
+            />
+          ) : (
+            <TextField
+              label="Workstation"
+              fullWidth
+              value={situationLabel ?? ""}
+            />
+          )}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              rowGap: 2,
+              columnGap: 3,
+              overflow: "auto",
+            }}
+          >
+            {Object.keys(slots).map((slotId) => (
+              <SlotEditor
+                key={slotId}
+                slot={slots[slotId]}
+                recipeRequiredAspects={Object.keys(aspectRequirements)}
+              />
+            ))}
+          </Box>
         </Box>
       </DialogContent>
       <DialogActions sx={{ display: "flex", flexDirection: "row" }}>

@@ -15,6 +15,7 @@ export interface OrchestrationBase {
   readonly recipe$: Observable<RecipeModel | null>;
   readonly situation$: Observable<SituationModel | null>;
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
+  readonly notes$: Observable<readonly string[]>;
   readonly executionPlan$: Observable<ExecutionPlan | null>;
 }
 

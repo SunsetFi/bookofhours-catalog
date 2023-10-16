@@ -37,6 +37,10 @@ export class OngoingSituationOrchestration implements OrchestrationBase {
     return this._situation$;
   }
 
+  get notes$(): Observable<readonly string[]> {
+    throw new Error("Not implemented");
+  }
+
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
     throw new Error("Not implemented");
   }

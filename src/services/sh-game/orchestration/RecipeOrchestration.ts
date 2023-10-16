@@ -26,12 +26,17 @@ import {
   distinctUntilShallowArrayChanged,
   filterItemObservations,
   mapArrayItemsCached,
+  mergeMapIfNotNull,
   observeAll,
 } from "@/observables";
 import { isNotNull } from "@/utils";
 import { aspectsMagnitude, workstationFilterAspects } from "@/aspects";
 
-import { ElementModel, RecipeModel } from "@/services/sh-compendium";
+import {
+  Compendium,
+  ElementModel,
+  RecipeModel,
+} from "@/services/sh-compendium";
 
 import { sphereMatchesToken } from "../observables";
 
@@ -70,6 +75,7 @@ export class RecipeOrchestration
 
   constructor(
     private readonly _recipe: RecipeModel,
+    private readonly _compendium: Compendium,
     private readonly _tokensSource: TokensSource,
     private readonly _desiredElements: readonly ElementModel[]
   ) {
@@ -167,6 +173,38 @@ export class RecipeOrchestration
 
   get situation$(): Observable<SituationModel | null> {
     return this._situation$;
+  }
+
+  private _notes$: Observable<readonly string[]> | null = null;
+  get notes$(): Observable<readonly string[]> {
+    if (!this._notes$) {
+      this._notes$ = combineLatest([
+        this._situation$.pipe(
+          mergeMapIfNotNull((situation) => situation?.verbId$),
+          mergeMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
+        ),
+        this._recipe.description$,
+      ]).pipe(
+        map(([verb, recipeDescription]) => {
+          if (recipeDescription === ".") {
+            if (verb) {
+              return [verb.description];
+            }
+
+            return [];
+          }
+
+          if (recipeDescription) {
+            return [recipeDescription];
+          }
+
+          return [];
+        }),
+        shareReplay(1)
+      );
+    }
+
+    return this._notes$;
   }
 
   private _availableSituations$: Observable<readonly SituationModel[]> | null =

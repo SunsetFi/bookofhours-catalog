@@ -179,7 +179,12 @@ export class Orchestrator {
     );
 
     this._orchestration$.next(
-      new RecipeOrchestration(recipe, this._tokensSource, desiredElements)
+      new RecipeOrchestration(
+        recipe,
+        this._compendium,
+        this._tokensSource,
+        desiredElements
+      )
     );
   }
 
