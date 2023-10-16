@@ -454,7 +454,9 @@ export class RecipeOrchestration
         }
       }
 
-      // TODO: Select recipe
+      if (!(await situation.setRecipe(this._recipe.recipeId))) {
+        success = false;
+      }
     } catch (e) {
       success = false;
     }

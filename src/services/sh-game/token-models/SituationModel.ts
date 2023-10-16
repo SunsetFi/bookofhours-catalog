@@ -302,6 +302,15 @@ export class SituationModel extends TokenModel {
     }
   }
 
+  async setRecipe(recipeId: string) {
+    try {
+      await this._api.setRecipeAtPath(this.path, recipeId);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async execute() {
     try {
       const result = await this._api.executeTokenAtPath(this.path);
