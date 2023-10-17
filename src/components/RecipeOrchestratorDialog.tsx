@@ -2,7 +2,6 @@ import * as React from "react";
 import { first, mapValues } from "lodash";
 
 import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogTitle";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import Typography from "@mui/material/Typography";
@@ -33,10 +32,9 @@ import SituationSelectField from "./SituationSelectField";
 import AspectsList from "./AspectsList";
 import ElementStackSelectField from "./ElementStackSelectField";
 import AspectIcon from "./AspectIcon";
-import PinRecipeIconButton from "./PinRecipeIconButton";
 import TlgNote from "./TlgNote";
-import { isNotNull } from "@/utils";
 import ElementStackTray from "./ElementStackTray";
+import GameTypography from "./GameTypography";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -85,19 +83,33 @@ const RecipeOrchestrationDialogContent = ({
 
   return (
     <>
-      <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
-        <Box sx={{ display: "flex", flexDirection: "row" }}>
+      <DialogTitle
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 2,
+          alignItems: "baseline",
+        }}
+      >
+        {label && (
           <Typography variant="h5">
             {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
             {label?.toLocaleUpperCase()}
           </Typography>
-          {recipe && (
-            <PinRecipeIconButton
-              sx={{ ml: 2, mt: "-4px" }}
-              recipeId={recipe.recipeId}
-            />
-          )}
-        </Box>
+        )}
+        {!isVariableSituationOrchestration(orchestration) && (
+          <>
+            {label && " - "}
+            <Typography variant="h5">{situationLabel}</Typography>
+          </>
+        )}
+        {isCompletedOrchestration(orchestration) && (
+          <>
+            {(label || !isVariableSituationOrchestration(orchestration)) &&
+              " - "}
+            <Typography variant="h5">Recipe Completed</Typography>
+          </>
+        )}
         <IconButton
           sx={{ ml: "auto", alignSelf: "flex-start" }}
           onClick={() => orchestrator.close()}
@@ -129,34 +141,15 @@ const RecipeOrchestrationDialogContent = ({
             minWidth: 0,
           }}
         >
-          {first(
-            [
-              isVariableSituationOrchestration(orchestration) && (
-                <SituationSelectField
-                  label="Workstation"
-                  fullWidth
-                  requireUnstarted
-                  situations$={orchestration.availableSituations$}
-                  value={situation ?? null}
-                  onChange={(s) => orchestration.selectSituation(s)}
-                />
-              ),
-              isCompletedOrchestration(orchestration) && (
-                <Box
-                  component="span"
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: 2,
-                    alignItems: "baseline",
-                  }}
-                >
-                  <Typography variant="h5">{situationLabel}</Typography>
-                  <Typography variant="caption">Recipe Completed</Typography>
-                </Box>
-              ),
-              <Typography variant="h5">{situationLabel}</Typography>,
-            ].filter((x) => Boolean(x))
+          {isVariableSituationOrchestration(orchestration) && (
+            <SituationSelectField
+              label="Workstation"
+              fullWidth
+              requireUnstarted
+              situations$={orchestration.availableSituations$}
+              value={situation ?? null}
+              onChange={(s) => orchestration.selectSituation(s)}
+            />
           )}
           {!isCompletedOrchestration(orchestration) && (
             <OrchestratorSlots orchestration={orchestration} />
@@ -252,9 +245,9 @@ const OrchestratorSidebar = ({
         }}
       >
         {startDescription && (
-          <Typography component="div" variant="body2">
+          <GameTypography component="div" variant="body2">
             {startDescription}
-          </Typography>
+          </GameTypography>
         )}
         {notes.map((note, index) => (
           <TlgNote key={index} elementStack={note} />

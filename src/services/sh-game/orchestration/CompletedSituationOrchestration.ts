@@ -9,6 +9,7 @@ import { SituationModel } from "../token-models/SituationModel";
 
 import {
   CompletedOrchestration,
+  Orchestration,
   OrchestrationBase,
   OrchestrationSlot,
 } from "./types";
@@ -19,7 +20,10 @@ export class CompletedSituationOrchestration
 {
   constructor(
     private readonly _situation: SituationModel,
-    private readonly _compendium: Compendium
+    private readonly _compendium: Compendium,
+    private readonly _replaceOrchestration: (
+      orchestration: Orchestration | null
+    ) => void
   ) {}
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
@@ -72,7 +76,12 @@ export class CompletedSituationOrchestration
     return this._situation.output$;
   }
 
-  conclude(): Promise<boolean> {
-    return this._situation.conclude();
+  async conclude(): Promise<boolean> {
+    if (await this._situation.conclude()) {
+      this._replaceOrchestration(null);
+      return true;
+    }
+
+    return false;
   }
 }

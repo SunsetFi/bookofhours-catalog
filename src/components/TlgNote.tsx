@@ -1,7 +1,6 @@
 import * as React from "react";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { type SxProps } from "@mui/material/styles";
 
 import { Null$ } from "@/observables";
@@ -23,9 +22,9 @@ const TlgNote = ({ sx, elementStack }: TlgNoteProps) => {
   const illuminations = useObservation(elementStack.illuminations$) ?? [];
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, ...sx }}>
-      <Typography component="div" variant="body2">
+      <GameTypography component="div" variant="body2">
         {description}
-      </Typography>
+      </GameTypography>
       {Object.keys(illuminations).map((illumination) => (
         <TlgNoteIllumination key={illumination} data={illumination} />
       ))}

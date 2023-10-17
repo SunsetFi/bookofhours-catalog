@@ -74,7 +74,8 @@ export class Orchestrator {
       } else if (state === "Complete") {
         const orchestration = new CompletedSituationOrchestration(
           situation,
-          this._compendium
+          this._compendium,
+          (orchestration) => this._orchestration$.next(orchestration)
         );
         this._orchestration$.next(orchestration);
       }
