@@ -34,19 +34,30 @@ export interface OrchestrationBase {
   readonly situation$: Observable<SituationModel | null>;
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
   readonly aspects$: Observable<Readonly<Aspects>>;
+
+  _dispose(): void;
 }
 
 export interface NoteContainingOrchestration extends OrchestrationBase {
   readonly notes$: Observable<readonly ElementStackModel[]>;
+  readonly content$: Observable<readonly ElementStackModel[]>;
 }
-export function isNoteContainingOrchestration(
+export function isContentContainingOrchestration(
   orchestration: Orchestration
 ): orchestration is NoteContainingOrchestration {
-  return "notes$" in orchestration;
+  return "content$" in orchestration;
+}
+
+export interface OngoingOrchestration extends OrchestrationBase {
+  passTime(): Promise<boolean>;
+}
+export function isOngoingOrchestration(
+  orchestration: Orchestration
+): orchestration is OngoingOrchestration {
+  return "passTime" in orchestration;
 }
 
 export interface CompletedOrchestration extends NoteContainingOrchestration {
-  readonly output$: Observable<readonly ElementStackModel[]>;
   conclude(): Promise<boolean>;
 }
 

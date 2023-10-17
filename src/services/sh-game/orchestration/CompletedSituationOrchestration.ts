@@ -26,6 +26,8 @@ export class CompletedSituationOrchestration
     ) => void
   ) {}
 
+  _dispose() {}
+
   private _recipe$: Observable<RecipeModel | null> | null = null;
   get recipe$(): Observable<RecipeModel | null> {
     if (!this._recipe$) {
@@ -72,7 +74,7 @@ export class CompletedSituationOrchestration
     return this._situation.notes$;
   }
 
-  get output$(): Observable<readonly ElementStackModel[]> {
+  get content$(): Observable<readonly ElementStackModel[]> {
     return this._situation.output$;
   }
 

@@ -137,6 +137,8 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return this._slots$;
   }
 
+  abstract _dispose(): void;
+
   private _aspects$: Observable<Readonly<Aspects>> | null = null;
   get aspects$() {
     if (!this._aspects$) {

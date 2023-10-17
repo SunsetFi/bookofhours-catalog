@@ -1,6 +1,7 @@
 import {
   BehaviorSubject,
   Observable,
+  Subscription,
   combineLatest,
   debounceTime,
   firstValueFrom,
@@ -34,6 +35,7 @@ import {
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
+import { TimeSource } from "../sources/TimeSource";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -53,13 +55,17 @@ export class RecipeOrchestration
   // This is here entirely for "consider", particularly for considering skills.
   private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
 
+  private readonly _subscription: Subscription;
+
   constructor(
     private readonly _recipe: RecipeModel,
     private readonly _compendium: Compendium,
     tokensSource: TokensSource,
+    // FIXME: This is only here to create a OngoingSituationOrchestration.  Make a factory func to handle dep injection for these.
+    private readonly _timeSource: TimeSource,
     private readonly _desiredElements: readonly ElementModel[],
     private readonly _replaceOrchestration: (
-      orchestration: Orchestration
+      orchestration: Orchestration | null
     ) => void
   ) {
     super(tokensSource);
@@ -84,9 +90,15 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
-    this.slots$.pipe(debounceTime(5)).subscribe((slots) => {
-      this._pickDefaults(Object.values(slots));
-    });
+    this._subscription = this.slots$
+      .pipe(debounceTime(5))
+      .subscribe((slots) => {
+        this._pickDefaults(Object.values(slots));
+      });
+  }
+
+  _dispose() {
+    this._subscription.unsubscribe();
   }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
@@ -284,7 +296,12 @@ export class RecipeOrchestration
     try {
       await situation.execute();
       this._replaceOrchestration(
-        new OngoingSituationOrchestration(situation, this._compendium)
+        new OngoingSituationOrchestration(
+          situation,
+          this._compendium,
+          this._timeSource,
+          this._replaceOrchestration
+        )
       );
       return true;
     } catch (e) {

@@ -22,8 +22,10 @@ import {
   Orchestrator,
   isCompletedOrchestration,
   isExecutableOrchestration,
-  isNoteContainingOrchestration,
+  isContentContainingOrchestration,
   isVariableSituationOrchestration,
+  OrchestrationBase,
+  isOngoingOrchestration,
 } from "@/services/sh-game/orchestration";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -35,6 +37,7 @@ import AspectIcon from "./AspectIcon";
 import TlgNote from "./TlgNote";
 import ElementStackTray from "./ElementStackTray";
 import GameTypography from "./GameTypography";
+import { TimeSource } from "@/services/sh-game";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -84,6 +87,7 @@ const RecipeOrchestrationDialogContent = ({
   return (
     <>
       <DialogTitle
+        component="div"
         sx={{
           display: "flex",
           flexDirection: "row",
@@ -177,6 +181,9 @@ const RecipeOrchestrationDialogContent = ({
               </Button>
             </>
           )}
+          {isOngoingOrchestration(orchestration) && (
+            <Button onClick={() => orchestration.passTime()}>Pass Time</Button>
+          )}
           {isCompletedOrchestration(orchestration) && (
             <Button onClick={() => orchestration.conclude()}>Conclude</Button>
           )}
@@ -209,7 +216,7 @@ const OrchestratorSidebar = ({
   const notes =
     useObservation(
       () =>
-        isNoteContainingOrchestration(orchestration)
+        isContentContainingOrchestration(orchestration)
           ? orchestration.notes$
           : Null$,
       [orchestration]
@@ -262,7 +269,7 @@ interface OrchestratorOutputProps {
 }
 
 const OrchestratorOutput = ({ orchestration }: OrchestratorOutputProps) => {
-  return <ElementStackTray elementStacks$={orchestration.output$} />;
+  return <ElementStackTray elementStacks$={orchestration.content$} />;
 };
 
 interface OrchestratorSlotsProps {
