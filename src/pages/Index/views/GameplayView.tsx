@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { useDIDependency } from "@/container";
 import { useQueryString } from "@/hooks/use-querystring";
@@ -18,6 +19,7 @@ import {
 import PageContainer from "@/components/PageContainer";
 import ElementStackTray from "@/components/ElementStackTray";
 import { tap } from "rxjs";
+import { useObservation } from "@/hooks/use-observation";
 
 const GameplayView = () => {
   const redirect = useQueryString("redirect");
@@ -41,6 +43,7 @@ const GameplayView = () => {
 
 const Overview = () => {
   const tokensSource = useDIDependency(TokensSource);
+  const tokens = useObservation(tokensSource.visibleTokens$);
 
   const memories$ = React.useMemo(
     () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("memory")),
@@ -100,6 +103,21 @@ const Overview = () => {
           Everything is accounted for, Hush House endures.
         </Typography>
       </Box>
+      {tokens == null && (
+        <Box
+          sx={{
+            gridRow: "start / end",
+            gridColumn: "start / end",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
       <ElementStackTray
         sx={{
           gridRow: "dividier / end",

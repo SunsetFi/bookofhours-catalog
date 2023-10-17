@@ -53,22 +53,36 @@ const ElementStackTrayCard = ({
             flexDirection: "column",
             width: widthPx,
             height: `${width * aspectRatio}px`,
+            backgroundColor: textBackgroundColor,
             overflow: "hidden",
           }}
         >
-          <img
-            loading="lazy"
-            src={iconUrl}
-            title={label}
-            style={{ width: widthPx }}
-          />
+          <Box
+            sx={{
+              width: widthPx,
+              height: widthPx,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              loading="lazy"
+              src={iconUrl}
+              title={label}
+              style={{
+                display: "block",
+                maxWidth: "100%",
+                maxHeight: "100%",
+              }}
+            />
+          </Box>
           <Box
             sx={{
               width: "100%",
               height: "100%",
               minHeight: 0,
               p: 1,
-              backgroundColor: textBackgroundColor,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

@@ -1,13 +1,19 @@
 import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
+import { Aspects } from "secrethistories-api";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
 import { SituationModel } from "../token-models/SituationModel";
 
-import { OrchestrationBase, OrchestrationSlot } from "./types";
-import { Aspects } from "secrethistories-api";
+import {
+  NoteContainingOrchestration,
+  OrchestrationBase,
+  OrchestrationSlot,
+} from "./types";
 
-export class OngoingSituationOrchestration implements OrchestrationBase {
+export class OngoingSituationOrchestration
+  implements OrchestrationBase, NoteContainingOrchestration
+{
   constructor(
     private readonly _situation: SituationModel,
     private readonly _compendium: Compendium
@@ -47,7 +53,7 @@ export class OngoingSituationOrchestration implements OrchestrationBase {
     return this._situation$;
   }
 
-  get notes$(): Observable<readonly string[]> {
+  get notes$() {
     return this._situation.notes$;
   }
 
@@ -56,6 +62,7 @@ export class OngoingSituationOrchestration implements OrchestrationBase {
   > | null = null;
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
     if (!this._slots$) {
+      // TODO: Ongoing slots
       this._slots$ = new BehaviorSubject({});
     }
 
@@ -65,6 +72,7 @@ export class OngoingSituationOrchestration implements OrchestrationBase {
   private _aspects$: Observable<Readonly<Record<string, number>>> | null = null;
   get aspects$(): Observable<Readonly<Record<string, number>>> {
     if (!this._aspects$) {
+      // TODO: Ongoing aspects
       this._aspects$ = new BehaviorSubject({});
     }
 

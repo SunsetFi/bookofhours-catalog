@@ -2,6 +2,7 @@ import * as React from "react";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 import type { SxProps } from "@mui/material";
 
 import { useDIDependency } from "@/container";
@@ -18,14 +19,13 @@ export interface HandOverviewIconsProps {
 
 const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
   const tokensSource = useDIDependency(TokensSource);
-  const elements =
-    useObservation(
-      () =>
-        tokensSource.visibleElementStacks$.pipe(
-          filterHasAnyAspect(["memory", "weather", "assistance"])
-        ),
-      []
-    ) ?? [];
+  const elements = useObservation(
+    () =>
+      tokensSource.visibleElementStacks$.pipe(
+        filterHasAnyAspect(["memory", "weather", "assistance"])
+      ),
+    []
+  );
 
   return (
     <Box
@@ -39,10 +39,15 @@ const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
         ...sx,
       }}
     >
-      {elements.slice(0, 10).map((element) => (
-        <ElementStackIcon key={element.id} elementStack={element} />
-      ))}
-      {elements.length >= 10 && <Typography>...</Typography>}
+      {elements == null && <CircularProgress />}
+      {elements && (
+        <>
+          {elements.slice(0, 10).map((element) => (
+            <ElementStackIcon key={element.id} elementStack={element} />
+          ))}
+          {elements.length >= 10 && <Typography>...</Typography>}
+        </>
+      )}
     </Box>
   );
 };

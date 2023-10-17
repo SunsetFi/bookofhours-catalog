@@ -13,7 +13,9 @@ import {
 } from "secrethistories-api";
 import { isEqual } from "lodash";
 
-import { filterItemObservations, filterItems, observeAll } from "@/observables";
+import { isNotNull } from "@/utils";
+
+import { filterItemObservations, filterItems } from "@/observables";
 
 import { API } from "../../sh-api";
 
@@ -22,7 +24,6 @@ import { TokenModel } from "./TokenModel";
 import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 import { ElementStackModel } from "./ElementStackModel";
-import { isNotNull } from "@/utils";
 
 export function isSituationModel(model: TokenModel): model is SituationModel {
   return model instanceof SituationModel;
@@ -33,7 +34,7 @@ export class SituationModel extends TokenModel {
 
   private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
-  private readonly _notes$: Observable<readonly string[]>;
+  private readonly _notes$: Observable<readonly ElementStackModel[]>;
   private readonly _output$: Observable<readonly ElementStackModel[]>;
 
   constructor(
@@ -53,16 +54,12 @@ export class SituationModel extends TokenModel {
       this._situation$
     );
 
-    // FIXME: Order is important for notes, but is not preserved in our bulk grab-everything query.
     this._notes$ = elementStacks$.pipe(
       // Notes never change their elementId, so its safe to not observe this.
       filterItems((item) => item.elementId === "tlg.note"),
-      // Notes can be in 'aureatenotessphere' or 'outputsphere'
       filterItemObservations((item) =>
         item.path$.pipe(map((path) => path.startsWith(`${this.path}`)))
       ),
-      map((items) => items.map((item) => item.description$)),
-      observeAll(),
       filterItems(isNotNull),
       shareReplay(1)
     );
@@ -336,6 +333,7 @@ export class SituationModel extends TokenModel {
         currentRecipeLabel: null,
         state: "Unstarted",
       });
+      return true;
     } catch (e) {
       return false;
     }

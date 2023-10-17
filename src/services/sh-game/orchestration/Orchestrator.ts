@@ -2,8 +2,6 @@ import { inject, injectable, singleton } from "microinject";
 import { BehaviorSubject, Observable, firstValueFrom } from "rxjs";
 
 import { Compendium } from "@/services/sh-compendium";
-import { API } from "@/services/sh-api";
-import { Scheduler } from "@/services/scheduler";
 
 import { RunningSource } from "../sources/RunningSource";
 import { TokensSource } from "../sources/TokensSource";
@@ -17,6 +15,7 @@ import {
 
 import { RecipeOrchestration } from "./RecipeOrchestration";
 import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
+import { CompletedSituationOrchestration } from "./CompletedSituationOrchestration";
 
 @injectable()
 @singleton()
@@ -27,14 +26,12 @@ export class Orchestrator {
 
   constructor(
     @inject(RunningSource) runningSource: RunningSource,
-    @inject(API) private readonly _api: API,
-    @inject(Scheduler) private readonly _scheduler: Scheduler,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(TokensSource) private readonly _tokensSource: TokensSource
   ) {
     runningSource.isRunning$.subscribe((isRunning) => {
       if (!isRunning) {
-        this.cancel();
+        this.close();
       }
     });
   }
@@ -60,20 +57,31 @@ export class Orchestrator {
         recipe,
         this._compendium,
         this._tokensSource,
-        desiredElements
+        desiredElements,
+        (orchestration) => this._orchestration$.next(orchestration)
       );
 
       this._orchestration$.next(orchestration);
     } else if (isSituationOrchestrationRequest(request)) {
-      const orchestration = new OngoingSituationOrchestration(
-        request.situation,
-        this._compendium
-      );
-      this._orchestration$.next(orchestration);
+      const { situation } = request;
+      const state = situation.state;
+      if (state === "Ongoing") {
+        const orchestration = new OngoingSituationOrchestration(
+          situation,
+          this._compendium
+        );
+        this._orchestration$.next(orchestration);
+      } else if (state === "Complete") {
+        const orchestration = new CompletedSituationOrchestration(
+          situation,
+          this._compendium
+        );
+        this._orchestration$.next(orchestration);
+      }
     }
   }
 
-  cancel() {
+  close() {
     this._orchestration$.next(null);
   }
 }

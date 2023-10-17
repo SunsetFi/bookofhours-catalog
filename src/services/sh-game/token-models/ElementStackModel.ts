@@ -133,6 +133,20 @@ export class ElementStackModel
     return this._description$;
   }
 
+  private _illuminations$: Observable<Readonly<Record<string, string>>> | null =
+    null;
+  get illuminations$() {
+    if (!this._illuminations$) {
+      this._illuminations$ = this._elementStack$.pipe(
+        map((e) => e.illuminations),
+        distinctUntilChanged(isEqual),
+        shareReplay(1)
+      );
+    }
+
+    return this._illuminations$;
+  }
+
   get visible$() {
     return this._visible$;
   }

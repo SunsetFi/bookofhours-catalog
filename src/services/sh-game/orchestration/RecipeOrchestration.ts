@@ -9,7 +9,7 @@ import {
   shareReplay,
 } from "rxjs";
 import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
-import { flatten, remove } from "lodash";
+import { flatten } from "lodash";
 
 import { mergeMapIfNotNull, observeAll } from "@/observables";
 import { workstationFilterAspects } from "@/aspects";
@@ -27,11 +27,13 @@ import { SituationModel } from "../token-models/SituationModel";
 
 import {
   ExecutableOrchestration,
+  Orchestration,
   OrchestrationBase,
   OrchestrationSlot,
   VariableSituationOrchestration,
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
+import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -55,7 +57,10 @@ export class RecipeOrchestration
     private readonly _recipe: RecipeModel,
     private readonly _compendium: Compendium,
     tokensSource: TokensSource,
-    private readonly _desiredElements: readonly ElementModel[]
+    private readonly _desiredElements: readonly ElementModel[],
+    private readonly _replaceOrchestration: (
+      orchestration: Orchestration
+    ) => void
   ) {
     super(tokensSource);
 
@@ -125,10 +130,10 @@ export class RecipeOrchestration
     return this._situation$;
   }
 
-  private _notes$: Observable<readonly string[]> | null = null;
-  get notes$(): Observable<readonly string[]> {
-    if (!this._notes$) {
-      this._notes$ = combineLatest([
+  private _startDescription$: Observable<string> | null = null;
+  get startDescription$(): Observable<string> {
+    if (!this._startDescription$) {
+      this._startDescription$ = combineLatest([
         this._situation$.pipe(
           mergeMapIfNotNull((situation) => situation?.verbId$),
           mergeMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
@@ -138,23 +143,23 @@ export class RecipeOrchestration
         map(([verb, recipeDescription]) => {
           if (recipeDescription === ".") {
             if (verb) {
-              return [verb.description];
+              return verb.description;
             }
 
-            return [];
+            return "";
           }
 
           if (recipeDescription) {
-            return [recipeDescription];
+            return recipeDescription;
           }
 
-          return [];
+          return "";
         }),
         shareReplay(1)
       );
     }
 
-    return this._notes$;
+    return this._startDescription$;
   }
 
   private _availableSituations$: Observable<readonly SituationModel[]> | null =
@@ -278,6 +283,9 @@ export class RecipeOrchestration
 
     try {
       await situation.execute();
+      this._replaceOrchestration(
+        new OngoingSituationOrchestration(situation, this._compendium)
+      );
       return true;
     } catch (e) {
       console.error("Failed to execute", situation.id, e);

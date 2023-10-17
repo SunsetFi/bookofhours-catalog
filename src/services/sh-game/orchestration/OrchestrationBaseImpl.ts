@@ -49,7 +49,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   abstract get recipe$(): Observable<RecipeModel | null>;
   abstract get requirements$(): Observable<Readonly<Aspects>>;
   abstract get situation$(): Observable<SituationModel | null>;
-  abstract get notes$(): Observable<readonly string[]>;
 
   private _slots$: Observable<
     Readonly<Record<string, OrchestrationSlot>>

@@ -34,10 +34,30 @@ export interface OrchestrationBase {
   readonly situation$: Observable<SituationModel | null>;
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
   readonly aspects$: Observable<Readonly<Aspects>>;
-  readonly notes$: Observable<readonly string[]>;
+}
+
+export interface NoteContainingOrchestration extends OrchestrationBase {
+  readonly notes$: Observable<readonly ElementStackModel[]>;
+}
+export function isNoteContainingOrchestration(
+  orchestration: Orchestration
+): orchestration is NoteContainingOrchestration {
+  return "notes$" in orchestration;
+}
+
+export interface CompletedOrchestration extends NoteContainingOrchestration {
+  readonly output$: Observable<readonly ElementStackModel[]>;
+  conclude(): Promise<boolean>;
+}
+
+export function isCompletedOrchestration(
+  orchestration: Orchestration
+): orchestration is CompletedOrchestration {
+  return "conclude" in orchestration;
 }
 
 export interface ExecutableOrchestration extends OrchestrationBase {
+  readonly startDescription$: Observable<string>;
   readonly canExecute$: Observable<boolean>;
   prepare(): Promise<boolean>;
   execute(): Promise<boolean>;
