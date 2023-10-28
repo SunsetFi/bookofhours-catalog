@@ -49,6 +49,7 @@ export function isContentContainingOrchestration(
 }
 
 export interface OngoingOrchestration extends OrchestrationBase {
+  readonly timeRemaining$: Observable<number>;
   passTime(): Promise<boolean>;
 }
 export function isOngoingOrchestration(

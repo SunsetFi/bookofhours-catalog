@@ -1,5 +1,5 @@
 import * as React from "react";
-import { first, mapValues } from "lodash";
+import { mapValues } from "lodash";
 
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -24,7 +24,6 @@ import {
   isExecutableOrchestration,
   isContentContainingOrchestration,
   isVariableSituationOrchestration,
-  OrchestrationBase,
   isOngoingOrchestration,
 } from "@/services/sh-game/orchestration";
 
@@ -37,7 +36,6 @@ import AspectIcon from "./AspectIcon";
 import TlgNote from "./TlgNote";
 import ElementStackTray from "./ElementStackTray";
 import GameTypography from "./GameTypography";
-import { TimeSource } from "@/services/sh-game";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -69,6 +67,14 @@ const RecipeOrchestrationDialogContent = ({
 
   const situation = useObservation(orchestration?.situation$ ?? Null$);
   const situationLabel = useObservation(situation?.label$ ?? Null$);
+
+  const timeRemaining = useObservation(
+    () =>
+      isOngoingOrchestration(orchestration)
+        ? orchestration.timeRemaining$
+        : Null$,
+    [orchestration]
+  );
 
   const canExecute =
     useObservation(
@@ -105,6 +111,15 @@ const RecipeOrchestrationDialogContent = ({
           <>
             {label && " - "}
             <Typography variant="h5">{situationLabel}</Typography>
+          </>
+        )}
+        {isOngoingOrchestration(orchestration) && (
+          <>
+            {(label || !isVariableSituationOrchestration(orchestration)) &&
+              " - "}
+            <Typography variant="h5">
+              {timeRemaining?.toFixed(1) ?? "0.0"}s
+            </Typography>
           </>
         )}
         {isCompletedOrchestration(orchestration) && (

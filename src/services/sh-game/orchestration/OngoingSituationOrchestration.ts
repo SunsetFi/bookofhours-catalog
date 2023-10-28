@@ -11,6 +11,9 @@ import { Aspects } from "secrethistories-api";
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
 import { SituationModel } from "../token-models/SituationModel";
+import { ElementStackModel } from "../token-models/ElementStackModel";
+
+import { TimeSource } from "../sources/TimeSource";
 
 import {
   NoteContainingOrchestration,
@@ -19,8 +22,7 @@ import {
   OrchestrationBase,
   OrchestrationSlot,
 } from "./types";
-import { ElementStackModel } from "../token-models/ElementStackModel";
-import { TimeSource } from "../sources/TimeSource";
+
 import { CompletedSituationOrchestration } from "./CompletedSituationOrchestration";
 
 export class OngoingSituationOrchestration
@@ -126,6 +128,10 @@ export class OngoingSituationOrchestration
     }
 
     return this._aspects$;
+  }
+
+  get timeRemaining$() {
+    return this._situation.timeRemaining$;
   }
 
   async passTime() {
