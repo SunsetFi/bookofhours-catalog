@@ -92,16 +92,23 @@ function elementStackToBook(
     memoryLabel$,
     memoryAspects$,
     read() {
-      const mystery = extractMysteryAspect(elementStack.aspects);
-      const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
-        aspectId.startsWith("mastery.")
-      );
-      orchestrator.requestOrchestration({
-        recipeId: isMastered
-          ? `study.mystery.${mystery}.mastered`
-          : `study.mystery.${mystery}.mastering.begin`,
-        desiredElementIds: [elementStack.elementId],
-      });
+      if (isUncat(elementStack.aspects)) {
+        orchestrator.requestOrchestration({
+          recipeId: `catalogue.book.${elementStack.elementId.substring(10)}`,
+          desiredElementIds: [elementStack.elementId],
+        });
+      } else {
+        const mystery = extractMysteryAspect(elementStack.aspects);
+        const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
+          aspectId.startsWith("mastery.")
+        );
+        orchestrator.requestOrchestration({
+          recipeId: isMastered
+            ? `study.mystery.${mystery}.mastered`
+            : `study.mystery.${mystery}.mastering.begin`,
+          desiredElementIds: [elementStack.elementId],
+        });
+      }
     },
   });
 }
@@ -115,6 +122,13 @@ function extractMysteryAspect(aspects: Aspects): string | null {
   }
 
   return mystery.substring(8);
+}
+
+function isUncat(aspects: Aspects): boolean {
+  return (
+    Object.keys(aspects).find((aspect) => aspect.startsWith("uncatalogued")) !=
+    undefined
+  );
 }
 
 export function getBooksObservable(
