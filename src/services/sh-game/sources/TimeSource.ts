@@ -156,6 +156,8 @@ export class TimeSource {
 
   async passTime(seconds: number) {
     await this._api.passTime(seconds);
+    // Re-pause, as daybreak may have reset the game speed.
+    await this._api.setSpeed("Paused");
     this._scheduler.updateNow();
   }
 

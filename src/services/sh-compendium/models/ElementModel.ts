@@ -70,6 +70,17 @@ export class ElementModel
     return this._description$;
   }
 
+  private _xexts$: Observable<Readonly<Record<string, string>>> | null = null;
+  get xexts$() {
+    if (!this._xexts$) {
+      this._xexts$ = this._element$.pipe(
+        map((e) => Object.freeze({ ...e?.xexts }))
+      );
+    }
+
+    return this._xexts$;
+  }
+
   private _iconUrl$: Observable<string> | null = null;
   get iconUrl$() {
     if (!this._iconUrl$) {

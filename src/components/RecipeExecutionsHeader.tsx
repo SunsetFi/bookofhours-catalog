@@ -10,6 +10,7 @@ import PlayCircle from "@mui/icons-material/PlayCircle";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
 import { type SxProps } from "@mui/material/styles";
 
 import SkipNextIcon from "@mui/icons-material/SkipNext";
@@ -21,7 +22,12 @@ import { filterItemObservations } from "@/observables";
 import { useObservation } from "@/hooks/use-observation";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 
-import { TokensSource, TimeSource, SituationModel } from "@/services/sh-game";
+import {
+  TokensSource,
+  TimeSource,
+  SituationModel,
+  Orchestrator,
+} from "@/services/sh-game";
 
 import FocusIconButton from "./FocusIconButton";
 import ScreenReaderContent from "./ScreenReaderContent";
@@ -110,8 +116,15 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
             width: "400px",
           }}
         >
+          {executingSituations.map((situation) => (
+            <ExecutingSituationListItem
+              key={situation.id}
+              situation={situation}
+            />
+          ))}
+          <Divider orientation="horizontal" />
           <ListItem>
-            <ListItemText sx={{ ml: 1 }} primary="Skip to Tomorrow" />
+            <ListItemText sx={{ ml: 6 }} primary="Skip to Tomorrow" />
             <Box sx={{ ml: "auto" }}>
               <Typography variant="caption" role="timer">
                 <ScreenReaderContent>
@@ -127,12 +140,6 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
               </IconButton>
             </Box>
           </ListItem>
-          {executingSituations.map((situation) => (
-            <ExecutingSituationListItem
-              key={situation.id}
-              situation={situation}
-            />
-          ))}
         </List>
       </Popover>
     </>
@@ -147,13 +154,35 @@ interface ExecutingSituationListItemProps {
 const ExecutingSituationListItem = ({
   situation,
 }: ExecutingSituationListItemProps) => {
+  const orchestrator = useDIDependency(Orchestrator);
+
   const timeSource = useDIDependency(TimeSource);
   const label = useObservation(situation.label$);
   const recipeLabel = useObservation(situation.recipeLabel$);
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const state = useObservation(situation.state$);
+  const output = useObservation(situation.output$) ?? [];
 
   const timeRemainingStr = timeRemaining.toFixed(1);
+
+  const onContinueClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (e.shiftKey) {
+        if (state === "Ongoing") {
+          // Tick one tick past the end of the situation, so we dont hang on 0.0
+          timeSource.passTime(timeRemaining + 0.1);
+        } else if (state === "Complete") {
+          situation.conclude();
+        }
+
+        return;
+      }
+
+      orchestrator.requestOrchestration({ situation });
+    },
+    [state, situation, timeSource, orchestrator]
+  );
 
   if (state !== "Ongoing" && state !== "Complete") {
     return null;
@@ -168,9 +197,10 @@ const ExecutingSituationListItem = ({
         primary={label === "." ? recipeLabel : label}
         secondary={label === "." ? null : recipeLabel}
       />
-      <Box sx={{ ml: "auto" }}>
+      <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
         {state === "Ongoing" && (
           <>
+            {/* TODO: Show if we have empty slots. */}
             <Typography variant="caption" role="timer">
               <ScreenReaderContent>
                 {timeRemainingStr} seconds left in recipe
@@ -179,17 +209,19 @@ const ExecutingSituationListItem = ({
             </Typography>
             <IconButton
               title="Fast Forward to Completion"
-              // Tick one tick past the end of the situation, so we dont hang on 0.0
-              onClick={() => timeSource.passTime(timeRemaining + 0.1)}
+              onClick={onContinueClick}
             >
               <SkipNextIcon />
             </IconButton>
           </>
         )}
         {state === "Complete" && (
-          <IconButton title="Complete" onClick={() => situation.conclude()}>
-            <DownloadIcon />
-          </IconButton>
+          <Badge badgeContent={output.length}>
+            {/* TODO: Show dialog of output. */}
+            <IconButton title="Complete" onClick={onContinueClick}>
+              <DownloadIcon />
+            </IconButton>
+          </Badge>
         )}
       </Box>
     </ListItem>

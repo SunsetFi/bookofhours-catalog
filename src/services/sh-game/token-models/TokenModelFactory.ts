@@ -41,6 +41,7 @@ export class TokenModelFactory {
         return new SituationModel(
           token as Situation,
           this._container.get(API),
+          this._container.get(TokensSource).visibleElementStacks$,
           this._container.get(TokenVisibilityFactory),
           this._container.get(TokenParentTerrainFactory)
         );

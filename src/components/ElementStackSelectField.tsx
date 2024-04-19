@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Observable, map } from "rxjs";
+import { Observable, combineLatest, map } from "rxjs";
 import { pick } from "lodash";
 
 import Popper from "@mui/material/Popper";
@@ -24,6 +24,7 @@ export interface ElementStackSelectFieldProps {
   label: string;
   fullWidth?: boolean;
   elementStacks$: Observable<readonly ElementStackModel[]>;
+  requireExterior?: boolean;
   displayAspects?: readonly string[];
   value: ElementStackModel | null;
   onChange(value: ElementStackModel | null): void;
@@ -32,15 +33,17 @@ export interface ElementStackSelectFieldProps {
 interface ElementStackAutocompleteItem {
   label: string | null;
   elementStack: ElementStackModel;
+  exterior: boolean;
 }
 
 function observeElementAutocomplete(
   model: ElementStackModel
 ): Observable<ElementStackAutocompleteItem> {
-  return model.label$.pipe(
-    map((label) => ({
+  return combineLatest([model.label$, model.inExteriorSphere$]).pipe(
+    map(([label, exterior]) => ({
       label,
       elementStack: model,
+      exterior,
     }))
   );
 }
@@ -49,6 +52,7 @@ const ElementStackSelectField = ({
   label,
   fullWidth,
   elementStacks$,
+  requireExterior = false,
   displayAspects,
   value,
   onChange,
@@ -80,6 +84,7 @@ const ElementStackSelectField = ({
       options={elementStacks}
       autoHighlight
       getOptionLabel={(option) => option.label!}
+      getOptionDisabled={(option) => requireExterior && !option.exterior}
       renderInput={(params) => (
         <TextField
           {...params}

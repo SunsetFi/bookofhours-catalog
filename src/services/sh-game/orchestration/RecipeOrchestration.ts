@@ -1,39 +1,25 @@
 import {
   BehaviorSubject,
   Observable,
-  asapScheduler,
+  Subscription,
   combineLatest,
   debounceTime,
-  distinctUntilChanged,
   firstValueFrom,
   map,
-  mergeMap,
   of as observableOf,
-  observeOn,
   shareReplay,
 } from "rxjs";
-import {
-  Aspects,
-  SphereSpec,
-  combineAspects,
-  actionIdMatches,
-  aspectsMatchExpression,
-} from "secrethistories-api";
-import { flatten, isEqual, omit, pick, sortBy } from "lodash";
+import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
+import { flatten } from "lodash";
+
+import { mergeMapIfNotNull, observeAll } from "@/observables";
+import { workstationFilterAspects } from "@/aspects";
 
 import {
-  Null$,
-  distinctUntilShallowArrayChanged,
-  filterItemObservations,
-  mapArrayItemsCached,
-  observeAll,
-} from "@/observables";
-import { isNotNull } from "@/utils";
-import { aspectsMagnitude, workstationFilterAspects } from "@/aspects";
-
-import { ElementModel, RecipeModel } from "@/services/sh-compendium";
-
-import { sphereMatchesToken } from "../observables";
+  Compendium,
+  ElementModel,
+  RecipeModel,
+} from "@/services/sh-compendium";
 
 import { TokensSource } from "../sources/TokensSource";
 
@@ -41,27 +27,26 @@ import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
 
 import {
-  ExecutionPlan,
+  ExecutableOrchestration,
+  Orchestration,
   OrchestrationBase,
   OrchestrationSlot,
   VariableSituationOrchestration,
 } from "./types";
+import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
+import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
+import { TimeSource } from "../sources/TimeSource";
 
 export class RecipeOrchestration
-  implements OrchestrationBase, VariableSituationOrchestration
+  extends OrchestrationBaseImpl
+  implements
+    OrchestrationBase,
+    ExecutableOrchestration,
+    VariableSituationOrchestration
 {
-  private readonly _aspectsFilter$ = new BehaviorSubject<readonly string[]>([]);
-
   private readonly _situation$ = new BehaviorSubject<SituationModel | null>(
     null
   );
-  private readonly _slotAssignments$ = new BehaviorSubject<
-    Record<string, ElementStackModel | null>
-  >({});
-
-  private readonly _elementStacksMatchingRecipe$: Observable<
-    readonly ElementStackModel[]
-  >;
 
   // Hack: Our elements have slots as well.  We need to take that into account when
   // choosing available situations.
@@ -70,24 +55,20 @@ export class RecipeOrchestration
   // This is here entirely for "consider", particularly for considering skills.
   private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
 
+  private readonly _subscription: Subscription;
+
   constructor(
     private readonly _recipe: RecipeModel,
-    private readonly _tokensSource: TokensSource,
-    private readonly _desiredElements: readonly ElementModel[]
+    private readonly _compendium: Compendium,
+    tokensSource: TokensSource,
+    // FIXME: This is only here to create a OngoingSituationOrchestration.  Make a factory func to handle dep injection for these.
+    private readonly _timeSource: TimeSource,
+    private readonly _desiredElements: readonly ElementModel[],
+    private readonly _replaceOrchestration: (
+      orchestration: Orchestration | null
+    ) => void
   ) {
-    const requiredAspects = Object.keys(_recipe.requirements);
-    this._elementStacksMatchingRecipe$ =
-      this._tokensSource.visibleElementStacks$.pipe(
-        filterItemObservations((item) =>
-          item.aspectsAndSelf$.pipe(
-            map((aspects) =>
-              Object.keys(aspects).some((r) => requiredAspects.includes(r))
-            )
-          )
-        ),
-        distinctUntilShallowArrayChanged(),
-        shareReplay(1)
-      );
+    super(tokensSource);
 
     // Must set this before accessing availableSituations$
     this._desiredElementThresholds$ = new BehaviorSubject(
@@ -109,53 +90,15 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
-    this.slots$.pipe(debounceTime(5)).subscribe((slots) => {
-      this._pickDefaults(Object.values(slots));
-    });
+    this._subscription = this.slots$
+      .pipe(debounceTime(5))
+      .subscribe((slots) => {
+        this._pickDefaults(Object.values(slots));
+      });
   }
 
-  private _executionPlan$: Observable<ExecutionPlan | null> | null = null;
-  get executionPlan$() {
-    if (!this._executionPlan$) {
-      this._executionPlan$ = combineLatest([
-        this.situation$,
-        this.situation$.pipe(mergeMap((s) => s?.state$ ?? Null$)),
-        this.slots$,
-        this._slotAssignments$,
-      ]).pipe(
-        map(([situation, situationState, slots, assignments]) => {
-          if (!situation || situationState !== "Unstarted") {
-            return null;
-          }
-
-          const recipe = this._recipe;
-          const plan: ExecutionPlan = {
-            situation,
-            recipe,
-            slots: {},
-          };
-
-          for (const slotId of Object.keys(slots)) {
-            const slot = slots[slotId];
-            if (!slot) {
-              continue;
-            }
-
-            const assignment = assignments[slotId];
-            if (!assignment) {
-              continue;
-            }
-
-            plan.slots[slotId] = assignment;
-          }
-
-          return plan;
-        }),
-        shareReplay(1)
-      );
-    }
-
-    return this._executionPlan$;
+  _dispose() {
+    this._subscription.unsubscribe();
   }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
@@ -167,12 +110,68 @@ export class RecipeOrchestration
     return this._recipe$;
   }
 
-  get aspectsFilter$(): Observable<readonly string[]> {
-    return this._aspectsFilter$;
+  private _requirements$: Observable<Readonly<Aspects>> | null = null;
+  get requirements$(): Observable<Readonly<Aspects>> {
+    if (!this._requirements$) {
+      this._requirements$ = combineLatest([
+        this._recipe.requirements$,
+        this.aspects$,
+      ]).pipe(
+        map(([requirements, aspects]) => {
+          const result: Aspects = {};
+          for (const aspect of Object.keys(requirements)) {
+            const reqValue = requirements[aspect];
+            let required = Number(reqValue);
+
+            if (Number.isNaN(required)) {
+              required = aspects[reqValue] ?? 0;
+            }
+
+            result[aspect] = required;
+          }
+
+          return result;
+        })
+      );
+    }
+
+    return this._requirements$;
   }
 
   get situation$(): Observable<SituationModel | null> {
     return this._situation$;
+  }
+
+  private _startDescription$: Observable<string> | null = null;
+  get startDescription$(): Observable<string> {
+    if (!this._startDescription$) {
+      this._startDescription$ = combineLatest([
+        this._situation$.pipe(
+          mergeMapIfNotNull((situation) => situation?.verbId$),
+          mergeMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
+        ),
+        this._recipe.description$,
+      ]).pipe(
+        map(([verb, recipeDescription]) => {
+          if (recipeDescription === ".") {
+            if (verb) {
+              return verb.description;
+            }
+
+            return "";
+          }
+
+          if (recipeDescription) {
+            return recipeDescription;
+          }
+
+          return "";
+        }),
+        shareReplay(1)
+      );
+    }
+
+    return this._startDescription$;
   }
 
   private _availableSituations$: Observable<readonly SituationModel[]> | null =
@@ -182,17 +181,16 @@ export class RecipeOrchestration
       this._availableSituations$ = combineLatest([
         this._tokensSource.considerSituation$,
         this._tokensSource.unlockedWorkstations$,
-        this._aspectsFilter$,
         this._desiredElementThresholds$,
       ]).pipe(
-        map(([consider, workstations, aspectsFilter, elementThresholds]) => {
+        map(([consider, workstations, elementThresholds]) => {
           const verbs = [...workstations];
           if (consider) {
             verbs.push(consider);
           }
 
           return verbs.filter((verb) =>
-            this._situationIsAvailable(verb, aspectsFilter, elementThresholds)
+            this._situationIsAvailable(verb, elementThresholds)
           );
         }),
         shareReplay(1)
@@ -202,96 +200,34 @@ export class RecipeOrchestration
     return this._availableSituations$;
   }
 
-  private _slots$: Observable<
-    Readonly<Record<string, OrchestrationSlot>>
-  > | null = null;
-  get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
-    if (!this._slots$) {
-      // The sheer amount of observeAlls here is a bit concerning.
-      const slottedElementStacks = this._slotAssignments$.pipe(
-        // Sort the values to guarentee the order doesn't change on us and mess up our distinct check.
-        map((assignments) =>
-          Object.keys(assignments)
-            .sort()
-            .map((key) => assignments[key])
-            .filter(isNotNull)
-        ),
-        shareReplay(1)
-      );
-      this._slots$ = combineLatest([
-        this._situation$.pipe(map((s) => s?.verbId)),
-        this._situation$.pipe(map((s) => s?.thresholds ?? [])),
-        // Cards can add slots too, so we need this mess to watch all assignments,
-        // get the elements, and get the slots.
-        // Honestly, it amazes me that this whole thing hasn't collapsed in on itself with the egregious
-        // chain of observables I am shoving into it.
-        // Update: We now have to track aspects as well.  Wonderful.
-        slottedElementStacks.pipe(
-          map((assignments) =>
-            assignments.map((x) => x.element$.pipe(mergeMap((x) => x.slots$)))
-          ),
-          observeAll()
-        ),
-        slottedElementStacks.pipe(
-          map((elements) => elements.map((x) => x.aspectsAndSelf$)),
-          observeAll(),
-          map((aspectsArray) =>
-            aspectsArray.reduce((a, b) => combineAspects(a, b), {} as Aspects)
-          )
-        ),
+  private _canExecute$: Observable<boolean> | null = null;
+  get canExecute$(): Observable<boolean> {
+    if (!this._canExecute$) {
+      this._canExecute$ = combineLatest([
+        this._recipe.requirements$,
+        this.aspects$,
       ]).pipe(
-        // The use of a shared slottedElementStacks here means we get 2 rapid updates from slotAssignments changing
-        // By default these are listened to with asyncScheduler, but that changes the order of our updates for some reason, leading
-        // to older values overriding newer values.
-        // What we really want is the null / concurrent scheduler, but this won't take null as an argument and the rxjs
-        // docs dont specify how else to get it.
-        observeOn(asapScheduler),
-        map(([verbId, situationThresholds, inputThresholds, aspects]) => {
-          if (!verbId) {
-            return [];
-          }
+        map(([requirements, aspects]) => {
+          for (const aspect of Object.keys(requirements)) {
+            const reqValue = requirements[aspect];
+            let required = Number(reqValue);
 
-          const thresholds = [
-            ...situationThresholds,
-            ...flatten(inputThresholds),
-          ].filter((spec) => {
-            if (!actionIdMatches(spec.actionId, verbId)) {
+            if (Number.isNaN(required)) {
+              required = aspects[reqValue] ?? 0;
+            }
+
+            if ((aspects[aspect] ?? 0) < required) {
               return false;
             }
-
-            if (!aspectsMatchExpression(aspects, spec.ifAspectsPresent)) {
-              return false;
-            }
-
-            return true;
-          });
-
-          return thresholds;
-        }),
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        mapArrayItemsCached((spec) => this._createSlot(spec)),
-        map((slots) => {
-          const result: Record<string, OrchestrationSlot> = {};
-          for (const slot of slots) {
-            if (result[slot.spec.id]) {
-              continue;
-            }
-
-            result[slot.spec.id] = slot;
           }
 
-          return result;
+          return true;
         }),
         shareReplay(1)
       );
     }
 
-    return this._slots$;
-  }
-
-  setAspectsFilter(aspects: readonly string[]): void {
-    this._aspectsFilter$.next(aspects);
-    this._tryClearSituation();
+    return this._canExecute$;
   }
 
   selectSituation(situation: SituationModel | null): void {
@@ -299,109 +235,86 @@ export class RecipeOrchestration
     this._slotAssignments$.next({});
   }
 
-  private async _tryClearSituation() {
-    if (!this._situation$.value) {
-      return;
-    }
-
-    const [filter, thresholds] = await Promise.all([
-      firstValueFrom(this._aspectsFilter$),
-      firstValueFrom(this._desiredElementThresholds$),
+  async prepare() {
+    const [situation, slots] = await Promise.all([
+      firstValueFrom(this._situation$),
+      firstValueFrom(this._slotAssignments$),
     ]);
 
-    if (
-      !this._situationIsAvailable(this._situation$.value, filter, thresholds)
-    ) {
-      this._situation$.next(null);
-      this._slotAssignments$.next({});
+    if (!situation || !slots) {
+      return false;
     }
+
+    var success = true;
+    try {
+      // hack: Don't do this for fixedVerbs, they aren't focusable.
+      // FIXME: Put this into the api mod logic.
+      if (!situation.path.startsWith("~/fixedVerbs")) {
+        situation.focus();
+      }
+
+      situation.open();
+
+      for (const slotId of Object.keys(slots)) {
+        var token = slots[slotId];
+        try {
+          situation.setSlotContents(slotId, token);
+        } catch (e) {
+          console.error(
+            "Failed to slot",
+            token?.id ?? "<clear>",
+            "to",
+            slotId,
+            "of situation",
+            situation.id,
+            e
+          );
+          success = false;
+        }
+      }
+
+      if (!(await situation.setRecipe(this._recipe.recipeId))) {
+        success = false;
+      }
+    } catch (e) {
+      success = false;
+    }
+
+    return success;
   }
 
-  private _createSlot(spec: SphereSpec): OrchestrationSlot {
-    const requirementKeys = Object.keys(this._recipe.requirements);
+  async execute() {
+    if (!(await this.prepare())) {
+      return false;
+    }
 
-    const availableElementStacks$ = combineLatest([
-      this._elementStacksMatchingRecipe$.pipe(
-        filterItemObservations((item) => sphereMatchesToken(spec, item))
-      ),
-      this._slotAssignments$.pipe(
-        map((assignments) => omit(assignments, spec.id)),
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        map((assignments) => Object.values(assignments).filter(isNotNull))
-      ),
-    ]).pipe(
-      map(([stacks, assigned]) => {
-        stacks = stacks.filter((x) => !assigned.includes(x));
-        return sortBy(stacks, [
-          (stack) =>
-            this._desiredElements.some((x) => x.elementId === stack.elementId)
-              ? 1
-              : 0,
-          (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
-          (stack) => aspectsMagnitude(stack.aspects),
-        ]).reverse();
-      }),
-      shareReplay(1)
-    );
+    const situation = await firstValueFrom(this._situation$);
+    if (!situation) {
+      return false;
+    }
 
-    return {
-      spec,
-      locked: false,
-      assignment$: this._slotAssignments$.pipe(
-        map((assignments) => assignments[spec.id] ?? null),
-        shareReplay(1)
-      ),
-      availableElementStacks$,
-      assign: (element) => {
-        this._slotAssignments$.next({
-          ...this._slotAssignments$.value,
-          [spec.id]: element,
-        });
-      },
-    };
-  }
-
-  private async _pickDefaults(slots: OrchestrationSlot[]) {
-    // Maybe we should recalculate all of these from the current values, but these should all be warmed up and ready.
-    const options = await Promise.all(
-      slots.map((slot) =>
-        firstValueFrom(slot.availableElementStacks$).then(
-          (stacks) => [slot, stacks] as const
+    try {
+      await situation.execute();
+      this._replaceOrchestration(
+        new OngoingSituationOrchestration(
+          situation,
+          this._compendium,
+          this._timeSource,
+          this._replaceOrchestration
         )
-      )
-    );
-
-    const assignments = { ...this._slotAssignments$.value };
-
-    for (const [slot, stacks] of options) {
-      const lastSelectedItem = assignments[slot.spec.id] ?? null;
-      if (lastSelectedItem && stacks.includes(lastSelectedItem)) {
-        continue;
-      }
-
-      // TODO: Pick the item by our own logic.
-      // Currently we screw with sorting to put the one we want at the top.  Don't rely on this, and let the user
-      // order things however.
-      const item = stacks.filter(
-        (x) => !Object.values(assignments).includes(x)
-      )[0];
-      if (!item) {
-        continue;
-      }
-
-      assignments[slot.spec.id] = item;
+      );
+      return true;
+    } catch (e) {
+      console.error("Failed to execute", situation.id, e);
+      return false;
     }
-
-    this._slotAssignments$.next(assignments);
   }
 
   private _situationIsAvailable(
     situation: SituationModel,
-    aspectsFilter: readonly string[],
     additionalThresholds: SphereSpec[]
   ): boolean {
     const requiredAspects = [
-      ...aspectsFilter,
       ...Object.keys(this._recipe.requirements).filter((x) =>
         workstationFilterAspects.includes(x)
       ),
@@ -441,5 +354,70 @@ export class RecipeOrchestration
     }
 
     return true;
+  }
+
+  protected _filterSlotCandidates(
+    spec: SphereSpec,
+    elementStack: ElementStackModel
+  ): Observable<boolean> {
+    const requirementKeys = Object.keys(this._recipe.requirements);
+    // Our recipe is fixed, so filter candidates by its requirements.
+    return elementStack.aspectsAndSelf$.pipe(
+      map((aspects) => {
+        return Object.keys(aspects).some((aspect) =>
+          requirementKeys.includes(aspect)
+        );
+      })
+    );
+  }
+
+  private async _pickDefaults(slots: OrchestrationSlot[]) {
+    // Maybe we should recalculate all of these from the current values, but these should all be warmed up and ready.
+    let options = await Promise.all(
+      slots.map((slot) =>
+        firstValueFrom(slot.availableElementStacks$).then(
+          (stacks) => [slot, stacks] as const
+        )
+      )
+    );
+
+    const assignments = { ...this._slotAssignments$.value };
+    const assigned = new Set<ElementStackModel>();
+
+    for (const [slot, stacks] of options) {
+      const lastSelectedItem = assignments[slot.spec.id] ?? null;
+      if (
+        lastSelectedItem &&
+        !assigned.has(lastSelectedItem) &&
+        stacks.includes(lastSelectedItem)
+      ) {
+        continue;
+      }
+
+      const desiredItem = stacks.find(
+        (x) =>
+          !assigned.has(x) &&
+          this._desiredElements.find(
+            (desired) => x.elementId === desired.elementId
+          )
+      );
+      if (desiredItem) {
+        assigned.add(desiredItem);
+        assignments[slot.spec.id] = desiredItem;
+        continue;
+      }
+
+      // TODO: Pick the item that contributes the most but don't go over.
+      const item = stacks.find(
+        (x) => !assigned.has(x) && !Object.values(assignments).includes(x)
+      );
+      if (item) {
+        assigned.add(item);
+        assignments[slot.spec.id] = item;
+        continue;
+      }
+    }
+
+    this._slotAssignments$.next(assignments);
   }
 }

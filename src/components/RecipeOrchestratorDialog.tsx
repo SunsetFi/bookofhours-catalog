@@ -2,24 +2,29 @@ import * as React from "react";
 import { mapValues } from "lodash";
 
 import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogTitle";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import IconButton from "@mui/material/IconButton";
+import { type SxProps } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useDIDependency } from "@/container";
 import { Null$, observableObjectOrEmpty } from "@/observables";
 
 import {
+  CompletedOrchestration,
+  Orchestration,
   OrchestrationSlot,
   Orchestrator,
+  isCompletedOrchestration,
+  isExecutableOrchestration,
+  isContentContainingOrchestration,
   isVariableSituationOrchestration,
+  isOngoingOrchestration,
 } from "@/services/sh-game/orchestration";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -28,27 +33,57 @@ import SituationSelectField from "./SituationSelectField";
 import AspectsList from "./AspectsList";
 import ElementStackSelectField from "./ElementStackSelectField";
 import AspectIcon from "./AspectIcon";
-import PinRecipeIconButton from "./PinRecipeIconButton";
+import TlgNote from "./TlgNote";
+import ElementStackTray from "./ElementStackTray";
+import GameTypography from "./GameTypography";
 
 const RecipeOrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
 
   const orchestration = useObservation(orchestrator.orchestration$);
-  const aspectRequirements =
-    useObservation(orchestrator.aspectRequirements$) ?? {};
-  const canExecute = useObservation(orchestrator.canExecute$) ?? false;
-
-  const recipe = useObservation(orchestration?.recipe$ ?? Null$);
-  const recipeLabel = useObservation(recipe?.label$ ?? Null$);
-  const situation = useObservation(orchestration?.situation$ ?? Null$);
-  const situationLabel = useObservation(situation?.label$ ?? Null$);
-
-  const slots =
-    useObservation(observableObjectOrEmpty(orchestration?.slots$)) ?? {};
 
   if (!orchestration) {
     return null;
   }
+
+  return (
+    <Dialog open onClose={() => orchestrator.close()} fullWidth maxWidth="lg">
+      <RecipeOrchestrationDialogContent orchestration={orchestration} />
+    </Dialog>
+  );
+};
+
+interface RecipeOrchestrationDialogContentProps {
+  orchestration: Orchestration;
+}
+
+const RecipeOrchestrationDialogContent = ({
+  orchestration,
+}: RecipeOrchestrationDialogContentProps) => {
+  const orchestrator = useDIDependency(Orchestrator);
+
+  const recipe = useObservation(orchestration?.recipe$ ?? Null$);
+  const recipeLabel = useObservation(recipe?.label$ ?? Null$);
+
+  const situation = useObservation(orchestration?.situation$ ?? Null$);
+  const situationLabel = useObservation(situation?.label$ ?? Null$);
+
+  const timeRemaining = useObservation(
+    () =>
+      isOngoingOrchestration(orchestration)
+        ? orchestration.timeRemaining$
+        : Null$,
+    [orchestration]
+  );
+
+  const canExecute =
+    useObservation(
+      () =>
+        isExecutableOrchestration(orchestration)
+          ? orchestration.canExecute$
+          : Null$,
+      [orchestration]
+    ) ?? false;
 
   let label = recipeLabel ?? situationLabel;
   if (label === ".") {
@@ -56,90 +91,229 @@ const RecipeOrchestratorDialog = () => {
   }
 
   return (
-    <Dialog open onClose={() => orchestrator.cancel()} fullWidth maxWidth="md">
-      <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Box sx={{ display: "flex", flexDirection: "row" }}>
-            <Typography variant="h5" sx={{ mr: 2 }}>
-              {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
-              {label?.toLocaleUpperCase()}
+    <>
+      <DialogTitle
+        component="div"
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 2,
+          alignItems: "baseline",
+        }}
+      >
+        {label && (
+          <Typography variant="h5">
+            {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
+            {label?.toLocaleUpperCase()}
+          </Typography>
+        )}
+        {!isVariableSituationOrchestration(orchestration) && (
+          <>
+            {label && " - "}
+            <Typography variant="h5">{situationLabel}</Typography>
+          </>
+        )}
+        {isOngoingOrchestration(orchestration) && (
+          <>
+            {(label || !isVariableSituationOrchestration(orchestration)) &&
+              " - "}
+            <Typography variant="h5">
+              {timeRemaining?.toFixed(1) ?? "0.0"}s
             </Typography>
-            {recipe && (
-              <PinRecipeIconButton
-                sx={{ mt: "-4px" }}
-                recipeId={recipe.recipeId}
-              />
-            )}
-          </Box>
-          <AspectsList
-            aspects={mapValues(
-              aspectRequirements,
-              (value) => `${value.current} / ${value.required}`
-            )}
-            iconSize={30}
-          />
-        </Box>
+          </>
+        )}
+        {isCompletedOrchestration(orchestration) && (
+          <>
+            {(label || !isVariableSituationOrchestration(orchestration)) &&
+              " - "}
+            <Typography variant="h5">Recipe Completed</Typography>
+          </>
+        )}
         <IconButton
           sx={{ ml: "auto", alignSelf: "flex-start" }}
-          onClick={() => orchestrator.cancel()}
+          onClick={() => orchestrator.close()}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          height: "100%",
+          px: 3,
+          pb: 1,
+          gap: 1,
+        }}
+      >
+        <OrchestratorSidebar
+          sx={{ height: 460, mr: 2 }}
+          orchestration={orchestration}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+            height: 460,
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
+          {isVariableSituationOrchestration(orchestration) && (
+            <SituationSelectField
+              label="Workstation"
+              fullWidth
+              requireUnstarted
+              situations$={orchestration.availableSituations$}
+              value={situation ?? null}
+              onChange={(s) => orchestration.selectSituation(s)}
+            />
+          )}
+          {!isCompletedOrchestration(orchestration) && (
+            <OrchestratorSlots orchestration={orchestration} />
+          )}
+          {isCompletedOrchestration(orchestration) && (
+            <OrchestratorOutput orchestration={orchestration} />
+          )}
+        </Box>
+      </Box>
+      <DialogActions sx={{ display: "flex", flexDirection: "row" }}>
+        <Button sx={{ mr: "auto" }} onClick={() => orchestrator.close()}>
+          Close
+        </Button>
+        <ButtonGroup>
+          {isExecutableOrchestration(orchestration) && (
+            <>
+              <Button onClick={() => orchestration.prepare()}>
+                Prepare Recipe
+              </Button>
+              <Button
+                disabled={!canExecute}
+                onClick={() => orchestration.execute()}
+              >
+                Start Recipe
+              </Button>
+            </>
+          )}
+          {isOngoingOrchestration(orchestration) && (
+            <Button onClick={() => orchestration.passTime()}>Pass Time</Button>
+          )}
+          {isCompletedOrchestration(orchestration) && (
+            <Button onClick={() => orchestration.conclude()}>Conclude</Button>
+          )}
+        </ButtonGroup>
+      </DialogActions>
+    </>
+  );
+};
+
+interface OrchestratorSidebarProps {
+  sx?: SxProps;
+  orchestration: Orchestration;
+}
+
+const OrchestratorSidebar = ({
+  sx,
+  orchestration,
+}: OrchestratorSidebarProps) => {
+  const requirements = useObservation(orchestration.requirements$) ?? {};
+  const aspects = useObservation(orchestration.aspects$) ?? {};
+
+  const startDescription = useObservation(
+    () =>
+      isExecutableOrchestration(orchestration)
+        ? orchestration.startDescription$
+        : Null$,
+    [orchestration]
+  );
+
+  const notes =
+    useObservation(
+      () =>
+        isContentContainingOrchestration(orchestration)
+          ? orchestration.notes$
+          : Null$,
+      [orchestration]
+    ) ?? [];
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: 400,
+        ...sx,
+      }}
+    >
+      {Object.keys(requirements).length > 0 && (
+        <AspectsList
+          sx={{ mb: 3 }}
+          aspects={mapValues(
+            requirements,
+            (value, key) => `${aspects[key] ?? 0} / ${value}`
+          )}
+          iconSize={30}
+        />
+      )}
+      <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: 3,
-          height: 460,
+          gap: 4,
+          pr: 1,
+          overflow: "auto",
+          height: "100%",
         }}
       >
-        {isVariableSituationOrchestration(orchestration) ? (
-          <SituationSelectField
-            label="Workstation"
-            fullWidth
-            requireUnstarted
-            situations$={orchestration.availableSituations$}
-            value={situation ?? null}
-            onChange={(s) => orchestration.selectSituation(s)}
-          />
-        ) : (
-          <TextField
-            label="Workstation"
-            fullWidth
-            value={situationLabel ?? ""}
-          />
+        {startDescription && (
+          <GameTypography component="div" variant="body2">
+            {startDescription}
+          </GameTypography>
         )}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            rowGap: 2,
-            columnGap: 3,
-            overflow: "auto",
-          }}
-        >
-          {Object.keys(slots).map((slotId) => (
-            <SlotEditor
-              key={slotId}
-              slot={slots[slotId]}
-              recipeRequiredAspects={Object.keys(aspectRequirements)}
-            />
-          ))}
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ display: "flex", flexDirection: "row" }}>
-        <Button sx={{ mr: "auto" }} onClick={() => orchestrator.cancel()}>
-          Cancel
-        </Button>
-        <ButtonGroup>
-          <Button onClick={() => orchestrator.apply()}>Prepare Recipe</Button>
-          <Button disabled={!canExecute} onClick={() => orchestrator.execute()}>
-            Start Recipe
-          </Button>
-        </ButtonGroup>
-      </DialogActions>
-    </Dialog>
+        {notes.map((note, index) => (
+          <TlgNote key={index} elementStack={note} />
+        ))}
+      </Box>
+    </Box>
+  );
+};
+
+interface OrchestratorOutputProps {
+  orchestration: CompletedOrchestration;
+}
+
+const OrchestratorOutput = ({ orchestration }: OrchestratorOutputProps) => {
+  return <ElementStackTray elementStacks$={orchestration.content$} />;
+};
+
+interface OrchestratorSlotsProps {
+  orchestration: Orchestration;
+}
+
+const OrchestratorSlots = ({ orchestration }: OrchestratorSlotsProps) => {
+  const requirements = useObservation(orchestration.requirements$) ?? {};
+  const slots =
+    useObservation(observableObjectOrEmpty(orchestration.slots$)) ?? {};
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, 1fr)",
+        rowGap: 2,
+        columnGap: 3,
+        overflow: "auto",
+      }}
+    >
+      {Object.keys(slots).map((slotId) => (
+        <SlotEditor
+          key={slotId}
+          slot={slots[slotId]}
+          recipeRequiredAspects={Object.keys(requirements)}
+        />
+      ))}
+    </Box>
   );
 };
 
@@ -188,6 +362,7 @@ const SlotEditor = ({ slot, recipeRequiredAspects }: SlotEditorProps) => {
         label="Element"
         fullWidth
         elementStacks$={slot.availableElementStacks$}
+        requireExterior
         displayAspects={recipeRequiredAspects}
         value={assignment}
         onChange={(stack) => slot.assign(stack)}

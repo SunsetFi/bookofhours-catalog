@@ -65,6 +65,19 @@ export abstract class TokenModel {
     return this._token$.value.spherePath;
   }
 
+  private _inExteriorSphere$: Observable<boolean> | null = null;
+  get inExteriorSphere$() {
+    if (!this._inExteriorSphere$) {
+      this._inExteriorSphere$ = this._token$.pipe(
+        map((token) => token.inExteriorSphere),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._inExteriorSphere$;
+  }
+
   private _occupiesSpaceAs$: Observable<SpaceOccupation | null> | null = null;
   get occupiesSpaceAs$() {
     if (!this._occupiesSpaceAs$) {
@@ -76,6 +89,10 @@ export abstract class TokenModel {
     }
 
     return this._occupiesSpaceAs$;
+  }
+
+  get occupiesSpaceAs() {
+    return this._token$.value.occupiesSpaceAs;
   }
 
   focus() {

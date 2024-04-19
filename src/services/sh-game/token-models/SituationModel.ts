@@ -13,6 +13,10 @@ import {
 } from "secrethistories-api";
 import { isEqual } from "lodash";
 
+import { isNotNull } from "@/utils";
+
+import { filterItemObservations, filterItems } from "@/observables";
+
 import { API } from "../../sh-api";
 
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
@@ -30,10 +34,13 @@ export class SituationModel extends TokenModel {
 
   private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
+  private readonly _notes$: Observable<readonly ElementStackModel[]>;
+  private readonly _output$: Observable<readonly ElementStackModel[]>;
 
   constructor(
     situation: ISituation,
     api: API,
+    elementStacks$: Observable<readonly ElementStackModel[]>,
     visibilityFactory: TokenVisibilityFactory,
     parentTerrainFactory: TokenParentTerrainFactory
   ) {
@@ -45,6 +52,27 @@ export class SituationModel extends TokenModel {
     );
     this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
       this._situation$
+    );
+
+    this._notes$ = elementStacks$.pipe(
+      // Notes never change their elementId, so its safe to not observe this.
+      filterItems((item) => item.elementId === "tlg.note"),
+      filterItemObservations((item) =>
+        item.path$.pipe(map((path) => path.startsWith(`${this.path}`)))
+      ),
+      filterItems(isNotNull),
+      shareReplay(1)
+    );
+
+    this._output$ = elementStacks$.pipe(
+      // Filter out notes.
+      filterItems((item) => item.elementId !== "tlg.note"),
+      filterItemObservations((item) =>
+        item.path$.pipe(
+          map((path) => path.startsWith(`${this.path}/outputsphere`))
+        )
+      ),
+      shareReplay(1)
     );
   }
 
@@ -121,6 +149,10 @@ export class SituationModel extends TokenModel {
     }
 
     return this._description$;
+  }
+
+  get notes$() {
+    return this._notes$;
   }
 
   private _aspects$: Observable<Aspects> | null = null;
@@ -248,6 +280,14 @@ export class SituationModel extends TokenModel {
     return this._timeRemaining$;
   }
 
+  get output$() {
+    return this._output$;
+  }
+
+  async open() {
+    await this._api.openTokenAtPath(this.path);
+  }
+
   async setSlotContents(slotId: string, token: ElementStackModel | null) {
     const slotPath = `${this.path}/${slotId}`;
     if (token) {
@@ -256,6 +296,15 @@ export class SituationModel extends TokenModel {
       }
     } else {
       await this._api.evictTokenAtPath(slotPath);
+    }
+  }
+
+  async setRecipe(recipeId: string) {
+    try {
+      await this._api.setRecipeAtPath(this.path, recipeId);
+      return true;
+    } catch {
+      return false;
     }
   }
 
@@ -284,6 +333,7 @@ export class SituationModel extends TokenModel {
         currentRecipeLabel: null,
         state: "Unstarted",
       });
+      return true;
     } catch (e) {
       return false;
     }

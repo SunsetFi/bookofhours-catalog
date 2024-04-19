@@ -8,18 +8,15 @@ import {
   map,
   mergeMap,
   shareReplay,
-  tap,
 } from "rxjs";
 import { Aspects, aspectsMatch } from "secrethistories-api";
 import { pick } from "lodash";
 
 import {
-  Null$,
   filterItemObservations,
   filterItems,
   firstOrDefault,
   mergeMapIfNotNull,
-  observeAll,
 } from "@/observables";
 
 import { TokensSource } from "./sources/TokensSource";
@@ -63,7 +60,6 @@ export class TerrainUnlocker {
         filterItems(isSituationModel),
         // This isnt an observable, but the situation is created and destroyed as it is used,
         // so this is safe.
-        tap((thing) => console.log("stuff", thing)),
         firstOrDefault((situation) => situation.verbId === "terrain.unlock"),
         mergeMapIfNotNull((situation) => situation.recipeId$),
         distinctUntilChanged(),

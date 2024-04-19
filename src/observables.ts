@@ -215,7 +215,7 @@ export function mapArrayItems<T, K>(mapping: (item: T) => K) {
 
 export function mergeMapIf<T, TM extends T, K>(
   condition: (value: T) => value is TM,
-  mapping: (value: TM) => Observable<K>,
+  mapping: (value: TM) => Observable<K> | Promise<K>,
   ifFalse: Observable<K>
 ) {
   return (source: Observable<T>): Observable<K> => {
@@ -225,7 +225,9 @@ export function mergeMapIf<T, TM extends T, K>(
   };
 }
 
-export function mergeMapIfNotNull<T, K>(mapping: (value: T) => Observable<K>) {
+export function mergeMapIfNotNull<T, K>(
+  mapping: (value: T) => Observable<K> | Promise<K>
+) {
   return mergeMapIf<T | null, T, K | null>(isNotNull, mapping, Null$);
 }
 

@@ -9,10 +9,11 @@ const GameTypography = React.forwardRef<HTMLSpanElement, GameTypographyProps>(
   ({ children, ...props }, ref) => {
     const parts = React.useMemo(
       () =>
-        React.Children.toArray(children).flatMap((child) => {
+        React.Children.toArray(children).flatMap((child, index) => {
           if (typeof child === "string") {
-            return parseSprites(child, (name) => (
+            return parseSprites(child, (name, spriteIndex) => (
               <AspectIcon
+                key={`${index}-${spriteIndex}`}
                 size={30}
                 aspectId={name}
                 sx={{ display: "inline-block", verticalAlign: "middle" }}
@@ -38,8 +39,9 @@ export default GameTypography;
 const spriteRegex = /<sprite name=([^>]+)>/g;
 function parseSprites(
   text: string,
-  fetchSprite: (name: string) => React.ReactNode
+  fetchSprite: (name: string, index: number) => React.ReactNode
 ): React.ReactNode[] {
+  let count = 0;
   let lastIndex = 0;
   const result: React.ReactNode[] = [];
 
@@ -52,7 +54,7 @@ function parseSprites(
 
     // Fetch the sprite and push to the result
     const spriteName = match[1];
-    const spriteNode = fetchSprite(spriteName);
+    const spriteNode = fetchSprite(spriteName, ++count);
     result.push(spriteNode);
 
     lastIndex = match.index + match[0].length;
