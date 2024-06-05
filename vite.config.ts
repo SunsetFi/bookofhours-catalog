@@ -14,6 +14,23 @@ export default defineConfig({
     },
   },
 
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom"],
+          ui: [
+            "@emotion/styled",
+            "@mui/material",
+            "@mui/icons-material",
+            "@tanstack/react-table",
+            "@tanstack/react-virtual",
+          ],
+        },
+      },
+    },
+  },
+
   server: {
     port: 8080,
   },
