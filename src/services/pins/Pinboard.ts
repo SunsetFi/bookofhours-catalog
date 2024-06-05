@@ -11,7 +11,7 @@ import { intersection } from "lodash";
 import {
   mapArrayItems,
   mapArrayItemsCached,
-  mergeMapIfNotNull,
+  switchMapIfNotNull,
   observeAll,
 } from "@/observables";
 
@@ -59,7 +59,7 @@ export class Pinboard {
           mapArrayItems((x) => x.aspects$),
           observeAll()
         ),
-        this.pinnedRecipe$.pipe(mergeMapIfNotNull((r) => r.requirements$)),
+        this.pinnedRecipe$.pipe(switchMapIfNotNull((r) => r.requirements$)),
       ]).pipe(
         map(([aspectArray, recipeReqs]) => {
           const result: Record<string, PinnedAspect> = {};

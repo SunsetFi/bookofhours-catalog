@@ -1,4 +1,4 @@
-import { Observable, combineLatest, filter, map, mergeMap } from "rxjs";
+import { Observable, combineLatest, filter, map, switchMap } from "rxjs";
 
 import {
   filterItemObservations,
@@ -21,7 +21,7 @@ export const craftingSearchProvider: PageSearchProviderPipe = (
   container
 ) => {
   return query$.pipe(
-    mergeMap((query) =>
+    switchMap((query) =>
       getCraftablesObservable(container).pipe(
         filterItemObservations((item) => filterCraftableToQuery(query, item)),
         mapArrayItemsCached((item) => craftableModelToSearchItem(item)),

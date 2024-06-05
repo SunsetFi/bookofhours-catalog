@@ -1,5 +1,5 @@
 import * as React from "react";
-import { mergeMap } from "rxjs";
+import { switchMap } from "rxjs";
 
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
@@ -26,7 +26,7 @@ const ElementStackDetails = React.forwardRef<
   const iconUrl = useObservation(elementStack.iconUrl$);
   const description = useObservation(
     () =>
-      elementStack.element$.pipe(mergeMap((element) => element.description$)),
+      elementStack.element$.pipe(switchMap((element) => element.description$)),
     [elementStack]
   );
 

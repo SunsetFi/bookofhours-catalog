@@ -1,4 +1,4 @@
-import { Observable, map, mergeMap } from "rxjs";
+import { Observable, map, switchMap } from "rxjs";
 
 import { filterItemObservations } from "@/observables";
 
@@ -16,7 +16,7 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
 ) => {
   const tokensSource = container.get(TokensSource);
   return query$.pipe(
-    mergeMap((query) => createQueryObservable(query, tokensSource))
+    switchMap((query) => createQueryObservable(query, tokensSource))
   );
 };
 

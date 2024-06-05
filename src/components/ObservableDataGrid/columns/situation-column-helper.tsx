@@ -3,7 +3,7 @@ import { IdentifiedColumnDef } from "@tanstack/react-table";
 import { Observable, map } from "rxjs";
 import { pick, pickBy } from "lodash";
 
-import { mergeMapIfNotNull } from "@/observables";
+import { switchMapIfNotNull } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
 
 import { SituationModel } from "@/services/sh-game";
@@ -108,7 +108,7 @@ export function createSituationColumnHelper<
       columnHelper.observe(
         (item) =>
           item.parentTerrain$.pipe(
-            mergeMapIfNotNull((terrain) => terrain.label$)
+            switchMapIfNotNull((terrain) => terrain.label$)
           ),
         {
           header: "Location",

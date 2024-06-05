@@ -6,7 +6,7 @@ import {
   distinctUntilChanged,
   firstValueFrom,
   map,
-  mergeMap,
+  switchMap,
   shareReplay,
 } from "rxjs";
 import { Aspects, aspectsMatch } from "secrethistories-api";
@@ -16,7 +16,7 @@ import {
   filterItemObservations,
   filterItems,
   firstOrDefault,
-  mergeMapIfNotNull,
+  switchMapIfNotNull,
 } from "@/observables";
 
 import { TokensSource } from "./sources/TokensSource";
@@ -61,7 +61,7 @@ export class TerrainUnlocker {
         // This isnt an observable, but the situation is created and destroyed as it is used,
         // so this is safe.
         firstOrDefault((situation) => situation.verbId === "terrain.unlock"),
-        mergeMapIfNotNull((situation) => situation.recipeId$),
+        switchMapIfNotNull((situation) => situation.recipeId$),
         distinctUntilChanged(),
         shareReplay(1)
       );
@@ -77,16 +77,16 @@ export class TerrainUnlocker {
     if (!this._unlockCandidateStacks$) {
       this._unlockCandidateStacks$ = combineLatest([
         this.target$.pipe(
-          mergeMapIfNotNull((target) => target.unlockEssentials$)
+          switchMapIfNotNull((target) => target.unlockEssentials$)
         ),
         this.target$.pipe(
-          mergeMapIfNotNull((target) => target.unlockRequirements$)
+          switchMapIfNotNull((target) => target.unlockRequirements$)
         ),
         this.target$.pipe(
-          mergeMapIfNotNull((target) => target.unlockForbiddens$)
+          switchMapIfNotNull((target) => target.unlockForbiddens$)
         ),
       ]).pipe(
-        mergeMap(([essentials, requirements, forbiddens]) => {
+        switchMap(([essentials, requirements, forbiddens]) => {
           return this._tokensSource.visibleElementStacks$.pipe(
             filterItemObservations((stack) =>
               stack.aspectsAndSelf$.pipe(

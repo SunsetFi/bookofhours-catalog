@@ -1,4 +1,4 @@
-import { map, mergeMap } from "rxjs";
+import { map, switchMap } from "rxjs";
 
 import { filterItemObservations } from "@/observables";
 
@@ -16,7 +16,7 @@ export const furnishingsSearchProvider: PageSearchProviderPipe = (
   container
 ) =>
   query$.pipe(
-    mergeMap((query) =>
+    switchMap((query) =>
       container.get(TokensSource).visibleElementStacks$.pipe(
         filterHasAnyAspect(furnishingAspects),
         filterItemObservations((item) => elementStackMatchesQuery(query, item)),

@@ -2,7 +2,7 @@ import * as React from "react";
 import { Container } from "microinject";
 
 import { pick, first } from "lodash";
-import { Observable, combineLatest, map, mergeMap } from "rxjs";
+import { Observable, combineLatest, map, switchMap } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
 import { useDIContainer } from "@/container";
@@ -12,7 +12,7 @@ import { decorateObjectInstance } from "@/object-decorator";
 import {
   Null$,
   mapArrayItemsCached,
-  mergeMapIfNotNull,
+  switchMapIfNotNull,
   observableObjectOrEmpty,
 } from "@/observables";
 
@@ -44,7 +44,7 @@ function elementStackToBook(
     elementStack.aspects$,
     elementStack.element$,
   ]).pipe(
-    mergeMap(([aspects, element]) => {
+    switchMap(([aspects, element]) => {
       const mastery = Object.keys(aspects).find((aspectId) =>
         aspectId.startsWith("mastery.")
       );
@@ -73,11 +73,11 @@ function elementStackToBook(
     map((memory) => memory?.elementId ?? null)
   );
   const memoryLabel$ = memory$.pipe(
-    mergeMapIfNotNull((memory) => memory.label$)
+    switchMapIfNotNull((memory) => memory.label$)
   );
 
   const memoryAspects$ = memory$.pipe(
-    mergeMap((memory) =>
+    switchMap((memory) =>
       observableObjectOrEmpty(memory?.aspects$).pipe(
         map((aspects) => pick(aspects, powerAspects))
       )

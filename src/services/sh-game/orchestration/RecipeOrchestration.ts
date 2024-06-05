@@ -12,7 +12,7 @@ import {
 import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
 import { flatten } from "lodash";
 
-import { mergeMapIfNotNull, observeAll } from "@/observables";
+import { switchMapIfNotNull, observeAll } from "@/observables";
 import { workstationFilterAspects } from "@/aspects";
 
 import {
@@ -147,8 +147,8 @@ export class RecipeOrchestration
     if (!this._startDescription$) {
       this._startDescription$ = combineLatest([
         this._situation$.pipe(
-          mergeMapIfNotNull((situation) => situation?.verbId$),
-          mergeMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
+          switchMapIfNotNull((situation) => situation?.verbId$),
+          switchMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
         ),
         this._recipe.description$,
       ]).pipe(

@@ -4,7 +4,7 @@ import {
   Subscription,
   map,
   distinctUntilChanged,
-  mergeMap,
+  switchMap,
   defer,
   from,
   shareReplay,
@@ -94,7 +94,7 @@ export function filterItemObservations<T, K extends T>(
 
 export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   return (source: Observable<T>): Observable<Observation<T[K]>> => {
-    return source.pipe(mergeMap((value) => value[key] as any)) as any;
+    return source.pipe(switchMap((value) => value[key] as any)) as any;
   };
 }
 
@@ -213,22 +213,22 @@ export function mapArrayItems<T, K>(mapping: (item: T) => K) {
   };
 }
 
-export function mergeMapIf<T, TM extends T, K>(
+export function switchMapIf<T, TM extends T, K>(
   condition: (value: T) => value is TM,
   mapping: (value: TM) => Observable<K> | Promise<K>,
   ifFalse: Observable<K>
 ) {
   return (source: Observable<T>): Observable<K> => {
     return source.pipe(
-      mergeMap((value) => (condition(value) ? mapping(value) : ifFalse))
+      switchMap((value) => (condition(value) ? mapping(value) : ifFalse))
     );
   };
 }
 
-export function mergeMapIfNotNull<T, K>(
+export function switchMapIfNotNull<T, K>(
   mapping: (value: T) => Observable<K> | Promise<K>
 ) {
-  return mergeMapIf<T | null, T, K | null>(isNotNull, mapping, Null$);
+  return switchMapIf<T | null, T, K | null>(isNotNull, mapping, Null$);
 }
 
 export function mapArrayItemsCached<T, R>(

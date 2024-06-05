@@ -8,7 +8,7 @@ import {
   Observable,
   firstValueFrom,
   map,
-  mergeMap,
+  switchMap,
   shareReplay,
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
@@ -67,18 +67,18 @@ function recipeToCraftableModel(
   return {
     id: recipeModel.recipeId,
     iconUrl$: craftable$.pipe(
-      mergeMap((element) => element?.iconUrl$ ?? Null$)
+      switchMap((element) => element?.iconUrl$ ?? Null$)
     ),
     elementId$: craftable$.pipe(map((element) => element?.elementId ?? null)),
     label$: craftable$.pipe(
-      mergeMap((element) => element?.label$ ?? nullStringObservable)
+      switchMap((element) => element?.label$ ?? nullStringObservable)
     ),
     aspects$: craftable$.pipe(
-      mergeMap((element) => element?.aspects$ ?? nullAspectsObservable)
+      switchMap((element) => element?.aspects$ ?? nullAspectsObservable)
     ),
     skillElementId$: skill$.pipe(map((element) => element?.elementId ?? null)),
     skillLabel$: skill$.pipe(
-      mergeMap((element) => element?.label$ ?? nullStringObservable)
+      switchMap((element) => element?.label$ ?? nullStringObservable)
     ),
     requirements$: recipeModel.requirements$.pipe(
       map((x) => mapValues(x, Number))

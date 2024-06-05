@@ -5,10 +5,9 @@ import {
   combineLatest,
   distinctUntilChanged,
   map,
-  mergeMap,
+  switchMap,
   observeOn,
   shareReplay,
-  tap,
 } from "rxjs";
 import {
   Aspects,
@@ -76,7 +75,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         // Update: We now have to track aspects as well.  Wonderful.
         slottedElementStacks.pipe(
           map((assignments) =>
-            assignments.map((x) => x.element$.pipe(mergeMap((x) => x.slots$)))
+            assignments.map((x) => x.element$.pipe(switchMap((x) => x.slots$)))
           ),
           observeAll()
         ),
@@ -190,7 +189,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         map((assignments) => Object.values(assignments).filter(isNotNull))
       ),
     ]).pipe(
-      mergeMap(([stacks, assigned]) =>
+      switchMap(([stacks, assigned]) =>
         this.requirements$.pipe(
           map((requirements) => {
             const requirementKeys = Object.keys(requirements);

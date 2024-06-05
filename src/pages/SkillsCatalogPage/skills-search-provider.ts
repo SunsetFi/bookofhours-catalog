@@ -1,4 +1,4 @@
-import { Observable, map, mergeMap } from "rxjs";
+import { Observable, map, switchMap } from "rxjs";
 import { Container } from "microinject";
 
 import { filterItemObservations, mapArrayItems } from "@/observables";
@@ -15,7 +15,7 @@ export const skillsSearchProvider: PageSearchProviderPipe = (
   container
 ) =>
   query$.pipe(
-    mergeMap((query) =>
+    switchMap((query) =>
       container.get(TokensSource).visibleElementStacks$.pipe(
         filterHasAnyAspect("skill"),
         filterItemObservations((item) => elementStackMatchesQuery(query, item)),
