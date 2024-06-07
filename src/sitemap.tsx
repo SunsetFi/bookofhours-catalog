@@ -27,87 +27,117 @@ import ToolsCatalogPage, {
 } from "./pages/ToolsCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 import LocationsCatalogPage from "./pages/LocationsCatalogPage";
+import IndexPage from "./pages/Index";
 
-interface SiteMapItem {
+export interface SiteMapItem {
   label: string;
-  aspectIcon: string;
+  iconSource: "aspect" | "verb";
+  iconName: string;
   path: string;
   searchProvider?: PageSearchProviderPipe;
   Component: React.ComponentType<{}>;
 }
 
+export function getSitemapItemIconPath(item: SiteMapItem): string {
+  if (item.iconSource === "aspect") {
+    return `api/compendium/elements/${item.iconName}/icon.png`;
+  } else if (item.iconSource === "verb") {
+    return `api/compendium/verbs/${item.iconName}/icon.png`;
+  }
+
+  return `api/compendium/elements/readable/icon.png`;
+}
+
 const sitemap: SiteMapItem[] = [
   {
+    label: "Desk",
+    iconSource: "verb",
+    iconName: "library.desk.nonna.consider",
+    path: "/",
+    Component: IndexPage,
+  },
+  {
     label: "Books",
-    aspectIcon: "readable",
+    iconSource: "aspect",
+    iconName: "readable",
     path: "/books",
     searchProvider: bookCatalogSearchProvider,
     Component: BookCatalogPage,
   },
   {
     label: "Locations",
-    aspectIcon: "knock",
+    iconSource: "aspect",
+    iconName: "knock",
     path: "/locations",
     Component: LocationsCatalogPage,
   },
   {
     label: "Provisions",
-    aspectIcon: "beverage",
+    iconSource: "aspect",
+    iconName: "beverage",
     path: "/provisions",
     searchProvider: provisionsSearchProvider,
     Component: ProvisionsCatalog,
   },
   {
     label: "Tools",
-    aspectIcon: "tool",
+    iconSource: "aspect",
+    iconName: "tool",
     path: "/tools",
     searchProvider: toolsSearchProvider,
     Component: ToolsCatalogPage,
   },
   {
     label: "Materials",
-    aspectIcon: "material",
+    iconSource: "aspect",
+    iconName: "material",
     path: "/materials",
     searchProvider: materialsSearchProvider,
     Component: MaterialsCatalogPage,
   },
   {
     label: "Things",
-    aspectIcon: "thing",
+    iconSource: "aspect",
+    iconName: "thing",
     path: "/things",
     searchProvider: thingsSearchProvider,
     Component: ThingsCatalogPage,
   },
   {
     label: "Furnishings",
-    aspectIcon: "comfort",
+    iconSource: "aspect",
+    iconName: "comfort",
     path: "/furnishings",
     searchProvider: furnishingsSearchProvider,
     Component: FurnishingsCatalogPage,
   },
   {
     label: "Skills",
-    aspectIcon: "skill",
+    iconSource: "aspect",
+    iconName: "skill",
     path: "/skills",
     searchProvider: skillsSearchProvider,
     Component: SkillsCatalogPage,
   },
   {
     label: "Craftables",
-    aspectIcon: "difficulty.keeper",
+    iconSource: "aspect",
+    iconName: "difficulty.keeper",
     path: "/craftables",
     searchProvider: craftingSearchProvider,
     Component: CraftingCatalogPage,
   },
   {
     label: "Workstations",
-    aspectIcon: "forge",
+    iconSource: "aspect",
+    iconName: "forge",
     path: "/workstations",
     Component: WorkstationCatalogPage,
   },
   {
     label: "Harvest",
-    aspectIcon: "nectar",
+    iconSource: "aspect",
+    iconName: "nectar",
     path: "/harvest",
     Component: HarvestCatalogPage,
   },

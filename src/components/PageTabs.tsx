@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import MuiLink from "@mui/material/Link";
 import GithubIcon from "@mui/icons-material/GitHub";
 
-import sitemap from "@/sitemap";
+import sitemap, { SiteMapItem, getSitemapItemIconPath } from "@/sitemap";
 
 import { useObservation } from "@/hooks/use-observation";
 
@@ -30,8 +30,8 @@ const PageTabs = () => {
         gap: 1,
       }}
     >
-      {sitemap.map(({ label, aspectIcon, path }) => (
-        <PageTab key={path} label={label} aspectId={aspectIcon} path={path} />
+      {sitemap.map((item) => (
+        <PageTab key={item.path} item={item} />
       ))}
       <Box sx={{ mt: "auto" }}>
         <Tooltip
@@ -51,13 +51,11 @@ const PageTabs = () => {
 };
 
 interface PageTab {
-  label: string;
-  aspectId: string;
-  path: string;
+  item: SiteMapItem;
 }
-const PageTab = ({ label, aspectId, path }: PageTab) => {
-  const aspect = useAspect(aspectId);
-  const iconUrl = useObservation(aspect.iconUrl$);
+const PageTab = ({ item }: PageTab) => {
+  const { label, path } = item;
+  const iconUrl = `http://localhost:8081/${getSitemapItemIconPath(item)}`;
   const { pathname } = useLocation();
   const value = firstPathPart(pathname);
   return (

@@ -15,7 +15,7 @@ const pagesSearchProvider: SearchProviderPipe = (query) => {
           page.label.toLowerCase().includes(query.toLowerCase())
         )
         .map((page) => ({
-          iconUrl: `http://localhost:8081/api/compendium/elements/${page.aspectIcon}/icon.png`,
+          iconUrl: `http://localhost:8081/api/compendium/elements/${page.iconName}/icon.png`,
           label: page.label,
           path: page.path,
         }))
