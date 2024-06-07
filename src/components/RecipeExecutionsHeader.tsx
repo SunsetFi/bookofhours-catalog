@@ -1,20 +1,27 @@
-import * as React from "react";
+import React from "react";
+
 import { map } from "rxjs";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Badge from "@mui/material/Badge";
-import IconButton from "@mui/material/IconButton";
-import Popover, { PopoverActions } from "@mui/material/Popover";
-import PlayCircle from "@mui/icons-material/PlayCircle";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import { type SxProps } from "@mui/material/styles";
+import {
+  Box,
+  Typography,
+  Badge,
+  IconButton,
+  Popover,
+  PopoverActions,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
+  SxProps,
+} from "@mui/material";
 
-import SkipNextIcon from "@mui/icons-material/SkipNext";
-import DownloadIcon from "@mui/icons-material/Download";
+import {
+  SkipNext as SkipNextIcon,
+  Download as DownloadIcon,
+  PlayCircle,
+} from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
 import { filterItemObservations } from "@/observables";
@@ -165,9 +172,11 @@ const ExecutingSituationListItem = ({
 
   const timeRemainingStr = timeRemaining.toFixed(1);
 
-  const onContinueClick = React.useCallback(
+  const onClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
+      e.stopPropagation();
+
       if (e.shiftKey) {
         if (state === "Ongoing") {
           // Tick one tick past the end of the situation, so we dont hang on 0.0
@@ -189,7 +198,7 @@ const ExecutingSituationListItem = ({
   }
 
   return (
-    <ListItem>
+    <ListItemButton onClick={onClick}>
       <FocusIconButton token={situation} />
       <ListItemText
         id={`executing-situation-${situation.id}-label`}
@@ -207,10 +216,7 @@ const ExecutingSituationListItem = ({
               </ScreenReaderContent>
               <span aria-hidden="true">{timeRemainingStr}s</span>
             </Typography>
-            <IconButton
-              title="Fast Forward to Completion"
-              onClick={onContinueClick}
-            >
+            <IconButton title="Fast Forward to Completion" onClick={onClick}>
               <SkipNextIcon />
             </IconButton>
           </>
@@ -218,12 +224,12 @@ const ExecutingSituationListItem = ({
         {state === "Complete" && (
           <Badge badgeContent={output.length}>
             {/* TODO: Show dialog of output. */}
-            <IconButton title="Complete" onClick={onContinueClick}>
+            <IconButton title="Complete" onClick={onClick}>
               <DownloadIcon />
             </IconButton>
           </Badge>
         )}
       </Box>
-    </ListItem>
+    </ListItemButton>
   );
 };

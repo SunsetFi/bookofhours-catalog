@@ -222,6 +222,7 @@ export class TokensSource {
     if (!this._unlockedWorkstations$) {
       this._unlockedWorkstations$ = this._visibleTokens$.pipe(
         filterItems(isSituationModel),
+        filterItems((x) => x.path.startsWith("~/library")),
         map((situations) =>
           situations.filter(
             (x) =>

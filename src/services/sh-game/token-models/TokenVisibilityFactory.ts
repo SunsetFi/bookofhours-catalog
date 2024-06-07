@@ -30,6 +30,7 @@ const playerSpherePaths = [
   "~/hand.skills",
   "~/hand.memories",
   "~/hand.misc",
+  "~/fixedverbs",
 ];
 
 @injectable()

@@ -120,6 +120,10 @@ export class ElementStackModel
     return this._label$;
   }
 
+  get label() {
+    return this._elementStack$.value.label;
+  }
+
   private _description$: Observable<string | null> | null = null;
   get description$() {
     if (!this._description$) {

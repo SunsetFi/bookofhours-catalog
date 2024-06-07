@@ -4,6 +4,7 @@ import {
   distinctUntilChanged,
   map,
   shareReplay,
+  tap,
 } from "rxjs";
 import {
   Aspects,
@@ -57,8 +58,16 @@ export class SituationModel extends TokenModel {
     this._notes$ = elementStacks$.pipe(
       // Notes never change their elementId, so its safe to not observe this.
       filterItems((item) => item.elementId === "tlg.note"),
+      tap((item) =>
+        console.log(
+          "Notes",
+          item.map((x) => x.label)
+        )
+      ),
       filterItemObservations((item) =>
-        item.path$.pipe(map((path) => path.startsWith(`${this.path}`)))
+        item.path$.pipe(
+          map((path) => path.startsWith(`${this.path}/aureatenotessphere`))
+        )
       ),
       filterItems(isNotNull),
       shareReplay(1)
@@ -136,6 +145,10 @@ export class SituationModel extends TokenModel {
     }
 
     return this._label$;
+  }
+
+  get label() {
+    return this._situation$.value.verbLabel;
   }
 
   private _description$: Observable<string | null> | null = null;
