@@ -129,24 +129,28 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
               situation={situation}
             />
           ))}
-          <Divider orientation="horizontal" />
-          <ListItem>
-            <ListItemText sx={{ ml: 6 }} primary="Skip to Tomorrow" />
-            <Box sx={{ ml: "auto" }}>
-              <Typography variant="caption" role="timer">
-                <ScreenReaderContent>
-                  {secondsToTomorrowStr} seconds to tomorrow
-                </ScreenReaderContent>
-                <span aria-hidden="true">{secondsToTomorrowStr}s</span>
-              </Typography>
-              <IconButton
-                title="Fast Forward to Next Day"
-                onClick={() => timeSource.passDay()}
-              >
-                <SkipNextIcon />
-              </IconButton>
-            </Box>
-          </ListItem>
+          {!Number.isNaN(secondsToTomorrow) && (
+            <>
+              <Divider orientation="horizontal" />
+              <ListItem>
+                <ListItemText sx={{ ml: 6 }} primary="Skip to Tomorrow" />
+                <Box sx={{ ml: "auto" }}>
+                  <Typography variant="caption" role="timer">
+                    <ScreenReaderContent>
+                      {secondsToTomorrowStr} seconds to tomorrow
+                    </ScreenReaderContent>
+                    <span aria-hidden="true">{secondsToTomorrowStr}s</span>
+                  </Typography>
+                  <IconButton
+                    title="Fast Forward to Next Day"
+                    onClick={() => timeSource.passDay()}
+                  >
+                    <SkipNextIcon />
+                  </IconButton>
+                </Box>
+              </ListItem>
+            </>
+          )}
         </List>
       </Popover>
     </>
