@@ -201,14 +201,16 @@ const ExecutingSituationListItem = ({
     return null;
   }
 
+  const hasLabel = label !== "." && label !== situation.verbId;
+
   return (
     <ListItemButton onClick={onClick}>
       <FocusIconButton token={situation} />
       <ListItemText
         id={`executing-situation-${situation.id}-label`}
         sx={{ ml: 1 }}
-        primary={label === "." ? recipeLabel : label}
-        secondary={label === "." ? null : recipeLabel}
+        primary={!hasLabel ? recipeLabel : label}
+        secondary={!hasLabel ? null : recipeLabel}
       />
       <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
         {state === "Ongoing" && (

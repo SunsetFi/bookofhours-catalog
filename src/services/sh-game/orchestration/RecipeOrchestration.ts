@@ -179,7 +179,11 @@ export class RecipeOrchestration
   get availableSituations$(): Observable<readonly SituationModel[]> {
     if (!this._availableSituations$) {
       this._availableSituations$ = combineLatest([
-        this._tokensSource.considerSituation$,
+        this._tokensSource.fixedSituations$.pipe(
+          map((situations) =>
+            situations.find((situation) => situation.verbId === "consider")
+          )
+        ),
         this._tokensSource.unlockedWorkstations$,
         this._desiredElementThresholds$,
       ]).pipe(

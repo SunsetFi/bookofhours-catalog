@@ -27,7 +27,7 @@ import ToolsCatalogPage, {
 } from "./pages/ToolsCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 import LocationsCatalogPage from "./pages/LocationsCatalogPage";
-import IndexPage from "./pages/Index";
+import IndexPage from "./pages/IndexPage";
 
 export interface SiteMapItem {
   label: string;

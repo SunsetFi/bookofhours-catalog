@@ -1,11 +1,14 @@
 import * as React from "react";
 import { Navigate } from "react-router-dom";
+import { tap } from "rxjs";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { useDIDependency } from "@/container";
+
+import { useObservation } from "@/hooks/use-observation";
 import { useQueryString } from "@/hooks/use-querystring";
 
 import {
@@ -18,13 +21,11 @@ import {
 
 import PageContainer from "@/components/PageContainer";
 import ElementStackTray from "@/components/ElementStackTray";
-import { tap } from "rxjs";
-import { useObservation } from "@/hooks/use-observation";
 
 const GameplayView = () => {
   const redirect = useQueryString("redirect");
   return (
-    <PageContainer title="">
+    <PageContainer title="Welcome, Librarian">
       <Box
         sx={{
           p: 2,
@@ -90,19 +91,9 @@ const Overview = () => {
           display: "flex",
           flexDirection: "row",
           alignItems: "baseline",
-          gap: 3,
+          justifyContent: "center",
         }}
-      >
-        <Typography variant="h1" sx={{ gridColumn: "start end" }}>
-          Welcome, Librarian
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{ textAlign: "middle", color: "text.secondary" }}
-        >
-          Everything is accounted for, Hush House endures.
-        </Typography>
-      </Box>
+      ></Box>
       {tokens == null && (
         <Box
           sx={{

@@ -55,8 +55,6 @@ const OrchestrationSidebar = ({
       [orchestration]
     ) ?? [];
 
-  console.log("Sidebar", orchestration, notes, content);
-
   return (
     <Box
       sx={{

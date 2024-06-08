@@ -85,6 +85,26 @@ const RecipeOrchestrationDialogContent = ({
     label = situationLabel;
   }
 
+  const titles: string[] = [];
+
+  if (label) {
+    // Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles.
+    titles.push(label.toLocaleUpperCase());
+  }
+
+  if (situationLabel && situationLabel !== situation?.verbId) {
+    // Some verbs, notably arrival verbs like oriflamme's, have no labels.
+    titles.push(situationLabel);
+  }
+
+  if (isOngoingOrchestration(orchestration)) {
+    titles.push((timeRemaining?.toFixed(1) ?? "0.0") + "s");
+  }
+
+  if (isCompletedOrchestration(orchestration)) {
+    titles.push("Recipe Completed");
+  }
+
   return (
     <>
       <DialogTitle
@@ -96,34 +116,14 @@ const RecipeOrchestrationDialogContent = ({
           alignItems: "baseline",
         }}
       >
-        {label && (
-          <Typography variant="h5">
-            {/* Recipe labels in situations are always written as upper case in-game, and the game isn't careful when casing its titles. */}
-            {label?.toLocaleUpperCase()}
-          </Typography>
-        )}
-        {!isVariableSituationOrchestration(orchestration) && (
+        {titles.map((title, i) => (
           <>
-            {label && " - "}
-            <Typography variant="h5">{situationLabel}</Typography>
-          </>
-        )}
-        {isOngoingOrchestration(orchestration) && (
-          <>
-            {(label || !isVariableSituationOrchestration(orchestration)) &&
-              " - "}
-            <Typography variant="h5">
-              {timeRemaining?.toFixed(1) ?? "0.0"}s
+            {i !== 0 && " - "}
+            <Typography key={i} variant="h6">
+              {title}
             </Typography>
           </>
-        )}
-        {isCompletedOrchestration(orchestration) && (
-          <>
-            {(label || !isVariableSituationOrchestration(orchestration)) &&
-              " - "}
-            <Typography variant="h5">Recipe Completed</Typography>
-          </>
-        )}
+        ))}
         <IconButton
           sx={{ ml: "auto", alignSelf: "flex-start" }}
           onClick={() => orchestrator.close()}

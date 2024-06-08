@@ -8,7 +8,7 @@ import {
   shareReplay,
 } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
-import { Token, isElementStack } from "secrethistories-api";
+import { Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
 
 import {
@@ -17,6 +17,8 @@ import {
   filterItems,
   firstOrDefault,
 } from "@/observables";
+
+import { visibleSpherePaths } from "@/spheres";
 
 import { Scheduler, TaskUnsubscriber } from "../../scheduler";
 import { API } from "../../sh-api";
@@ -37,20 +39,6 @@ import {
 } from "../token-models/ElementStackModel";
 
 import { RunningSource } from "./RunningSource";
-
-const spherePaths = [
-  "~/portage1",
-  "~/portage2",
-  "~/portage3",
-  "~/portage4",
-  "~/portage5",
-  "~/hand.abilities",
-  "~/hand.skills",
-  "~/hand.memories",
-  "~/hand.misc",
-  "~/library",
-  "~/fixedverbs",
-];
 
 const supportedPayloadTypes = [
   "ConnectedTerrain",
@@ -109,21 +97,34 @@ export class TokensSource {
     return this._visibleTokens$;
   }
 
-  private _considerSituation$: Observable<SituationModel | null> | null = null;
-  get considerSituation$() {
-    if (this._considerSituation$ == null) {
-      this._considerSituation$ = this._tokens$.pipe(
-        map(
-          (tokens) =>
-            tokens
-              .filter(isSituationModel)
-              .find((x) => x.path.startsWith("~/fixedverbs!consider.")) ?? null
-        ),
+  private _fixedSituations$: Observable<readonly SituationModel[]> | null =
+    null;
+  get fixedSituations$() {
+    if (this._fixedSituations$ == null) {
+      this._fixedSituations$ = this._tokens$.pipe(
+        filterItems(isSituationModel),
+        filterItems((x) => x.path.startsWith("~/fixedverbs")),
+        distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
     }
 
-    return this._considerSituation$;
+    return this._fixedSituations$;
+  }
+
+  private _arrivalSituations$: Observable<readonly SituationModel[]> | null =
+    null;
+  get arrivalSituations$() {
+    if (this._arrivalSituations$ == null) {
+      this._arrivalSituations$ = this._tokens$.pipe(
+        filterItems(isSituationModel),
+        filterItems((x) => x.path.startsWith("~/arrivalverbs")),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._arrivalSituations$;
   }
 
   private _unlockingTerrainSituation$: Observable<SituationModel | null> | null =
@@ -148,18 +149,21 @@ export class TokensSource {
   get visibleSituations$() {
     if (!this._visibleSituations$) {
       this._visibleSituations$ = combineLatest([
-        this.considerSituation$,
+        this.fixedSituations$,
+        this.arrivalSituations$,
         this.unlockingTerrainSituation$,
         this.unlockedWorkstations$,
         this.unlockedHarvestStations$,
       ]).pipe(
-        map(([consider, unlock, workstations, harvestStations]) => {
-          const situations = [...workstations, ...harvestStations];
+        map(([fixed, arrival, unlock, workstations, harvestStations]) => {
+          const situations = [
+            ...fixed,
+            ...arrival,
+            ...workstations,
+            ...harvestStations,
+          ];
           if (unlock) {
             situations.push(unlock);
-          }
-          if (consider) {
-            situations.push(consider);
           }
           return situations;
         }),
@@ -262,7 +266,7 @@ export class TokensSource {
 
   private async _pollTokens() {
     const tokens = await this._api.getAllTokens({
-      spherePrefix: spherePaths,
+      spherePrefix: visibleSpherePaths,
       payloadType: supportedPayloadTypes,
     });
 

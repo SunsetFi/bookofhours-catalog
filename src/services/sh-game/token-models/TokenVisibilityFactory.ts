@@ -16,22 +16,11 @@ import {
   observeAll,
 } from "@/observables";
 
+import { playerSpherePaths } from "@/spheres";
+
 import { TokensSource } from "../sources/TokensSource";
 
 import { isConnectedTerrainModel } from "./ConnectedTerrainModel";
-
-const playerSpherePaths = [
-  "~/portage1",
-  "~/portage2",
-  "~/portage3",
-  "~/portage4",
-  "~/portage5",
-  "~/hand.abilities",
-  "~/hand.skills",
-  "~/hand.memories",
-  "~/hand.misc",
-  "~/fixedverbs",
-];
 
 @injectable()
 @singleton()

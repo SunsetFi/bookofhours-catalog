@@ -58,12 +58,6 @@ export class SituationModel extends TokenModel {
     this._notes$ = elementStacks$.pipe(
       // Notes never change their elementId, so its safe to not observe this.
       filterItems((item) => item.elementId === "tlg.note"),
-      tap((item) =>
-        console.log(
-          "Notes",
-          item.map((x) => x.label)
-        )
-      ),
       filterItemObservations((item) =>
         item.path$.pipe(
           map((path) => path.startsWith(`${this.path}/aureatenotessphere`))
