@@ -73,6 +73,7 @@ export class Orchestrator {
       if (state === "Ongoing") {
         const orchestration = new OngoingSituationOrchestration(
           situation,
+          this._tokensSource,
           this._compendium,
           this._timeSource,
           (orchestration) => this._updateOrchestration(orchestration)

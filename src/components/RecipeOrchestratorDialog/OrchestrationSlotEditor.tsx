@@ -55,6 +55,7 @@ const OrchestrationSlotEditor = ({
       <ElementStackSelectField
         label="Element"
         fullWidth
+        readOnly={slot.locked}
         elementStacks$={slot.availableElementStacks$}
         requireExterior
         displayAspects={recipeRequiredAspects}

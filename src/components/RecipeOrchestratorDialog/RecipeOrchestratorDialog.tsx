@@ -117,12 +117,10 @@ const RecipeOrchestrationDialogContent = ({
         }}
       >
         {titles.map((title, i) => (
-          <>
+          <React.Fragment key={i}>
             {i !== 0 && " - "}
-            <Typography key={i} variant="h6">
-              {title}
-            </Typography>
-          </>
+            <Typography variant="h6">{title}</Typography>
+          </React.Fragment>
         ))}
         <IconButton
           sx={{ ml: "auto", alignSelf: "flex-start" }}

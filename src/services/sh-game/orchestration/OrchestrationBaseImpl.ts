@@ -16,7 +16,7 @@ import {
   aspectsMatchExpression,
   combineAspects,
 } from "secrethistories-api";
-import { flatten, isEqual, omit, pick, sortBy } from "lodash";
+import { flatten, isEqual, omit, pick, sortBy, uniqBy } from "lodash";
 
 import { isNotNull } from "@/utils";
 import {
@@ -98,7 +98,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
             return [];
           }
 
-          const thresholds = [
+          let thresholds = [
             ...situationThresholds,
             ...flatten(inputThresholds),
           ].filter((spec) => {
@@ -113,6 +113,11 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
             return true;
           });
 
+          // Can this happen?  I added logic to check for redundant ids post-create-slot, but I don't recall if that was ever a thing.
+          // I must have added it for a reason...
+          // Anyway, moving it here so we can save on the expensive createSlot call.
+          thresholds = uniqBy(thresholds, (x) => x.id);
+
           return thresholds;
         }),
         distinctUntilChanged((a, b) => isEqual(a, b)),
@@ -120,10 +125,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         map((slots) => {
           const result: Record<string, OrchestrationSlot> = {};
           for (const slot of slots) {
-            if (result[slot.spec.id]) {
-              continue;
-            }
-
             result[slot.spec.id] = slot;
           }
 
@@ -176,6 +177,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   ): Observable<boolean>;
 
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
+    console.log("create slot", spec.id, spec);
     const availableElementStacks$ = combineLatest([
       this._tokensSource.visibleElementStacks$.pipe(
         filterItemObservations((item) =>
@@ -206,7 +208,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
     return {
       spec,
-      locked: false,
+      locked: spec.greedy,
       assignment$: this._slotAssignments$.pipe(
         map((assignments) => assignments[spec.id] ?? null),
         shareReplay(1)

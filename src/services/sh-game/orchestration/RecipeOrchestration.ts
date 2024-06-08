@@ -302,6 +302,7 @@ export class RecipeOrchestration
       this._replaceOrchestration(
         new OngoingSituationOrchestration(
           situation,
+          this._tokensSource,
           this._compendium,
           this._timeSource,
           this._replaceOrchestration

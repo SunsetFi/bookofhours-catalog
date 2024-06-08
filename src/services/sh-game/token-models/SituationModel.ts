@@ -36,6 +36,7 @@ export class SituationModel extends TokenModel {
   private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
   private readonly _notes$: Observable<readonly ElementStackModel[]>;
+  private readonly _content$: Observable<readonly ElementStackModel[]>;
   private readonly _output$: Observable<readonly ElementStackModel[]>;
 
   constructor(
@@ -64,6 +65,17 @@ export class SituationModel extends TokenModel {
         )
       ),
       filterItems(isNotNull),
+      shareReplay(1)
+    );
+
+    this._content$ = elementStacks$.pipe(
+      // Filter out notes.
+      filterItems((item) => item.elementId !== "tlg.note"),
+      filterItemObservations((item) =>
+        item.path$.pipe(
+          map((path) => path.startsWith(`${this.path}/situationstoragesphere`))
+        )
+      ),
       shareReplay(1)
     );
 
@@ -285,6 +297,10 @@ export class SituationModel extends TokenModel {
     }
 
     return this._timeRemaining$;
+  }
+
+  get content$() {
+    return this._content$;
   }
 
   get output$() {

@@ -27,6 +27,7 @@ export interface ElementStackSelectFieldProps {
   requireExterior?: boolean;
   displayAspects?: readonly string[];
   value: ElementStackModel | null;
+  readOnly?: boolean;
   onChange(value: ElementStackModel | null): void;
 }
 
@@ -55,6 +56,7 @@ const ElementStackSelectField = ({
   requireExterior = false,
   displayAspects,
   value,
+  readOnly,
   onChange,
 }: ElementStackSelectFieldProps) => {
   let elementStacks =
@@ -82,6 +84,7 @@ const ElementStackSelectField = ({
     <Autocomplete
       fullWidth={fullWidth}
       options={elementStacks}
+      readOnly={readOnly}
       autoHighlight
       getOptionLabel={(option) => option.label!}
       getOptionDisabled={(option) => requireExterior && !option.exterior}

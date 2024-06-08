@@ -16,6 +16,7 @@ import {
 import AspectsList from "../AspectsList";
 import GameTypography from "../GameTypography";
 import TlgNote from "../TlgNote";
+import ElementStackIcon from "../ElementStackIcon";
 
 interface OrchestrationSidebarProps {
   sx?: SxProps;
@@ -89,8 +90,10 @@ const OrchestrationSidebar = ({
             {startDescription}
           </GameTypography>
         )}
-        {notes.map((note, index) => (
-          <TlgNote key={index} elementStack={note} />
+        {/* TODO: Show all notes paginated */}
+        {notes.length > 0 && <TlgNote elementStack={notes[notes.length - 1]} />}
+        {content.map((elementStack, index) => (
+          <ElementStackIcon key={index} elementStack={elementStack} />
         ))}
       </Box>
     </Box>

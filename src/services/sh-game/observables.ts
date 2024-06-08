@@ -1,4 +1,4 @@
-import { Observable, map } from "rxjs";
+import { Observable, map, tap } from "rxjs";
 import { SpaceOccupation, SphereSpec } from "secrethistories-api";
 
 import { filterItemObservations } from "@/observables";

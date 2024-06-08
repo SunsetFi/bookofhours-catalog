@@ -6,7 +6,9 @@ import {
   map,
   shareReplay,
 } from "rxjs";
-import { Aspects } from "secrethistories-api";
+import { Aspects, SphereSpec } from "secrethistories-api";
+
+import { True$ } from "@/observables";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
@@ -14,18 +16,20 @@ import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
 
 import { TimeSource } from "../sources/TimeSource";
+import { TokensSource } from "../sources/TokensSource";
 
 import {
   NoteContainingOrchestration,
   OngoingOrchestration,
   Orchestration,
   OrchestrationBase,
-  OrchestrationSlot,
 } from "./types";
 
 import { CompletedSituationOrchestration } from "./CompletedSituationOrchestration";
+import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 
 export class OngoingSituationOrchestration
+  extends OrchestrationBaseImpl
   implements
     OrchestrationBase,
     NoteContainingOrchestration,
@@ -34,12 +38,14 @@ export class OngoingSituationOrchestration
   private readonly _subscription: Subscription;
   constructor(
     private readonly _situation: SituationModel,
+    tokensSource: TokensSource,
     private readonly _compendium: Compendium,
     private readonly _timeSource: TimeSource,
     private readonly _replaceOrchestration: (
       orchestration: Orchestration | null
     ) => void
   ) {
+    super(tokensSource);
     this._subscription = _situation.state$.subscribe((state) => {
       if (state === "Complete") {
         this._replaceOrchestration(
@@ -51,6 +57,15 @@ export class OngoingSituationOrchestration
         );
       } else if (state !== "Ongoing") {
         this._replaceOrchestration(null);
+      }
+    });
+
+    // TODO: Magnet slots pull stuff in.  Reflect that in slotAssignments.
+    // Also reflect the magnet-status.
+
+    this._slotAssignments$.subscribe((assignments) => {
+      for (const [key, value] of Object.entries(assignments)) {
+        this._situation.setSlotContents(key, value);
       }
     });
   }
@@ -97,37 +112,8 @@ export class OngoingSituationOrchestration
     return this._situation.notes$;
   }
 
-  private _content$: Observable<readonly ElementStackModel[]> | null = null;
   get content$(): Observable<readonly ElementStackModel[]> {
-    if (!this._content$) {
-      // TODO: Show content sphere items.
-      this._content$ = new BehaviorSubject([]);
-      // this._content$ = this._situation.content$;
-    }
-
-    return this._content$;
-  }
-
-  private _slots$: Observable<
-    Readonly<Record<string, OrchestrationSlot>>
-  > | null = null;
-  get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
-    if (!this._slots$) {
-      // TODO: Ongoing slots
-      this._slots$ = new BehaviorSubject({});
-    }
-
-    return this._slots$;
-  }
-
-  private _aspects$: Observable<Readonly<Record<string, number>>> | null = null;
-  get aspects$(): Observable<Readonly<Record<string, number>>> {
-    if (!this._aspects$) {
-      // TODO: Ongoing aspects
-      this._aspects$ = new BehaviorSubject({});
-    }
-
-    return this._aspects$;
+    return this._situation.content$;
   }
 
   get timeRemaining$() {
@@ -146,5 +132,14 @@ export class OngoingSituationOrchestration
     } catch {
       return false;
     }
+  }
+
+  protected _filterSlotCandidates(
+    spec: SphereSpec,
+    elementStack: ElementStackModel
+  ): Observable<boolean> {
+    // We have no additional logic to add.
+    // Let the base apply its own matching.
+    return True$;
   }
 }

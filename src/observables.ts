@@ -20,6 +20,7 @@ export type ObservableKeys<T> = {
 export type Observation<T> = T extends Observable<infer K> ? K : never;
 
 export const Null$: Observable<null> = new BehaviorSubject(null);
+export const True$: Observable<true> = new BehaviorSubject(true);
 export const False$: Observable<false> = new BehaviorSubject(false);
 export const EmptyArray$: Observable<[]> = new BehaviorSubject([]);
 export const EmptyObject$: Observable<{}> = new BehaviorSubject({});
