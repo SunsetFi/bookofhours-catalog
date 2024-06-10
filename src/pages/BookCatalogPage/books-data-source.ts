@@ -96,7 +96,7 @@ function elementStackToBook(
       const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
         aspectId.startsWith("mastery.")
       );
-      orchestrator.requestOrchestration({
+      orchestrator.openOrchestration({
         recipeId: isMastered
           ? `study.mystery.${mystery}.mastered`
           : `study.mystery.${mystery}.mastering.begin`,

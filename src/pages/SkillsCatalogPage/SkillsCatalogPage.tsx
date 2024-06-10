@@ -46,7 +46,7 @@ const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
     >
       <IconButton
         onClick={() =>
-          orchestrator.requestOrchestration({
+          orchestrator.openOrchestration({
             recipeId,
             desiredElementIds: [model.elementId],
           })

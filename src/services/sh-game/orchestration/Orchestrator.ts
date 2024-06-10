@@ -5,8 +5,6 @@ import { Compendium } from "@/services/sh-compendium";
 import { Scheduler } from "@/services/scheduler";
 
 import { RunningSource } from "../sources/RunningSource";
-import { TokensSource } from "../sources/TokensSource";
-import { TimeSource } from "../sources/TimeSource";
 
 import {
   Orchestration,
@@ -15,9 +13,7 @@ import {
   isSituationOrchestrationRequest,
 } from "./types";
 
-import { RecipeOrchestration } from "./RecipeOrchestration";
-import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
-import { CompletedSituationOrchestration } from "./CompletedSituationOrchestration";
+import { OrchestrationFactory } from "./OrchestrationFactory";
 
 @injectable()
 @singleton()
@@ -29,9 +25,9 @@ export class Orchestrator {
   constructor(
     @inject(RunningSource) runningSource: RunningSource,
     @inject(Scheduler) private readonly _scheduler: Scheduler,
-    @inject(Compendium) private readonly _compendium: Compendium,
-    @inject(TokensSource) private readonly _tokensSource: TokensSource,
-    @inject(TimeSource) private readonly _timeSource: TimeSource
+    @inject(OrchestrationFactory)
+    private readonly _orchestrationFactory: OrchestrationFactory,
+    @inject(Compendium) private readonly _compendium: Compendium
   ) {
     runningSource.isRunning$.subscribe((isRunning) => {
       if (!isRunning) {
@@ -44,7 +40,7 @@ export class Orchestrator {
     return this._orchestration$;
   }
 
-  async requestOrchestration(request: OrchestrationRequest) {
+  async openOrchestration(request: OrchestrationRequest) {
     if (isRecipeOrchestrationRequest(request)) {
       const { recipeId, desiredElementIds } = request;
       const recipe = this._compendium.getRecipeById(recipeId);
@@ -57,34 +53,30 @@ export class Orchestrator {
         this._compendium.getElementById(id)
       );
 
-      const orchestration = new RecipeOrchestration(
-        recipe,
-        this._compendium,
-        this._tokensSource,
-        this._timeSource,
-        desiredElements,
-        (orchestration) => this._updateOrchestration(orchestration)
-      );
+      const orchestration =
+        this._orchestrationFactory.createRecipeOrchestration(
+          recipe,
+          desiredElements,
+          (orchestration) => this._updateOrchestration(orchestration)
+        );
 
       this._orchestration$.next(orchestration);
     } else if (isSituationOrchestrationRequest(request)) {
       const { situation } = request;
       const state = situation.state;
       if (state === "Ongoing") {
-        const orchestration = new OngoingSituationOrchestration(
-          situation,
-          this._tokensSource,
-          this._compendium,
-          this._timeSource,
-          (orchestration) => this._updateOrchestration(orchestration)
-        );
+        const orchestration =
+          this._orchestrationFactory.createOngoingOrchestration(
+            situation,
+            (orchestration) => this._updateOrchestration(orchestration)
+          );
         this._orchestration$.next(orchestration);
       } else if (state === "Complete") {
-        const orchestration = new CompletedSituationOrchestration(
-          situation,
-          this._compendium,
-          (orchestration) => this._updateOrchestration(orchestration)
-        );
+        const orchestration =
+          this._orchestrationFactory.createCompletedOrchestration(
+            situation,
+            (orchestration) => this._updateOrchestration(orchestration)
+          );
         this._orchestration$.next(orchestration);
       }
     }

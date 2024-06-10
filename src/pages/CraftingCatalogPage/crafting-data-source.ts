@@ -86,7 +86,7 @@ function recipeToCraftableModel(
     description$: recipeModel.startDescription$,
     craft: async () => {
       const skill = await firstValueFrom(skill$);
-      orchestrator.requestOrchestration({
+      orchestrator.openOrchestration({
         recipeId: recipeModel.recipeId,
         desiredElementIds: skill ? [skill.elementId] : [],
       });

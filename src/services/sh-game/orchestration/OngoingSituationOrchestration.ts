@@ -25,8 +25,8 @@ import {
   OrchestrationBase,
 } from "./types";
 
-import { CompletedSituationOrchestration } from "./CompletedSituationOrchestration";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
+import { OrchestrationFactory } from "./OrchestrationFactory";
 
 export class OngoingSituationOrchestration
   extends OrchestrationBaseImpl
@@ -41,6 +41,7 @@ export class OngoingSituationOrchestration
     tokensSource: TokensSource,
     private readonly _compendium: Compendium,
     private readonly _timeSource: TimeSource,
+    orchestrationFactory: OrchestrationFactory,
     private readonly _replaceOrchestration: (
       orchestration: Orchestration | null
     ) => void
@@ -48,21 +49,22 @@ export class OngoingSituationOrchestration
     super(tokensSource);
     this._subscription = _situation.state$.subscribe((state) => {
       if (state === "Complete") {
-        this._replaceOrchestration(
-          new CompletedSituationOrchestration(
+        const completeOrchestration =
+          orchestrationFactory.createCompletedOrchestration(
             _situation,
-            _compendium,
-            _replaceOrchestration
-          )
-        );
+            this._replaceOrchestration
+          );
+        this._replaceOrchestration(completeOrchestration);
       } else if (state !== "Ongoing") {
         this._replaceOrchestration(null);
       }
     });
 
-    // TODO: Magnet slots pull stuff in.  Reflect that in slotAssignments.
-    // Also reflect the magnet-status.
+    // TODO: Greedy slots pull stuff in.  We need to subscribe to the spheres
+    // and update slotAssignments.
 
+    // Note: This is different than all other orchestrations in that we
+    // immediately move the card rather than waiting for a button press.
     this._slotAssignments$.subscribe((assignments) => {
       for (const [key, value] of Object.entries(assignments)) {
         this._situation.setSlotContents(key, value);

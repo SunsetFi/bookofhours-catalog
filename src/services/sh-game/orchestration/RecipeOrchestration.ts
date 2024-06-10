@@ -34,8 +34,7 @@ import {
   VariableSituationOrchestration,
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
-import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
-import { TimeSource } from "../sources/TimeSource";
+import { OrchestrationFactory } from "./OrchestrationFactory";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -59,11 +58,10 @@ export class RecipeOrchestration
 
   constructor(
     private readonly _recipe: RecipeModel,
+    private readonly _desiredElements: readonly ElementModel[],
     private readonly _compendium: Compendium,
     tokensSource: TokensSource,
-    // FIXME: This is only here to create a OngoingSituationOrchestration.  Make a factory func to handle dep injection for these.
-    private readonly _timeSource: TimeSource,
-    private readonly _desiredElements: readonly ElementModel[],
+    private readonly _orchestrationFactory: OrchestrationFactory,
     private readonly _replaceOrchestration: (
       orchestration: Orchestration | null
     ) => void
@@ -299,15 +297,13 @@ export class RecipeOrchestration
 
     try {
       await situation.execute();
-      this._replaceOrchestration(
-        new OngoingSituationOrchestration(
+
+      const ongoingOrchestration =
+        this._orchestrationFactory.createOngoingOrchestration(
           situation,
-          this._tokensSource,
-          this._compendium,
-          this._timeSource,
           this._replaceOrchestration
-        )
-      );
+        );
+      this._replaceOrchestration(ongoingOrchestration);
       return true;
     } catch (e) {
       console.error("Failed to execute", situation.id, e);

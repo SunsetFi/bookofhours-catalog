@@ -192,7 +192,7 @@ const ExecutingSituationListItem = ({
         return;
       }
 
-      orchestrator.requestOrchestration({ situation });
+      orchestrator.openOrchestration({ situation });
     },
     [state, situation, timeSource, orchestrator]
   );
