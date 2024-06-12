@@ -276,7 +276,7 @@ export class TokensSource {
     tokenIdsToRemove.forEach((id) => {
       const token = this._tokenModels.get(id);
       if (token) {
-        token.retire();
+        token._retire();
         this._tokenModels.delete(id);
       }
     });
@@ -298,7 +298,7 @@ export class TokensSource {
       this._tokenModels.set(token.id, model);
     } else {
       model = this._tokenModels.get(token.id)!;
-      model.update(token);
+      model._update(token);
     }
 
     return model;

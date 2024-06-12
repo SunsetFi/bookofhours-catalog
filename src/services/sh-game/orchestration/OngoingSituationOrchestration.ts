@@ -66,24 +66,29 @@ export class OngoingSituationOrchestration
     this._subscription.unsubscribe();
   }
 
-  private _label$: Observable<string | null> | null = null;
+  // private _label$: Observable<string | null> | null = null;
   get label$(): Observable<string | null> {
-    if (this._label$ == null) {
-      this._label$ = combineLatest([
-        this._situation.label$,
-        this._situation.recipeLabel$,
-      ]).pipe(
-        map(([situationLabel, recipeLabel]) => {
-          let label = recipeLabel ?? situationLabel;
-          if (label === ".") {
-            label = situationLabel;
-          }
-          return label;
-        })
-      );
-    }
+    return this._situation.label$;
+    // if (this._label$ == null) {
+    //   this._label$ = combineLatest([
+    //     this._situation.verbLabel$,
+    //     this._situation.recipeLabel$,
+    //   ]).pipe(
+    //     map(([situationLabel, recipeLabel]) => {
+    //       let label = recipeLabel ?? situationLabel;
+    //       if (label === ".") {
+    //         label = situationLabel;
+    //       }
+    //       return label;
+    //     })
+    //   );
+    // }
 
-    return this._label$;
+    // return this._label$;
+  }
+
+  get description$(): Observable<string | null> {
+    return this._situation.description$;
   }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
@@ -159,10 +164,18 @@ export class OngoingSituationOrchestration
     return True$;
   }
 
-  protected _assignSlot(
+  protected async _assignSlot(
     spec: SphereSpec,
     element: ElementStackModel | null
-  ): void {
-    this._situation.setSlotContents(spec.id, element);
+  ): Promise<void> {
+    // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
+    try {
+      await this._situation.setSlotContents(spec.id, element);
+    } catch {
+      console.warn(
+        "Failed to assign slot contents, but this is a known bug for ongoing situations.  Continuing..."
+      );
+    }
+    await this._situation.refresh();
   }
 }

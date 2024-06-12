@@ -107,6 +107,10 @@ export class RecipeOrchestration
     return this._recipe.label$;
   }
 
+  get description$(): Observable<string | null> {
+    return this._recipe.description$;
+  }
+
   private _recipe$: Observable<RecipeModel | null> | null = null;
   get recipe$(): Observable<RecipeModel | null> {
     if (!this._recipe$) {
@@ -274,7 +278,7 @@ export class RecipeOrchestration
       for (const slotId of Object.keys(slots)) {
         var token = slots[slotId];
         try {
-          situation.setSlotContents(slotId, token);
+          await situation.setSlotContents(slotId, token);
         } catch (e) {
           console.error(
             "Failed to slot",
@@ -292,6 +296,8 @@ export class RecipeOrchestration
       if (!(await situation.setRecipe(this._recipe.recipeId))) {
         success = false;
       }
+
+      await situation.refresh();
     } catch (e) {
       success = false;
     }

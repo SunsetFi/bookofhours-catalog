@@ -161,7 +161,7 @@ interface SituationLineItemProps {
 }
 const SituationLineItem = ({ model }: SituationLineItemProps) => {
   const verbId = useObservation(model.verbId$);
-  const label = useObservation(model.label$);
+  const label = useObservation(model.verbLabel$);
   if (!verbId || !label) {
     return null;
   }

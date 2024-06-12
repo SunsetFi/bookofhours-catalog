@@ -30,6 +30,7 @@ export function isSituationOrchestrationRequest(
 
 export interface OrchestrationBase {
   readonly label$: Observable<string | null>;
+  readonly description$: Observable<string | null>;
 
   readonly recipe$: Observable<RecipeModel | null>;
   readonly requirements$: Observable<Readonly<Aspects>>;

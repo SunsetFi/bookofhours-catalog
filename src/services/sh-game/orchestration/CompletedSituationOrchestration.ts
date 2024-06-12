@@ -34,23 +34,28 @@ export class CompletedSituationOrchestration
 
   _dispose() {}
 
-  private _label$: Observable<string | null> | null = null;
+  // private _label$: Observable<string | null> | null = null;
   get label$(): Observable<string | null> {
-    if (this._label$ == null) {
-      this._label$ = combineLatest([
-        this._situation.label$,
-        this._situation.recipeLabel$,
-      ]).pipe(
-        map(([situationLabel, recipeLabel]) => {
-          let label = recipeLabel ?? situationLabel;
-          if (label === ".") {
-            label = situationLabel;
-          }
-          return label;
-        })
-      );
-    }
     return this._situation.label$;
+    // if (this._label$ == null) {
+    //   this._label$ = combineLatest([
+    //     this._situation.verbLabel$,
+    //     this._situation.recipeLabel$,
+    //   ]).pipe(
+    //     map(([situationLabel, recipeLabel]) => {
+    //       let label = recipeLabel ?? situationLabel;
+    //       if (label === ".") {
+    //         label = situationLabel;
+    //       }
+    //       return label;
+    //     })
+    //   );
+    // }
+    // return this._situation.verbLabel$;
+  }
+
+  get description$() {
+    return this._situation.description$;
   }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;

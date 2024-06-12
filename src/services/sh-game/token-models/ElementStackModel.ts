@@ -2,6 +2,7 @@ import {
   Aspects,
   ElementStack as IElementStack,
   combineAspects,
+  APINetworkError,
 } from "secrethistories-api";
 import {
   BehaviorSubject,
@@ -321,6 +322,7 @@ export class ElementStackModel
   }
 
   async moveToSphere(spherePath: string) {
+    console.log("Moving element stack to sphere", this.id, spherePath);
     try {
       await this._api.updateTokenAtPath(this.path, {
         spherePath,
@@ -332,7 +334,17 @@ export class ElementStackModel
       });
       return true;
     } catch (e) {
-      return false;
+      if (e instanceof APINetworkError && [400, 409].includes(e.statusCode)) {
+        console.warn(
+          "Failed to move elementStack",
+          this.id,
+          "to path",
+          spherePath
+        );
+        return false;
+      }
+
+      throw e;
     }
   }
 

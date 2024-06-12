@@ -62,7 +62,7 @@ const OrchestrationDialogContent = ({
   const recipeLabel = useObservation(recipe?.label$ ?? Null$);
 
   const situation = useObservation(orchestration?.situation$ ?? Null$);
-  const situationLabel = useObservation(situation?.label$ ?? Null$);
+  const situationLabel = useObservation(situation?.verbLabel$ ?? Null$);
 
   const timeRemaining = useObservation(
     () =>

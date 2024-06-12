@@ -91,7 +91,7 @@ const ExecutingSituationListItem = ({
   const orchestrator = useDIDependency(Orchestrator);
 
   const timeSource = useDIDependency(TimeSource);
-  const label = useObservation(situation.label$);
+  const label = useObservation(situation.verbLabel$);
   const recipeLabel = useObservation(situation.recipeLabel$);
   const state = useObservation(situation.state$);
   const output = useObservation(situation.output$) ?? [];

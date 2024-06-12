@@ -34,6 +34,7 @@ const OrchestrationContent = ({
   onBack,
 }: OrchestrationContentProps) => {
   const label = useObservation(orchestration.label$);
+  const description = useObservation(orchestration.description$);
 
   const situation = useObservation(orchestration.situation$);
 
@@ -45,14 +46,15 @@ const OrchestrationContent = ({
     [orchestration]
   );
 
-  const notes =
-    useObservation(
-      () =>
-        isContentContainingOrchestration(orchestration)
-          ? orchestration.notes$
-          : Null$,
-      [orchestration]
-    ) ?? [];
+  // TODO: Show browsable notes
+  // const notes =
+  //   useObservation(
+  //     () =>
+  //       isContentContainingOrchestration(orchestration)
+  //         ? orchestration.notes$
+  //         : Null$,
+  //     [orchestration]
+  //   ) ?? [];
 
   const content =
     useObservation(
@@ -86,20 +88,29 @@ const OrchestrationContent = ({
     );
   }
 
-  if (notes.length > 0) {
+  if (description) {
     stackItems.push(
-      <TlgNote
-        key="notes"
-        sx={{
-          minHeight: 75,
-          ["& .game-typography"]: {
-            textAlign: "center",
-          },
-        }}
-        elementStack={notes[notes.length - 1]}
-      />
+      <GameTypography key="description" component="div" variant="body1">
+        {description}
+      </GameTypography>
     );
   }
+
+  // TODO: Show pagable notes
+  // if (notes.length > 0) {
+  //   stackItems.push(
+  //     <TlgNote
+  //       key="notes"
+  //       sx={{
+  //         minHeight: 75,
+  //         ["& .game-typography"]: {
+  //           textAlign: "center",
+  //         },
+  //       }}
+  //       elementStack={notes[notes.length - 1]}
+  //     />
+  //   );
+  // }
 
   if (content.length > 0) {
     stackItems.push(

@@ -104,11 +104,11 @@ export class SituationModel extends TokenModel {
     return this._parentTerrain$;
   }
 
-  private _label$: Observable<string | null> | null = null;
+  private _label$: Observable<string> | null = null;
   get label$() {
     if (!this._label$) {
       this._label$ = this._situation$.pipe(
-        map((s) => s.verbLabel),
+        map((s) => s.label),
         distinctUntilChanged(),
         shareReplay(1)
       );
@@ -117,15 +117,41 @@ export class SituationModel extends TokenModel {
     return this._label$;
   }
 
-  get label() {
+  private _verbLabel$: Observable<string | null> | null = null;
+  get verbLabel$() {
+    if (!this._verbLabel$) {
+      this._verbLabel$ = this._situation$.pipe(
+        map((s) => s.verbLabel),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._verbLabel$;
+  }
+
+  get verbLabel() {
     return this._situation$.value.verbLabel;
   }
 
+  private _verbDescription$: Observable<string | null> | null = null;
+  get verbDescription$() {
+    if (!this._verbDescription$) {
+      this._verbDescription$ = this._situation$.pipe(
+        map((s) => s.verbDescription),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._verbDescription$;
+  }
+
   private _description$: Observable<string | null> | null = null;
-  get description$() {
+  get description$(): Observable<string | null> {
     if (!this._description$) {
       this._description$ = this._situation$.pipe(
-        map((s) => s.verbDescription),
+        map((s) => s.description),
         distinctUntilChanged(),
         shareReplay(1)
       );

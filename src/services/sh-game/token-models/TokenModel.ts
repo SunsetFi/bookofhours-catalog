@@ -99,12 +99,21 @@ export abstract class TokenModel {
     this._api.focusTokenAtPath(this.path);
   }
 
-  update(token: Token) {
+  async refresh(): Promise<void> {
+    const token = await this._api.getTokenById(this.id);
+    if (!token) {
+      this._retire();
+    } else {
+      this._update(token);
+    }
+  }
+
+  _update(token: Token) {
     this._token$.next(token);
     this._onUpdate(token);
   }
 
-  retire() {
+  _retire() {
     this._retired$.next(true);
   }
 
