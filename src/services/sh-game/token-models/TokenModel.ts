@@ -18,6 +18,8 @@ export abstract class TokenModel {
   private readonly _token$: BehaviorSubject<Token>;
   private readonly _retired$ = new BehaviorSubject<boolean>(false);
 
+  private _lastUpdate: number = 0;
+
   constructor(token: Token, protected readonly _api: API) {
     this._id = token.id;
     this._payloadType = token.payloadType;
@@ -100,15 +102,24 @@ export abstract class TokenModel {
   }
 
   async refresh(): Promise<void> {
+    const thisUpdate = (this._lastUpdate = Date.now());
     const token = await this._api.getTokenById(this.id);
+
     if (!token) {
       this._retire();
     } else {
-      this._update(token);
+      this._update(token, thisUpdate);
     }
   }
 
-  _update(token: Token) {
+  _update(token: Token, timestamp: number) {
+    if (this._lastUpdate > timestamp) {
+      console.warn(
+        "Skipping token update as a more recent update took its place."
+      );
+      return;
+    }
+
     this._token$.next(token);
     this._onUpdate(token);
   }

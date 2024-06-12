@@ -265,6 +265,8 @@ export class TokensSource {
   }
 
   private async _pollTokens() {
+    const thisUpdate = Date.now();
+
     const tokens = await this._api.getAllTokens({
       spherePrefix: visibleSpherePaths,
       payloadType: supportedPayloadTypes,
@@ -283,7 +285,7 @@ export class TokensSource {
 
     startTransition(() => {
       const tokenModels = sortBy(
-        tokens.map((token) => this._getOrUpdateTokenModel(token)),
+        tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
         "id"
       );
 
@@ -291,14 +293,14 @@ export class TokensSource {
     });
   }
 
-  private _getOrUpdateTokenModel(token: Token): TokenModel {
+  private _getOrUpdateTokenModel(token: Token, timestamp: number): TokenModel {
     let model: TokenModel;
     if (!this._tokenModels.has(token.id)) {
       model = this._tokenModelFactory.create(token);
       this._tokenModels.set(token.id, model);
     } else {
       model = this._tokenModels.get(token.id)!;
-      model._update(token);
+      model._update(token, timestamp);
     }
 
     return model;
