@@ -56,15 +56,6 @@ export class TokensSource {
   private readonly _tokenModels: Map<string, TokenModel> = new Map();
 
   private readonly _tokensSubject$ = new Subject<readonly TokenModel[]>();
-  private readonly _tokens$ = this._tokensSubject$.pipe(
-    distinctUntilShallowArrayChanged()
-  );
-
-  private readonly _visibleTokens$ = this._tokens$.pipe(
-    filterItemObservations((model) => model.visible$),
-    distinctUntilShallowArrayChanged(),
-    shareReplay(1)
-  );
 
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
@@ -89,10 +80,18 @@ export class TokensSource {
     });
   }
 
+  private readonly _tokens$ = this._tokensSubject$.pipe(
+    distinctUntilShallowArrayChanged()
+  );
   get tokens$(): Observable<readonly TokenModel[]> {
     return this._tokens$;
   }
 
+  private readonly _visibleTokens$ = this._tokens$.pipe(
+    filterItemObservations((model) => model.visible$),
+    distinctUntilShallowArrayChanged(),
+    shareReplay(1)
+  );
   get visibleTokens$(): Observable<readonly TokenModel[]> {
     return this._visibleTokens$;
   }

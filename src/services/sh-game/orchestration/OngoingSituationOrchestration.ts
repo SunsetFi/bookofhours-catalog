@@ -66,7 +66,6 @@ export class OngoingSituationOrchestration
 
     this._slotAssignmentsSubscription = _situation.thresholdContents$.subscribe(
       (assignments) => {
-        console.log("Setting optimistic slots", assignments);
         this._optimisticSlotAssignments$.next(assignments);
       }
     );

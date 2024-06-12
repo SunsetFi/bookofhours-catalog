@@ -2,14 +2,21 @@ import React from "react";
 
 import { Observable } from "rxjs";
 
+export interface UseObservationOpts {
+  onError?(error: any): void;
+  profileName?: string;
+}
+
 export function useObservation<T>(observable: Observable<T>): T | undefined;
 export function useObservation<T>(
   factory: () => Observable<T>,
-  deps?: any[]
+  deps?: any[],
+  opts?: UseObservationOpts
 ): T | undefined;
 export function useObservation<T>(
   observableOrFactory: Observable<T> | (() => Observable<T>),
-  deps?: any[]
+  deps?: any[],
+  { onError, profileName }: UseObservationOpts = {}
 ) {
   const factory = React.useMemo(
     () =>
@@ -20,13 +27,36 @@ export function useObservation<T>(
   );
 
   const [value, setValue] = React.useState<T | undefined>(undefined);
+  const [err, setError] = React.useState<any>(null);
 
   // Using LayoutEffect guarentees we get a value before render.
   // This is useful when we know the observable is warmed up and we want the value on the very first render.
   React.useLayoutEffect(() => {
-    const sub = factory().subscribe((value) => setValue(value));
+    let seenFirstValue = false;
+    const start = Date.now();
+    const sub = factory().subscribe({
+      next: (value) => {
+        if (!seenFirstValue) {
+          seenFirstValue = true;
+          if (profileName)
+            console.log(
+              "PERF",
+              profileName,
+              "retrieved first value in ",
+              (Date.now() - start) / 1000,
+              "s"
+            );
+        }
+        setValue(value);
+      },
+      error: onError ?? setError,
+    });
     return () => sub.unsubscribe();
-  }, [factory]);
+  }, [factory, onError]);
+
+  if (err) {
+    throw err;
+  }
 
   return value;
 }

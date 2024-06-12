@@ -219,7 +219,10 @@ function ObservableDataGrid<T extends {}>({
         mapArrayItemsCached((item, index) => itemToRow(item, index, columns)),
         observeAll()
       ),
-    [items$, columns]
+    [items$, columns],
+    {
+      profileName: "ObservableDataGrid.Data",
+    }
   );
 
   const onTableFiltersChanged = React.useCallback(
