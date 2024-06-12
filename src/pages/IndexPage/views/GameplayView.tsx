@@ -28,7 +28,6 @@ const GameplayView = () => {
     <PageContainer title="Welcome, Librarian">
       <Box
         sx={{
-          p: 2,
           width: "100%",
           height: "100%",
           display: "flex",

@@ -19,7 +19,7 @@ import { TimeSource } from "../sources/TimeSource";
 import { TokensSource } from "../sources/TokensSource";
 
 import {
-  NoteContainingOrchestration,
+  ContentContainingOrchestration,
   OngoingOrchestration,
   Orchestration,
   OrchestrationBase,
@@ -32,7 +32,7 @@ export class OngoingSituationOrchestration
   extends OrchestrationBaseImpl
   implements
     OrchestrationBase,
-    NoteContainingOrchestration,
+    ContentContainingOrchestration,
     OngoingOrchestration
 {
   private readonly _subscription: Subscription;

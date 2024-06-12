@@ -32,29 +32,30 @@ import OrchestrationSidebar from "./OrchestrationSidebar";
 import OrchestrationSlots from "./OrchestrationSlots";
 import OrchestrationOutput from "./OrchestrationOutput";
 
-const RecipeOrchestratorDialog = () => {
+const OrchestratorDialog = () => {
   const orchestrator = useDIDependency(Orchestrator);
 
+  const form = useObservation(orchestrator.form$);
   const orchestration = useObservation(orchestrator.orchestration$);
 
-  if (!orchestration) {
+  if (!orchestration || form !== "dialog") {
     return null;
   }
 
   return (
     <Dialog open onClose={() => orchestrator.close()} fullWidth maxWidth="lg">
-      <RecipeOrchestrationDialogContent orchestration={orchestration} />
+      <OrchestrationDialogContent orchestration={orchestration} />
     </Dialog>
   );
 };
 
-interface RecipeOrchestrationDialogContentProps {
+interface OrchestrationDialogContentProps {
   orchestration: Orchestration;
 }
 
-const RecipeOrchestrationDialogContent = ({
+const OrchestrationDialogContent = ({
   orchestration,
-}: RecipeOrchestrationDialogContentProps) => {
+}: OrchestrationDialogContentProps) => {
   const orchestrator = useDIDependency(Orchestrator);
 
   const recipe = useObservation(orchestration?.recipe$ ?? Null$);
@@ -201,4 +202,4 @@ const RecipeOrchestrationDialogContent = ({
   );
 };
 
-export default RecipeOrchestratorDialog;
+export default OrchestratorDialog;

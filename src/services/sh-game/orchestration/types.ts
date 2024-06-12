@@ -38,13 +38,13 @@ export interface OrchestrationBase {
   _dispose(): void;
 }
 
-export interface NoteContainingOrchestration extends OrchestrationBase {
+export interface ContentContainingOrchestration extends OrchestrationBase {
   readonly notes$: Observable<readonly ElementStackModel[]>;
   readonly content$: Observable<readonly ElementStackModel[]>;
 }
 export function isContentContainingOrchestration(
   orchestration: Orchestration
-): orchestration is NoteContainingOrchestration {
+): orchestration is ContentContainingOrchestration {
   return "content$" in orchestration;
 }
 
@@ -58,7 +58,7 @@ export function isOngoingOrchestration(
   return "passTime" in orchestration;
 }
 
-export interface CompletedOrchestration extends NoteContainingOrchestration {
+export interface CompletedOrchestration extends ContentContainingOrchestration {
   conclude(): Promise<boolean>;
 }
 

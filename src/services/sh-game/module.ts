@@ -1,6 +1,8 @@
 import { ContainerModule } from "microinject";
 
 import { Orchestrator } from "./orchestration/Orchestrator";
+import { OrchestrationFactory } from "./orchestration/OrchestrationFactory";
+
 import { CharacterSource } from "./sources/CharacterSource";
 import { RunningSource } from "./sources/RunningSource";
 import { TimeSource } from "./sources/TimeSource";
@@ -14,6 +16,7 @@ import { TerrainUnlocker } from "./TerrainUnlocker";
 
 export default new ContainerModule((bind) => {
   bind(Orchestrator);
+  bind(OrchestrationFactory);
   bind(CharacterSource);
   bind(RunningSource);
   bind(TokensSource);
