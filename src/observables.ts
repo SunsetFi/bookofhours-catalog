@@ -1,7 +1,6 @@
 import {
   OperatorFunction,
   Observable,
-  Subscription,
   map,
   distinctUntilChanged,
   switchMap,
@@ -10,6 +9,7 @@ import {
   shareReplay,
   BehaviorSubject,
   combineLatest,
+  of as observableOf,
 } from "rxjs";
 
 import { arrayShallowEquals, isNotNull } from "./utils";
@@ -113,13 +113,25 @@ export function observeAll<T, K>(func?: (value: T) => Observable<K>) {
       return source.pipe(
         map((inputs) => inputs.map((input) => func(input))),
         distinctUntilShallowArrayChanged(),
-        switchMap((observables) => combineLatest(observables))
+        switchMap((observables) => {
+          if (observables.length === 0) {
+            return observableOf([] as K[]);
+          }
+
+          return combineLatest(observables);
+        })
       );
     };
   } else {
     return (source: Observable<readonly Observable<T>[]>) => {
       return source.pipe(
-        switchMap((observables) => combineLatest(observables))
+        switchMap((observables) => {
+          if (observables.length === 0) {
+            return observableOf([] as T[]);
+          }
+
+          return combineLatest(observables);
+        })
       );
     };
   }

@@ -2,7 +2,6 @@ import {
   BehaviorSubject,
   Observable,
   Subscription,
-  combineLatest,
   firstValueFrom,
   map,
   shareReplay,
@@ -66,7 +65,10 @@ export class OngoingSituationOrchestration
     });
 
     this._slotAssignmentsSubscription = _situation.thresholdContents$.subscribe(
-      (assignments) => this._optimisticSlotAssignments$.next(assignments)
+      (assignments) => {
+        console.log("Setting optimistic slots", assignments);
+        this._optimisticSlotAssignments$.next(assignments);
+      }
     );
   }
 

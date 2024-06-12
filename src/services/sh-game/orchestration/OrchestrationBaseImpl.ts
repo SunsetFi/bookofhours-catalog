@@ -71,19 +71,21 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           ),
           distinctUntilShallowArrayChanged(),
           switchMap((assignments) => {
+            if (assignments.length === 0) {
+              return observableOf([[], {}] as [SphereSpec[], Aspects]);
+            }
+
             // We want the slots added by cards
-            const slots$ = observableOf(assignments).pipe(
-              map((assignments) =>
-                assignments.map((x) =>
-                  x.element$.pipe(switchMap((x) => x.slots$))
-                )
-              ),
-              observeAll()
-            );
+            const slots$ = combineLatest(
+              assignments.map((x) =>
+                x.element$.pipe(switchMap((x) => x.slots$))
+              )
+            ).pipe(map((slots) => flatten(slots)));
 
             // We want the aspects of all the cards
-            const aspects$ = observableOf(assignments).pipe(
-              observeAll((element) => element.aspectsAndSelf$),
+            const aspects$ = combineLatest(
+              assignments.map((x) => x.aspectsAndSelf$)
+            ).pipe(
               map((aspectsArray) =>
                 aspectsArray.reduce(
                   (a, b) => combineAspects(a, b),
@@ -100,6 +102,11 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           if (!verbId) {
             return [];
           }
+
+          // Note: situationThresholds will contain duplicate with inputs if it already contains some of the cards, or if we
+          // click the prepare button.
+          // We still need to process the cards manually because RecipeOrchestration lets you explore without slotting any cards,
+          // and submits them all in one go.
 
           let thresholds = [
             ...situationThresholds,
