@@ -3,6 +3,7 @@ import React from "react";
 import Typography, { TypographyProps } from "@mui/material/Typography";
 
 import AspectIcon from "./Aspects/AspectIcon";
+import clsx from "clsx";
 
 export type GameTypographyProps = TypographyProps;
 
@@ -28,7 +29,11 @@ const GameTypography = React.forwardRef<HTMLSpanElement, GameTypographyProps>(
     );
 
     return (
-      <Typography ref={ref} {...props}>
+      <Typography
+        {...props}
+        className={clsx("game-typography", props.className)}
+        ref={ref}
+      >
         {parts}
       </Typography>
     );

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Divider, Stack } from "@mui/material";
+import { Box, Button, ButtonGroup, Divider, Stack } from "@mui/material";
 
 import { Null$ } from "@/observables";
 
@@ -8,15 +8,21 @@ import { useObservation } from "@/hooks/use-observation";
 
 import {
   Orchestration,
+  isCompletedOrchestration,
   isContentContainingOrchestration,
   isExecutableOrchestration,
+  isOngoingOrchestration,
+  isVariableSituationOrchestration,
 } from "@/services/sh-game";
 
-import GameTypography from "../GameTypography";
 import TlgNote from "../Elements/TlgNote";
 import ElementStackIcon from "../Elements/ElementStackIcon";
 
+import GameTypography from "../GameTypography";
+import SituationSelectField from "../SituationSelectField";
+
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
+import OrchestrationSlots from "../OrchestratorDialog/OrchestrationSlots";
 
 export interface OrchestrationContentProps {
   onBack(): void;
@@ -28,6 +34,8 @@ const OrchestrationContent = ({
   onBack,
 }: OrchestrationContentProps) => {
   const label = useObservation(orchestration.label$);
+
+  const situation = useObservation(orchestration.situation$);
 
   const startDescription = useObservation(
     () =>
@@ -55,13 +63,24 @@ const OrchestrationContent = ({
       [orchestration]
     ) ?? [];
 
-  const slots = useObservation(orchestration.slots$) ?? [];
+  const canExecute =
+    useObservation(
+      () =>
+        isExecutableOrchestration(orchestration)
+          ? orchestration.canExecute$
+          : Null$,
+      [orchestration]
+    ) ?? false;
+
+  const timeRemaining =
+    useObservation(situation?.timeRemaining$ ?? Null$) ?? Number.NaN;
+  const timeRemainingStr = timeRemaining.toFixed(1);
 
   let stackItems: React.ReactNode[] = [];
 
   if (startDescription) {
     stackItems.push(
-      <GameTypography key="startDescription" variant="h6">
+      <GameTypography key="startDescription" component="div" variant="h6">
         {startDescription}
       </GameTypography>
     );
@@ -69,27 +88,91 @@ const OrchestrationContent = ({
 
   if (notes.length > 0) {
     stackItems.push(
-      <TlgNote key="notes" elementStack={notes[notes.length - 1]} />
+      <TlgNote
+        key="notes"
+        sx={{
+          minHeight: 75,
+          ["& .game-typography"]: {
+            textAlign: "center",
+          },
+        }}
+        elementStack={notes[notes.length - 1]}
+      />
     );
   }
 
   if (content.length > 0) {
     stackItems.push(
-      <React.Fragment key="content">
-        {content.map((elementStack, index) => (
-          <ElementStackIcon key={index} elementStack={elementStack} />
+      <Stack key="content" direction="row" flexWrap="wrap">
+        {content.map((elementStack) => (
+          <ElementStackIcon key={elementStack.id} elementStack={elementStack} />
         ))}
-      </React.Fragment>
+      </Stack>
     );
   }
 
+  if (isVariableSituationOrchestration(orchestration)) {
+    stackItems.push(
+      <SituationSelectField
+        key="situation"
+        label="Workstation"
+        fullWidth
+        requireUnstarted
+        situations$={orchestration.availableSituations$}
+        value={situation ?? null}
+        onChange={(s) => orchestration.selectSituation(s)}
+      />
+    );
+  }
+
+  if (!isCompletedOrchestration(orchestration)) {
+    stackItems.push(
+      <OrchestrationSlots
+        key="slots"
+        sx={{ height: "100%" }}
+        orchestration={orchestration}
+      />
+    );
+  }
+
+  stackItems.push(
+    <Stack key="actions" direction="row">
+      {!Number.isNaN(timeRemaining) && (
+        <GameTypography key="timeRemaining" variant="h6" role="timer">
+          {timeRemainingStr} seconds remain.
+        </GameTypography>
+      )}
+      <ButtonGroup sx={{ ml: "auto" }}>
+        {isExecutableOrchestration(orchestration) && (
+          <>
+            <Button onClick={() => orchestration.prepare()}>
+              Prepare Recipe
+            </Button>
+            <Button
+              disabled={!canExecute}
+              onClick={() => orchestration.execute()}
+            >
+              Start Recipe
+            </Button>
+          </>
+        )}
+        {isOngoingOrchestration(orchestration) && (
+          <Button onClick={() => orchestration.passTime()}>Pass Time</Button>
+        )}
+        {isCompletedOrchestration(orchestration) && (
+          <Button onClick={() => orchestration.conclude()}>Conclude</Button>
+        )}
+      </ButtonGroup>
+    </Stack>
+  );
+
   return (
-    <Stack direction="column">
+    <Stack direction="column" sx={{ height: "100%" }}>
       <OrchestrationContentHeader
         title={label ?? "Orchestration"}
         onBack={onBack}
       />
-      <Stack direction="column" spacing={2} sx={{ p: 2 }}>
+      <Stack direction="column" spacing={2} sx={{ height: "100%", p: 2 }}>
         {stackItems.map((item, index) => (
           <React.Fragment key={index}>
             {index !== 0 && <Divider />}

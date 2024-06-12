@@ -1,6 +1,7 @@
 import {
   BehaviorSubject,
   Observable,
+  combineLatest,
   distinctUntilChanged,
   map,
   shareReplay,
@@ -16,7 +17,7 @@ import { isEqual } from "lodash";
 
 import { isNotNull } from "@/utils";
 
-import { filterItemObservations, filterItems } from "@/observables";
+import { filterItemObservations, filterItems, observeAll } from "@/observables";
 
 import { API } from "../../sh-api";
 
@@ -35,14 +36,11 @@ export class SituationModel extends TokenModel {
 
   private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
-  private readonly _notes$: Observable<readonly ElementStackModel[]>;
-  private readonly _content$: Observable<readonly ElementStackModel[]>;
-  private readonly _output$: Observable<readonly ElementStackModel[]>;
 
   constructor(
     situation: ISituation,
     api: API,
-    elementStacks$: Observable<readonly ElementStackModel[]>,
+    private readonly _elementStacks$: Observable<readonly ElementStackModel[]>,
     visibilityFactory: TokenVisibilityFactory,
     parentTerrainFactory: TokenParentTerrainFactory
   ) {
@@ -54,40 +52,6 @@ export class SituationModel extends TokenModel {
     );
     this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
       this._situation$
-    );
-
-    this._notes$ = elementStacks$.pipe(
-      // Notes never change their elementId, so its safe to not observe this.
-      filterItems((item) => item.elementId === "tlg.note"),
-      filterItemObservations((item) =>
-        item.path$.pipe(
-          map((path) => path.startsWith(`${this.path}/aureatenotessphere`))
-        )
-      ),
-      filterItems(isNotNull),
-      shareReplay(1)
-    );
-
-    this._content$ = elementStacks$.pipe(
-      // Filter out notes.
-      filterItems((item) => item.elementId !== "tlg.note"),
-      filterItemObservations((item) =>
-        item.path$.pipe(
-          map((path) => path.startsWith(`${this.path}/situationstoragesphere`))
-        )
-      ),
-      shareReplay(1)
-    );
-
-    this._output$ = elementStacks$.pipe(
-      // Filter out notes.
-      filterItems((item) => item.elementId !== "tlg.note"),
-      filterItemObservations((item) =>
-        item.path$.pipe(
-          map((path) => path.startsWith(`${this.path}/outputsphere`))
-        )
-      ),
-      shareReplay(1)
     );
   }
 
@@ -170,7 +134,22 @@ export class SituationModel extends TokenModel {
     return this._description$;
   }
 
+  private _notes$: Observable<readonly ElementStackModel[]> | null = null;
   get notes$() {
+    if (!this._notes$) {
+      this._notes$ = this._elementStacks$.pipe(
+        // Notes never change their elementId, so its safe to not observe this.
+        filterItems((item) => item.elementId === "tlg.note"),
+        filterItemObservations((item) =>
+          item.path$.pipe(
+            map((path) => path.startsWith(`${this.path}/aureatenotessphere`))
+          )
+        ),
+        filterItems(isNotNull),
+        shareReplay(1)
+      );
+    }
+
     return this._notes$;
   }
 
@@ -215,6 +194,51 @@ export class SituationModel extends TokenModel {
 
   get thresholds() {
     return this._situation$.value.thresholds;
+  }
+
+  private _thresholdContents$: Observable<
+    Readonly<Record<string, ElementStackModel | null>>
+  > | null = null;
+  get thresholdContents$() {
+    if (!this._thresholdContents$) {
+      this._thresholdContents$ = combineLatest([
+        this.thresholds$,
+        this._elementStacks$.pipe(
+          map((items) =>
+            items.map((item) =>
+              item.path$.pipe(map((path) => ({ item, path })))
+            )
+          ),
+          observeAll()
+        ),
+      ]).pipe(
+        map(([thresholds, elementPathPairs]) => {
+          const thresholdContents: Record<string, ElementStackModel | null> =
+            {};
+
+          for (const threshold of thresholds) {
+            const searchPath = `${this.path}/${threshold.id}`;
+            const element = elementPathPairs.find(
+              ({ path }) =>
+                // We want to avoid cases where we can have thresholds with subset names,
+                // eg: 't', 't2'.
+                // Paths are tricky in that sometimes the '/' is left out for tokens, and '!' is the delimiter
+                // instead.  This happens for tokens in threshold spheres reliably, but future game behavior changes
+                // might break this as /! is also valid.
+                path.startsWith(`${searchPath}!`) ||
+                path.startsWith(`${searchPath}/`)
+            )?.item;
+
+            thresholdContents[threshold.id] = element ?? null;
+          }
+
+          return Object.freeze(thresholdContents);
+        }),
+        shareReplay(1)
+      );
+    }
+
+    return this._thresholdContents$;
   }
 
   private _state$: Observable<SituationState> | null = null;
@@ -287,7 +311,7 @@ export class SituationModel extends TokenModel {
   }
 
   private _timeRemaining$: Observable<number> | null = null;
-  get timeRemaining$() {
+  get timeRemaining$(): Observable<number> {
     if (!this._timeRemaining$) {
       this._timeRemaining$ = this._situation$.pipe(
         map((s) => s.timeRemaining),
@@ -299,11 +323,41 @@ export class SituationModel extends TokenModel {
     return this._timeRemaining$;
   }
 
-  get content$() {
+  private _content$: Observable<readonly ElementStackModel[]> | null = null;
+  get content$(): Observable<readonly ElementStackModel[]> {
+    if (!this._content$) {
+      this._content$ = this._elementStacks$.pipe(
+        // Filter out notes.
+        filterItems((item) => item.elementId !== "tlg.note"),
+        filterItemObservations((item) =>
+          item.path$.pipe(
+            map((path) =>
+              path.startsWith(`${this.path}/situationstoragesphere`)
+            )
+          )
+        ),
+        shareReplay(1)
+      );
+    }
+
     return this._content$;
   }
 
-  get output$() {
+  private _output$: Observable<readonly ElementStackModel[]> | null = null;
+  get output$(): Observable<readonly ElementStackModel[]> {
+    if (this._output$ == null) {
+      this._output$ = this._elementStacks$.pipe(
+        // Filter out notes.
+        filterItems((item) => item.elementId !== "tlg.note"),
+        filterItemObservations((item) =>
+          item.path$.pipe(
+            map((path) => path.startsWith(`${this.path}/outputsphere`))
+          )
+        ),
+        shareReplay(1)
+      );
+    }
+
     return this._output$;
   }
 

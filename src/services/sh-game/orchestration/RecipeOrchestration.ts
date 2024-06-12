@@ -47,6 +47,10 @@ export class RecipeOrchestration
     null
   );
 
+  private readonly _slotAssignments$ = new BehaviorSubject<
+    Readonly<Record<string, ElementStackModel | null>>
+  >({});
+
   // Hack: Our elements have slots as well.  We need to take that into account when
   // choosing available situations.
   // This will observe all slots added by our desiredElements, and use them in our
@@ -236,6 +240,12 @@ export class RecipeOrchestration
     return this._canExecute$;
   }
 
+  protected get slotAssignments$(): Observable<
+    Readonly<Record<string, ElementStackModel | null>>
+  > {
+    return this._slotAssignments$;
+  }
+
   selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
     this._slotAssignments$.next({});
@@ -315,6 +325,30 @@ export class RecipeOrchestration
     }
   }
 
+  protected _filterSlotCandidates(
+    spec: SphereSpec,
+    elementStack: ElementStackModel
+  ): Observable<boolean> {
+    const requirementKeys = Object.keys(this._recipe.requirements);
+    // Our recipe is fixed, so filter candidates by its requirements.
+    return elementStack.aspectsAndSelf$.pipe(
+      map((aspects) => {
+        return Object.keys(aspects).some((aspect) =>
+          requirementKeys.includes(aspect)
+        );
+      })
+    );
+  }
+
+  protected _assignSlot(
+    spec: SphereSpec,
+    element: ElementStackModel | null
+  ): void {
+    const assignments = { ...this._slotAssignments$.value };
+    assignments[spec.id] = element;
+    this._slotAssignments$.next(assignments);
+  }
+
   private _situationIsAvailable(
     situation: SituationModel,
     additionalThresholds: SphereSpec[]
@@ -359,21 +393,6 @@ export class RecipeOrchestration
     }
 
     return true;
-  }
-
-  protected _filterSlotCandidates(
-    spec: SphereSpec,
-    elementStack: ElementStackModel
-  ): Observable<boolean> {
-    const requirementKeys = Object.keys(this._recipe.requirements);
-    // Our recipe is fixed, so filter candidates by its requirements.
-    return elementStack.aspectsAndSelf$.pipe(
-      map((aspects) => {
-        return Object.keys(aspects).some((aspect) =>
-          requirementKeys.includes(aspect)
-        );
-      })
-    );
   }
 
   private async _pickDefaults(slots: OrchestrationSlot[]) {

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box } from "@mui/material";
+import { Box, SxProps } from "@mui/material";
 
 import { observableObjectOrEmpty } from "@/observables";
 
@@ -11,10 +11,11 @@ import { Orchestration } from "@/services/sh-game";
 import OrchestrationSlotEditor from "./OrchestrationSlotEditor";
 
 interface OrchestrationSlotsProps {
+  sx?: SxProps;
   orchestration: Orchestration;
 }
 
-const OrchestrationSlots = ({ orchestration }: OrchestrationSlotsProps) => {
+const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
   const requirements = useObservation(orchestration.requirements$) ?? {};
   const slots =
     useObservation(observableObjectOrEmpty(orchestration.slots$)) ?? {};
@@ -27,6 +28,7 @@ const OrchestrationSlots = ({ orchestration }: OrchestrationSlotsProps) => {
         rowGap: 2,
         columnGap: 3,
         overflow: "auto",
+        ...sx,
       }}
     >
       {Object.keys(slots).map((slotId) => (

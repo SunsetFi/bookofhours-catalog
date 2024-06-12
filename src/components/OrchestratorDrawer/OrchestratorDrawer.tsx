@@ -11,6 +11,9 @@ import { Orchestrator } from "@/services/sh-game";
 import OrchestrationListContent from "./OrchestrationListContent";
 import OrchestrationContent from "./OrchestrationContent";
 
+const OrchestrationListWidth = 400;
+const OrchestrationContentWidth = 650;
+
 const StyledDrawer = styled(
   Drawer,
   {}
@@ -42,7 +45,7 @@ const OrchestratorDrawer = () => {
       open={form === "drawer"}
       anchor="right"
       variant="persistent"
-      width={orchestration ? 600 : 300}
+      width={orchestration ? OrchestrationContentWidth : OrchestrationListWidth}
     >
       {orchestration == null && <OrchestrationListContent />}
       {orchestration != null && (

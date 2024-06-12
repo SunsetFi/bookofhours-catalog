@@ -60,17 +60,6 @@ export class OngoingSituationOrchestration
         this._replaceOrchestration(null);
       }
     });
-
-    // TODO: Greedy slots pull stuff in.  We need to subscribe to the spheres
-    // and update slotAssignments.
-
-    // Note: This is different than all other orchestrations in that we
-    // immediately move the card rather than waiting for a button press.
-    this._slotAssignments$.subscribe((assignments) => {
-      for (const [key, value] of Object.entries(assignments)) {
-        this._situation.setSlotContents(key, value);
-      }
-    });
   }
 
   _dispose() {
@@ -131,6 +120,10 @@ export class OngoingSituationOrchestration
     return this._situation$;
   }
 
+  get slotAssignments$() {
+    return this._situation.thresholdContents$;
+  }
+
   get notes$() {
     return this._situation.notes$;
   }
@@ -164,5 +157,12 @@ export class OngoingSituationOrchestration
     // We have no additional logic to add.
     // Let the base apply its own matching.
     return True$;
+  }
+
+  protected _assignSlot(
+    spec: SphereSpec,
+    element: ElementStackModel | null
+  ): void {
+    this._situation.setSlotContents(spec.id, element);
   }
 }

@@ -1,4 +1,6 @@
 import React from "react";
+import { map } from "rxjs";
+import { values } from "lodash";
 
 import {
   List,
@@ -11,10 +13,12 @@ import {
   ListItemText,
   Badge,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import {
   SkipNext as SkipNextIcon,
   Download as DownloadIcon,
+  Error as ErrorIcon,
 } from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
@@ -89,11 +93,19 @@ const ExecutingSituationListItem = ({
   const timeSource = useDIDependency(TimeSource);
   const label = useObservation(situation.label$);
   const recipeLabel = useObservation(situation.recipeLabel$);
-  const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const state = useObservation(situation.state$);
   const output = useObservation(situation.output$) ?? [];
 
+  const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const timeRemainingStr = timeRemaining.toFixed(1);
+
+  const hasEmptyThresholds = useObservation(
+    () =>
+      situation.thresholdContents$.pipe(
+        map((contents) => values(contents).some((x) => x === null))
+      ),
+    [situation]
+  );
 
   const onClick = React.useCallback(
     (e: React.MouseEvent) => {
@@ -134,7 +146,11 @@ const ExecutingSituationListItem = ({
       <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
         {state === "Ongoing" && (
           <>
-            {/* TODO: Show if we have empty slots. */}
+            {hasEmptyThresholds && (
+              <Tooltip title="Empty Card Slots" sx={{ m: 2 }}>
+                <ErrorIcon />
+              </Tooltip>
+            )}
             <Typography variant="caption" role="timer">
               <ScreenReaderContent>
                 {timeRemainingStr} seconds left in recipe

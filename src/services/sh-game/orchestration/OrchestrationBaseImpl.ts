@@ -1,5 +1,4 @@
 import {
-  BehaviorSubject,
   Observable,
   asapScheduler,
   combineLatest,
@@ -39,10 +38,6 @@ import { sphereMatchesToken } from "../observables";
 import { OrchestrationBase, OrchestrationSlot } from "./types";
 
 export abstract class OrchestrationBaseImpl implements OrchestrationBase {
-  protected readonly _slotAssignments$ = new BehaviorSubject<
-    Record<string, ElementStackModel | null>
-  >({});
-
   constructor(protected readonly _tokensSource: TokensSource) {}
 
   abstract get label$(): Observable<string | null>;
@@ -50,13 +45,17 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   abstract get requirements$(): Observable<Readonly<Aspects>>;
   abstract get situation$(): Observable<SituationModel | null>;
 
+  protected abstract get slotAssignments$(): Observable<
+    Readonly<Record<string, ElementStackModel | null>>
+  >;
+
   private _slots$: Observable<
     Readonly<Record<string, OrchestrationSlot>>
   > | null = null;
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
     if (!this._slots$) {
       // The sheer amount of observeAlls here is a bit concerning.
-      const slottedElementStacks = this._slotAssignments$.pipe(
+      const slottedElementStacks = this.slotAssignments$.pipe(
         // Sort the values to guarentee the order doesn't change on us and mess up our distinct check.
         map((assignments) =>
           Object.keys(assignments)
@@ -143,7 +142,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   private _aspects$: Observable<Readonly<Aspects>> | null = null;
   get aspects$() {
     if (!this._aspects$) {
-      this._aspects$ = this._slotAssignments$.pipe(
+      this._aspects$ = this.slotAssignments$.pipe(
         map((slots) => {
           if (!slots) {
             return [];
@@ -177,8 +176,12 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     elementStack: ElementStackModel
   ): Observable<boolean>;
 
+  protected abstract _assignSlot(
+    spec: SphereSpec,
+    element: ElementStackModel | null
+  ): void;
+
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
-    console.log("create slot", spec.id, spec);
     const availableElementStacks$ = combineLatest([
       this._tokensSource.visibleElementStacks$.pipe(
         filterItemObservations((item) =>
@@ -186,7 +189,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         ),
         filterItemObservations((item) => sphereMatchesToken(spec, item))
       ),
-      this._slotAssignments$.pipe(
+      this.slotAssignments$.pipe(
         map((assignments) => omit(assignments, spec.id)),
         distinctUntilChanged((a, b) => isEqual(a, b)),
         map((assignments) => Object.values(assignments).filter(isNotNull))
@@ -210,16 +213,13 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return {
       spec,
       locked: spec.greedy,
-      assignment$: this._slotAssignments$.pipe(
+      assignment$: this.slotAssignments$.pipe(
         map((assignments) => assignments[spec.id] ?? null),
         shareReplay(1)
       ),
       availableElementStacks$,
       assign: (element) => {
-        this._slotAssignments$.next({
-          ...this._slotAssignments$.value,
-          [spec.id]: element,
-        });
+        this._assignSlot(spec, element);
       },
     };
   }

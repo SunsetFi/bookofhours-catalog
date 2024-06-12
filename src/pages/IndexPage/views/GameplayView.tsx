@@ -1,9 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { tap } from "rxjs";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { useDIDependency } from "@/container";
