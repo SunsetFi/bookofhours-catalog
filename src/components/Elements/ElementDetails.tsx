@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
@@ -8,7 +8,7 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { ElementModel } from "@/services/sh-compendium";
 
-import AspectsList from "./AspectsList";
+import AspectsList from "../Aspects/AspectsList";
 
 export interface ElementDetailsProps {
   element: ElementModel;

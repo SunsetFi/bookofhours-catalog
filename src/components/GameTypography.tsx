@@ -1,7 +1,8 @@
-import * as React from "react";
+import React from "react";
 
 import Typography, { TypographyProps } from "@mui/material/Typography";
-import AspectIcon from "./AspectIcon";
+
+import AspectIcon from "./Aspects/AspectIcon";
 
 export type GameTypographyProps = TypographyProps;
 

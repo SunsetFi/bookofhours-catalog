@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 const ContextState = React.createContext<
   Record<string, React.Dispatch<React.SetStateAction<unknown>>>

@@ -1,8 +1,6 @@
-import * as React from "react";
+import React from "react";
 
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import { Box, TextField, Button } from "@mui/material";
 
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 

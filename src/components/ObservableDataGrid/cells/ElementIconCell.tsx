@@ -1,8 +1,8 @@
-import * as React from "react";
+import React from "react";
 
 import { CellContext, RowData } from "@tanstack/react-table";
 
-import ElementIcon from "@/components/ElementIcon";
+import ElementIcon from "../../Elements/ElementIcon";
 
 import { RowHeight, RowPaddingY } from "../constants";
 

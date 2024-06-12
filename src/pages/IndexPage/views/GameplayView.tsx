@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 import { tap } from "rxjs";
 
@@ -20,7 +20,7 @@ import {
 } from "@/services/sh-game";
 
 import PageContainer from "@/components/PageContainer";
-import ElementStackTray from "@/components/ElementStackTray";
+import ElementStackTray from "@/components/Elements/ElementStackTray";
 
 const GameplayView = () => {
   const redirect = useQueryString("redirect");
@@ -73,69 +73,72 @@ const Overview = () => {
   );
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "100%",
-        overflow: "auto",
-        display: "grid",
-        gridTemplateRows: `[start] max-content [dividier] 1fr [end]`,
-        gridTemplateColumns: `[start] 15% [memories-soul] 20% [soul-skill] 45% [skill-misc] 20% [end]`,
-      }}
-    >
+    <Box sx={{ overflow: "auto" }}>
       <Box
         sx={{
-          gridRow: "start / dividier",
-          gridColumn: "start / end",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "baseline",
-          justifyContent: "center",
+          p: 2,
+          width: "100%",
+          height: "100%",
+          overflow: "auto",
+          display: "grid",
+          gridTemplateRows: `[start] max-content [dividier] 1fr [end]`,
+          gridTemplateColumns: `[start] 15% [memories-soul] 20% [soul-skill] 45% [skill-misc] 20% [end]`,
         }}
-      ></Box>
-      {tokens == null && (
+      >
         <Box
           sx={{
-            gridRow: "start / end",
+            gridRow: "start / dividier",
             gridColumn: "start / end",
             display: "flex",
-            alignItems: "center",
+            flexDirection: "row",
+            alignItems: "baseline",
             justifyContent: "center",
-            width: "100%",
-            height: "100%",
           }}
-        >
-          <CircularProgress />
-        </Box>
-      )}
-      <ElementStackTray
-        sx={{
-          gridRow: "dividier / end",
-          gridColumn: "start / memories-soul",
-        }}
-        elementStacks$={memories$}
-      />
-      <ElementStackTray
-        sx={{
-          gridRow: "dividier / end",
-          gridColumn: "memories-soul / soul-skill",
-        }}
-        elementStacks$={abilities$}
-      />
-      <ElementStackTray
-        sx={{
-          gridRow: "dividier / end",
-          gridColumn: "soul-skill / skill-misc",
-        }}
-        elementStacks$={skills$}
-      />
-      <ElementStackTray
-        sx={{
-          gridRow: "dividier / end",
-          gridColumn: "skill-misc / end",
-        }}
-        elementStacks$={misc$}
-      />
+        ></Box>
+        {tokens == null && (
+          <Box
+            sx={{
+              gridRow: "start / end",
+              gridColumn: "start / end",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+        <ElementStackTray
+          sx={{
+            gridRow: "dividier / end",
+            gridColumn: "start / memories-soul",
+          }}
+          elementStacks$={memories$}
+        />
+        <ElementStackTray
+          sx={{
+            gridRow: "dividier / end",
+            gridColumn: "memories-soul / soul-skill",
+          }}
+          elementStacks$={abilities$}
+        />
+        <ElementStackTray
+          sx={{
+            gridRow: "dividier / end",
+            gridColumn: "soul-skill / skill-misc",
+          }}
+          elementStacks$={skills$}
+        />
+        <ElementStackTray
+          sx={{
+            gridRow: "dividier / end",
+            gridColumn: "skill-misc / end",
+          }}
+          elementStacks$={misc$}
+        />
+      </Box>
     </Box>
   );
 };

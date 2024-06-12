@@ -1,4 +1,10 @@
-import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  map,
+  shareReplay,
+} from "rxjs";
 import { Aspects, combineAspects } from "secrethistories-api";
 
 import { EmptyObject$, observeAll } from "@/observables";
@@ -27,6 +33,25 @@ export class CompletedSituationOrchestration
   ) {}
 
   _dispose() {}
+
+  private _label$: Observable<string | null> | null = null;
+  get label$(): Observable<string | null> {
+    if (this._label$ == null) {
+      this._label$ = combineLatest([
+        this._situation.label$,
+        this._situation.recipeLabel$,
+      ]).pipe(
+        map(([situationLabel, recipeLabel]) => {
+          let label = recipeLabel ?? situationLabel;
+          if (label === ".") {
+            label = situationLabel;
+          }
+          return label;
+        })
+      );
+    }
+    return this._situation.label$;
+  }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
   get recipe$(): Observable<RecipeModel | null> {

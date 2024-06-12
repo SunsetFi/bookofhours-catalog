@@ -5,8 +5,8 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { OrchestrationSlot } from "@/services/sh-game";
 
-import ElementStackSelectField from "../ElementStackSelectField";
-import AspectIcon from "../AspectIcon";
+import ElementStackSelectField from "../Elements/ElementStackSelectField";
+import AspectIcon from "../Aspects/AspectIcon";
 
 interface OrchestrationSlotEditorProps {
   slot: OrchestrationSlot;

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Observable } from "rxjs";
 
 import Box from "@mui/material/Box";

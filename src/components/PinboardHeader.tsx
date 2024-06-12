@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { mapValues } from "lodash";
 
 import type { SxProps } from "@mui/material/styles";
@@ -18,8 +18,8 @@ import {
   isPinnedElementItemModel,
 } from "@/services/pins/PinnedItemModel";
 
-import ElementIcon from "./ElementIcon";
-import AspectsList from "./AspectsList";
+import ElementIcon from "./Elements/ElementIcon";
+import AspectsList from "./Aspects/AspectsList";
 
 export interface PinboardHeaderProps {
   sx?: SxProps;

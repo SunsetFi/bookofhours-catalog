@@ -1,9 +1,9 @@
-import * as React from "react";
+import React from "react";
+import { mapValues } from "lodash";
 
 import { CellContext, RowData } from "@tanstack/react-table";
 
-import AspectsList from "@/components/AspectsList";
-import { mapValues } from "lodash";
+import AspectsList from "../../Aspects/AspectsList";
 
 function AspectsListCell<T extends RowData>({
   showLevel,

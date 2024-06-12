@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Observable, combineLatest, map } from "rxjs";
 import { pick } from "lodash";
 
@@ -16,7 +16,8 @@ import { ElementStackModel } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import AspectsList from "./AspectsList";
+import AspectsList from "../Aspects/AspectsList";
+
 import ElementStackDetails from "./ElementStackDetails";
 import ElementIcon from "./ElementIcon";
 

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Observable, combineLatest, map, of as observableOf } from "rxjs";
 import { omit } from "lodash";
 

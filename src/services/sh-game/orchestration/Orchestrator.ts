@@ -114,10 +114,13 @@ export class Orchestrator {
       }
     }
 
-    // Always use dialog for now
-    // if (this._form$.value == null) {
-    this._form$.next("dialog");
-    // }
+    if (this._form$.value == null) {
+      this._form$.next("drawer");
+    }
+  }
+
+  closeOrchestration() {
+    this._updateOrchestration(null);
   }
 
   close() {
@@ -130,7 +133,9 @@ export class Orchestrator {
       this._orchestration$.value._dispose();
     }
 
-    await this._scheduler.updateNow();
+    if (orchestration) {
+      await this._scheduler.updateNow();
+    }
 
     this._orchestration$.next(orchestration);
 

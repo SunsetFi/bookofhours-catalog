@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Observable, combineLatest, map } from "rxjs";
 import { sortBy } from "lodash";
 
@@ -15,7 +15,7 @@ import { SituationModel } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import AspectIcon from "./AspectIcon";
+import AspectIcon from "./Aspects/AspectIcon";
 import VerbIcon from "./VerbIcon";
 
 export interface SituationSelectFieldProps {

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import type { SxProps } from "@mui/material/styles";
 
@@ -10,7 +10,7 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { useAspect } from "@/services/sh-compendium";
 
-import Tooltip from "./Tooltip";
+import Tooltip from "../Tooltip";
 
 export interface AspectIconProps extends React.HTMLAttributes<HTMLSpanElement> {
   aspectId: string;

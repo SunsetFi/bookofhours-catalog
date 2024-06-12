@@ -1,8 +1,8 @@
-import * as React from "react";
+import React from "react";
 
 import { CellContext, RowData } from "@tanstack/react-table";
 
-import VerbIcon from "@/components/VerbIcon";
+import VerbIcon from "../../VerbIcon";
 
 import { RowHeight, RowPaddingY } from "../constants";
 

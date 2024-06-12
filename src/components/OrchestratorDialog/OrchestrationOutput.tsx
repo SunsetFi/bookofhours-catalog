@@ -2,7 +2,7 @@ import React from "react";
 
 import { CompletedOrchestration } from "@/services/sh-game";
 
-import ElementStackTray from "../ElementStackTray";
+import ElementStackTray from "../Elements/ElementStackTray";
 
 interface OrchestratorOutputProps {
   orchestration: CompletedOrchestration;

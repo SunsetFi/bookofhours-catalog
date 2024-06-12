@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import Box from "@mui/material/Box";
 import { type SxProps } from "@mui/material/styles";
@@ -10,7 +10,7 @@ import { Null$ } from "@/observables";
 
 import { Compendium, ElementModel } from "@/services/sh-compendium";
 
-import Tooltip from "./Tooltip";
+import Tooltip from "../Tooltip";
 import ElementDetails from "./ElementDetails";
 
 export interface ElementIconBaseProps {

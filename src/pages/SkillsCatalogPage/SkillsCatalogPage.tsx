@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Aspects } from "secrethistories-api";
 
 import Box from "@mui/material/Box";

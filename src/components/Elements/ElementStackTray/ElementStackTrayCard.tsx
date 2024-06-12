@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -8,8 +8,8 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { ElementStackModel } from "@/services/sh-game";
 
-import Tooltip from "../Tooltip";
-import AutosizeTypography from "../AutosizeText";
+import Tooltip from "../../Tooltip";
+import AutosizeTypography from "../../AutosizeText";
 import ElementStackDetails from "../ElementStackDetails";
 
 export interface ElementStackTrayCardProps {

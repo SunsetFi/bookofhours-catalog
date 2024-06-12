@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -11,7 +11,7 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-import ElementStackIcon from "./ElementStackIcon";
+import ElementStackIcon from "./Elements/ElementStackIcon";
 
 export interface HandOverviewIconsProps {
   sx?: SxProps;

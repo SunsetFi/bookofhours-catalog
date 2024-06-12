@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 
 import { index as indexPath } from "@/paths";

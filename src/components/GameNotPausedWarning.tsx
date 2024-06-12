@@ -1,5 +1,5 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import React from "react";
+import ReactDOM from "react-dom";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";

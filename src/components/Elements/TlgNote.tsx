@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import Box from "@mui/material/Box";
 import { type SxProps } from "@mui/material/styles";
@@ -10,7 +10,7 @@ import { useElement } from "@/services/sh-compendium";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import GameTypography from "./GameTypography";
+import GameTypography from "../GameTypography";
 
 export interface TlgNoteProps {
   sx?: SxProps;

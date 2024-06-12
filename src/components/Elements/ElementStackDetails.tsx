@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { switchMap } from "rxjs";
 
 import Card from "@mui/material/Card";
@@ -9,8 +9,8 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { ElementStackModel } from "@/services/sh-game";
 
-import AspectsList from "./AspectsList";
-import GameTypography from "./GameTypography";
+import AspectsList from "../Aspects/AspectsList";
+import GameTypography from "../GameTypography";
 
 export interface ElementStackDetailsProps {
   elementStack: ElementStackModel;

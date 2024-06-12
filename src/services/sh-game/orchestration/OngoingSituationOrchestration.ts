@@ -2,6 +2,7 @@ import {
   BehaviorSubject,
   Observable,
   Subscription,
+  combineLatest,
   firstValueFrom,
   map,
   shareReplay,
@@ -74,6 +75,26 @@ export class OngoingSituationOrchestration
 
   _dispose() {
     this._subscription.unsubscribe();
+  }
+
+  private _label$: Observable<string | null> | null = null;
+  get label$(): Observable<string | null> {
+    if (this._label$ == null) {
+      this._label$ = combineLatest([
+        this._situation.label$,
+        this._situation.recipeLabel$,
+      ]).pipe(
+        map(([situationLabel, recipeLabel]) => {
+          let label = recipeLabel ?? situationLabel;
+          if (label === ".") {
+            label = situationLabel;
+          }
+          return label;
+        })
+      );
+    }
+
+    return this._label$;
   }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;

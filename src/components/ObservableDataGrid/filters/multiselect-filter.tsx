@@ -1,14 +1,16 @@
-import * as React from "react";
+import React from "react";
 
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import Checkbox from "@mui/material/Checkbox";
-import ListItemText from "@mui/material/ListItemText";
+import {
+  Box,
+  TextField,
+  Button,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  Checkbox,
+  ListItemText,
+} from "@mui/material";
 
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 

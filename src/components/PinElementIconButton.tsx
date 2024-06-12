@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import IconButton from "@mui/material/IconButton";
 import PushPin from "@mui/icons-material/PushPin";

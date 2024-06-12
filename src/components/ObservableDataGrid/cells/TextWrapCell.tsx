@@ -1,12 +1,12 @@
-import * as React from "react";
+import React from "react";
 
-import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
+import { Box, Tooltip } from "@mui/material";
+
 import { CellContext, RowData } from "@tanstack/react-table";
 
 import { useComponentBounds } from "@/hooks/use-component-bounds";
 
-import GameTypography from "@/components/GameTypography";
+import GameTypography from "../../GameTypography";
 
 import { RowHeight, RowPaddingY } from "../constants";
 

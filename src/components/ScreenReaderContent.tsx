@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 interface ScreenReaderContentProps
   extends React.HTMLAttributes<HTMLSpanElement> {

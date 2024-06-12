@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { mapValues } from "lodash";
 
 import { Box, SxProps } from "@mui/material";
@@ -13,10 +13,11 @@ import {
   isExecutableOrchestration,
 } from "@/services/sh-game";
 
-import AspectsList from "../AspectsList";
+import AspectsList from "../Aspects/AspectsList";
+
 import GameTypography from "../GameTypography";
-import TlgNote from "../TlgNote";
-import ElementStackIcon from "../ElementStackIcon";
+import TlgNote from "../Elements/TlgNote";
+import ElementStackIcon from "../Elements/ElementStackIcon";
 
 interface OrchestrationSidebarProps {
   sx?: SxProps;

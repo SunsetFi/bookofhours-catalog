@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { useNavigate } from "react-router";
 
 import Dialog from "@mui/material/Dialog";

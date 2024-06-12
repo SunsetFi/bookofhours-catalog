@@ -99,6 +99,10 @@ export class RecipeOrchestration
     this._subscription.unsubscribe();
   }
 
+  get label$(): Observable<string | null> {
+    return this._recipe.label$;
+  }
+
   private _recipe$: Observable<RecipeModel | null> | null = null;
   get recipe$(): Observable<RecipeModel | null> {
     if (!this._recipe$) {

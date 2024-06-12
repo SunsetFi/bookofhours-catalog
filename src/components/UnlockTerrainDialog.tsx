@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -17,7 +17,7 @@ import { TerrainUnlocker } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import ElementStackSelectField from "./ElementStackSelectField";
+import ElementStackSelectField from "./Elements/ElementStackSelectField";
 
 const UnlockTerrainDialog = () => {
   const unlocker = useDIDependency(TerrainUnlocker);

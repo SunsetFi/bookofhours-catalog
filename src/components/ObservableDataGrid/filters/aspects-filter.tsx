@@ -1,17 +1,19 @@
-import * as React from "react";
+import React from "react";
 import { Aspects } from "secrethistories-api";
 import { uniq, flatten, isEqual } from "lodash";
 import { Row } from "@tanstack/react-table";
 
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
+import {
+  Box,
+  Button,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+} from "@mui/material";
 
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 
-import AspectSelectionGrid from "@/components/AspectSelectionGrid";
+import AspectSelectionGrid from "../../Aspects/AspectSelectionGrid";
 
 import { FilterComponentProps } from "./types";
 

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 import Badge from "@mui/material/Badge";
 
@@ -6,7 +6,7 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { ElementStackModel } from "@/services/sh-game";
 
-import Tooltip from "./Tooltip";
+import Tooltip from "../Tooltip";
 import ElementStackDetails from "./ElementStackDetails";
 
 export interface ElementStackIconProps {

@@ -45,6 +45,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
   constructor(protected readonly _tokensSource: TokensSource) {}
 
+  abstract get label$(): Observable<string | null>;
   abstract get recipe$(): Observable<RecipeModel | null>;
   abstract get requirements$(): Observable<Readonly<Aspects>>;
   abstract get situation$(): Observable<SituationModel | null>;
