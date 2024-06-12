@@ -36,7 +36,11 @@ export class OngoingSituationOrchestration
     ContentContainingOrchestration,
     OngoingOrchestration
 {
-  private readonly _subscription: Subscription;
+  private readonly _stateSubscription: Subscription;
+  private readonly _slotAssignmentsSubscription: Subscription;
+
+  private readonly _optimisticSlotAssignments$ = new BehaviorSubject({});
+
   constructor(
     private readonly _situation: SituationModel,
     tokensSource: TokensSource,
@@ -48,7 +52,7 @@ export class OngoingSituationOrchestration
     ) => void
   ) {
     super(tokensSource);
-    this._subscription = _situation.state$.subscribe((state) => {
+    this._stateSubscription = _situation.state$.subscribe((state) => {
       if (state === "Complete") {
         const completeOrchestration =
           orchestrationFactory.createCompletedOrchestration(
@@ -60,10 +64,15 @@ export class OngoingSituationOrchestration
         this._replaceOrchestration(null);
       }
     });
+
+    this._slotAssignmentsSubscription = _situation.thresholdContents$.subscribe(
+      (assignments) => this._optimisticSlotAssignments$.next(assignments)
+    );
   }
 
   _dispose() {
-    this._subscription.unsubscribe();
+    this._stateSubscription.unsubscribe();
+    this._slotAssignmentsSubscription.unsubscribe();
   }
 
   get label$(): Observable<string | null> {
@@ -109,7 +118,7 @@ export class OngoingSituationOrchestration
   }
 
   get slotAssignments$() {
-    return this._situation.thresholdContents$;
+    return this._optimisticSlotAssignments$;
   }
 
   get notes$() {
@@ -166,6 +175,12 @@ export class OngoingSituationOrchestration
 
       refreshes.push(element.refresh());
     }
+
+    // Do this even if we fail, see bug above.
+    this._optimisticSlotAssignments$.next({
+      ...this._optimisticSlotAssignments$.value,
+      [spec.id]: element,
+    });
 
     await Promise.all(refreshes);
   }
