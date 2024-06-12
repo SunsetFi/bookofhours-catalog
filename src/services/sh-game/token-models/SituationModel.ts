@@ -8,6 +8,7 @@ import {
   tap,
 } from "rxjs";
 import {
+  APINetworkError,
   Aspects,
   Situation as ISituation,
   SituationState,
@@ -391,14 +392,23 @@ export class SituationModel extends TokenModel {
     await this._api.openTokenAtPath(this.path);
   }
 
-  async setSlotContents(slotId: string, token: ElementStackModel | null) {
+  async setSlotContents(
+    slotId: string,
+    token: ElementStackModel | null
+  ): Promise<boolean> {
     const slotPath = `${this.path}/${slotId}`;
     if (token) {
       if (token.spherePath !== slotPath) {
-        await token.moveToSphere(slotPath);
+        return await token.moveToSphere(slotPath);
       }
+
+      // We are already there, so just say we succeeded.
+      return true;
     } else {
       await this._api.evictTokenAtPath(slotPath);
+      // evict can't really fail beyond having the path not exist, and
+      // we want to throw for that.
+      return true;
     }
   }
 

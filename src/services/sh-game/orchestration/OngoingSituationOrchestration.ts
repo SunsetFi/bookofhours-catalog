@@ -66,25 +66,8 @@ export class OngoingSituationOrchestration
     this._subscription.unsubscribe();
   }
 
-  // private _label$: Observable<string | null> | null = null;
   get label$(): Observable<string | null> {
     return this._situation.label$;
-    // if (this._label$ == null) {
-    //   this._label$ = combineLatest([
-    //     this._situation.verbLabel$,
-    //     this._situation.recipeLabel$,
-    //   ]).pipe(
-    //     map(([situationLabel, recipeLabel]) => {
-    //       let label = recipeLabel ?? situationLabel;
-    //       if (label === ".") {
-    //         label = situationLabel;
-    //       }
-    //       return label;
-    //     })
-    //   );
-    // }
-
-    // return this._label$;
   }
 
   get description$(): Observable<string | null> {
@@ -168,14 +151,22 @@ export class OngoingSituationOrchestration
     spec: SphereSpec,
     element: ElementStackModel | null
   ): Promise<void> {
-    // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
-    try {
-      await this._situation.setSlotContents(spec.id, element);
-    } catch {
+    const setSlotContent = await this._situation.setSlotContents(
+      spec.id,
+      element
+    );
+
+    let refreshes: Promise<void>[] = [this._situation.refresh()];
+
+    if (!setSlotContent && element) {
+      // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
       console.warn(
-        "Failed to assign slot contents, but this is a known bug for ongoing situations.  Continuing..."
+        "Failed to set slot content for ongoing situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
       );
+
+      refreshes.push(element.refresh());
     }
-    await this._situation.refresh();
+
+    await Promise.all(refreshes);
   }
 }

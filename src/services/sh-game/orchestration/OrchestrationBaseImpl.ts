@@ -1,12 +1,11 @@
 import {
   Observable,
-  asapScheduler,
   combineLatest,
   distinctUntilChanged,
   map,
   switchMap,
-  observeOn,
   shareReplay,
+  of as observableOf,
 } from "rxjs";
 import {
   Aspects,
@@ -20,6 +19,7 @@ import { flatten, isEqual, omit, pick, sortBy, uniqBy } from "lodash";
 import { isNotNull } from "@/utils";
 import {
   EmptyObject$,
+  distinctUntilShallowArrayChanged,
   filterItemObservations,
   mapArrayItemsCached,
   observeAll,
@@ -55,46 +55,48 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   > | null = null;
   get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
     if (!this._slots$) {
-      // The sheer amount of observeAlls here is a bit concerning.
-      const slottedElementStacks = this.slotAssignments$.pipe(
-        // Sort the values to guarentee the order doesn't change on us and mess up our distinct check.
-        map((assignments) =>
-          Object.keys(assignments)
-            .sort()
-            .map((key) => assignments[key])
-            .filter(isNotNull)
-        ),
-        shareReplay(1)
-      );
       this._slots$ = combineLatest([
         this.situation$.pipe(map((s) => s?.verbId)),
         this.situation$.pipe(map((s) => s?.thresholds ?? [])),
-        // Cards can add slots too, so we need this mess to watch all assignments,
-        // get the elements, and get the slots.
-        // Honestly, it amazes me that this whole thing hasn't collapsed in on itself with the egregious
-        // chain of observables I am shoving into it.
-        // Update: We now have to track aspects as well.  Wonderful.
-        slottedElementStacks.pipe(
+        // Lots of data can come from slotted cards that affect what slots are available:
+        // - Aspects can select recipes
+        // - The cards themselves can add slots
+        this.slotAssignments$.pipe(
+          // Sort the values to guarentee the order doesn't change on us and mess up our distinct check.
           map((assignments) =>
-            assignments.map((x) => x.element$.pipe(switchMap((x) => x.slots$)))
+            Object.keys(assignments)
+              .sort()
+              .map((key) => assignments[key])
+              .filter(isNotNull)
           ),
-          observeAll()
-        ),
-        slottedElementStacks.pipe(
-          map((elements) => elements.map((x) => x.aspectsAndSelf$)),
-          observeAll(),
-          map((aspectsArray) =>
-            aspectsArray.reduce((a, b) => combineAspects(a, b), {} as Aspects)
-          )
+          distinctUntilShallowArrayChanged(),
+          switchMap((assignments) => {
+            // We want the slots added by cards
+            const slots$ = observableOf(assignments).pipe(
+              map((assignments) =>
+                assignments.map((x) =>
+                  x.element$.pipe(switchMap((x) => x.slots$))
+                )
+              ),
+              observeAll()
+            );
+
+            // We want the aspects of all the cards
+            const aspects$ = observableOf(assignments).pipe(
+              observeAll((element) => element.aspectsAndSelf$),
+              map((aspectsArray) =>
+                aspectsArray.reduce(
+                  (a, b) => combineAspects(a, b),
+                  {} as Aspects
+                )
+              )
+            );
+
+            return combineLatest([slots$, aspects$]);
+          })
         ),
       ]).pipe(
-        // The use of a shared slottedElementStacks here means we get 2 rapid updates from slotAssignments changing
-        // By default these are listened to with asyncScheduler, but that changes the order of our updates for some reason, leading
-        // to older values overriding newer values.
-        // What we really want is the null / concurrent scheduler, but this won't take null as an argument and the rxjs
-        // docs dont specify how else to get it.
-        observeOn(asapScheduler),
-        map(([verbId, situationThresholds, inputThresholds, aspects]) => {
+        map(([verbId, situationThresholds, [inputThresholds, aspects]]) => {
           if (!verbId) {
             return [];
           }

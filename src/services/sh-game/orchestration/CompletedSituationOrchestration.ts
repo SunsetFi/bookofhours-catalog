@@ -34,24 +34,8 @@ export class CompletedSituationOrchestration
 
   _dispose() {}
 
-  // private _label$: Observable<string | null> | null = null;
   get label$(): Observable<string | null> {
     return this._situation.label$;
-    // if (this._label$ == null) {
-    //   this._label$ = combineLatest([
-    //     this._situation.verbLabel$,
-    //     this._situation.recipeLabel$,
-    //   ]).pipe(
-    //     map(([situationLabel, recipeLabel]) => {
-    //       let label = recipeLabel ?? situationLabel;
-    //       if (label === ".") {
-    //         label = situationLabel;
-    //       }
-    //       return label;
-    //     })
-    //   );
-    // }
-    // return this._situation.verbLabel$;
   }
 
   get description$() {

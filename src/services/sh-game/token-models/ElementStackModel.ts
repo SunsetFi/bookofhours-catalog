@@ -322,7 +322,6 @@ export class ElementStackModel
   }
 
   async moveToSphere(spherePath: string) {
-    console.log("Moving element stack to sphere", this.id, spherePath);
     try {
       await this._api.updateTokenAtPath(this.path, {
         spherePath,
