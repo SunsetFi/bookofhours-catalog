@@ -107,8 +107,36 @@ export class RecipeOrchestration
     return this._recipe.label$;
   }
 
-  get description$(): Observable<string | null> {
-    return this._recipe.description$;
+  private _description$: Observable<string> | null = null;
+  get description$(): Observable<string> {
+    if (!this._description$) {
+      this._description$ = combineLatest([
+        this._situation$.pipe(
+          switchMapIfNotNull((situation) => situation?.verbId$),
+          switchMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
+        ),
+        this._recipe.description$,
+      ]).pipe(
+        map(([verb, recipeDescription]) => {
+          if (recipeDescription === ".") {
+            if (verb) {
+              return verb.description;
+            }
+
+            return "";
+          }
+
+          if (recipeDescription) {
+            return recipeDescription;
+          }
+
+          return "";
+        }),
+        shareReplay(1)
+      );
+    }
+
+    return this._description$;
   }
 
   private _recipe$: Observable<RecipeModel | null> | null = null;
@@ -150,38 +178,6 @@ export class RecipeOrchestration
 
   get situation$(): Observable<SituationModel | null> {
     return this._situation$;
-  }
-
-  private _startDescription$: Observable<string> | null = null;
-  get startDescription$(): Observable<string> {
-    if (!this._startDescription$) {
-      this._startDescription$ = combineLatest([
-        this._situation$.pipe(
-          switchMapIfNotNull((situation) => situation?.verbId$),
-          switchMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
-        ),
-        this._recipe.description$,
-      ]).pipe(
-        map(([verb, recipeDescription]) => {
-          if (recipeDescription === ".") {
-            if (verb) {
-              return verb.description;
-            }
-
-            return "";
-          }
-
-          if (recipeDescription) {
-            return recipeDescription;
-          }
-
-          return "";
-        }),
-        shareReplay(1)
-      );
-    }
-
-    return this._startDescription$;
   }
 
   private _availableSituations$: Observable<readonly SituationModel[]> | null =

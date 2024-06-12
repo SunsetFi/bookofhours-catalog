@@ -31,13 +31,7 @@ const OrchestrationSidebar = ({
   const requirements = useObservation(orchestration.requirements$) ?? {};
   const aspects = useObservation(orchestration.aspects$) ?? {};
 
-  const startDescription = useObservation(
-    () =>
-      isExecutableOrchestration(orchestration)
-        ? orchestration.startDescription$
-        : Null$,
-    [orchestration]
-  );
+  const description = useObservation(orchestration.description$);
 
   const notes =
     useObservation(
@@ -86,9 +80,9 @@ const OrchestrationSidebar = ({
           height: "100%",
         }}
       >
-        {startDescription && (
+        {description && (
           <GameTypography component="div" variant="body2">
-            {startDescription}
+            {description}
           </GameTypography>
         )}
         {/* TODO: Show all notes paginated */}

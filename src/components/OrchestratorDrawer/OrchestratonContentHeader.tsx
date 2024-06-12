@@ -36,7 +36,9 @@ const OrchestrationContentHeader = ({
             <ArrowBackIcon />
           </IconButton>
         )}
-        <Typography variant="h5">{title}</Typography>
+        <Typography variant="h5" sx={{ ml: 2 }}>
+          {title}
+        </Typography>
         <IconButton
           sx={{ ml: "auto" }}
           onClick={() => orchestrator.toggleDrawer()}

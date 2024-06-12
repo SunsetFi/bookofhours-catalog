@@ -72,7 +72,6 @@ export function isCompletedOrchestration(
 }
 
 export interface ExecutableOrchestration extends OrchestrationBase {
-  readonly startDescription$: Observable<string>;
   readonly canExecute$: Observable<boolean>;
   prepare(): Promise<boolean>;
   execute(): Promise<boolean>;

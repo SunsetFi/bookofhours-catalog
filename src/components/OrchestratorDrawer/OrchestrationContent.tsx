@@ -38,14 +38,6 @@ const OrchestrationContent = ({
 
   const situation = useObservation(orchestration.situation$);
 
-  const startDescription = useObservation(
-    () =>
-      isExecutableOrchestration(orchestration)
-        ? orchestration.startDescription$
-        : Null$,
-    [orchestration]
-  );
-
   // TODO: Show browsable notes
   // const notes =
   //   useObservation(
@@ -76,17 +68,13 @@ const OrchestrationContent = ({
 
   const timeRemaining =
     useObservation(situation?.timeRemaining$ ?? Null$) ?? Number.NaN;
-  const timeRemainingStr = timeRemaining.toFixed(1);
+
+  let timeRemainingStr: string | null = null;
+  if (isOngoingOrchestration(orchestration)) {
+    timeRemainingStr = timeRemaining.toFixed(1);
+  }
 
   let stackItems: React.ReactNode[] = [];
-
-  if (startDescription) {
-    stackItems.push(
-      <GameTypography key="startDescription" component="div" variant="h6">
-        {startDescription}
-      </GameTypography>
-    );
-  }
 
   if (description) {
     stackItems.push(
@@ -148,7 +136,7 @@ const OrchestrationContent = ({
 
   stackItems.push(
     <Stack key="actions" direction="row">
-      {!Number.isNaN(timeRemaining) && (
+      {timeRemainingStr && (
         <GameTypography key="timeRemaining" variant="h6" role="timer">
           {timeRemainingStr} seconds remain.
         </GameTypography>
