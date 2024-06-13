@@ -37,12 +37,12 @@ const StyledDrawer = styled(
 
 const OrchestratorDrawer = () => {
   const orchestrator = useDIDependency(Orchestrator);
-  const form = useObservation(orchestrator.form$);
+  const open = useObservation(orchestrator.open$);
   const orchestration = useObservation(orchestrator.orchestration$);
 
   return (
     <StyledDrawer
-      open={form === "drawer"}
+      open={open}
       anchor="right"
       variant="persistent"
       width={orchestration ? OrchestrationContentWidth : OrchestrationListWidth}

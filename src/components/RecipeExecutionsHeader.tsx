@@ -19,7 +19,7 @@ interface RecipeExecutionsHeaderProps {
 
 const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
   const orchestrator = useDIDependency(Orchestrator);
-  const form = useObservation(orchestrator.form$);
+  const open = useObservation(orchestrator.open$);
   const executingSituations =
     useObservation(orchestrator.executingSituations$) ?? [];
 
@@ -31,7 +31,7 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
     [orchestrator]
   );
 
-  if (form != null) {
+  if (open) {
     return null;
   }
 

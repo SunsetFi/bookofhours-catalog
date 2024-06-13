@@ -10,7 +10,6 @@ import ThemeProvider from "./theme";
 
 import AppRouter from "./services/history/AppRouter";
 
-import OrchestratorDialog from "./components/OrchestratorDialog";
 import UnlockTerrainDialog from "./components/UnlockTerrainDialog";
 import SearchDialog from "./components/SearchDialog";
 import Favicon from "./components/Favicon";
@@ -29,7 +28,6 @@ root.render(
           <ThemeProvider>
             <CssBaseline />
             <AppRoutes />
-            <OrchestratorDialog />
             <UnlockTerrainDialog />
             <SearchDialog />
           </ThemeProvider>

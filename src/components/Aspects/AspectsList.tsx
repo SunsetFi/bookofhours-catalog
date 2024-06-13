@@ -21,6 +21,7 @@ export interface AspectsListProps {
 const AspectsList = ({ sx, aspects, iconSize }: AspectsListProps) => {
   return (
     <Box
+      className="aspects-list"
       sx={{
         display: "flex",
         flexDirection: "row",

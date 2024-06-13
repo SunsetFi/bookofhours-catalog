@@ -7,6 +7,9 @@ import { Compendium } from "@/services/sh-compendium";
 import { Scheduler } from "@/services/scheduler";
 
 import { RunningSource } from "../sources/RunningSource";
+import { TokensSource } from "../sources/TokensSource";
+
+import { SituationModel } from "../token-models/SituationModel";
 
 import {
   Orchestration,
@@ -16,10 +19,6 @@ import {
 } from "./types";
 
 import { OrchestrationFactory } from "./OrchestrationFactory";
-import { SituationModel } from "../token-models/SituationModel";
-import { TokensSource } from "../sources/TokensSource";
-
-export type OrchestratorForm = "dialog" | "drawer";
 
 @injectable()
 @singleton()
@@ -28,7 +27,7 @@ export class Orchestrator {
     null
   );
 
-  private readonly _form$ = new BehaviorSubject<OrchestratorForm | null>(null);
+  private readonly _open$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     @inject(RunningSource) runningSource: RunningSource,
@@ -40,7 +39,8 @@ export class Orchestrator {
   ) {
     runningSource.isRunning$.subscribe((isRunning) => {
       if (!isRunning) {
-        this.close();
+        this._updateOrchestration(null);
+        this._open$.next(false);
       }
     });
   }
@@ -49,8 +49,8 @@ export class Orchestrator {
     return this._orchestration$;
   }
 
-  get form$(): Observable<OrchestratorForm | null> {
-    return this._form$;
+  get open$(): Observable<boolean> {
+    return this._open$;
   }
 
   private _executingSituations$: Observable<SituationModel[]> | null = null;
@@ -66,10 +66,10 @@ export class Orchestrator {
   }
 
   toggleDrawer() {
-    if (this._form$.value === "drawer") {
-      this._form$.next(null);
+    if (this._open$.value) {
+      this._open$.next(false);
     } else {
-      this._form$.next("drawer");
+      this._open$.next(true);
     }
   }
 
@@ -114,18 +114,11 @@ export class Orchestrator {
       }
     }
 
-    if (this._form$.value == null) {
-      this._form$.next("drawer");
-    }
+    this._open$.next(true);
   }
 
   closeOrchestration() {
     this._updateOrchestration(null);
-  }
-
-  close() {
-    this._orchestration$.next(null);
-    this._form$.next(null);
   }
 
   private async _updateOrchestration(orchestration: Orchestration | null) {
@@ -138,9 +131,5 @@ export class Orchestrator {
     }
 
     this._orchestration$.next(orchestration);
-
-    if (orchestration == null && this._form$.value === "dialog") {
-      this._form$.next(null);
-    }
   }
 }

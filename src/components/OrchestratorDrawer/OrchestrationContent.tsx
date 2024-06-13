@@ -1,6 +1,8 @@
 import React from "react";
 
-import { Box, Button, ButtonGroup, Divider, Stack } from "@mui/material";
+import { Button, ButtonGroup, Divider, Stack } from "@mui/material";
+
+import { mapValues } from "lodash";
 
 import { Null$ } from "@/observables";
 
@@ -21,8 +23,12 @@ import ElementStackIcon from "../Elements/ElementStackIcon";
 import GameTypography from "../GameTypography";
 import SituationSelectField from "../SituationSelectField";
 
+import AspectsList from "../Aspects/AspectsList";
+import ElementStackTray from "../Elements/ElementStackTray";
+
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
-import OrchestrationSlots from "../OrchestratorDialog/OrchestrationSlots";
+
+import OrchestrationSlots from "./OrchestrationSlots";
 
 export interface OrchestrationContentProps {
   onBack(): void;
@@ -37,6 +43,9 @@ const OrchestrationContent = ({
   const description = useObservation(orchestration.description$);
 
   const situation = useObservation(orchestration.situation$);
+
+  const requirements = useObservation(orchestration.requirements$) ?? {};
+  const aspects = useObservation(orchestration.aspects$) ?? {};
 
   // TODO: Show browsable notes
   // const notes =
@@ -100,9 +109,15 @@ const OrchestrationContent = ({
   //   );
   // }
 
-  if (content.length > 0) {
+  if (!isCompletedOrchestration(orchestration) && content.length > 0) {
     stackItems.push(
-      <Stack key="content" direction="row" flexWrap="wrap">
+      <Stack
+        key="content"
+        direction="row"
+        flexWrap="wrap"
+        gap={2}
+        justifyContent="center"
+      >
         {content.map((elementStack) => (
           <ElementStackIcon key={elementStack.id} elementStack={elementStack} />
         ))}
@@ -124,12 +139,37 @@ const OrchestrationContent = ({
     );
   }
 
+  if (Object.keys(requirements).length > 0) {
+    stackItems.push(
+      <AspectsList
+        sx={{ justifyContent: "center" }}
+        aspects={mapValues(
+          requirements,
+          (value, key) => `${aspects[key] ?? 0} / ${value}`
+        )}
+        iconSize={30}
+      />
+    );
+  }
+
   if (!isCompletedOrchestration(orchestration)) {
     stackItems.push(
       <OrchestrationSlots
         key="slots"
         sx={{ height: "100%" }}
         orchestration={orchestration}
+      />
+    );
+  } else {
+    stackItems.push(
+      <ElementStackTray
+        key="final-content"
+        sx={{
+          height: "100%",
+          justifyContent: "center",
+          alignContent: "center",
+        }}
+        elementStacks$={orchestration.content$}
       />
     );
   }
