@@ -1,17 +1,14 @@
 import React from "react";
 
-import { map } from "rxjs";
-
 import { Badge, IconButton, SxProps } from "@mui/material";
 
 import { PlayCircle } from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
-import { filterItemObservations } from "@/observables";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import { TokensSource, Orchestrator } from "@/services/sh-game";
+import { Orchestrator } from "@/services/sh-game";
 
 interface RecipeExecutionsHeaderProps {
   sx?: SxProps;
