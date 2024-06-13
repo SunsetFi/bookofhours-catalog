@@ -35,6 +35,7 @@ import {
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OrchestrationFactory } from "./OrchestrationFactory";
+import { tokenPathIsChildOf } from "@/utils";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -262,9 +263,9 @@ export class RecipeOrchestration
 
     var success = true;
     try {
-      // hack: Don't do this for fixedVerbs, they aren't focusable.
+      // hack: Only do this for things out in the world.
       // FIXME: Put this into the api mod logic.
-      if (!situation.path.startsWith("~/fixedVerbs")) {
+      if (tokenPathIsChildOf("~/library", situation.path)) {
         situation.focus();
       }
 

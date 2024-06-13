@@ -24,3 +24,21 @@ export function arrayShallowEquals<T>(a: readonly T[], b: readonly T[]) {
 
   return a.every((x, i) => x === b[i]);
 }
+
+const pathSplit = /[\/\!]/;
+export function tokenPathIsChildOf(parent: string, child: string) {
+  const parentParts = parent.split(pathSplit);
+  const childParts = child.split(pathSplit);
+
+  if (childParts.length < parentParts.length) {
+    return false;
+  }
+
+  for (let i = 0; i < parentParts.length; i++) {
+    if (parentParts[i] !== childParts[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}

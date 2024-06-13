@@ -14,7 +14,7 @@ import {
 } from "secrethistories-api";
 import { isEqual } from "lodash";
 
-import { isNotNull } from "@/utils";
+import { isNotNull, tokenPathIsChildOf } from "@/utils";
 
 import {
   filterItemObservations,
@@ -171,7 +171,9 @@ export class SituationModel extends TokenModel {
         filterItems((item) => item.elementId === "tlg.note"),
         filterItemObservations((item) =>
           item.path$.pipe(
-            map((path) => path.startsWith(`${this.path}/aureatenotessphere`))
+            map((path) =>
+              tokenPathIsChildOf(`${this.path}/aureatenotessphere`, path)
+            )
           )
         ),
         filterItems(isNotNull),
@@ -244,15 +246,8 @@ export class SituationModel extends TokenModel {
 
           for (const threshold of thresholds) {
             const searchPath = `${this.path}/${threshold.id}`;
-            const element = elementPathPairs.find(
-              ({ path }) =>
-                // We want to avoid cases where we can have thresholds with subset names,
-                // eg: 't', 't2'.
-                // Paths are tricky in that sometimes the '/' is left out for tokens, and '!' is the delimiter
-                // instead.  This happens for tokens in threshold spheres reliably, but future game behavior changes
-                // might break this as /! is also valid.
-                path.startsWith(`${searchPath}!`) ||
-                path.startsWith(`${searchPath}/`)
+            const element = elementPathPairs.find(({ path }) =>
+              tokenPathIsChildOf(searchPath, path)
             )?.item;
 
             thresholdContents[threshold.id] = element ?? null;
@@ -358,7 +353,7 @@ export class SituationModel extends TokenModel {
         filterItemObservations((item) =>
           item.path$.pipe(
             map((path) =>
-              path.startsWith(`${this.path}/situationstoragesphere`)
+              tokenPathIsChildOf(`${this.path}/situationstoragesphere`, path)
             )
           )
         ),
@@ -377,7 +372,7 @@ export class SituationModel extends TokenModel {
         filterItems((item) => item.elementId !== "tlg.note"),
         filterItemObservations((item) =>
           item.path$.pipe(
-            map((path) => path.startsWith(`${this.path}/outputsphere`))
+            map((path) => tokenPathIsChildOf(`${this.path}/outputsphere`, path))
           )
         ),
         shareReplay(1)

@@ -20,6 +20,7 @@ import { playerSpherePaths } from "@/spheres";
 import { TokensSource } from "../sources/TokensSource";
 
 import { isConnectedTerrainModel } from "./ConnectedTerrainModel";
+import { tokenPathIsChildOf } from "@/utils";
 
 @injectable()
 @singleton()
@@ -50,11 +51,13 @@ export class TokenVisibilityFactory {
   createVisibilityObservable(token$: Observable<Token>): Observable<boolean> {
     return combineLatest([token$, this._visiblePaths$]).pipe(
       map(([token, visiblePaths]) => {
-        if (playerSpherePaths.some((p) => token.path.startsWith(p))) {
+        if (
+          playerSpherePaths.some((path) => tokenPathIsChildOf(path, token.path))
+        ) {
           return true;
         }
 
-        if (visiblePaths.some((path) => token.path.startsWith(path))) {
+        if (visiblePaths.some((path) => tokenPathIsChildOf(path, token.path))) {
           return true;
         }
 

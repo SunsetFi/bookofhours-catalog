@@ -39,6 +39,7 @@ import {
 } from "../token-models/ElementStackModel";
 
 import { RunningSource } from "./RunningSource";
+import { tokenPathIsChildOf } from "@/utils";
 
 const supportedPayloadTypes = [
   "ConnectedTerrain",
@@ -102,7 +103,7 @@ export class TokensSource {
     if (this._fixedSituations$ == null) {
       this._fixedSituations$ = this._tokens$.pipe(
         filterItems(isSituationModel),
-        filterItems((x) => x.path.startsWith("~/fixedverbs")),
+        filterItems((x) => tokenPathIsChildOf("~/fixedverbs", x.path)),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
@@ -117,7 +118,9 @@ export class TokensSource {
     if (this._arrivalSituations$ == null) {
       this._arrivalSituations$ = this._tokens$.pipe(
         filterItems(isSituationModel),
-        filterItems((x) => x.path.startsWith("~/arrivalverbs")),
+        filterItems((situation) =>
+          tokenPathIsChildOf("~/arrivalverbs", situation.path)
+        ),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
@@ -225,7 +228,9 @@ export class TokensSource {
     if (!this._unlockedWorkstations$) {
       this._unlockedWorkstations$ = this._visibleTokens$.pipe(
         filterItems(isSituationModel),
-        filterItems((x) => x.path.startsWith("~/library")),
+        filterItems((situation) =>
+          tokenPathIsChildOf("~/library", situation.path)
+        ),
         map((situations) =>
           situations.filter(
             (x) =>
