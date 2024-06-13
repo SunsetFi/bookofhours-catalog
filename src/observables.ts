@@ -82,11 +82,9 @@ export function filterItemObservations<T, K extends T>(
 ) {
   return (source: Observable<readonly T[]>): Observable<K[]> => {
     return source.pipe(
-      mapArrayItemsCached((item) =>
+      observeAllMap((item) =>
         filter(item).pipe(map((isMatch) => ({ item, isMatch })))
       ),
-      distinctUntilShallowArrayChanged(),
-      observeAll(),
       map((items) =>
         items.filter(({ isMatch }) => isMatch).map(({ item }) => item as K)
       )
@@ -100,41 +98,36 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   };
 }
 
-export function observeAll<T>(): OperatorFunction<
-  readonly Observable<T>[],
-  T[]
->;
-export function observeAll<T, K>(
-  func: (value: T) => Observable<K>
-): OperatorFunction<readonly T[], K[]>;
-export function observeAll<T, K>(func?: (value: T) => Observable<K>) {
-  if (func) {
-    return (source: Observable<readonly T[]>) => {
-      return source.pipe(
-        map((inputs) => inputs.map((input) => func(input))),
-        distinctUntilShallowArrayChanged(),
-        switchMap((observables) => {
-          if (observables.length === 0) {
-            return observableOf([] as K[]);
-          }
+export function observeAll<T>() {
+  return (source: Observable<readonly Observable<T>[]>) => {
+    return source.pipe(
+      switchMap((observables) => {
+        if (observables.length === 0) {
+          return observableOf([] as T[]);
+        }
 
-          return combineLatest(observables);
-        })
-      );
-    };
-  } else {
-    return (source: Observable<readonly Observable<T>[]>) => {
-      return source.pipe(
-        switchMap((observables) => {
-          if (observables.length === 0) {
-            return observableOf([] as T[]);
-          }
+        return combineLatest(observables);
+      })
+    );
+  };
+}
 
-          return combineLatest(observables);
-        })
-      );
-    };
-  }
+export function observeAllMap<T, K>(
+  func: (value: T, index: number) => Observable<K>
+): OperatorFunction<readonly T[], K[]> {
+  return (source: Observable<readonly T[]>) => {
+    return source.pipe(
+      mapArrayItemsCached((input, index) => func(input, index)),
+      distinctUntilShallowArrayChanged(),
+      switchMap((observables) => {
+        if (observables.length === 0) {
+          return observableOf([] as K[]);
+        }
+
+        return combineLatest(observables);
+      })
+    );
+  };
 }
 
 export function mapArrayItems<T, K>(mapping: (item: T) => K) {

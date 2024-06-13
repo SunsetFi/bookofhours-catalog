@@ -1,13 +1,7 @@
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  map,
-  shareReplay,
-} from "rxjs";
+import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
 import { Aspects, combineAspects } from "secrethistories-api";
 
-import { EmptyObject$, observeAll } from "@/observables";
+import { EmptyObject$, observeAllMap } from "@/observables";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
@@ -74,8 +68,7 @@ export class CompletedSituationOrchestration
   get aspects$(): Observable<Readonly<Aspects>> {
     if (!this._aspects$) {
       this._aspects$ = this._situation.output$.pipe(
-        map((output) => output.map((o) => o.aspects$)),
-        observeAll(),
+        observeAllMap((output) => output.aspects$),
         map((aspects) => aspects.reduce((a, b) => combineAspects(a, b), {})),
         shareReplay(1)
       );

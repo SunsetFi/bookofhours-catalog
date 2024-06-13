@@ -11,8 +11,7 @@ import { Container, inject, injectable, singleton } from "microinject";
 import {
   distinctUntilShallowArrayChanged,
   filterItems,
-  mapArrayItemsCached,
-  observeAll,
+  observeAllMap,
 } from "@/observables";
 
 import { TokensSource } from "../sources/TokensSource";
@@ -37,10 +36,7 @@ export class TokenParentTerrainFactory {
       this.__terrainsByPath$ = this._container.get(TokensSource).tokens$.pipe(
         filterItems(isConnectedTerrainModel),
         distinctUntilShallowArrayChanged(),
-        mapArrayItemsCached((t) =>
-          t.path$.pipe(map((path) => [path, t] as const))
-        ),
-        observeAll(),
+        observeAllMap((t) => t.path$.pipe(map((path) => [path, t] as const))),
         map((items) => Object.fromEntries(items)),
         shareReplay(1)
       );

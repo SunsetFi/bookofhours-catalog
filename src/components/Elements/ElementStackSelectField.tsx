@@ -10,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import InputAdornment from "@mui/material/InputAdornment";
 
-import { observeAll } from "@/observables";
+import { observeAllMap } from "@/observables";
 
 import { ElementStackModel } from "@/services/sh-game";
 
@@ -38,7 +38,7 @@ interface ElementStackAutocompleteItem {
   exterior: boolean;
 }
 
-function observeElementAutocomplete(
+function observeAutocompleteItem(
   model: ElementStackModel
 ): Observable<ElementStackAutocompleteItem> {
   return combineLatest([model.label$, model.inExteriorSphere$]).pipe(
@@ -60,31 +60,27 @@ const ElementStackSelectField = ({
   readOnly,
   onChange,
 }: ElementStackSelectFieldProps) => {
-  let elementStacks =
+  let items =
     useObservation(
-      () =>
-        elementStacks$.pipe(
-          map((items) => items.map(observeElementAutocomplete)),
-          observeAll()
-        ),
+      () => elementStacks$.pipe(observeAllMap(observeAutocompleteItem)),
       [elementStacks$]
     ) ?? null;
 
-  if (!elementStacks) {
+  if (!items) {
     return <CircularProgress />;
   }
 
-  elementStacks = elementStacks.filter((x) => x.label != null) ?? null;
+  items = items.filter((x) => x.label != null) ?? null;
 
   const selectedValue =
-    elementStacks.find(({ elementStack }) => elementStack === value) ?? null;
+    items.find(({ elementStack }) => elementStack === value) ?? null;
 
   const selectedElementId = selectedValue?.elementStack.elementId ?? null;
 
   return (
     <Autocomplete
       fullWidth={fullWidth}
-      options={elementStacks}
+      options={items}
       readOnly={readOnly}
       autoHighlight
       getOptionLabel={(option) => option.label!}

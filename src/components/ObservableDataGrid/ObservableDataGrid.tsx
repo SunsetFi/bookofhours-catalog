@@ -42,7 +42,7 @@ import {
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { Null$, mapArrayItemsCached, observeAll } from "@/observables";
+import { Null$, observeAllMap } from "@/observables";
 import { decorateObjectInstance } from "@/object-decorator";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -216,8 +216,7 @@ function ObservableDataGrid<T extends {}>({
   const data = useObservation(
     () =>
       items$.pipe(
-        mapArrayItemsCached((item, index) => itemToRow(item, index, columns)),
-        observeAll()
+        observeAllMap((item, index) => itemToRow(item, index, columns))
       ),
     [items$, columns],
     {

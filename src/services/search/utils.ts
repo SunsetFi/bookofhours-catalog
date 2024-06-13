@@ -3,17 +3,16 @@ import { Observable, combineLatest, map, filter } from "rxjs";
 import { ElementStackModel } from "../sh-game";
 
 import { PageSearchItemResult } from "./types";
-import { mapArrayItemsCached, observeAll } from "@/observables";
+import { observeAllMap } from "@/observables";
 
 export function mapElementStacksToSearchItems(
   produceQuery: (elementStack: ElementStackModel) => Observable<string | null>
 ) {
   return (source: Observable<ElementStackModel[]>) => {
     return source.pipe(
-      mapArrayItemsCached((elementStack) =>
+      observeAllMap((elementStack) =>
         elementStackToSearchItem(elementStack, produceQuery)
-      ),
-      observeAll()
+      )
     );
   };
 }

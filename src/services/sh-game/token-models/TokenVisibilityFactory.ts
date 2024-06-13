@@ -12,8 +12,7 @@ import {
   distinctUntilShallowArrayChanged,
   filterItemObservations,
   filterItems,
-  mapArrayItems,
-  observeAll,
+  observeAllMap,
 } from "@/observables";
 
 import { playerSpherePaths } from "@/spheres";
@@ -40,8 +39,7 @@ export class TokenVisibilityFactory {
             map(([shrouded, sealed]) => !shrouded && !sealed)
           )
         ),
-        mapArrayItems((t) => t.path$),
-        observeAll(),
+        observeAllMap((t) => t.path$),
         shareReplay(1)
       );
     }

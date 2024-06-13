@@ -1,10 +1,6 @@
 import { Observable, combineLatest, filter, map, switchMap } from "rxjs";
 
-import {
-  filterItemObservations,
-  mapArrayItemsCached,
-  observeAll,
-} from "@/observables";
+import { filterItemObservations, observeAllMap } from "@/observables";
 
 import {
   PageSearchItemResult,
@@ -24,8 +20,7 @@ export const craftingSearchProvider: PageSearchProviderPipe = (
     switchMap((query) =>
       getCraftablesObservable(container).pipe(
         filterItemObservations((item) => filterCraftableToQuery(query, item)),
-        mapArrayItemsCached((item) => craftableModelToSearchItem(item)),
-        observeAll()
+        observeAllMap(craftableModelToSearchItem)
       )
     )
   );

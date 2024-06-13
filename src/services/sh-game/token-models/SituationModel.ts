@@ -5,10 +5,8 @@ import {
   distinctUntilChanged,
   map,
   shareReplay,
-  tap,
 } from "rxjs";
 import {
-  APINetworkError,
   Aspects,
   Situation as ISituation,
   SituationState,
@@ -18,7 +16,11 @@ import { isEqual } from "lodash";
 
 import { isNotNull } from "@/utils";
 
-import { filterItemObservations, filterItems, observeAll } from "@/observables";
+import {
+  filterItemObservations,
+  filterItems,
+  observeAllMap,
+} from "@/observables";
 
 import { API } from "../../sh-api";
 
@@ -231,12 +233,9 @@ export class SituationModel extends TokenModel {
       this._thresholdContents$ = combineLatest([
         this.thresholds$,
         this._elementStacks$.pipe(
-          map((items) =>
-            items.map((item) =>
-              item.path$.pipe(map((path) => ({ item, path })))
-            )
-          ),
-          observeAll()
+          observeAllMap((item) =>
+            item.path$.pipe(map((path) => ({ item, path })))
+          )
         ),
       ]).pipe(
         map(([thresholds, elementPathPairs]) => {

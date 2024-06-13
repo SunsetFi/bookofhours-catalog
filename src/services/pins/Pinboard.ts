@@ -8,12 +8,7 @@ import {
 } from "rxjs";
 import { intersection } from "lodash";
 
-import {
-  mapArrayItems,
-  mapArrayItemsCached,
-  switchMapIfNotNull,
-  observeAll,
-} from "@/observables";
+import { switchMapIfNotNull, observeAllMap } from "@/observables";
 
 import { Compendium, RecipeModel } from "../sh-compendium";
 
@@ -55,10 +50,7 @@ export class Pinboard {
   get pinnedAspects$() {
     if (!this._pinnedAspects$) {
       this._pinnedAspects$ = combineLatest([
-        this._pins$.pipe(
-          mapArrayItems((x) => x.aspects$),
-          observeAll()
-        ),
+        this._pins$.pipe(observeAllMap((x) => x.aspects$)),
         this.pinnedRecipe$.pipe(switchMapIfNotNull((r) => r.requirements$)),
       ]).pipe(
         map(([aspectArray, recipeReqs]) => {
@@ -124,8 +116,7 @@ export class Pinboard {
 
   isElementPinned$(elementId: string) {
     return this._pins$.pipe(
-      mapArrayItemsCached((x) => x.elementId$),
-      observeAll(),
+      observeAllMap((x) => x.elementId$),
       map((items) => items.includes(elementId)),
       shareReplay(1)
     );

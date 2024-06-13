@@ -12,7 +12,7 @@ import {
 import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
 import { flatten } from "lodash";
 
-import { switchMapIfNotNull, observeAll } from "@/observables";
+import { switchMapIfNotNull, observeAllMap } from "@/observables";
 import { workstationFilterAspects } from "@/aspects";
 
 import {
@@ -76,8 +76,7 @@ export class RecipeOrchestration
     this._desiredElementThresholds$ = new BehaviorSubject(
       _desiredElements
     ).pipe(
-      map((items) => items.map((item) => item.slots$)),
-      observeAll(),
+      observeAllMap((item) => item.slots$),
       map((items) => flatten(items)),
       shareReplay(1)
     );

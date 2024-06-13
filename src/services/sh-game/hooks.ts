@@ -1,7 +1,5 @@
-import { map } from "rxjs";
-
 import { useDIDependency } from "@/container";
-import { observeAll } from "@/observables";
+import { observeAllMap } from "@/observables";
 
 import { useObservation } from "@/hooks/use-observation";
 
@@ -12,8 +10,7 @@ export function useUnlockedLocationLabels() {
   return useObservation(
     () =>
       tokensSource.unlockedTerrains$.pipe(
-        map((terrains) => terrains.map((terrain) => terrain.label$)),
-        observeAll()
+        observeAllMap((terrain) => terrain.label$)
       ),
     [tokensSource]
   );
