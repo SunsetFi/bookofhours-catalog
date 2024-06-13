@@ -13,6 +13,7 @@ export interface TooltipProps {
   sx?: SxProps;
   children: React.ReactNode;
   title: React.ReactNode;
+  disabled?: boolean;
 }
 
 /**
@@ -22,7 +23,7 @@ export interface TooltipProps {
  * - Auto open on delay (again, for ARIA support)
  * - Automatic resizing and repositioning for popped content changes.
  */
-const Tooltip = ({ sx, children, title }: TooltipProps) => {
+const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   const id = React.useId();
 
   const popperRef = React.useRef<PopperInstance>(null);
@@ -63,7 +64,8 @@ const Tooltip = ({ sx, children, title }: TooltipProps) => {
     popperRef.current.update();
   });
 
-  const open = mouseOver || (immediateFocus && delayedFocus) || false;
+  const open =
+    (!disabled && mouseOver) || (immediateFocus && delayedFocus) || false;
 
   return (
     <>

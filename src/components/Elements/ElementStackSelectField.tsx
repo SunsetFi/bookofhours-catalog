@@ -20,6 +20,8 @@ import AspectsList from "../Aspects/AspectsList";
 
 import ElementStackDetails from "./ElementStackDetails";
 import ElementIcon from "./ElementIcon";
+import { useDrop } from "react-dnd";
+import { ElementStackDraggable } from "@/draggables/element-stack";
 
 export interface ElementStackSelectFieldProps {
   label: string;
@@ -66,14 +68,40 @@ const ElementStackSelectField = ({
       [elementStacks$]
     ) ?? null;
 
+  const [{ canDrop, isOver, dropElementStack }, drop] = useDrop(
+    () => ({
+      accept: ElementStackDraggable,
+      canDrop: (item: ElementStackDraggable) =>
+        items?.some((x) => x.elementStack === item.elementStack) ?? false,
+      drop: (item: ElementStackDraggable) => {
+        if (items?.some((x) => x.elementStack === item.elementStack)) {
+          onChange(item.elementStack);
+        }
+      },
+      collect: (monitor) => ({
+        canDrop: monitor.canDrop(),
+        isOver: monitor.isOver(),
+        dropElementStack:
+          monitor.getItem<ElementStackDraggable>()?.elementStack,
+      }),
+    }),
+    [items]
+  );
+
   if (!items) {
     return <CircularProgress />;
   }
 
   items = items.filter((x) => x.label != null) ?? null;
 
-  const selectedValue =
+  let selectedValue =
     items.find(({ elementStack }) => elementStack === value) ?? null;
+
+  if (canDrop && isOver && dropElementStack) {
+    selectedValue =
+      items.find(({ elementStack }) => elementStack === dropElementStack) ??
+      null;
+  }
 
   const selectedElementId = selectedValue?.elementStack.elementId ?? null;
 
@@ -87,7 +115,17 @@ const ElementStackSelectField = ({
       getOptionDisabled={(option) => requireExterior && !option.exterior}
       renderInput={(params) => (
         <TextField
+          ref={drop}
           {...params}
+          sx={{
+            ["& .MuiOutlinedInput-root"]: {
+              ["& fieldset"]: {
+                ...(canDrop && {
+                  borderColor: "primary.main",
+                }),
+              },
+            },
+          }}
           label={label}
           InputProps={{
             ...params.InputProps,

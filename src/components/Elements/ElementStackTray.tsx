@@ -7,7 +7,8 @@ import type { SxProps } from "@mui/material/styles";
 import { useObservation } from "@/hooks/use-observation";
 
 import { ElementStackModel } from "@/services/sh-game";
-import ElementStackTrayCard from "./ElementStackTrayCard";
+
+import ElementStackCard from "./ElementStackCard";
 
 export interface ElementStackTrayProps {
   sx?: SxProps;
@@ -35,10 +36,7 @@ const ElementStackTray = ({ elementStacks$, sx }: ElementStackTrayProps) => {
       }}
     >
       {elementStacks.map((elementStack) => (
-        <ElementStackTrayCard
-          key={elementStack.id}
-          elementStack={elementStack}
-        />
+        <ElementStackCard key={elementStack.id} elementStack={elementStack} />
       ))}
     </Box>
   );

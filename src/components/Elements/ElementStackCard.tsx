@@ -4,15 +4,20 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useTheme, type SxProps } from "@mui/material/styles";
 
+import { useDrag } from "react-dnd";
+
 import { useObservation } from "@/hooks/use-observation";
+
+import { ElementStackDraggable } from "@/draggables/element-stack";
 
 import { ElementStackModel } from "@/services/sh-game";
 
-import Tooltip from "../../Tooltip";
-import AutosizeTypography from "../../AutosizeText";
-import ElementStackDetails from "../ElementStackDetails";
+import Tooltip from "../Tooltip";
+import AutosizeTypography from "../AutosizeText";
 
-export interface ElementStackTrayCardProps {
+import ElementStackDetails from "./ElementStackDetails";
+
+export interface ElementStackCardProps {
   sx?: SxProps;
   elementStack: ElementStackModel;
   width?: number;
@@ -24,17 +29,25 @@ const aspectRatio = 1.59;
 
 const textBackgroundColor = "#444";
 
-const ElementStackTrayCard = ({
+const ElementStackCard = ({
   elementStack,
   width = 125,
   sx,
-}: ElementStackTrayCardProps) => {
+}: ElementStackCardProps) => {
   const theme = useTheme();
   const widthPx = `${width}px`;
 
   const iconUrl = useObservation(elementStack.iconUrl$);
   const label = useObservation(elementStack.label$) ?? "";
   const quantity = useObservation(elementStack.quantity$) ?? 0;
+
+  const [{ isDragging }, dragRef] = useDrag(() => ({
+    type: ElementStackDraggable,
+    item: { elementStack } satisfies ElementStackDraggable,
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
 
   if (!iconUrl) {
     return null;
@@ -44,9 +57,11 @@ const ElementStackTrayCard = ({
     <Tooltip
       sx={sx}
       title={<ElementStackDetails elementStack={elementStack} />}
+      disabled={isDragging}
     >
       <Box sx={{ position: "relative" }}>
         <Box
+          ref={dragRef}
           sx={{
             borderRadius: 2,
             display: "flex",
@@ -55,6 +70,10 @@ const ElementStackTrayCard = ({
             height: `${width * aspectRatio}px`,
             backgroundColor: textBackgroundColor,
             overflow: "hidden",
+            ...(isDragging && {
+              borderWidth: 3,
+              borderColor: theme.palette.primary.main,
+            }),
           }}
         >
           <Box
@@ -125,4 +144,4 @@ const ElementStackTrayCard = ({
   );
 };
 
-export default ElementStackTrayCard;
+export default ElementStackCard;

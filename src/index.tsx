@@ -3,6 +3,9 @@ import "@/style.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+
 import CssBaseline from "@mui/material/CssBaseline";
 
 import { ContainerProvider } from "./container";
@@ -22,17 +25,19 @@ const root = ReactDOM.createRoot(rootEl!);
 root.render(
   <React.StrictMode>
     <ContainerProvider>
-      <Hotkeys>
-        <AppRouter>
-          <Favicon />
-          <ThemeProvider>
-            <CssBaseline />
-            <AppRoutes />
-            <UnlockTerrainDialog />
-            <SearchDialog />
-          </ThemeProvider>
-        </AppRouter>
-      </Hotkeys>
+      <DndProvider backend={HTML5Backend}>
+        <Hotkeys>
+          <AppRouter>
+            <Favicon />
+            <ThemeProvider>
+              <CssBaseline />
+              <AppRoutes />
+              <UnlockTerrainDialog />
+              <SearchDialog />
+            </ThemeProvider>
+          </AppRouter>
+        </Hotkeys>
+      </DndProvider>
     </ContainerProvider>
   </React.StrictMode>
 );
