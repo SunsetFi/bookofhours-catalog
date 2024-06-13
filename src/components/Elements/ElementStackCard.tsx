@@ -41,13 +41,16 @@ const ElementStackCard = ({
   const label = useObservation(elementStack.label$) ?? "";
   const quantity = useObservation(elementStack.quantity$) ?? 0;
 
-  const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: ElementStackDraggable,
-    item: { elementStack } satisfies ElementStackDraggable,
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
+  const [{ isDragging }, dragRef] = useDrag(
+    () => ({
+      type: ElementStackDraggable,
+      item: { elementStack } satisfies ElementStackDraggable,
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
     }),
-  }));
+    [elementStack]
+  );
 
   if (!iconUrl) {
     return null;
@@ -70,10 +73,6 @@ const ElementStackCard = ({
             height: `${width * aspectRatio}px`,
             backgroundColor: textBackgroundColor,
             overflow: "hidden",
-            ...(isDragging && {
-              borderWidth: 3,
-              borderColor: theme.palette.primary.main,
-            }),
           }}
         >
           <Box

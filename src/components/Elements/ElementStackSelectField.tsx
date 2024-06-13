@@ -1,6 +1,7 @@
 import React from "react";
 import { Observable, combineLatest, map } from "rxjs";
 import { pick } from "lodash";
+import { useDrop } from "react-dnd";
 
 import Popper from "@mui/material/Popper";
 import Box from "@mui/material/Box";
@@ -12,6 +13,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 
 import { observeAllMap } from "@/observables";
 
+import { ElementStackDraggable } from "@/draggables/element-stack";
+
 import { ElementStackModel } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -20,8 +23,6 @@ import AspectsList from "../Aspects/AspectsList";
 
 import ElementStackDetails from "./ElementStackDetails";
 import ElementIcon from "./ElementIcon";
-import { useDrop } from "react-dnd";
-import { ElementStackDraggable } from "@/draggables/element-stack";
 
 export interface ElementStackSelectFieldProps {
   label: string;
