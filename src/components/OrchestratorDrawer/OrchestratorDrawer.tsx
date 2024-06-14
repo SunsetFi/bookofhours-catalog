@@ -40,6 +40,12 @@ const OrchestratorDrawer = () => {
   const open = useObservation(orchestrator.open$);
   const orchestration = useObservation(orchestrator.orchestration$);
 
+  // Getting some frames where open is undefined, causing the drawer to think its closed, and resulting in
+  // it rerunning its animation when it realizes it is open.
+  if (open === undefined) {
+    return null;
+  }
+
   return (
     <StyledDrawer
       open={open}
