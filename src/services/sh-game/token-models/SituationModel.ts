@@ -393,13 +393,18 @@ export class SituationModel extends TokenModel {
     const slotPath = `${this.path}/${slotId}`;
     if (token) {
       if (token.spherePath !== slotPath) {
-        return await token.moveToSphere(slotPath);
+        const success = await token.moveToSphere(slotPath);
+        if (success) {
+          await this.refresh();
+        }
+        return success;
       }
 
       // We are already there, so just say we succeeded.
       return true;
     } else {
       await this._api.evictTokenAtPath(slotPath);
+      await this.refresh();
       // evict can't really fail beyond having the path not exist, and
       // we want to throw for that.
       return true;

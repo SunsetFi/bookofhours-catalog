@@ -36,6 +36,8 @@ export class UnstartedSituationOrchestration
   extends OrchestrationBaseImpl
   implements VariableSituationOrchestration, ExecutableOrchestration
 {
+  private readonly _situationStateSubscription: Subscription;
+
   private readonly _situation$ = new BehaviorSubject<SituationModel | null>(
     null
   );
@@ -47,6 +49,8 @@ export class UnstartedSituationOrchestration
 
   private readonly _recipe$: Observable<RecipeModel | null>;
 
+  private _isExecuting = false;
+
   constructor(
     situation: SituationModel | null,
     tokensSource: TokensSource,
@@ -57,6 +61,18 @@ export class UnstartedSituationOrchestration
     ) => void
   ) {
     super(tokensSource);
+
+    this._situationStateSubscription = this._situation$
+      .pipe(switchMap((s) => s?.state$ ?? Null$))
+      .subscribe((state) => {
+        if (this._isExecuting) {
+          return;
+        }
+
+        if (state !== "Unstarted") {
+          this._situation$.next(null);
+        }
+      });
 
     this._situation$.next(situation);
 
@@ -85,6 +101,7 @@ export class UnstartedSituationOrchestration
   }
 
   _dispose(): void {
+    this._situationStateSubscription.unsubscribe();
     this._slotAssigmentsSubscription.unsubscribe();
   }
 
@@ -163,13 +180,18 @@ export class UnstartedSituationOrchestration
   protected get slotAssignments$(): Observable<
     Readonly<Record<string, ElementStackModel | null>>
   > {
-    if (!this._slotAssignments$) {
-      this._slotAssignments$ = this._situation$.pipe(
-        switchMap((s) => s?.thresholdContents$ ?? EmptyObject$)
-      );
-    }
+    // FIXME: This is indicative of something janky with our observables, as
+    // thresholdContents should be immediately updated when the card slotting optimistically updates
+    // its sphere path.
+    // Even with this hack, we still get flickers and update lag.
+    return this._optimisticSlotAssignments$;
+    // if (!this._slotAssignments$) {
+    //   this._slotAssignments$ = this._situation$.pipe(
+    //     switchMap((s) => s?.thresholdContents$ ?? EmptyObject$)
+    //   );
+    // }
 
-    return this._slotAssignments$;
+    // return this._slotAssignments$;
   }
 
   selectSituation(situation: SituationModel | null): void {
@@ -217,18 +239,40 @@ export class UnstartedSituationOrchestration
   }
 
   async execute(): Promise<boolean> {
-    const situation = await firstValueFrom(this._situation$);
-    if (!situation) {
+    if (this._isExecuting) {
       return false;
     }
 
-    // Don't need to do this, mod api will tell us if it succeeds.
-    // const canExecute = firstValueFrom(this.canExecute$);
-    // if (!canExecute) {
-    //   return false;
-    // }
+    this._isExecuting = true;
+    let executed = false;
+    try {
+      const situation = await firstValueFrom(this._situation$);
+      if (!situation) {
+        return false;
+      }
 
-    return situation.execute();
+      // Don't need to do this, mod api will tell us if it succeeds.
+      // const canExecute = firstValueFrom(this.canExecute$);
+      // if (!canExecute) {
+      //   return false;
+      // }
+
+      // Unsubscribe from our watcher so we dont flicker and remove the orchestration before establishing the ongoing one
+      executed = await situation.execute();
+
+      if (executed) {
+        this._replaceOrchestration(
+          this._orchestrationFactory.createOngoingOrchestration(
+            situation,
+            this._replaceOrchestration
+          )
+        );
+      }
+    } finally {
+      this._isExecuting = false;
+    }
+
+    return executed;
   }
 
   protected _filterSlotCandidates(
@@ -249,15 +293,13 @@ export class UnstartedSituationOrchestration
 
     const setSlotContent = await situation.setSlotContents(spec.id, element);
 
-    let refreshes: Promise<void>[] = [situation.refresh()];
-
     if (!setSlotContent && element) {
       // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
       console.warn(
         "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
       );
 
-      refreshes.push(element.refresh());
+      await element.refresh();
     }
 
     // Do this even if we fail, see bug above.
@@ -265,7 +307,5 @@ export class UnstartedSituationOrchestration
       ...this._optimisticSlotAssignments$.value,
       [spec.id]: element,
     });
-
-    await Promise.all(refreshes);
   }
 }
