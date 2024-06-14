@@ -45,7 +45,7 @@ const BookCatalogPage = () => {
           );
         },
       }),
-      columnHelper.elementIcon(),
+      columnHelper.elementStackIcon(),
       columnHelper.label(),
       columnHelper.location(),
       columnHelper.aspectsList("mystery", (s) => s.startsWith("mystery."), {

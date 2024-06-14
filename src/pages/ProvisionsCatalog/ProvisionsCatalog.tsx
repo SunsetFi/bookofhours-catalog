@@ -48,7 +48,7 @@ const ProvisionsCatalog = () => {
           </Box>
         ),
       }),
-      columnHelper.elementIcon(),
+      columnHelper.elementStackIcon(),
       columnHelper.label(),
       columnHelper.location(),
       columnHelper.aspectsList("type", provisionsAspects, {

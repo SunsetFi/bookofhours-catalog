@@ -17,13 +17,13 @@ import {
 } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
+import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import ObservableDataGrid, {
   createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid";
-import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 const columnHelper = createElementStackColumnHelper();
 
@@ -65,7 +65,7 @@ const columns = [
     size: 30,
     cell: (context) => <SkillUpgradeButton model={context.row.original} />,
   }),
-  columnHelper.elementIcon(),
+  columnHelper.elementStackIcon(),
   columnHelper.label({
     header: "Skill",
     size: 200,

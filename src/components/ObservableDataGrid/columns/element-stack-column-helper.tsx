@@ -1,13 +1,17 @@
 import React from "react";
 import { IdentifiedColumnDef } from "@tanstack/react-table";
 import { Observable, map } from "rxjs";
-import { mapValues, pick, pickBy } from "lodash";
+import { pick, pickBy } from "lodash";
 
 import { switchMapIfNotNull } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
 
+import { undecorateObjectInstance } from "@/object-decorator";
+
 import { ElementStackModel } from "@/services/sh-game";
 import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
+
+import ElementStackIcon from "@/components/Elements/ElementStackIcon";
 
 import {
   MultiselectOptionsFilter,
@@ -16,7 +20,9 @@ import {
   TextFilter,
 } from "../filters";
 
-import { AspectsListCell, TextWrapCell, ElementIconCell } from "../cells";
+import { AspectsListCell, TextWrapCell } from "../cells";
+
+import { RowHeight, RowPaddingY } from "../constants";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
 
@@ -38,13 +44,21 @@ export function createElementStackColumnHelper<
         },
         ...def,
       }),
-    elementIcon: () =>
-      columnHelper.observe("elementId$" as any, {
+    elementStackIcon: () =>
+      columnHelper.display({
         id: "icon",
         header: "",
         size: 100,
         enableSorting: false,
-        cell: ElementIconCell,
+        cell: (context) => (
+          <ElementStackIcon
+            maxWidth={75}
+            maxHeight={RowHeight - RowPaddingY * 2}
+            // This is a hack as most tables decorate the instance, causing the drag and drop code
+            // to get confused, as it does object references.
+            elementStack={undecorateObjectInstance(context.row.original)}
+          />
+        ),
       }),
     aspectsList: (
       id: string,

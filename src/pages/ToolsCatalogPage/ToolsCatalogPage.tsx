@@ -46,7 +46,7 @@ const ToolsCatalogPage = () => {
           </Box>
         ),
       }),
-      columnHelper.elementIcon(),
+      columnHelper.elementStackIcon(),
       columnHelper.label(),
       columnHelper.location(),
       columnHelper.aspectsList("power-aspects", powerAspects, {

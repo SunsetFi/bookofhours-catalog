@@ -104,6 +104,10 @@ export class OngoingSituationOrchestration
   }
 
   get slotAssignments$() {
+    // FIXME: This is indicative of something janky with our observables, as
+    // thresholdContents should be immediately updated when the card slotting optimistically updates
+    // its sphere path.
+    // Even with this hack, we still get flickers and update lag.
     return this._optimisticSlotAssignments$;
   }
 
