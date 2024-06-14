@@ -26,7 +26,7 @@ export function createSituationColumnHelper<
   const columnHelper = createObservableColumnHelper<T>();
   return Object.assign(columnHelper, {
     label: (def?: Partial<IdentifiedColumnDef<T, string | null>>) =>
-      columnHelper.observe("label$" as any, {
+      columnHelper.observe("verbLabel$" as any, {
         id: "label",
         size: 200,
         header: "Name",
@@ -94,7 +94,7 @@ export function createSituationColumnHelper<
         }
       ),
     description: () =>
-      columnHelper.observe("description$" as any, {
+      columnHelper.observe("verbDescription$" as any, {
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
         enableSorting: false,

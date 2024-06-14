@@ -16,6 +16,7 @@ import { Orchestration } from "./types";
 import { RecipeOrchestration } from "./RecipeOrchestration";
 import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
 import { CompletedSituationOrchestration } from "./CompletedSituationOrchestration";
+import { UnstartedSituationOrchestration } from "./UnstartedSituationOrchestration";
 
 @injectable()
 @singleton()
@@ -25,6 +26,19 @@ export class OrchestrationFactory {
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(TimeSource) private readonly _timeSource: TimeSource
   ) {}
+
+  createUnstartedOrchestration(
+    defaultSituation: SituationModel | null,
+    updateOrchestration: (orchestration: Orchestration | null) => void
+  ) {
+    return new UnstartedSituationOrchestration(
+      defaultSituation ?? null,
+      this._tokensSource,
+      this._compendium,
+      this,
+      updateOrchestration
+    );
+  }
 
   createRecipeOrchestration(
     recipe: RecipeModel,
@@ -48,7 +62,6 @@ export class OrchestrationFactory {
     return new OngoingSituationOrchestration(
       situation,
       this._tokensSource,
-      this._compendium,
       this._timeSource,
       this,
       updateOrchestration
@@ -59,10 +72,6 @@ export class OrchestrationFactory {
     situation: SituationModel,
     updateOrchestration: (orchestration: Orchestration | null) => void
   ) {
-    return new CompletedSituationOrchestration(
-      situation,
-      this._compendium,
-      updateOrchestration
-    );
+    return new CompletedSituationOrchestration(situation, updateOrchestration);
   }
 }

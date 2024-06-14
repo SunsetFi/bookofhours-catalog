@@ -184,9 +184,11 @@ const OrchestrationContent = ({
       <ButtonGroup sx={{ ml: "auto" }}>
         {isExecutableOrchestration(orchestration) && (
           <>
-            <Button onClick={() => orchestration.prepare()}>
-              Prepare Recipe
-            </Button>
+            {orchestration.prepare && (
+              <Button onClick={() => orchestration.prepare!()}>
+                Prepare Recipe
+              </Button>
+            )}
             <Button
               disabled={!canExecute}
               onClick={() => orchestration.execute()}

@@ -26,8 +26,6 @@ import {
 } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
 
-import { RecipeModel } from "@/services/sh-compendium";
-
 import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
 
@@ -42,7 +40,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
   abstract get label$(): Observable<string | null>;
   abstract get description$(): Observable<string | null>;
-  abstract get recipe$(): Observable<RecipeModel | null>;
   abstract get requirements$(): Observable<Readonly<Aspects>>;
   abstract get situation$(): Observable<SituationModel | null>;
 

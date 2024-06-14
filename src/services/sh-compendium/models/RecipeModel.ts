@@ -56,6 +56,19 @@ export class RecipeModel
     return this._recipe?.actionId ?? null;
   }
 
+  private _craftable$: Observable<boolean> | null = null;
+  get craftable$() {
+    if (this._craftable$ == null) {
+      this._craftable$ = this._recipe$.pipe(map((e) => e?.craftable ?? false));
+    }
+
+    return this._craftable$;
+  }
+
+  get craftable() {
+    return this._recipe?.craftable ?? false;
+  }
+
   private _label$: Observable<string | null> | null = null;
   get label$() {
     if (this._label$ == null) {

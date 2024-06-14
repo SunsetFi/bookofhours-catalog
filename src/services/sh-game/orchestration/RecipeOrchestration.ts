@@ -139,15 +139,6 @@ export class RecipeOrchestration
     return this._description$;
   }
 
-  private _recipe$: Observable<RecipeModel | null> | null = null;
-  get recipe$(): Observable<RecipeModel | null> {
-    if (!this._recipe$) {
-      this._recipe$ = observableOf(this._recipe).pipe(shareReplay(1));
-    }
-
-    return this._recipe$;
-  }
-
   private _requirements$: Observable<Readonly<Aspects>> | null = null;
   get requirements$(): Observable<Readonly<Aspects>> {
     if (!this._requirements$) {
@@ -163,6 +154,8 @@ export class RecipeOrchestration
 
             if (Number.isNaN(required)) {
               required = aspects[reqValue] ?? 0;
+            } else if (required <= 0) {
+              continue;
             }
 
             result[aspect] = required;

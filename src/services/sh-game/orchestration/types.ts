@@ -32,7 +32,6 @@ export interface OrchestrationBase {
   readonly label$: Observable<string | null>;
   readonly description$: Observable<string | null>;
 
-  readonly recipe$: Observable<RecipeModel | null>;
   readonly requirements$: Observable<Readonly<Aspects>>;
   readonly situation$: Observable<SituationModel | null>;
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
@@ -73,7 +72,7 @@ export function isCompletedOrchestration(
 
 export interface ExecutableOrchestration extends OrchestrationBase {
   readonly canExecute$: Observable<boolean>;
-  prepare(): Promise<boolean>;
+  prepare?(): Promise<boolean>;
   execute(): Promise<boolean>;
 }
 export function isExecutableOrchestration(

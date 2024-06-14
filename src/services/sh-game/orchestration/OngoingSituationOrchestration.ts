@@ -43,7 +43,6 @@ export class OngoingSituationOrchestration
   constructor(
     private readonly _situation: SituationModel,
     tokensSource: TokensSource,
-    private readonly _compendium: Compendium,
     private readonly _timeSource: TimeSource,
     orchestrationFactory: OrchestrationFactory,
     private readonly _replaceOrchestration: (
@@ -82,20 +81,6 @@ export class OngoingSituationOrchestration
 
   get description$(): Observable<string | null> {
     return this._situation.description$;
-  }
-
-  private _recipe$: Observable<RecipeModel | null> | null = null;
-  get recipe$(): Observable<RecipeModel | null> {
-    if (!this._recipe$) {
-      this._recipe$ = this._situation.recipeId$.pipe(
-        map((recipeId) =>
-          recipeId ? this._compendium.getRecipeById(recipeId) : null
-        ),
-        shareReplay(1)
-      );
-    }
-
-    return this._recipe$;
   }
 
   private _requirements$: Observable<Readonly<Aspects>> | null = null;

@@ -12,7 +12,7 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { decorateObjectInstance } from "@/object-decorator";
 
-import { SituationModel, TokensSource } from "@/services/sh-game";
+import { Orchestrator, SituationModel, TokensSource } from "@/services/sh-game";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
@@ -20,16 +20,20 @@ import FocusIconButton from "@/components/FocusIconButton";
 import ObservableDataGrid, {
   createSituationColumnHelper,
 } from "@/components/ObservableDataGrid";
+import { IconButton, IconButtonProps } from "@mui/material";
+import { PlayCircle } from "@mui/icons-material";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
 interface WorkstationModelDecorators {
   thresholdAspects$: Observable<Aspects>;
+  orchestrate(): void;
 }
 
 const columnHelper = createSituationColumnHelper<WorkstationModel>();
 
 function situationToWorkstationModel(
-  situation: SituationModel
+  situation: SituationModel,
+  orchestrator: Orchestrator
 ): WorkstationModel {
   return decorateObjectInstance(situation, {
     thresholdAspects$: situation.thresholds$.pipe(
@@ -49,16 +53,28 @@ function situationToWorkstationModel(
       distinctUntilChanged(isEqual),
       shareReplay(1)
     ),
-  });
+    orchestrate: () => {
+      orchestrator.openOrchestration({ situation });
+    },
+  } satisfies WorkstationModelDecorators);
 }
+
+const OrchestrateIconButton = (props: IconButtonProps) => (
+  <IconButton title="Open Workstation" {...props}>
+    <PlayCircle />
+  </IconButton>
+);
 
 const WorkstationCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
+  const orchestrator = useDIDependency(Orchestrator);
 
   const elements$ = React.useMemo(
     () =>
       tokensSource.unlockedWorkstations$.pipe(
-        mapArrayItemsCached(situationToWorkstationModel)
+        mapArrayItemsCached((situation) =>
+          situationToWorkstationModel(situation, orchestrator)
+        )
       ),
     [tokensSource]
   );
@@ -78,6 +94,8 @@ const WorkstationCatalogPage = () => {
             }}
           >
             <FocusIconButton token={row.original} />
+            {/* TODO: Not functional yet. */}
+            <OrchestrateIconButton onClick={() => row.original.orchestrate()} />
           </Box>
         ),
       }),

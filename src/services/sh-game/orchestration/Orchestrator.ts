@@ -97,7 +97,14 @@ export class Orchestrator {
     } else if (isSituationOrchestrationRequest(request)) {
       const { situation } = request;
       const state = situation.state;
-      if (state === "Ongoing") {
+      if (state === "Unstarted") {
+        const orchestration =
+          this._orchestrationFactory.createUnstartedOrchestration(
+            situation,
+            (orchestration) => this._updateOrchestration(orchestration)
+          );
+        this._orchestration$.next(orchestration);
+      } else if (state === "Ongoing") {
         const orchestration =
           this._orchestrationFactory.createOngoingOrchestration(
             situation,

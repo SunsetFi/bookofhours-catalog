@@ -20,7 +20,6 @@ export class CompletedSituationOrchestration
 {
   constructor(
     private readonly _situation: SituationModel,
-    private readonly _compendium: Compendium,
     private readonly _replaceOrchestration: (
       orchestration: Orchestration | null
     ) => void
@@ -34,21 +33,6 @@ export class CompletedSituationOrchestration
 
   get description$() {
     return this._situation.description$;
-  }
-
-  private _recipe$: Observable<RecipeModel | null> | null = null;
-  get recipe$(): Observable<RecipeModel | null> {
-    if (!this._recipe$) {
-      // TODO: We do a lot of this... Should we have recipe$ in situation that returns the model?
-      this._recipe$ = this._situation.recipeId$.pipe(
-        map((recipeId) =>
-          recipeId ? this._compendium.getRecipeById(recipeId) : null
-        ),
-        shareReplay(1)
-      );
-    }
-
-    return this._recipe$;
   }
 
   get requirements$(): Observable<Readonly<Aspects>> {
