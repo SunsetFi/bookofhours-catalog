@@ -276,15 +276,16 @@ export class TokensSource {
     const existingTokenIds = Array.from(this._tokenModels.keys());
     const foundIds = tokens.map((t) => t.id);
     const tokenIdsToRemove = difference(existingTokenIds, foundIds);
-    tokenIdsToRemove.forEach((id) => {
-      const token = this._tokenModels.get(id);
-      if (token) {
-        token._retire();
-        this._tokenModels.delete(id);
-      }
-    });
 
     startTransition(() => {
+      tokenIdsToRemove.forEach((id) => {
+        const token = this._tokenModels.get(id);
+        if (token) {
+          token._retire();
+          this._tokenModels.delete(id);
+        }
+      });
+
       const tokenModels = sortBy(
         tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
         "id"

@@ -1,11 +1,16 @@
-import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  firstValueFrom,
+  map,
+  shareReplay,
+} from "rxjs";
 import { Aspects, combineAspects } from "secrethistories-api";
 
 import { EmptyObject$, observeAllMap } from "@/observables";
 
-import { Compendium, RecipeModel } from "@/services/sh-compendium";
-
 import { SituationModel } from "../token-models/SituationModel";
+import { ElementStackModel } from "../token-models/ElementStackModel";
 
 import {
   CompletedOrchestration,
@@ -13,7 +18,6 @@ import {
   OrchestrationBase,
   OrchestrationSlot,
 } from "./types";
-import { ElementStackModel } from "../token-models/ElementStackModel";
 
 export class CompletedSituationOrchestration
   implements OrchestrationBase, CompletedOrchestration
@@ -70,6 +74,15 @@ export class CompletedSituationOrchestration
   }
 
   async conclude(): Promise<boolean> {
+    // Special case for unlocks; they cease to exist on completion.
+    // hack: Make sure the damn thing exists.  Unlocking terrains are being finicky.
+    await this._situation.refresh();
+    const retired = await firstValueFrom(this._situation.retired$);
+    if (retired) {
+      this._replaceOrchestration(null);
+      return true;
+    }
+
     if (await this._situation.conclude()) {
       this._replaceOrchestration(null);
       return true;

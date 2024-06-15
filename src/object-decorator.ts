@@ -30,5 +30,12 @@ export function decorateObjectInstance<
 export function undecorateObjectInstance<TClass extends object>(
   target: TClass
 ): TClass {
-  return (target as any)[Original] || target;
+  // We can get wrapped in multiple layers, as we decorate both for
+  // individual page data grids, and for ObservableDataGrid internals.
+  let undecorated = target;
+  while ((undecorated as any)[Original]) {
+    undecorated = (undecorated as any)[Original];
+  }
+
+  return undecorated;
 }

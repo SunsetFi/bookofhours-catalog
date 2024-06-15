@@ -102,6 +102,11 @@ export abstract class TokenModel {
   }
 
   async refresh(): Promise<void> {
+    if (this._retired$.value) {
+      console.warn("Skipping token refresh as it was already retired.");
+      return;
+    }
+
     const thisUpdate = (this._lastUpdate = Date.now());
     const token = await this._api.getTokenById(this.id);
 
@@ -113,6 +118,11 @@ export abstract class TokenModel {
   }
 
   _update(token: Token, timestamp: number) {
+    if (this._retired$.value) {
+      console.warn("Skipping token update as it was already retired.");
+      return;
+    }
+
     if (this._lastUpdate > timestamp) {
       console.warn(
         "Skipping token update as a more recent update took its place."
@@ -125,6 +135,7 @@ export abstract class TokenModel {
   }
 
   _retire() {
+    console.log("Retiring token", this._id);
     this._retired$.next(true);
   }
 

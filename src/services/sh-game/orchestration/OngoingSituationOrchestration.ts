@@ -2,6 +2,7 @@ import {
   BehaviorSubject,
   Observable,
   Subscription,
+  combineLatest,
   firstValueFrom,
   map,
   shareReplay,
@@ -50,8 +51,13 @@ export class OngoingSituationOrchestration
     ) => void
   ) {
     super(tokensSource);
-    this._stateSubscription = _situation.state$.subscribe((state) => {
-      if (state === "Complete") {
+    this._stateSubscription = combineLatest([
+      _situation.state$,
+      _situation.retired$,
+    ]).subscribe(([state, retired]) => {
+      if (retired) {
+        this._replaceOrchestration(null);
+      } else if (state === "Complete") {
         const completeOrchestration =
           orchestrationFactory.createCompletedOrchestration(
             _situation,

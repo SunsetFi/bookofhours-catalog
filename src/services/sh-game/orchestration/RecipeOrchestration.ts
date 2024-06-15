@@ -6,7 +6,6 @@ import {
   debounceTime,
   firstValueFrom,
   map,
-  of as observableOf,
   shareReplay,
 } from "rxjs";
 import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
@@ -14,6 +13,7 @@ import { flatten } from "lodash";
 
 import { switchMapIfNotNull, observeAllMap } from "@/observables";
 import { workstationFilterAspects } from "@/aspects";
+import { tokenPathContainsChild } from "@/utils";
 
 import {
   Compendium,
@@ -35,7 +35,6 @@ import {
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OrchestrationFactory } from "./OrchestrationFactory";
-import { tokenPathContainsChild } from "@/utils";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -115,7 +114,7 @@ export class RecipeOrchestration
           switchMapIfNotNull((situation) => situation?.verbId$),
           switchMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
         ),
-        this._recipe.description$,
+        this._recipe.startDescription$,
       ]).pipe(
         map(([verb, recipeDescription]) => {
           if (recipeDescription === ".") {

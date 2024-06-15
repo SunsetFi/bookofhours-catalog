@@ -19,11 +19,14 @@ import {
   switchMapIfNotNull,
 } from "@/observables";
 
+import { Scheduler } from "../scheduler";
+
 import { TokensSource } from "./sources/TokensSource";
 
 import { isSituationModel } from "./token-models/SituationModel";
 import { ConnectedTerrainModel } from "./token-models/ConnectedTerrainModel";
 import { ElementStackModel } from "./token-models/ElementStackModel";
+import { Orchestrator } from "./orchestration";
 
 @injectable()
 @singleton()
@@ -36,7 +39,9 @@ export class TerrainUnlocker {
     new BehaviorSubject<ElementStackModel | null>(null);
 
   constructor(
-    @inject(TokensSource) private readonly _tokensSource: TokensSource
+    @inject(TokensSource) private readonly _tokensSource: TokensSource,
+    @inject(Scheduler) private readonly _scheduler: Scheduler,
+    @inject(Orchestrator) private readonly _orchestrator: Orchestrator
   ) {
     this.unlockCandidateStacks$.subscribe((items) => {
       if (
@@ -184,6 +189,18 @@ export class TerrainUnlocker {
     try {
       await target.unlockTerrain(this._selectedStack$.value);
       this.close();
+
+      // Locate and open the situation for the unlock.
+      await this._scheduler.updateNow();
+      const situations = await firstValueFrom(
+        this._orchestrator.executingSituations$
+      );
+      const unlockSituation = situations.find(
+        (x) => x.verbId === "terrain.unlock"
+      );
+      if (unlockSituation) {
+        this._orchestrator.openOrchestration({ situation: unlockSituation });
+      }
       return true;
     } catch {
       return false;

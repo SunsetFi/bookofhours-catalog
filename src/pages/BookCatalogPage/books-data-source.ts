@@ -84,6 +84,8 @@ function elementStackToBook(
     )
   );
 
+  console.log("Decorating", elementStack);
+
   return decorateObjectInstance(elementStack, {
     get id() {
       return elementStack.id;
@@ -92,16 +94,28 @@ function elementStackToBook(
     memoryLabel$,
     memoryAspects$,
     read() {
-      const mystery = extractMysteryAspect(elementStack.aspects);
-      const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
-        aspectId.startsWith("mastery.")
-      );
-      orchestrator.openOrchestration({
-        recipeId: isMastered
-          ? `study.mystery.${mystery}.mastered`
-          : `study.mystery.${mystery}.mastering.begin`,
-        desiredElementIds: [elementStack.elementId],
-      });
+      if (elementStack.elementId.startsWith("uncatbook.")) {
+        const period = elementStack.elementId.substring(10);
+        orchestrator.openOrchestration({
+          recipeId: `catalogue.book.${period}`,
+          desiredElementIds: [elementStack.elementId],
+        });
+      } else {
+        const mystery = extractMysteryAspect(elementStack.aspects);
+        if (mystery == null) {
+          return;
+        }
+
+        const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
+          aspectId.startsWith("mastery.")
+        );
+        orchestrator.openOrchestration({
+          recipeId: isMastered
+            ? `study.mystery.${mystery}.mastered`
+            : `study.mystery.${mystery}.mastering.begin`,
+          desiredElementIds: [elementStack.elementId],
+        });
+      }
     },
   });
 }

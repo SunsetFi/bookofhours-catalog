@@ -35,8 +35,6 @@ const UnlockTerrainDialog = () => {
   const requiredAspectsMap = useObservation(unlocker.unlockRequirements$);
   const essentialAspectsMap = useObservation(unlocker.unlockEssentials$);
 
-  console.log("Unlocks", requiredAspectsMap, essentialAspectsMap);
-
   const requiredAspects = Object.keys(requiredAspectsMap ?? {});
   const essentialAspects = Object.keys(essentialAspectsMap ?? {});
 
