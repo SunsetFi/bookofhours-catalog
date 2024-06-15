@@ -50,7 +50,7 @@ interface AspectListItemProps {
 const AspectListItem = ({ aspectId, size, children }: AspectListItemProps) => {
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$);
-  const isHidden = useObservation(aspect.isHidden$) ?? true;
+  const isHidden = useObservation(aspect.hidden$) ?? true;
 
   if (isHidden || !label) {
     return null;

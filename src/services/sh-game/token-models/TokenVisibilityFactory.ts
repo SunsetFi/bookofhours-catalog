@@ -20,7 +20,7 @@ import { playerSpherePaths } from "@/spheres";
 import { TokensSource } from "../sources/TokensSource";
 
 import { isConnectedTerrainModel } from "./ConnectedTerrainModel";
-import { tokenPathIsChildOf } from "@/utils";
+import { tokenPathContainsChild } from "@/utils";
 
 @injectable()
 @singleton()
@@ -52,12 +52,16 @@ export class TokenVisibilityFactory {
     return combineLatest([token$, this._visiblePaths$]).pipe(
       map(([token, visiblePaths]) => {
         if (
-          playerSpherePaths.some((path) => tokenPathIsChildOf(path, token.path))
+          playerSpherePaths.some((path) =>
+            tokenPathContainsChild(path, token.path)
+          )
         ) {
           return true;
         }
 
-        if (visiblePaths.some((path) => tokenPathIsChildOf(path, token.path))) {
+        if (
+          visiblePaths.some((path) => tokenPathContainsChild(path, token.path))
+        ) {
           return true;
         }
 

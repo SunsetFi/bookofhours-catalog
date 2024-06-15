@@ -82,16 +82,15 @@ const Overview = () => {
   );
 
   return (
-    <Box sx={{ overflow: "auto" }}>
+    <Box sx={{ width: "100%", height: "100%", overflow: "auto" }}>
       <Box
         sx={{
           p: 2,
           width: "100%",
           height: "100%",
-          overflow: "auto",
           display: "grid",
           gridTemplateRows: `[start] max-content [dividier] 1fr [end]`,
-          gridTemplateColumns: `[start] 15% [memories-soul] 20% [soul-skill] 45% [skill-misc] 20% [end]`,
+          gridTemplateColumns: `[start] 2fr [memories-soul] 3fr [soul-skill] 4fr [skill-misc] 2fr [end]`,
           gap: 2,
         }}
       >
@@ -116,6 +115,7 @@ const Overview = () => {
             gridColumn: "start / end",
           }}
           elementStacks$={portage$}
+          requireExterior
         />
         <ElementStackTray
           sx={{
@@ -123,6 +123,7 @@ const Overview = () => {
             gridColumn: "start / memories-soul",
           }}
           elementStacks$={memories$}
+          requireExterior
         />
         <ElementStackTray
           sx={{
@@ -130,6 +131,7 @@ const Overview = () => {
             gridColumn: "memories-soul / soul-skill",
           }}
           elementStacks$={abilities$}
+          requireExterior
         />
         <ElementStackTray
           sx={{
@@ -137,6 +139,7 @@ const Overview = () => {
             gridColumn: "soul-skill / skill-misc",
           }}
           elementStacks$={skills$}
+          requireExterior
         />
         <ElementStackTray
           sx={{
@@ -144,6 +147,7 @@ const Overview = () => {
             gridColumn: "skill-misc / end",
           }}
           elementStacks$={misc$}
+          requireExterior
         />
       </Box>
     </Box>

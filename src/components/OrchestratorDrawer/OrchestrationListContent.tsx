@@ -51,7 +51,7 @@ const OrchestrationListContent = () => {
         {!Number.isNaN(secondsToTomorrow) && (
           <>
             <ListItem>
-              <ListItemText sx={{ ml: 6 }} primary="Skip to Tomorrow" />
+              <ListItemText primary="Skip to Tomorrow" />
               <Box sx={{ ml: "auto" }}>
                 <Typography variant="caption" role="timer">
                   <ScreenReaderContent>
@@ -80,6 +80,7 @@ const OrchestrationListContent = () => {
             </IconButton>
           </Box>
         </ListItemButton>
+        {executingSituations.length > 0 && <Divider orientation="horizontal" />}
         {executingSituations.map((situation) => (
           <ExecutingSituationListItem
             situation={situation}

@@ -14,7 +14,7 @@ import {
 } from "secrethistories-api";
 import { isEqual } from "lodash";
 
-import { isNotNull, tokenPathIsChildOf } from "@/utils";
+import { isNotNull, tokenPathContainsChild } from "@/utils";
 
 import {
   filterItemObservations,
@@ -172,7 +172,7 @@ export class SituationModel extends TokenModel {
         filterItemObservations((item) =>
           item.path$.pipe(
             map((path) =>
-              tokenPathIsChildOf(`${this.path}/aureatenotessphere`, path)
+              tokenPathContainsChild(`${this.path}/aureatenotessphere`, path)
             )
           )
         ),
@@ -247,7 +247,7 @@ export class SituationModel extends TokenModel {
           for (const threshold of thresholds) {
             const searchPath = `${this.path}/${threshold.id}`;
             const element = elementPathPairs.find(({ path }) =>
-              tokenPathIsChildOf(searchPath, path)
+              tokenPathContainsChild(searchPath, path)
             )?.item;
 
             thresholdContents[threshold.id] = element ?? null;
@@ -353,7 +353,10 @@ export class SituationModel extends TokenModel {
         filterItemObservations((item) =>
           item.path$.pipe(
             map((path) =>
-              tokenPathIsChildOf(`${this.path}/situationstoragesphere`, path)
+              tokenPathContainsChild(
+                `${this.path}/situationstoragesphere`,
+                path
+              )
             )
           )
         ),
@@ -372,7 +375,9 @@ export class SituationModel extends TokenModel {
         filterItems((item) => item.elementId !== "tlg.note"),
         filterItemObservations((item) =>
           item.path$.pipe(
-            map((path) => tokenPathIsChildOf(`${this.path}/outputsphere`, path))
+            map((path) =>
+              tokenPathContainsChild(`${this.path}/outputsphere`, path)
+            )
           )
         ),
         shareReplay(1)

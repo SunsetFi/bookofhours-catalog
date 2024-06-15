@@ -26,7 +26,7 @@ export function arrayShallowEquals<T>(a: readonly T[], b: readonly T[]) {
 }
 
 const pathSplit = /[\/\!]/;
-export function tokenPathIsChildOf(parent: string, child: string) {
+export function tokenPathContainsChild(parent: string, child: string) {
   const parentParts = parent.split(pathSplit);
   const childParts = child.split(pathSplit);
 

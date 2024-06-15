@@ -29,13 +29,13 @@ export class AspectModel {
     return this._exists$;
   }
 
-  private _isHidden$: Observable<boolean> | null = null;
-  get isHidden$() {
-    if (this._isHidden$ == null) {
-      this._isHidden$ = this._element$.pipe(map((e) => e?.isHidden ?? false));
+  private _hidden$: Observable<boolean> | null = null;
+  get hidden$() {
+    if (this._hidden$ == null) {
+      this._hidden$ = this._element$.pipe(map((e) => e?.isHidden ?? false));
     }
 
-    return this._isHidden$;
+    return this._hidden$;
   }
 
   private _label$: Observable<string | null> | null = null;

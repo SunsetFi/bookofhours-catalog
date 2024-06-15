@@ -2,7 +2,7 @@ import { Observable, map, tap } from "rxjs";
 import { SpaceOccupation, SphereSpec } from "secrethistories-api";
 
 import { filterItemObservations } from "@/observables";
-import { tokenPathIsChildOf } from "@/utils";
+import { tokenPathContainsChild } from "@/utils";
 
 import { ModelWithAspects } from "./types";
 
@@ -16,9 +16,9 @@ export function filterContainedInPath(path: string | string[]) {
         element.path$.pipe(
           map((elementPath) => {
             if (Array.isArray(path)) {
-              return path.some((p) => tokenPathIsChildOf(p, elementPath));
+              return path.some((p) => tokenPathContainsChild(p, elementPath));
             } else {
-              return tokenPathIsChildOf(path, elementPath);
+              return tokenPathContainsChild(path, elementPath);
             }
           })
         )
@@ -137,19 +137,22 @@ export function sphereMatchesToken(
         }
       }
 
-      let foundRequired = false;
-      for (const required of Object.keys(t.required)) {
-        const expectedValue = t.required[required];
-        const compareValue = aspects[required];
-        if (compareValue === undefined) {
-          continue;
-        } else if (compareValue >= expectedValue) {
-          foundRequired = true;
-          break;
+      const requiredKeys = Object.keys(t.required);
+      if (requiredKeys.length > 0) {
+        let foundRequired = false;
+        for (const required of requiredKeys) {
+          const expectedValue = t.required[required];
+          const compareValue = aspects[required];
+          if (compareValue === undefined) {
+            continue;
+          } else if (compareValue >= expectedValue) {
+            foundRequired = true;
+            break;
+          }
         }
-      }
-      if (!foundRequired) {
-        return false;
+        if (!foundRequired) {
+          return false;
+        }
       }
 
       for (const forbidden of Object.keys(t.forbidden)) {

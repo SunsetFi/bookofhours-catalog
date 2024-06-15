@@ -65,7 +65,11 @@ const UnlockTerrainDialog = () => {
         )}
       </DialogContent>
       <DialogActions sx={{ display: "flex", flexDirection: "row" }}>
-        <Button sx={{ mr: "auto" }} onClick={() => unlocker.close()}>
+        <Button
+          variant="contained"
+          sx={{ mr: "auto" }}
+          onClick={() => unlocker.close()}
+        >
           Cancel
         </Button>
         <Button

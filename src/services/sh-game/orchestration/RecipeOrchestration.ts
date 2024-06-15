@@ -35,7 +35,7 @@ import {
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OrchestrationFactory } from "./OrchestrationFactory";
-import { tokenPathIsChildOf } from "@/utils";
+import { tokenPathContainsChild } from "@/utils";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -258,7 +258,7 @@ export class RecipeOrchestration
     try {
       // hack: Only do this for things out in the world.
       // FIXME: Put this into the api mod logic.
-      if (tokenPathIsChildOf("~/library", situation.path)) {
+      if (tokenPathContainsChild("~/library", situation.path)) {
         situation.focus();
       }
 

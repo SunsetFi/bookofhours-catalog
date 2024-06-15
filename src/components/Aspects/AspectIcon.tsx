@@ -29,6 +29,11 @@ const AspectIcon = ({
   const aspect = useAspect(aspectId);
   const label = useObservation(aspect.label$) ?? "";
   const iconUrl = useObservation(aspect.iconUrl$);
+  const hidden = useObservation(aspect.hidden$);
+
+  if (!hidden) {
+    return null;
+  }
 
   return (
     <Tooltip title={<AspectDetails aspectId={aspectId} />}>

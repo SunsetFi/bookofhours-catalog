@@ -16,7 +16,7 @@ import { RecipeModel } from "@/services/sh-compendium";
 
 import { TokenModel } from "./TokenModel";
 import { ElementStackModel } from "./ElementStackModel";
-import { tokenPathIsChildOf } from "@/utils";
+import { tokenPathContainsChild } from "@/utils";
 
 export function isConnectedTerrainModel(
   model: TokenModel
@@ -52,7 +52,7 @@ export class ConnectedTerrainModel extends TokenModel {
       // Thankfully, terrains never move, so we don't have to observe our own path here.
       filterItemObservations((token) =>
         token.path$.pipe(
-          map((tokenPath) => tokenPathIsChildOf(this.path, tokenPath))
+          map((tokenPath) => tokenPathContainsChild(this.path, tokenPath))
         )
       ),
       shareReplay(1)

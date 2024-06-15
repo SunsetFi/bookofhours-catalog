@@ -20,7 +20,7 @@ import {
   ConnectedTerrainModel,
   isConnectedTerrainModel,
 } from "./ConnectedTerrainModel";
-import { tokenPathIsChildOf } from "@/utils";
+import { tokenPathContainsChild } from "@/utils";
 
 @injectable()
 @singleton()
@@ -52,7 +52,7 @@ export class TokenParentTerrainFactory {
     return combineLatest([token$, this._terrainsByPath$]).pipe(
       map(([token, terrainsByPath]) => {
         for (const path of Object.keys(terrainsByPath)) {
-          if (tokenPathIsChildOf(path, token.path)) {
+          if (tokenPathContainsChild(path, token.path)) {
             return terrainsByPath[path];
           }
         }

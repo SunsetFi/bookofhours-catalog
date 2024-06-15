@@ -153,6 +153,7 @@ export class TerrainUnlocker {
 
     try {
       await target.unlockTerrain(this._selectedStack$.value);
+      this.close();
       return true;
     } catch {
       return false;
