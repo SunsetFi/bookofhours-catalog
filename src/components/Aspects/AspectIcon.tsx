@@ -31,7 +31,7 @@ const AspectIcon = ({
   const iconUrl = useObservation(aspect.iconUrl$);
   const hidden = useObservation(aspect.hidden$);
 
-  if (!hidden) {
+  if (hidden) {
     return null;
   }
 

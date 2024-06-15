@@ -83,7 +83,7 @@ const LocationsCatalogPage = () => {
             );
           }
 
-          return <LockOpenIcon />;
+          return <LockOpenIcon sx={{ ml: 1 }} />;
         },
       }),
       columnHelper.observe(

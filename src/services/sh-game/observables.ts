@@ -9,8 +9,8 @@ import { ModelWithAspects } from "./types";
 import { ElementStackModel } from "./token-models/ElementStackModel";
 import { TokenModel } from "./token-models/TokenModel";
 
-export function filterContainedInPath(path: string | string[]) {
-  return <T extends ElementStackModel>(source: Observable<readonly T[]>) => {
+export function filterTokenInPath(path: string | string[]) {
+  return <T extends TokenModel>(source: Observable<readonly T[]>) => {
     return source.pipe(
       filterItemObservations((element) =>
         element.path$.pipe(

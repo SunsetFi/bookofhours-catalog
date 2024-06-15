@@ -38,8 +38,9 @@ import {
   isElementStackModel,
 } from "../token-models/ElementStackModel";
 
+import { filterTokenInPath } from "../observables";
+
 import { RunningSource } from "./RunningSource";
-import { tokenPathContainsChild } from "@/utils";
 
 const supportedPayloadTypes = [
   "ConnectedTerrain",
@@ -103,7 +104,7 @@ export class TokensSource {
     if (this._fixedSituations$ == null) {
       this._fixedSituations$ = this._tokens$.pipe(
         filterItems(isSituationModel),
-        filterItems((x) => tokenPathContainsChild("~/fixedverbs", x.path)),
+        filterTokenInPath("~/fixedverbs"),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
@@ -118,9 +119,7 @@ export class TokensSource {
     if (this._arrivalSituations$ == null) {
       this._arrivalSituations$ = this._tokens$.pipe(
         filterItems(isSituationModel),
-        filterItems((situation) =>
-          tokenPathContainsChild("~/arrivalverbs", situation.path)
-        ),
+        filterTokenInPath("~/arrivalverbs"),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
@@ -228,9 +227,7 @@ export class TokensSource {
     if (!this._unlockedWorkstations$) {
       this._unlockedWorkstations$ = this._visibleTokens$.pipe(
         filterItems(isSituationModel),
-        filterItems((situation) =>
-          tokenPathContainsChild("~/library", situation.path)
-        ),
+        filterTokenInPath("~/library"),
         map((situations) =>
           situations.filter(
             (x) =>

@@ -13,7 +13,7 @@ import { useQueryString } from "@/hooks/use-querystring";
 
 import {
   TokensSource,
-  filterContainedInPath,
+  filterTokenInPath,
   filterDoesNotOccupySpace,
   filterElementId,
   filterHasAnyAspect,
@@ -49,7 +49,7 @@ const Overview = () => {
   const portage$ = React.useMemo(
     () =>
       tokensSource.visibleElementStacks$.pipe(
-        filterContainedInPath(portageSpherePaths)
+        filterTokenInPath(portageSpherePaths)
       ),
     [tokensSource.visibleElementStacks$]
   );

@@ -1,13 +1,17 @@
 import React from "react";
 
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  IconButton,
+  Stack,
+} from "@mui/material";
+
+import { Close as CloseIcon } from "@mui/icons-material";
 
 import { Null$ } from "@/observables";
 
@@ -18,6 +22,7 @@ import { TerrainUnlocker } from "@/services/sh-game";
 import { useObservation } from "@/hooks/use-observation";
 
 import ElementStackSelectField from "./Elements/ElementStackSelectField";
+import AspectIcon from "./Aspects/AspectIcon";
 
 const UnlockTerrainDialog = () => {
   const unlocker = useDIDependency(TerrainUnlocker);
@@ -26,6 +31,14 @@ const UnlockTerrainDialog = () => {
   const targetLabel = useObservation(target?.label$ ?? Null$);
   const targetDescription = useObservation(target?.description$ ?? Null$);
   const unlocking = useObservation(unlocker.unlockingTerrainId$);
+
+  const requiredAspectsMap = useObservation(unlocker.unlockRequirements$);
+  const essentialAspectsMap = useObservation(unlocker.unlockEssentials$);
+
+  console.log("Unlocks", requiredAspectsMap, essentialAspectsMap);
+
+  const requiredAspects = Object.keys(requiredAspectsMap ?? {});
+  const essentialAspects = Object.keys(essentialAspectsMap ?? {});
 
   const selectedStack = useObservation(unlocker.selectedStack$) ?? null;
 
@@ -52,9 +65,33 @@ const UnlockTerrainDialog = () => {
         )}
         {!unlocking && (
           <>
-            <Typography variant="body1" sx={{ textAlign: "center", mb: 1 }}>
+            <Typography variant="body1" sx={{ textAlign: "center", mb: 2 }}>
               {targetDescription}
             </Typography>
+            <Stack
+              direction="row"
+              justifyContent="flex-end"
+              gap={1}
+              sx={{ width: "100%", mb: 2 }}
+            >
+              <Stack
+                direction="row"
+                gap={1}
+                sx={{
+                  // FIXME: We are getting an aspect that is hidden here... See skill upgrade recipes on consider slot.
+                  mr: essentialAspects.length > 0 ? 2 : 0,
+                }}
+              >
+                {requiredAspects.map((aspectId) => (
+                  <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
+                ))}
+              </Stack>
+              <Stack direction="row" gap={1}>
+                {essentialAspects.map((aspectId) => (
+                  <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
+                ))}
+              </Stack>
+            </Stack>
             <ElementStackSelectField
               elementStacks$={unlocker.unlockCandidateStacks$}
               label="Unlock with"
@@ -65,11 +102,7 @@ const UnlockTerrainDialog = () => {
         )}
       </DialogContent>
       <DialogActions sx={{ display: "flex", flexDirection: "row" }}>
-        <Button
-          variant="contained"
-          sx={{ mr: "auto" }}
-          onClick={() => unlocker.close()}
-        >
+        <Button sx={{ mr: "auto" }} onClick={() => unlocker.close()}>
           Cancel
         </Button>
         <Button

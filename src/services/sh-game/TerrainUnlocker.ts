@@ -70,21 +70,51 @@ export class TerrainUnlocker {
     return this._unlockingTerrainId$;
   }
 
+  private _unlockEssentials$: Observable<Aspects | null> | null = null;
+  get unlockEssentials$() {
+    if (!this._unlockEssentials$) {
+      this._unlockEssentials$ = this.target$.pipe(
+        switchMapIfNotNull((target) => target.unlockEssentials$),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockEssentials$;
+  }
+
+  private _unlockRequirements$: Observable<Aspects | null> | null = null;
+  get unlockRequirements$() {
+    if (!this._unlockRequirements$) {
+      this._unlockRequirements$ = this.target$.pipe(
+        switchMapIfNotNull((target) => target.unlockRequirements$),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockRequirements$;
+  }
+
+  private _unlockForbiddens$: Observable<Aspects | null> | null = null;
+  get unlockForbiddens$() {
+    if (!this._unlockForbiddens$) {
+      this._unlockForbiddens$ = this.target$.pipe(
+        switchMapIfNotNull((target) => target.unlockForbiddens$),
+        shareReplay(1)
+      );
+    }
+
+    return this._unlockForbiddens$;
+  }
+
   private _unlockCandidateStacks$: Observable<
     readonly ElementStackModel[]
   > | null = null;
   get unlockCandidateStacks$() {
     if (!this._unlockCandidateStacks$) {
       this._unlockCandidateStacks$ = combineLatest([
-        this.target$.pipe(
-          switchMapIfNotNull((target) => target.unlockEssentials$)
-        ),
-        this.target$.pipe(
-          switchMapIfNotNull((target) => target.unlockRequirements$)
-        ),
-        this.target$.pipe(
-          switchMapIfNotNull((target) => target.unlockForbiddens$)
-        ),
+        this.unlockEssentials$,
+        this.unlockRequirements$,
+        this.unlockForbiddens$,
       ]).pipe(
         switchMap(([essentials, requirements, forbiddens]) => {
           return this._tokensSource.visibleElementStacks$.pipe(

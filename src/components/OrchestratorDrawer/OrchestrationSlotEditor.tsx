@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 
 import { useObservation } from "@/hooks/use-observation";
 
@@ -24,20 +24,15 @@ const OrchestrationSlotEditor = ({
   const essentialAspects = Object.keys(slot.spec.essential);
 
   return (
-    <Box
-      sx={{ display: "flex", flexDirection: "column", gap: 1, width: "100%" }}
-    >
-      <Box
-        sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
-      >
+    <Stack direction="column" gap={1} sx={{ width: "100%" }}>
+      <Stack direction="row" gap={1} sx={{ width: "100%" }}>
         <Typography variant="body1" sx={{ mr: "auto" }}>
           {slot.spec.label}
         </Typography>
-        <Box
+        <Stack
+          direction="row"
+          gap={1}
           sx={{
-            display: "flex",
-            flexDirection: "row",
-            gap: 1,
             // FIXME: We are getting an aspect that is hidden here... See skill upgrade recipes on consider slot.
             mr: essentialAspects.length > 0 ? 2 : 0,
           }}
@@ -45,13 +40,13 @@ const OrchestrationSlotEditor = ({
           {requiredAspects.map((aspectId) => (
             <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
           ))}
-        </Box>
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+        </Stack>
+        <Stack direction="row" gap={1}>
           {essentialAspects.map((aspectId) => (
             <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
           ))}
-        </Box>
-      </Box>
+        </Stack>
+      </Stack>
       <ElementStackSelectField
         label="Element"
         fullWidth
@@ -62,7 +57,7 @@ const OrchestrationSlotEditor = ({
         value={assignment}
         onChange={(stack) => slot.assign(stack)}
       />
-    </Box>
+    </Stack>
   );
 };
 

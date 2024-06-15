@@ -14,15 +14,13 @@ import {
 } from "secrethistories-api";
 import { isEqual } from "lodash";
 
-import { isNotNull, tokenPathContainsChild } from "@/utils";
+import { tokenPathContainsChild } from "@/utils";
 
-import {
-  filterItemObservations,
-  filterItems,
-  observeAllMap,
-} from "@/observables";
+import { filterItems, observeAllMap } from "@/observables";
 
 import { API } from "../../sh-api";
+
+import { filterTokenInPath } from "../observables";
 
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
@@ -169,14 +167,7 @@ export class SituationModel extends TokenModel {
       this._notes$ = this._elementStacks$.pipe(
         // Notes never change their elementId, so its safe to not observe this.
         filterItems((item) => item.elementId === "tlg.note"),
-        filterItemObservations((item) =>
-          item.path$.pipe(
-            map((path) =>
-              tokenPathContainsChild(`${this.path}/aureatenotessphere`, path)
-            )
-          )
-        ),
-        filterItems(isNotNull),
+        filterTokenInPath(`${this.path}/aureatenotessphere`),
         shareReplay(1)
       );
     }
@@ -350,16 +341,7 @@ export class SituationModel extends TokenModel {
       this._content$ = this._elementStacks$.pipe(
         // Filter out notes.
         filterItems((item) => item.elementId !== "tlg.note"),
-        filterItemObservations((item) =>
-          item.path$.pipe(
-            map((path) =>
-              tokenPathContainsChild(
-                `${this.path}/situationstoragesphere`,
-                path
-              )
-            )
-          )
-        ),
+        filterTokenInPath(`${this.path}/situationstoragesphere`),
         shareReplay(1)
       );
     }
@@ -373,13 +355,7 @@ export class SituationModel extends TokenModel {
       this._output$ = this._elementStacks$.pipe(
         // Filter out notes.
         filterItems((item) => item.elementId !== "tlg.note"),
-        filterItemObservations((item) =>
-          item.path$.pipe(
-            map((path) =>
-              tokenPathContainsChild(`${this.path}/outputsphere`, path)
-            )
-          )
-        ),
+        filterTokenInPath(`${this.path}/outputsphere`),
         shareReplay(1)
       );
     }

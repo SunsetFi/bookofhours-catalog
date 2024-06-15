@@ -9,14 +9,13 @@ import {
 import { Aspects, ConnectedTerrain } from "secrethistories-api";
 import { isEqual } from "lodash";
 
-import { filterItemObservations } from "@/observables";
-
 import { API } from "@/services/sh-api";
 import { RecipeModel } from "@/services/sh-compendium";
 
+import { filterTokenInPath } from "../observables";
+
 import { TokenModel } from "./TokenModel";
 import { ElementStackModel } from "./ElementStackModel";
-import { tokenPathContainsChild } from "@/utils";
 
 export function isConnectedTerrainModel(
   model: TokenModel
@@ -50,11 +49,7 @@ export class ConnectedTerrainModel extends TokenModel {
 
     this._childTokens$ = visibleTokens$.pipe(
       // Thankfully, terrains never move, so we don't have to observe our own path here.
-      filterItemObservations((token) =>
-        token.path$.pipe(
-          map((tokenPath) => tokenPathContainsChild(this.path, tokenPath))
-        )
-      ),
+      filterTokenInPath(this.path),
       shareReplay(1)
     );
   }
