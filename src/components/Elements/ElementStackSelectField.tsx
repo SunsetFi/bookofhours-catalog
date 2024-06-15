@@ -72,12 +72,26 @@ const ElementStackSelectField = ({
   const [{ canDrop, isOver, dropElementStack }, drop] = useDrop(
     () => ({
       accept: ElementStackDraggable,
-      canDrop: (item: ElementStackDraggable) =>
-        items?.some((x) => x.elementStack === item.elementStack) ?? false,
-      drop: (item: ElementStackDraggable) => {
-        if (items?.some((x) => x.elementStack === item.elementStack)) {
-          onChange(item.elementStack);
+      canDrop: (draggable: ElementStackDraggable) => {
+        const item = items?.find(
+          (x) => x.elementStack === draggable.elementStack
+        );
+        if (!item) {
+          return false;
         }
+
+        if (requireExterior && !item.exterior) {
+          return false;
+        }
+
+        return true;
+      },
+      drop: (item: ElementStackDraggable, monitor) => {
+        if (!monitor.canDrop()) {
+          return;
+        }
+
+        onChange(item.elementStack);
       },
       collect: (monitor) => ({
         canDrop: monitor.canDrop(),
@@ -86,7 +100,7 @@ const ElementStackSelectField = ({
           monitor.getItem<ElementStackDraggable>()?.elementStack,
       }),
     }),
-    [items]
+    [items, requireExterior]
   );
 
   if (!items) {

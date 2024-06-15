@@ -1,5 +1,5 @@
 import { inject, injectable, singleton } from "microinject";
-import { BehaviorSubject, Observable, firstValueFrom, map } from "rxjs";
+import { BehaviorSubject, Observable, firstValueFrom, map, tap } from "rxjs";
 
 import { filterItemObservations } from "@/observables";
 
@@ -96,22 +96,21 @@ export class Orchestrator {
       this._orchestration$.next(orchestration);
     } else if (isSituationOrchestrationRequest(request)) {
       const { situation } = request;
-      const state = situation.state;
-      if (state === "Unstarted") {
+      if (situation == null || situation.state === "Unstarted") {
         const orchestration =
           this._orchestrationFactory.createUnstartedOrchestration(
             situation,
             (orchestration) => this._updateOrchestration(orchestration)
           );
         this._orchestration$.next(orchestration);
-      } else if (state === "Ongoing") {
+      } else if (situation.state === "Ongoing") {
         const orchestration =
           this._orchestrationFactory.createOngoingOrchestration(
             situation,
             (orchestration) => this._updateOrchestration(orchestration)
           );
         this._orchestration$.next(orchestration);
-      } else if (state === "Complete") {
+      } else if (situation.state === "Complete") {
         const orchestration =
           this._orchestrationFactory.createCompletedOrchestration(
             situation,

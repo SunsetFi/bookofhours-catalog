@@ -69,7 +69,9 @@ export class UnstartedSituationOrchestration
           return;
         }
 
-        if (state !== "Unstarted") {
+        // If we dont have a situation, state will be null.
+        // Do not loop inifnitely clearing the situation in this case.
+        if (state && state !== "Unstarted") {
           this._situation$.next(null);
         }
       });

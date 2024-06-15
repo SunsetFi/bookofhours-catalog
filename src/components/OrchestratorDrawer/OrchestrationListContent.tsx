@@ -19,6 +19,7 @@ import {
   SkipNext as SkipNextIcon,
   Download as DownloadIcon,
   Error as ErrorIcon,
+  PlayArrow,
 } from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
@@ -67,14 +68,24 @@ const OrchestrationListContent = () => {
               </Box>
             </ListItem>
             <Divider orientation="horizontal" />
-            {executingSituations.map((situation) => (
-              <ExecutingSituationListItem
-                situation={situation}
-                key={situation.id}
-              />
-            ))}
           </>
         )}
+        <ListItemButton
+          onClick={() => orchestrator.openOrchestration({ situation: null })}
+        >
+          <ListItemText primary="Start an Orchestration" />
+          <Box sx={{ ml: "auto" }}>
+            <IconButton title="Start an Orchestration">
+              <PlayArrow />
+            </IconButton>
+          </Box>
+        </ListItemButton>
+        {executingSituations.map((situation) => (
+          <ExecutingSituationListItem
+            situation={situation}
+            key={situation.id}
+          />
+        ))}
       </List>
     </Stack>
   );

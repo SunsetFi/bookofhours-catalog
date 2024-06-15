@@ -20,7 +20,7 @@ export function isRecipeOrchestrationRequest(
 }
 
 export interface SituationOrchestrationRequest {
-  situation: SituationModel;
+  situation: SituationModel | null;
 }
 export function isSituationOrchestrationRequest(
   request: OrchestrationRequest

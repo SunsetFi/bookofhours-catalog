@@ -2,11 +2,30 @@ import { Observable, map, tap } from "rxjs";
 import { SpaceOccupation, SphereSpec } from "secrethistories-api";
 
 import { filterItemObservations } from "@/observables";
+import { tokenPathIsChildOf } from "@/utils";
 
 import { ModelWithAspects } from "./types";
 
 import { ElementStackModel } from "./token-models/ElementStackModel";
 import { TokenModel } from "./token-models/TokenModel";
+
+export function filterContainedInPath(path: string | string[]) {
+  return <T extends ElementStackModel>(source: Observable<readonly T[]>) => {
+    return source.pipe(
+      filterItemObservations((element) =>
+        element.path$.pipe(
+          map((elementPath) => {
+            if (Array.isArray(path)) {
+              return path.some((p) => tokenPathIsChildOf(p, elementPath));
+            } else {
+              return tokenPathIsChildOf(path, elementPath);
+            }
+          })
+        )
+      )
+    );
+  };
+}
 
 export function filterElementId(id: string | ((id: string) => boolean)) {
   return <T extends ElementStackModel>(source: Observable<readonly T[]>) => {

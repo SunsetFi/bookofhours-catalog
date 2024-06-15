@@ -6,11 +6,14 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 import { useDIDependency } from "@/container";
 
+import { portageSpherePaths } from "@/spheres";
+
 import { useObservation } from "@/hooks/use-observation";
 import { useQueryString } from "@/hooks/use-querystring";
 
 import {
   TokensSource,
+  filterContainedInPath,
   filterDoesNotOccupySpace,
   filterElementId,
   filterHasAnyAspect,
@@ -42,6 +45,14 @@ const GameplayView = () => {
 const Overview = () => {
   const tokensSource = useDIDependency(TokensSource);
   const tokens = useObservation(tokensSource.visibleTokens$);
+
+  const portage$ = React.useMemo(
+    () =>
+      tokensSource.visibleElementStacks$.pipe(
+        filterContainedInPath(portageSpherePaths)
+      ),
+    [tokensSource.visibleElementStacks$]
+  );
 
   const memories$ = React.useMemo(
     () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("memory")),
@@ -81,18 +92,9 @@ const Overview = () => {
           display: "grid",
           gridTemplateRows: `[start] max-content [dividier] 1fr [end]`,
           gridTemplateColumns: `[start] 15% [memories-soul] 20% [soul-skill] 45% [skill-misc] 20% [end]`,
+          gap: 2,
         }}
       >
-        <Box
-          sx={{
-            gridRow: "start / dividier",
-            gridColumn: "start / end",
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "baseline",
-            justifyContent: "center",
-          }}
-        ></Box>
         {tokens == null && (
           <Box
             sx={{
@@ -108,6 +110,13 @@ const Overview = () => {
             <CircularProgress />
           </Box>
         )}
+        <ElementStackTray
+          sx={{
+            gridRow: "start / dividier",
+            gridColumn: "start / end",
+          }}
+          elementStacks$={portage$}
+        />
         <ElementStackTray
           sx={{
             gridRow: "dividier / end",
