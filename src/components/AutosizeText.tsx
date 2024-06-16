@@ -28,8 +28,9 @@ const AutosizeTypography = ({ sx, ...props }: TypographyProps) => {
       return 1;
     }
 
-    const widthScale = outerWidth / innerWidth;
-    const heightScale = outerHeight / innerHeight;
+    // Text is getting cut off... Apply an arbitrary padding and hope it holds.
+    const widthScale = outerWidth / (innerWidth + 10);
+    const heightScale = outerHeight / (innerHeight + 10);
 
     return Math.min(1, widthScale, heightScale);
   }, [outerWidth, outerHeight, innerWidth, innerHeight]);

@@ -26,16 +26,31 @@ import { useDIDependency } from "@/container";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import { Orchestrator, SituationModel, TimeSource } from "@/services/sh-game";
+import {
+  Orchestrator,
+  SituationModel,
+  TimeSource,
+  TokensSource,
+  filterTokenNotInPath,
+} from "@/services/sh-game";
 
 import FocusIconButton from "../FocusIconButton";
 import ScreenReaderContent from "../ScreenReaderContent";
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
+import { tokenPathContainsChild } from "@/utils";
 
 const OrchestrationListContent = () => {
   const orchestrator = useDIDependency(Orchestrator);
+  const tokensSource = useDIDependency(TokensSource);
+  const fixedSituations = useObservation(tokensSource.fixedSituations$) ?? [];
   const executingSituations =
-    useObservation(orchestrator.executingSituations$) ?? [];
+    useObservation(
+      () =>
+        orchestrator.executingSituations$.pipe(
+          filterTokenNotInPath("~/fixedverbs")
+        ),
+      [orchestrator.executingSituations$]
+    ) ?? [];
 
   const timeSource = useDIDependency(TimeSource);
   const secondsToTomorrow =
@@ -70,6 +85,10 @@ const OrchestrationListContent = () => {
             <Divider orientation="horizontal" />
           </>
         )}
+        {fixedSituations.map((situation) => (
+          <SituationListItem situation={situation} key={situation.id} />
+        ))}
+        <Divider />
         <ListItemButton
           onClick={() => orchestrator.openOrchestration({ situation: null })}
         >
@@ -82,10 +101,7 @@ const OrchestrationListContent = () => {
         </ListItemButton>
         {executingSituations.length > 0 && <Divider orientation="horizontal" />}
         {executingSituations.map((situation) => (
-          <ExecutingSituationListItem
-            situation={situation}
-            key={situation.id}
-          />
+          <SituationListItem situation={situation} key={situation.id} />
         ))}
       </List>
     </Stack>
@@ -94,12 +110,10 @@ const OrchestrationListContent = () => {
 
 export default OrchestrationListContent;
 
-interface ExecutingSituationListItemProps {
+interface SituationListItemProps {
   situation: SituationModel;
 }
-const ExecutingSituationListItem = ({
-  situation,
-}: ExecutingSituationListItemProps) => {
+const SituationListItem = ({ situation }: SituationListItemProps) => {
   const orchestrator = useDIDependency(Orchestrator);
 
   const timeSource = useDIDependency(TimeSource);
@@ -107,6 +121,8 @@ const ExecutingSituationListItem = ({
   const recipeLabel = useObservation(situation.recipeLabel$);
   const state = useObservation(situation.state$);
   const output = useObservation(situation.output$) ?? [];
+
+  const isFixed = tokenPathContainsChild("~/fixedverbs", situation.path);
 
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const timeRemainingStr = timeRemaining.toFixed(1);
@@ -140,7 +156,7 @@ const ExecutingSituationListItem = ({
     [state, situation, timeSource, orchestrator]
   );
 
-  if (state !== "Ongoing" && state !== "Complete") {
+  if (state !== "Unstarted" && state !== "Ongoing" && state !== "Complete") {
     return null;
   }
 
@@ -148,14 +164,19 @@ const ExecutingSituationListItem = ({
 
   return (
     <ListItemButton onClick={onClick}>
-      <FocusIconButton token={situation} />
+      {!isFixed && <FocusIconButton token={situation} />}
       <ListItemText
-        id={`executing-situation-${situation.id}-label`}
-        sx={{ ml: 1 }}
+        id={`situation-${situation.id}-label`}
+        sx={{ ml: isFixed ? 0 : 1 }}
         primary={!hasLabel ? recipeLabel : label}
         secondary={!hasLabel ? null : recipeLabel}
       />
       <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+        {state === "Unstarted" && (
+          <IconButton title="Start an Orchestration">
+            <PlayArrow />
+          </IconButton>
+        )}
         {state === "Ongoing" && (
           <>
             {hasEmptyThresholds && (

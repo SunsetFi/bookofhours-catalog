@@ -25,6 +25,20 @@ export function arrayShallowEquals<T>(a: readonly T[], b: readonly T[]) {
   return a.every((x, i) => x === b[i]);
 }
 
+export function objectShallowEquals<T extends Record<string | symbol, any>>(
+  a: T,
+  b: T
+): boolean {
+  const aKeys = Object.keys(a) as (keyof T)[];
+  const bKeys = Object.keys(b) as (keyof T)[];
+
+  if (aKeys.length !== bKeys.length) {
+    return false;
+  }
+
+  return aKeys.every((key) => a[key] === b[key]);
+}
+
 const pathSplit = /[\/\!]/;
 export function tokenPathContainsChild(parent: string, child: string) {
   const parentParts = parent.split(pathSplit);

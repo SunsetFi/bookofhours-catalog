@@ -17,6 +17,7 @@ import {
   TokensSource,
   TerrainUnlocker,
   isSituationModel,
+  Orchestrator,
 } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
@@ -90,7 +91,7 @@ const LocationsCatalogPage = () => {
         (item) => item.children$.pipe(filterItems(isSituationModel)),
         {
           header: "Workstations",
-          size: 650,
+          size: 700,
           enableSorting: false,
           cell: WorkstationsCell,
         }
@@ -150,18 +151,19 @@ const WorkstationsCell = (
       }}
     >
       {workstations.map((workstation) => (
-        <SituationLineItem key={workstation.id} model={workstation} />
+        <SituationLineItem key={workstation.id} situation={workstation} />
       ))}
     </Box>
   );
 };
 
 interface SituationLineItemProps {
-  model: SituationModel;
+  situation: SituationModel;
 }
-const SituationLineItem = ({ model }: SituationLineItemProps) => {
-  const verbId = useObservation(model.verbId$);
-  const label = useObservation(model.verbLabel$);
+const SituationLineItem = ({ situation }: SituationLineItemProps) => {
+  const orchestrator = useDIDependency(Orchestrator);
+  const verbId = useObservation(situation.verbId$);
+  const label = useObservation(situation.verbLabel$);
   if (!verbId || !label) {
     return null;
   }
@@ -172,10 +174,12 @@ const SituationLineItem = ({ model }: SituationLineItemProps) => {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
+        cursor: "pointer",
         gap: 1,
       }}
+      onClick={() => orchestrator.openOrchestration({ situation })}
     >
-      <VerbIcon verbId={model.verbId} />
+      <VerbIcon verbId={situation.verbId} />
       <Typography variant="body2">{label}</Typography>
     </Box>
   );

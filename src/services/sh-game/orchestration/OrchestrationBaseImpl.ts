@@ -6,6 +6,7 @@ import {
   switchMap,
   shareReplay,
   of as observableOf,
+  tap,
 } from "rxjs";
 import {
   Aspects,
@@ -16,7 +17,7 @@ import {
 } from "secrethistories-api";
 import { flatten, isEqual, omit, pick, sortBy, uniqBy } from "lodash";
 
-import { isNotNull } from "@/utils";
+import { arrayShallowEquals, isNotNull, objectShallowEquals } from "@/utils";
 import {
   EmptyArray$,
   EmptyObject$,
@@ -57,107 +58,21 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
       // FIXME: This is ripe for a refactor.
       // Every orchestration save RecipeOrchestration just wants to use situation thresholds
       // RecipeOrchestration needs to calculate them on the fly as the game would.
-      this._slots$ = combineLatest([
-        this.situation$.pipe(switchMap((s) => s?.thresholds$ ?? EmptyArray$)),
-        // Lots of data can come from slotted cards that affect what slots are available:
-        // - Aspects can select recipes
-        // - The cards themselves can add slots
-        this.situation$.pipe(
-          switchMap((s) => s?.state$ ?? Null$),
-          switchMap((state) => {
-            if (state !== "Unstarted") {
-              // We only use card thresholds if the situation is unstarted.
-              // This is kinda a hack, and this whole mess only exists for RecipeOrchestration anyway.
-              return EmptyArray$;
+      this._slots$ = this.situation$
+        .pipe(switchMap((s) => s?.thresholds$ ?? EmptyArray$))
+        .pipe(
+          distinctUntilChanged((a, b) => isEqual(a, b)),
+          mapArrayItemsCached((spec) => this._createSlot(spec)),
+          map((slots) => {
+            const result: Record<string, OrchestrationSlot> = {};
+            for (const slot of slots) {
+              result[slot.spec.id] = slot;
             }
 
-            // Determine slots from cards
-            return this.slotAssignments$.pipe(
-              // Sort the values to guarentee the order doesn't change on us and mess up our distinct check.
-              map((assignments) =>
-                Object.keys(assignments)
-                  .sort()
-                  .map((key) => assignments[key])
-                  .filter(isNotNull)
-              ),
-              distinctUntilShallowArrayChanged(),
-              switchMap((assignments) => {
-                if (assignments.length === 0) {
-                  return EmptyArray$;
-                }
-
-                // We want the slots added by cards
-                const assignmetThresholds$ = combineLatest(
-                  assignments.map((x) =>
-                    x.element$.pipe(switchMap((x) => x.slots$))
-                  )
-                ).pipe(map((slots) => flatten(slots)));
-
-                // We want the aspects of all the cards
-                const aspects$ = combineLatest(
-                  assignments.map((x) => x.aspectsAndSelf$)
-                ).pipe(
-                  map((aspectsArray) =>
-                    aspectsArray.reduce(
-                      (a, b) => combineAspects(a, b),
-                      {} as Aspects
-                    )
-                  )
-                );
-
-                return combineLatest([
-                  this.situation$.pipe(switchMap((s) => s?.verbId$ ?? Null$)),
-                  assignmetThresholds$,
-                  aspects$,
-                ]).pipe(
-                  map(([verbId, assignmentThresholds, aspects]) => {
-                    if (!verbId) {
-                      return [];
-                    }
-
-                    return flatten(assignmentThresholds).filter((spec) => {
-                      if (!actionIdMatches(spec.actionId, verbId)) {
-                        return false;
-                      }
-
-                      if (
-                        !aspectsMatchExpression(aspects, spec.ifAspectsPresent)
-                      ) {
-                        return false;
-                      }
-
-                      return true;
-                    });
-                  })
-                );
-              })
-            );
-          })
-        ),
-      ]).pipe(
-        map(([situationThresholds, inputThresholds]) => {
-          // Note: situationThresholds will contain duplicate with inputs if it already contains some of the cards, or if we
-          // click the prepare button.
-          // We still need to process the cards manually because RecipeOrchestration lets you explore without slotting any cards,
-          // and submits them all in one go.
-
-          return uniqBy(
-            [...situationThresholds, ...inputThresholds],
-            (x) => x.id
-          );
-        }),
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        mapArrayItemsCached((spec) => this._createSlot(spec)),
-        map((slots) => {
-          const result: Record<string, OrchestrationSlot> = {};
-          for (const slot of slots) {
-            result[slot.spec.id] = slot;
-          }
-
-          return result;
-        }),
-        shareReplay(1)
-      );
+            return result;
+          }),
+          shareReplay(1)
+        );
     }
 
     return this._slots$;

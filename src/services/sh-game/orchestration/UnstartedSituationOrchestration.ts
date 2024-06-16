@@ -80,9 +80,9 @@ export class UnstartedSituationOrchestration
 
     this._slotAssigmentsSubscription = this._situation$
       .pipe(switchMap((s) => s?.thresholdContents$ ?? EmptyObject$))
-      .subscribe((assignments) =>
-        this._optimisticSlotAssignments$.next(assignments)
-      );
+      .subscribe((assignments) => {
+        this._optimisticSlotAssignments$.next(assignments);
+      });
 
     this._recipe$ = this._situation$.pipe(
       switchMap((situation) => situation?.currentRecipeId$ ?? Null$),
@@ -176,9 +176,9 @@ export class UnstartedSituationOrchestration
     return this._situation$;
   }
 
-  private _slotAssignments$: Observable<
-    Readonly<Record<string, ElementStackModel | null>>
-  > | null = null;
+  // private _slotAssignments$: Observable<
+  //   Readonly<Record<string, ElementStackModel | null>>
+  // > | null = null;
   protected get slotAssignments$(): Observable<
     Readonly<Record<string, ElementStackModel | null>>
   > {

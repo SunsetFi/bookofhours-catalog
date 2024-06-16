@@ -27,6 +27,24 @@ export function filterTokenInPath(path: string | string[]) {
   };
 }
 
+export function filterTokenNotInPath(path: string | string[]) {
+  return <T extends TokenModel>(source: Observable<readonly T[]>) => {
+    return source.pipe(
+      filterItemObservations((element) =>
+        element.path$.pipe(
+          map((elementPath) => {
+            if (Array.isArray(path)) {
+              return path.some((p) => !tokenPathContainsChild(p, elementPath));
+            } else {
+              return !tokenPathContainsChild(path, elementPath);
+            }
+          })
+        )
+      )
+    );
+  };
+}
+
 export function filterElementId(id: string | ((id: string) => boolean)) {
   return <T extends ElementStackModel>(source: Observable<readonly T[]>) => {
     return source.pipe(

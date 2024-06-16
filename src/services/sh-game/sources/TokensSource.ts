@@ -8,7 +8,7 @@ import {
   shareReplay,
 } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
-import { Token } from "secrethistories-api";
+import { APIError, APINetworkError, Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
 
 import {
@@ -268,10 +268,22 @@ export class TokensSource {
   private async _pollTokens() {
     const thisUpdate = Date.now();
 
-    const tokens = await this._api.getAllTokens({
-      spherePrefix: visibleSpherePaths,
-      payloadType: supportedPayloadTypes,
-    });
+    let tokens: Token[];
+    try {
+      tokens = await this._api.getAllTokens({
+        spherePrefix: visibleSpherePaths,
+        payloadType: supportedPayloadTypes,
+      });
+    } catch (e) {
+      // Happens on occasion, probably as a result of us no longer
+      // thread locking reads.
+      if (e instanceof APINetworkError && e.statusCode === 500) {
+        console.warn("Failed to fetch tokens due to internal error", e.message);
+        return;
+      }
+
+      throw e;
+    }
 
     const existingTokenIds = Array.from(this._tokenModels.keys());
     const foundIds = tokens.map((t) => t.id);

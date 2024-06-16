@@ -7,11 +7,12 @@ import {
   firstValueFrom,
   map,
   shareReplay,
+  switchMap,
 } from "rxjs";
 import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
 import { flatten } from "lodash";
 
-import { switchMapIfNotNull, observeAllMap } from "@/observables";
+import { switchMapIfNotNull, observeAllMap, EmptyObject$ } from "@/observables";
 import { workstationFilterAspects } from "@/aspects";
 import { tokenPathContainsChild } from "@/utils";
 
@@ -47,7 +48,7 @@ export class RecipeOrchestration
     null
   );
 
-  private readonly _slotAssignments$ = new BehaviorSubject<
+  private readonly _optimisticSlotAssignments$ = new BehaviorSubject<
     Readonly<Record<string, ElementStackModel | null>>
   >({});
 
@@ -60,7 +61,8 @@ export class RecipeOrchestration
   // This is here entirely for "consider", particularly for considering skills.
   private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
 
-  private readonly _subscription: Subscription;
+  private readonly _applyDefaultsSubscription: Subscription;
+  private readonly _slotAssigmentsSubscription: Subscription;
 
   constructor(
     private readonly _recipe: RecipeModel,
@@ -108,15 +110,22 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
-    this._subscription = this.slots$
+    this._applyDefaultsSubscription = this.slots$
       .pipe(debounceTime(5))
       .subscribe((slots) => {
         this._pickDefaults(Object.values(slots));
       });
+
+    this._slotAssigmentsSubscription = this._situation$
+      .pipe(switchMap((s) => s?.thresholdContents$ ?? EmptyObject$))
+      .subscribe((assignments) => {
+        this._optimisticSlotAssignments$.next(assignments);
+      });
   }
 
   _dispose() {
-    this._subscription.unsubscribe();
+    this._applyDefaultsSubscription.unsubscribe();
+    this._slotAssigmentsSubscription.unsubscribe();
   }
 
   get label$(): Observable<string | null> {
@@ -223,79 +232,42 @@ export class RecipeOrchestration
     return this._canExecute$;
   }
 
+  // private _slotAssignments$: Observable<
+  //   Readonly<Record<string, ElementStackModel | null>>
+  // > | null = null;
   protected get slotAssignments$(): Observable<
     Readonly<Record<string, ElementStackModel | null>>
   > {
-    return this._slotAssignments$;
+    // FIXME: This is indicative of something janky with our observables, as
+    // thresholdContents should be immediately updated when the card slotting optimistically updates
+    // its sphere path.
+    // Even with this hack, we still get flickers and update lag.
+    return this._optimisticSlotAssignments$;
+    // if (!this._slotAssignments$) {
+    //   this._slotAssignments$ = this._situation$.pipe(
+    //     switchMap((s) => s?.thresholdContents$ ?? EmptyObject$)
+    //   );
+    // }
+
+    // return this._slotAssignments$;
   }
 
   selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
-    this._slotAssignments$.next({});
-  }
-
-  async prepare() {
-    const [situation, slots] = await Promise.all([
-      firstValueFrom(this._situation$),
-      firstValueFrom(this._slotAssignments$),
-    ]);
-
-    if (!situation || !slots) {
-      return false;
-    }
-
-    var success = true;
-    try {
-      // hack: Only do this for things out in the world.
-      // FIXME: Put this into the api mod logic.
-      if (tokenPathContainsChild("~/library", situation.path)) {
-        situation.focus();
-      }
-
-      situation.open();
-
-      for (const slotId of Object.keys(slots)) {
-        var token = slots[slotId];
-        try {
-          await situation.setSlotContents(slotId, token);
-        } catch (e) {
-          console.error(
-            "Failed to slot",
-            token?.id ?? "<clear>",
-            "to",
-            slotId,
-            "of situation",
-            situation.id,
-            e
-          );
-          success = false;
-        }
-      }
-
-      if (!(await situation.setRecipe(this._recipe.recipeId))) {
-        success = false;
-      }
-
-      await situation.refresh();
-    } catch (e) {
-      success = false;
-    }
-
-    return success;
   }
 
   async execute() {
-    if (!(await this.prepare())) {
-      return false;
-    }
-
     const situation = await firstValueFrom(this._situation$);
     if (!situation) {
       return false;
     }
 
     try {
-      await situation.execute();
+      await situation.setRecipe(this._recipe.recipeId);
+      const didExecute = await situation.execute();
+      if (!didExecute) {
+        return false;
+      }
 
       const ongoingOrchestration =
         this._orchestrationFactory.createOngoingOrchestration(
@@ -325,13 +297,31 @@ export class RecipeOrchestration
     );
   }
 
-  protected _assignSlot(
+  protected async _assignSlot(
     spec: SphereSpec,
     element: ElementStackModel | null
-  ): void {
-    const assignments = { ...this._slotAssignments$.value };
-    assignments[spec.id] = element;
-    this._slotAssignments$.next(assignments);
+  ): Promise<void> {
+    const situation = await firstValueFrom(this._situation$);
+    if (!situation) {
+      return;
+    }
+
+    const setSlotContent = await situation.setSlotContents(spec.id, element);
+
+    if (!setSlotContent && element) {
+      // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
+      console.warn(
+        "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
+      );
+
+      await element.refresh();
+    }
+
+    // Do this even if we fail, see bug above.
+    this._optimisticSlotAssignments$.next({
+      ...this._optimisticSlotAssignments$.value,
+      [spec.id]: element,
+    });
   }
 
   private _situationIsAvailable(
@@ -395,8 +385,13 @@ export class RecipeOrchestration
   }
 
   private async _pickDefaults(slots: OrchestrationSlot[]) {
+    const situation = await firstValueFrom(this._situation$);
+    if (!situation) {
+      return;
+    }
+
     // Maybe we should recalculate all of these from the current values, but these should all be warmed up and ready.
-    let options = await Promise.all(
+    const options = await Promise.all(
       slots.map((slot) =>
         firstValueFrom(slot.availableElementStacks$).then(
           (stacks) => [slot, stacks] as const
@@ -404,7 +399,8 @@ export class RecipeOrchestration
       )
     );
 
-    const assignments = { ...this._slotAssignments$.value };
+    const currentAssignments = await firstValueFrom(this.slotAssignments$);
+    const assignments = { ...currentAssignments };
     const assigned = new Set<ElementStackModel>();
 
     for (const [slot, stacks] of options) {
@@ -441,6 +437,15 @@ export class RecipeOrchestration
       }
     }
 
-    this._slotAssignments$.next(assignments);
+    let promises: Promise<boolean>[] = [];
+    for (const [key, value] of Object.entries(assignments)) {
+      if (currentAssignments[key] === value) {
+        continue;
+      }
+
+      promises.push(situation.setSlotContents(key, value));
+    }
+
+    await Promise.all(promises);
   }
 }
