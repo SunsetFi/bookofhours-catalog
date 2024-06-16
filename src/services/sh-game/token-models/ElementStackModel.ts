@@ -323,14 +323,18 @@ export class ElementStackModel
 
   async moveToSphere(spherePath: string) {
     try {
+      const now = Date.now();
       await this._api.updateTokenAtPath(this.path, {
         spherePath,
       });
-      this._elementStack$.next({
-        ...this._elementStack$.value,
-        path: `${spherePath}/${this.id}`,
-        spherePath,
-      });
+      this._update(
+        {
+          ...this._token,
+          path: `${spherePath}/${this.id}`,
+          spherePath,
+        },
+        now
+      );
       return true;
     } catch (e) {
       if (e instanceof APINetworkError && [400, 409].includes(e.statusCode)) {

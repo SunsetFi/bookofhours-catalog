@@ -27,6 +27,9 @@ export class Scheduler implements Initializable {
   }
 
   onInitialize(): void {
+    (window as any).debugPauseScheduler = () => this._cancelPoll();
+    (window as any).debugResumeScheduler = () => this._scheduleNextPoll(0);
+
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
         this.updateNow();

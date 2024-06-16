@@ -11,6 +11,7 @@ import {
   Situation as ISituation,
   SituationState,
   SphereSpec,
+  Token,
 } from "secrethistories-api";
 import { isEqual } from "lodash";
 
@@ -403,12 +404,16 @@ export class SituationModel extends TokenModel {
 
   async execute() {
     try {
+      const now = Date.now();
       const result = await this._api.executeTokenAtPath(this.path);
-      this._situation$.next({
-        ...this._situation$.value,
-        label: result.executedRecipeLabel,
-        state: "Ongoing",
-      });
+      this._update(
+        {
+          ...this._token,
+          label: result.executedRecipeLabel,
+          state: "Ongoing",
+        } as Token,
+        now
+      );
       return true;
     } catch (e) {
       return false;
