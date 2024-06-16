@@ -9,6 +9,7 @@ import {
   Typography,
   IconButton,
   Stack,
+  Box,
 } from "@mui/material";
 
 import { Close as CloseIcon } from "@mui/icons-material";
@@ -80,14 +81,22 @@ const UnlockTerrainDialog = () => {
                   mr: essentialAspects.length > 0 ? 2 : 0,
                 }}
               >
-                {requiredAspects.map((aspectId) => (
-                  <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
-                ))}
+                {requiredAspectsMap &&
+                  requiredAspects.map((aspectId) => (
+                    <Stack key={aspectId} direction="row" gap={1}>
+                      <AspectIcon aspectId={aspectId} size={30} />
+                      <Typography>{requiredAspectsMap[aspectId]}</Typography>
+                    </Stack>
+                  ))}
               </Stack>
               <Stack direction="row" gap={1}>
-                {essentialAspects.map((aspectId) => (
-                  <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
-                ))}
+                {essentialAspectsMap &&
+                  essentialAspects.map((aspectId) => (
+                    <Stack key={aspectId} direction="row" gap={1}>
+                      <AspectIcon aspectId={aspectId} size={30} />
+                      <Typography>{essentialAspectsMap[aspectId]}</Typography>
+                    </Stack>
+                  ))}
               </Stack>
             </Stack>
             <ElementStackSelectField

@@ -135,7 +135,6 @@ export abstract class TokenModel {
   }
 
   _retire() {
-    console.log("Retiring token", this._id);
     this._retired$.next(true);
   }
 

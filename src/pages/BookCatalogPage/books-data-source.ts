@@ -84,8 +84,6 @@ function elementStackToBook(
     )
   );
 
-  console.log("Decorating", elementStack);
-
   return decorateObjectInstance(elementStack, {
     get id() {
       return elementStack.id;

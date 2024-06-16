@@ -167,7 +167,7 @@ export class TimeSource {
     // Note: The api mod takes into account recipe timers and incrementally passes time around them so that all recipes
     // execute as intended, despite the significant time gap we are jumping.
     // TODO: What is the exact delay we need for weather to show up?  Came up with +7 by trial and error.
-    await this._api.passTime(time + 7 + 0.1);
+    await this._api.passTime(time + 8 + 0.1);
     // Re-pause, as daybreak will have reset the game speed.
     await this._api.setSpeed("Paused");
     this._scheduler.updateNow();

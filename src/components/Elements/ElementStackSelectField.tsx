@@ -77,21 +77,10 @@ const ElementStackSelectField = ({
           (x) => x.elementStack === draggable.elementStack
         );
         if (!item) {
-          console.log(
-            "Cannot drop",
-            draggable,
-            draggable.elementStack.id,
-            "because it is not in our candidates"
-          );
           return false;
         }
 
         if (requireExterior && !item.exterior) {
-          console.log(
-            "Cannot drop",
-            draggable.elementStack.id,
-            "because it is not exterior"
-          );
           return false;
         }
 

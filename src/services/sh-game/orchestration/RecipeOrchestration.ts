@@ -51,6 +51,8 @@ export class RecipeOrchestration
     Readonly<Record<string, ElementStackModel | null>>
   >({});
 
+  private readonly _availableSituations$: Observable<SituationModel[]>;
+
   // Hack: Our elements have slots as well.  We need to take that into account when
   // choosing available situations.
   // This will observe all slots added by our desiredElements, and use them in our
@@ -78,6 +80,21 @@ export class RecipeOrchestration
     ).pipe(
       observeAllMap((item) => item.slots$),
       map((items) => flatten(items)),
+      shareReplay(1)
+    );
+
+    this._availableSituations$ = combineLatest([
+      this._tokensSource.fixedSituations$,
+      this._tokensSource.unlockedWorkstations$,
+      this._desiredElementThresholds$,
+    ]).pipe(
+      map(([fixed, workstations, elementThresholds]) => {
+        const verbs = [...fixed, ...workstations];
+
+        return verbs.filter((verb) =>
+          this._situationIsAvailable(verb, elementThresholds)
+        );
+      }),
       shareReplay(1)
     );
 
@@ -172,33 +189,7 @@ export class RecipeOrchestration
     return this._situation$;
   }
 
-  private _availableSituations$: Observable<readonly SituationModel[]> | null =
-    null;
   get availableSituations$(): Observable<readonly SituationModel[]> {
-    if (!this._availableSituations$) {
-      this._availableSituations$ = combineLatest([
-        this._tokensSource.fixedSituations$.pipe(
-          map((situations) =>
-            situations.find((situation) => situation.verbId === "consider")
-          )
-        ),
-        this._tokensSource.unlockedWorkstations$,
-        this._desiredElementThresholds$,
-      ]).pipe(
-        map(([consider, workstations, elementThresholds]) => {
-          const verbs = [...workstations];
-          if (consider) {
-            verbs.push(consider);
-          }
-
-          return verbs.filter((verb) =>
-            this._situationIsAvailable(verb, elementThresholds)
-          );
-        }),
-        shareReplay(1)
-      );
-    }
-
     return this._availableSituations$;
   }
 
@@ -370,21 +361,35 @@ export class RecipeOrchestration
       ),
     ];
 
+    // Let's let them through if any of the thresholds match any of the requirements.
+    // This is required to allow the fixed verb consider to be used to read books, for example
+    if (
+      !requiredAspects.some((aspect) =>
+        thresholds.some(
+          (t) =>
+            Object.keys(t.essential).includes(aspect) ||
+            (Object.keys(t.required).includes(aspect) &&
+              !Object.keys(t.forbidden).includes(aspect))
+        )
+      )
+    ) {
+      return false;
+    }
     // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.
     // This really is a special / edge case for skills, so maybe restrict the match to the skill card off-aspect.
     // Interestingly enough, this is absolutely required to 'read' phonographs and films.
-    for (const aspect of requiredAspects) {
-      if (
-        !thresholds.some(
-          (t) =>
-            (Object.keys(t.essential).includes(aspect) ||
-              Object.keys(t.required).includes(aspect)) &&
-            !Object.keys(t.forbidden).includes(aspect)
-        )
-      ) {
-        return false;
-      }
-    }
+    // for (const aspect of requiredAspects) {
+    //   if (
+    //     !thresholds.some(
+    //       (t) =>
+    //         (Object.keys(t.essential).includes(aspect) ||
+    //           Object.keys(t.required).includes(aspect)) &&
+    //         !Object.keys(t.forbidden).includes(aspect)
+    //     )
+    //   ) {
+    //     return false;
+    //   }
+    // }
 
     return true;
   }
