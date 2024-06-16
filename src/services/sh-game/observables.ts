@@ -34,7 +34,7 @@ export function filterTokenNotInPath(path: string | string[]) {
         element.path$.pipe(
           map((elementPath) => {
             if (Array.isArray(path)) {
-              return path.some((p) => !tokenPathContainsChild(p, elementPath));
+              return path.every((p) => !tokenPathContainsChild(p, elementPath));
             } else {
               return !tokenPathContainsChild(path, elementPath);
             }

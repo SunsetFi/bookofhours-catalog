@@ -17,3 +17,9 @@ export const playerSpherePaths = [
 ];
 
 export const visibleSpherePaths = [...playerSpherePaths, "~/library"];
+
+export const brancrugTokens = [
+  "~/library!brancrugbeach",
+  "~/library!brancrug",
+  "~/library!ocean",
+];

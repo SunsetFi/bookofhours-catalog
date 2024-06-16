@@ -28,6 +28,7 @@ import ToolsCatalogPage, {
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 import LocationsCatalogPage from "./pages/LocationsCatalogPage";
 import IndexPage from "./pages/IndexPage";
+import BrancrugCatalogPage from "./pages/BrancrugCatalogPage";
 
 export interface SiteMapItem {
   label: string;
@@ -70,6 +71,27 @@ const sitemap: SiteMapItem[] = [
     iconName: "knock",
     path: "/locations",
     Component: LocationsCatalogPage,
+  },
+  {
+    label: "Brancrug",
+    iconSource: "verb",
+    iconName: "village.sweetbones.open",
+    path: "/brancrug",
+    Component: BrancrugCatalogPage,
+  },
+  {
+    label: "Workstations",
+    iconSource: "aspect",
+    iconName: "forge",
+    path: "/workstations",
+    Component: WorkstationCatalogPage,
+  },
+  {
+    label: "Harvest",
+    iconSource: "aspect",
+    iconName: "nectar",
+    path: "/harvest",
+    Component: HarvestCatalogPage,
   },
   {
     label: "Provisions",
@@ -126,20 +148,6 @@ const sitemap: SiteMapItem[] = [
     path: "/craftables",
     searchProvider: craftingSearchProvider,
     Component: CraftingCatalogPage,
-  },
-  {
-    label: "Workstations",
-    iconSource: "aspect",
-    iconName: "forge",
-    path: "/workstations",
-    Component: WorkstationCatalogPage,
-  },
-  {
-    label: "Harvest",
-    iconSource: "aspect",
-    iconName: "nectar",
-    path: "/harvest",
-    Component: HarvestCatalogPage,
   },
 ];
 

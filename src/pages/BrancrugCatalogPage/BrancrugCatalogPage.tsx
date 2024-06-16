@@ -18,7 +18,7 @@ import {
   Orchestrator,
   SituationModel,
   TokensSource,
-  filterTokenNotInPath,
+  filterTokenInPath,
 } from "@/services/sh-game";
 
 import PageContainer from "@/components/PageContainer";
@@ -70,14 +70,14 @@ const OrchestrateIconButton = (props: IconButtonProps) => (
   </IconButton>
 );
 
-const WorkstationCatalogPage = () => {
+const BrancrugCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
   const orchestrator = useDIDependency(Orchestrator);
 
   const elements$ = React.useMemo(
     () =>
       tokensSource.unlockedWorkstations$.pipe(
-        filterTokenNotInPath(brancrugTokens),
+        filterTokenInPath(brancrugTokens),
         mapArrayItemsCached((situation) =>
           situationToWorkstationModel(situation, orchestrator)
         )
@@ -144,7 +144,7 @@ const WorkstationCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Workstations" backTo="/">
+    <PageContainer title="Brancrug and Environs" backTo="/">
       <RequireRunning />
       <Box
         sx={{
@@ -166,4 +166,4 @@ const WorkstationCatalogPage = () => {
   );
 };
 
-export default WorkstationCatalogPage;
+export default BrancrugCatalogPage;

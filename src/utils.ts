@@ -41,8 +41,8 @@ export function objectShallowEquals<T extends Record<string | symbol, any>>(
 
 const pathSplit = /[\/\!]/;
 export function tokenPathContainsChild(parent: string, child: string) {
-  const parentParts = parent.split(pathSplit);
-  const childParts = child.split(pathSplit);
+  const parentParts = parent.split(pathSplit).filter((x) => x !== "");
+  const childParts = child.split(pathSplit).filter((x) => x !== "");
 
   if (childParts.length < parentParts.length) {
     return false;
