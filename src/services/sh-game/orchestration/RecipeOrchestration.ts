@@ -4,6 +4,7 @@ import {
   Subscription,
   combineLatest,
   debounceTime,
+  distinctUntilChanged,
   firstValueFrom,
   map,
   shareReplay,
@@ -12,9 +13,13 @@ import {
 import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
 import { flatten } from "lodash";
 
-import { switchMapIfNotNull, observeAllMap, EmptyObject$ } from "@/observables";
+import {
+  switchMapIfNotNull,
+  observeAllMap,
+  EmptyObject$,
+  distinctUntilShallowArrayChanged,
+} from "@/observables";
 import { workstationFilterAspects } from "@/aspects";
-import { tokenPathContainsChild } from "@/utils";
 
 import {
   Compendium,
@@ -36,6 +41,7 @@ import {
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OrchestrationFactory } from "./OrchestrationFactory";
+import { objectShallowEquals } from "@/utils";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -62,7 +68,6 @@ export class RecipeOrchestration
   private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
 
   private readonly _applyDefaultsSubscription: Subscription;
-  private readonly _slotAssigmentsSubscription: Subscription;
 
   constructor(
     private readonly _recipe: RecipeModel,
@@ -115,17 +120,10 @@ export class RecipeOrchestration
       .subscribe((slots) => {
         this._pickDefaults(Object.values(slots));
       });
-
-    this._slotAssigmentsSubscription = this._situation$
-      .pipe(switchMap((s) => s?.thresholdContents$ ?? EmptyObject$))
-      .subscribe((assignments) => {
-        this._optimisticSlotAssignments$.next(assignments);
-      });
   }
 
   _dispose() {
     this._applyDefaultsSubscription.unsubscribe();
-    this._slotAssigmentsSubscription.unsubscribe();
   }
 
   get label$(): Observable<string | null> {
@@ -232,26 +230,6 @@ export class RecipeOrchestration
     return this._canExecute$;
   }
 
-  // private _slotAssignments$: Observable<
-  //   Readonly<Record<string, ElementStackModel | null>>
-  // > | null = null;
-  protected get slotAssignments$(): Observable<
-    Readonly<Record<string, ElementStackModel | null>>
-  > {
-    // FIXME: This is indicative of something janky with our observables, as
-    // thresholdContents should be immediately updated when the card slotting optimistically updates
-    // its sphere path.
-    // Even with this hack, we still get flickers and update lag.
-    return this._optimisticSlotAssignments$;
-    // if (!this._slotAssignments$) {
-    //   this._slotAssignments$ = this._situation$.pipe(
-    //     switchMap((s) => s?.thresholdContents$ ?? EmptyObject$)
-    //   );
-    // }
-
-    // return this._slotAssignments$;
-  }
-
   selectSituation(situation: SituationModel | null): void {
     this._situation$.next(situation);
   }
@@ -295,33 +273,6 @@ export class RecipeOrchestration
         );
       })
     );
-  }
-
-  protected async _assignSlot(
-    spec: SphereSpec,
-    element: ElementStackModel | null
-  ): Promise<void> {
-    const situation = await firstValueFrom(this._situation$);
-    if (!situation) {
-      return;
-    }
-
-    const setSlotContent = await situation.setSlotContents(spec.id, element);
-
-    if (!setSlotContent && element) {
-      // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
-      console.warn(
-        "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
-      );
-
-      await element.refresh();
-    }
-
-    // Do this even if we fail, see bug above.
-    this._optimisticSlotAssignments$.next({
-      ...this._optimisticSlotAssignments$.value,
-      [spec.id]: element,
-    });
   }
 
   private _situationIsAvailable(

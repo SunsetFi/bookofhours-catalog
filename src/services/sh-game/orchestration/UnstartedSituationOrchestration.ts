@@ -42,11 +42,6 @@ export class UnstartedSituationOrchestration
     null
   );
 
-  private readonly _slotAssigmentsSubscription: Subscription;
-  private readonly _optimisticSlotAssignments$ = new BehaviorSubject<
-    Readonly<Record<string, ElementStackModel | null>>
-  >({});
-
   private readonly _recipe$: Observable<RecipeModel | null>;
 
   private _isExecuting = false;
@@ -78,12 +73,6 @@ export class UnstartedSituationOrchestration
 
     this._situation$.next(situation);
 
-    this._slotAssigmentsSubscription = this._situation$
-      .pipe(switchMap((s) => s?.thresholdContents$ ?? EmptyObject$))
-      .subscribe((assignments) => {
-        this._optimisticSlotAssignments$.next(assignments);
-      });
-
     this._recipe$ = this._situation$.pipe(
       switchMap((situation) => situation?.currentRecipeId$ ?? Null$),
       map((recipeId) =>
@@ -104,7 +93,6 @@ export class UnstartedSituationOrchestration
 
   _dispose(): void {
     this._situationStateSubscription.unsubscribe();
-    this._slotAssigmentsSubscription.unsubscribe();
   }
 
   private _label$: Observable<string | null> | null = null;
@@ -174,26 +162,6 @@ export class UnstartedSituationOrchestration
 
   get situation$(): Observable<SituationModel | null> {
     return this._situation$;
-  }
-
-  // private _slotAssignments$: Observable<
-  //   Readonly<Record<string, ElementStackModel | null>>
-  // > | null = null;
-  protected get slotAssignments$(): Observable<
-    Readonly<Record<string, ElementStackModel | null>>
-  > {
-    // FIXME: This is indicative of something janky with our observables, as
-    // thresholdContents should be immediately updated when the card slotting optimistically updates
-    // its sphere path.
-    // Even with this hack, we still get flickers and update lag.
-    return this._optimisticSlotAssignments$;
-    // if (!this._slotAssignments$) {
-    //   this._slotAssignments$ = this._situation$.pipe(
-    //     switchMap((s) => s?.thresholdContents$ ?? EmptyObject$)
-    //   );
-    // }
-
-    // return this._slotAssignments$;
   }
 
   selectSituation(situation: SituationModel | null): void {
@@ -282,32 +250,5 @@ export class UnstartedSituationOrchestration
     elementStack: ElementStackModel
   ): Observable<boolean> {
     return True$;
-  }
-
-  protected async _assignSlot(
-    spec: SphereSpec,
-    element: ElementStackModel | null
-  ): Promise<void> {
-    const situation = await firstValueFrom(this._situation$);
-    if (!situation) {
-      return;
-    }
-
-    const setSlotContent = await situation.setSlotContents(spec.id, element);
-
-    if (!setSlotContent && element) {
-      // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
-      console.warn(
-        "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
-      );
-
-      await element.refresh();
-    }
-
-    // Do this even if we fail, see bug above.
-    this._optimisticSlotAssignments$.next({
-      ...this._optimisticSlotAssignments$.value,
-      [spec.id]: element,
-    });
   }
 }

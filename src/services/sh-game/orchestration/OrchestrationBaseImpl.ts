@@ -5,24 +5,16 @@ import {
   map,
   switchMap,
   shareReplay,
-  of as observableOf,
+  firstValueFrom,
   tap,
 } from "rxjs";
-import {
-  Aspects,
-  SphereSpec,
-  actionIdMatches,
-  aspectsMatchExpression,
-  combineAspects,
-} from "secrethistories-api";
-import { flatten, isEqual, omit, pick, sortBy, uniqBy } from "lodash";
+import { Aspects, SphereSpec, combineAspects } from "secrethistories-api";
+import { isEqual, omit, pick, sortBy } from "lodash";
 
-import { arrayShallowEquals, isNotNull, objectShallowEquals } from "@/utils";
+import { isNotNull } from "@/utils";
 import {
   EmptyArray$,
   EmptyObject$,
-  Null$,
-  distinctUntilShallowArrayChanged,
   filterItemObservations,
   mapArrayItemsCached,
   observeAll,
@@ -41,14 +33,12 @@ import { OrchestrationBase, OrchestrationSlot } from "./types";
 export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   constructor(protected readonly _tokensSource: TokensSource) {}
 
+  abstract _dispose(): void;
+
   abstract get label$(): Observable<string | null>;
   abstract get description$(): Observable<string | null>;
   abstract get requirements$(): Observable<Readonly<Aspects>>;
   abstract get situation$(): Observable<SituationModel | null>;
-
-  protected abstract get slotAssignments$(): Observable<
-    Readonly<Record<string, ElementStackModel | null>>
-  >;
 
   private _slots$: Observable<
     Readonly<Record<string, OrchestrationSlot>>
@@ -78,7 +68,20 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return this._slots$;
   }
 
-  abstract _dispose(): void;
+  private _slotAssignments$: Observable<
+    Readonly<Record<string, ElementStackModel | null>>
+  > | null = null;
+  protected get slotAssignments$(): Observable<
+    Readonly<Record<string, ElementStackModel | null>>
+  > {
+    if (!this._slotAssignments$) {
+      this._slotAssignments$ = this.situation$.pipe(
+        switchMap((s) => s?.thresholdContents$ ?? EmptyObject$)
+      );
+    }
+
+    return this._slotAssignments$;
+  }
 
   private _aspects$: Observable<Readonly<Aspects>> | null = null;
   get aspects$() {
@@ -116,11 +119,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     spec: SphereSpec,
     elementStack: ElementStackModel
   ): Observable<boolean>;
-
-  protected abstract _assignSlot(
-    spec: SphereSpec,
-    element: ElementStackModel | null
-  ): void;
 
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
     const availableElementStacks$ = combineLatest([
@@ -163,5 +161,26 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         this._assignSlot(spec, element);
       },
     };
+  }
+
+  private async _assignSlot(
+    spec: SphereSpec,
+    element: ElementStackModel | null
+  ): Promise<void> {
+    const situation = await firstValueFrom(this.situation$);
+    if (!situation) {
+      return;
+    }
+
+    const setSlotContent = await situation.setSlotContents(spec.id, element);
+
+    if (!setSlotContent && element) {
+      // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
+      console.warn(
+        "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
+      );
+
+      await element.refresh();
+    }
   }
 }

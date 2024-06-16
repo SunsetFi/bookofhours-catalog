@@ -6,6 +6,7 @@ import {
   firstValueFrom,
   map,
   shareReplay,
+  switchMap,
 } from "rxjs";
 import { Aspects, SphereSpec } from "secrethistories-api";
 
@@ -37,9 +38,6 @@ export class OngoingSituationOrchestration
     OngoingOrchestration
 {
   private readonly _stateSubscription: Subscription;
-  private readonly _slotAssignmentsSubscription: Subscription;
-
-  private readonly _optimisticSlotAssignments$ = new BehaviorSubject({});
 
   constructor(
     private readonly _situation: SituationModel,
@@ -68,17 +66,10 @@ export class OngoingSituationOrchestration
         this._replaceOrchestration(null);
       }
     });
-
-    this._slotAssignmentsSubscription = _situation.thresholdContents$.subscribe(
-      (assignments) => {
-        this._optimisticSlotAssignments$.next(assignments);
-      }
-    );
   }
 
   _dispose() {
     this._stateSubscription.unsubscribe();
-    this._slotAssignmentsSubscription.unsubscribe();
   }
 
   get label$(): Observable<string | null> {
@@ -107,14 +98,6 @@ export class OngoingSituationOrchestration
     }
 
     return this._situation$;
-  }
-
-  get slotAssignments$() {
-    // FIXME: This is indicative of something janky with our observables, as
-    // thresholdContents should be immediately updated when the card slotting optimistically updates
-    // its sphere path.
-    // Even with this hack, we still get flickers and update lag.
-    return this._optimisticSlotAssignments$;
   }
 
   get notes$() {
@@ -150,34 +133,5 @@ export class OngoingSituationOrchestration
     // We have no additional logic to add.
     // Let the base apply its own matching.
     return True$;
-  }
-
-  protected async _assignSlot(
-    spec: SphereSpec,
-    element: ElementStackModel | null
-  ): Promise<void> {
-    const setSlotContent = await this._situation.setSlotContents(
-      spec.id,
-      element
-    );
-
-    let refreshes: Promise<void>[] = [this._situation.refresh()];
-
-    if (!setSlotContent && element) {
-      // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
-      console.warn(
-        "Failed to set slot content for ongoing situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
-      );
-
-      refreshes.push(element.refresh());
-    }
-
-    // Do this even if we fail, see bug above.
-    this._optimisticSlotAssignments$.next({
-      ...this._optimisticSlotAssignments$.value,
-      [spec.id]: element,
-    });
-
-    await Promise.all(refreshes);
   }
 }
