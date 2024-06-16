@@ -93,7 +93,7 @@ export class Orchestrator {
           (orchestration) => this._updateOrchestration(orchestration)
         );
 
-      this._orchestration$.next(orchestration);
+      this._updateOrchestration(orchestration);
     } else if (isSituationOrchestrationRequest(request)) {
       const { situation } = request;
       if (situation == null || situation.state === "Unstarted") {
@@ -102,21 +102,21 @@ export class Orchestrator {
             situation,
             (orchestration) => this._updateOrchestration(orchestration)
           );
-        this._orchestration$.next(orchestration);
+        this._updateOrchestration(orchestration);
       } else if (situation.state === "Ongoing") {
         const orchestration =
           this._orchestrationFactory.createOngoingOrchestration(
             situation,
             (orchestration) => this._updateOrchestration(orchestration)
           );
-        this._orchestration$.next(orchestration);
+        this._updateOrchestration(orchestration);
       } else if (situation.state === "Complete") {
         const orchestration =
           this._orchestrationFactory.createCompletedOrchestration(
             situation,
             (orchestration) => this._updateOrchestration(orchestration)
           );
-        this._orchestration$.next(orchestration);
+        this._updateOrchestration(orchestration);
       }
     }
 

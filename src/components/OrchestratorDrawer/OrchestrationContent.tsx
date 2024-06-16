@@ -48,14 +48,14 @@ const OrchestrationContent = ({
   const aspects = useObservation(orchestration.aspects$) ?? {};
 
   // TODO: Show browsable notes
-  // const notes =
-  //   useObservation(
-  //     () =>
-  //       isContentContainingOrchestration(orchestration)
-  //         ? orchestration.notes$
-  //         : Null$,
-  //     [orchestration]
-  //   ) ?? [];
+  const notes =
+    useObservation(
+      () =>
+        isContentContainingOrchestration(orchestration)
+          ? orchestration.notes$
+          : Null$,
+      [orchestration]
+    ) ?? [];
 
   const content =
     useObservation(
@@ -85,29 +85,26 @@ const OrchestrationContent = ({
 
   let stackItems: React.ReactNode[] = [];
 
-  if (description) {
+  if (notes.length > 0) {
+    stackItems.push(
+      <TlgNote
+        key="notes"
+        sx={{
+          minHeight: 75,
+          ["& .game-typography"]: {
+            textAlign: "center",
+          },
+        }}
+        elementStack={notes[notes.length - 1]}
+      />
+    );
+  } else if (description) {
     stackItems.push(
       <GameTypography key="description" component="div" variant="body1">
         {description}
       </GameTypography>
     );
   }
-
-  // TODO: Show pagable notes
-  // if (notes.length > 0) {
-  //   stackItems.push(
-  //     <TlgNote
-  //       key="notes"
-  //       sx={{
-  //         minHeight: 75,
-  //         ["& .game-typography"]: {
-  //           textAlign: "center",
-  //         },
-  //       }}
-  //       elementStack={notes[notes.length - 1]}
-  //     />
-  //   );
-  // }
 
   if (!isCompletedOrchestration(orchestration) && content.length > 0) {
     stackItems.push(
