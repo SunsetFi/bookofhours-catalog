@@ -119,7 +119,6 @@ export class RecipeOrchestration
     this._slotAssigmentsSubscription = this._situation$
       .pipe(switchMap((s) => s?.thresholdContents$ ?? EmptyObject$))
       .subscribe((assignments) => {
-        console.log("Updating slot assignments", assignments);
         this._optimisticSlotAssignments$.next(assignments);
       });
   }
@@ -448,6 +447,5 @@ export class RecipeOrchestration
     }
 
     await Promise.all(promises);
-    console.log(promises.length, "Defaults set");
   }
 }
