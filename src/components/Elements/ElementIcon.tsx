@@ -78,7 +78,6 @@ const ElementIcon = ({
           loading="lazy"
           src={iconUrl}
           alt={label}
-          title={title}
           style={{ display: "block", maxWidth: "100%", maxHeight: "100%" }}
         />
       </Box>

@@ -35,7 +35,7 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
   return (
     <Badge
       role="region"
-      aria-label="Recipe Executions"
+      aria-label="Toggle Actions"
       badgeContent={executingSituations.length}
       color="primary"
       sx={{
@@ -46,7 +46,12 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
         ...sx,
       }}
     >
-      <IconButton aria-haspopup="menu" title="Orchestrations" onClick={onClick}>
+      <IconButton
+        aria-controls="orchestration-drawer"
+        aria-expanded={open}
+        title="Actions"
+        onClick={onClick}
+      >
         <PlayCircle />
       </IconButton>
     </Badge>

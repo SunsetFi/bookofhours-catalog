@@ -14,6 +14,7 @@ import {
   Badge,
   Stack,
   Tooltip,
+  Icon,
 } from "@mui/material";
 import {
   SkipNext as SkipNextIcon,
@@ -61,7 +62,7 @@ const OrchestrationListContent = () => {
 
   return (
     <Stack direction="column">
-      <OrchestrationContentHeader title="Orchestrations" />
+      <OrchestrationContentHeader title="Activities" />
       <List>
         {!Number.isNaN(secondsToTomorrow) && (
           <>
@@ -92,9 +93,9 @@ const OrchestrationListContent = () => {
         <ListItemButton
           onClick={() => orchestrator.openOrchestration({ situation: null })}
         >
-          <ListItemText primary="Start an Orchestration" />
+          <ListItemText primary="Start an Activity" />
           <Box sx={{ ml: "auto" }}>
-            <IconButton title="Start an Orchestration">
+            <IconButton title="Start an Activity">
               <PlayArrow />
             </IconButton>
           </Box>
@@ -122,7 +123,9 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
   const state = useObservation(situation.state$);
   const output = useObservation(situation.output$) ?? [];
 
-  const isFixed = tokenPathContainsChild("~/fixedverbs", situation.path);
+  const isFixed =
+    tokenPathContainsChild("~/fixedverbs", situation.path) ||
+    tokenPathContainsChild("~/arrivalverbs", situation.path);
 
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const timeRemainingStr = timeRemaining.toFixed(1);
@@ -135,25 +138,33 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
     [situation]
   );
 
+  const onAltAction = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (state === "Ongoing") {
+        // Tick one tick past the end of the situation, so we dont hang on 0.0
+        timeSource.passTime(timeRemaining + 0.1);
+      } else if (state === "Complete") {
+        situation.conclude();
+      }
+    },
+    [state, situation, timeSource]
+  );
+
   const onClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
 
       if (e.shiftKey) {
-        if (state === "Ongoing") {
-          // Tick one tick past the end of the situation, so we dont hang on 0.0
-          timeSource.passTime(timeRemaining + 0.1);
-        } else if (state === "Complete") {
-          situation.conclude();
-        }
-
+        onAltAction(e);
         return;
       }
 
       orchestrator.openOrchestration({ situation });
     },
-    [state, situation, timeSource, orchestrator]
+    [orchestrator, onAltAction]
   );
 
   if (state !== "Unstarted" && state !== "Ongoing" && state !== "Complete") {
@@ -173,7 +184,7 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
       />
       <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
         {state === "Unstarted" && (
-          <IconButton title="Start an Orchestration">
+          <IconButton title="Start an Action">
             <PlayArrow />
           </IconButton>
         )}
@@ -181,7 +192,9 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
           <>
             {hasEmptyThresholds && (
               <Tooltip title="Empty Card Slots" sx={{ m: 2 }}>
-                <ErrorIcon />
+                <Icon aria-hidden="false" aria-label="Empty Card Slots">
+                  <ErrorIcon aria-label="Empty Card Slots" />
+                </Icon>
               </Tooltip>
             )}
             <Typography variant="caption" role="timer">
@@ -190,15 +203,17 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
               </ScreenReaderContent>
               <span aria-hidden="true">{timeRemainingStr}s</span>
             </Typography>
-            <IconButton title="Fast Forward to Completion" onClick={onClick}>
+            <IconButton
+              title="Fast Forward to Completion"
+              onClick={onAltAction}
+            >
               <SkipNextIcon />
             </IconButton>
           </>
         )}
         {state === "Complete" && (
           <Badge badgeContent={output.length}>
-            {/* TODO: Show dialog of output. */}
-            <IconButton title="Complete" onClick={onClick}>
+            <IconButton title="Complete" onClick={onAltAction}>
               <DownloadIcon />
             </IconButton>
           </Badge>

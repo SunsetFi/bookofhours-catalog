@@ -85,6 +85,7 @@ const ElementStackCard = ({
             }}
           >
             <img
+              aria-hidden="true"
               loading="lazy"
               src={iconUrl}
               title={label}

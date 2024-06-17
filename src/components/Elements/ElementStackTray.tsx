@@ -16,6 +16,8 @@ export interface ElementStackTrayProps {
   sx?: SxProps;
   elementStacks$: Observable<readonly ElementStackModel[]>;
   requireExterior?: boolean;
+  "aria-label"?: string;
+  role?: string;
 }
 
 interface ElementStackTrayItem {
@@ -37,6 +39,8 @@ const ElementStackTray = ({
   elementStacks$,
   sx,
   requireExterior,
+  "aria-label": ariaLabel,
+  role,
 }: ElementStackTrayProps) => {
   const items = useObservation(
     () => elementStacks$.pipe(observeAllMap(observeTrayItem)),
@@ -49,6 +53,8 @@ const ElementStackTray = ({
 
   return (
     <Box
+      aria-label={ariaLabel}
+      role={role}
       sx={{
         display: "flex",
         flexDirection: "row",

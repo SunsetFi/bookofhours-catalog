@@ -44,8 +44,9 @@ function TextWrapCell<T extends RowData>(props: CellContext<T, string | null>) {
     >
       {/* TODO: Pop open on mouse position.  This is popping on the bottom of the typography, which can be significantly offset due to our masking.*/}
       <Tooltip
+        disabled={!textTooBig}
         title={
-          <Paper sx={{ maxWidth: 400 }}>
+          <Paper sx={{ maxWidth: 400, p: 3 }}>
             <GameTypography>{value}</GameTypography>
           </Paper>
         }

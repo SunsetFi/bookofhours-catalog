@@ -187,7 +187,10 @@ export class TerrainUnlocker {
     }
 
     try {
-      await target.unlockTerrain(this._selectedStack$.value);
+      if (!(await target.unlockTerrain(this._selectedStack$.value))) {
+        return false;
+      }
+
       this.close();
 
       // Locate and open the situation for the unlock.

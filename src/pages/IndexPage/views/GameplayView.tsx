@@ -110,6 +110,8 @@ const Overview = () => {
           </Box>
         )}
         <ElementStackTray
+          aria-label="portage"
+          role="region"
           sx={{
             gridRow: "start / dividier",
             gridColumn: "start / end",
@@ -118,6 +120,8 @@ const Overview = () => {
           requireExterior
         />
         <ElementStackTray
+          aria-label="memories"
+          role="region"
           sx={{
             gridRow: "dividier / end",
             gridColumn: "start / memories-soul",
@@ -126,6 +130,8 @@ const Overview = () => {
           requireExterior
         />
         <ElementStackTray
+          aria-label="abilities"
+          role="region"
           sx={{
             gridRow: "dividier / end",
             gridColumn: "memories-soul / soul-skill",
@@ -134,6 +140,8 @@ const Overview = () => {
           requireExterior
         />
         <ElementStackTray
+          aria-label="skills"
+          role="region"
           sx={{
             gridRow: "dividier / end",
             gridColumn: "soul-skill / skill-misc",
@@ -142,6 +150,8 @@ const Overview = () => {
           requireExterior
         />
         <ElementStackTray
+          aria-label="miscelanious"
+          role="region"
           sx={{
             gridRow: "dividier / end",
             gridColumn: "skill-misc / end",

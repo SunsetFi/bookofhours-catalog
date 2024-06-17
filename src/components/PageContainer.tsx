@@ -29,6 +29,7 @@ const Main = styled("main", {
   width: "100%",
   height: "100%",
   minWidth: 0,
+  isolation: "isolate",
 }));
 
 const PageContainer = ({ title, backTo, children }: PageContainerProps) => {

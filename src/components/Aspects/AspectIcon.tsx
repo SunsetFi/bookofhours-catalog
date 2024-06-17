@@ -54,7 +54,6 @@ const AspectIcon = ({
             loading="lazy"
             style={{ display: "block" }}
             src={iconUrl}
-            alt={label ?? ""}
             width={size}
             height={size}
           />
@@ -93,9 +92,8 @@ const AspectDetails = ({ aspectId }: AspectDetailsProps) => {
       >
         <img
           loading="lazy"
+          aria-hidden="true"
           src={iconUrl}
-          alt={label}
-          title={label}
           style={{ display: "block", width: "50px" }}
         />
         <Typography variant="body1">{label}</Typography>

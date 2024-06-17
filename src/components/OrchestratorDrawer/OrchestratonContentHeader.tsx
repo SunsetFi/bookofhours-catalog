@@ -32,7 +32,7 @@ const OrchestrationContentHeader = ({
     <>
       <DrawerHeader>
         {onBack && (
-          <IconButton onClick={onBack}>
+          <IconButton aria-label="Back to Actions List" onClick={onBack}>
             <ArrowBackIcon />
           </IconButton>
         )}
@@ -41,6 +41,9 @@ const OrchestrationContentHeader = ({
         </Typography>
         <IconButton
           sx={{ ml: "auto" }}
+          aria-label="Close Actions Drawer"
+          aria-controls="orchestration-drawer"
+          aria-expanded={true}
           onClick={() => orchestrator.toggleDrawer()}
         >
           <ChevronRightIcon />

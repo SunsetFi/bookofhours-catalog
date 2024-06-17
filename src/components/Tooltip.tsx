@@ -65,7 +65,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   });
 
   const open =
-    (!disabled && mouseOver) || (immediateFocus && delayedFocus) || false;
+    !disabled && (mouseOver || (immediateFocus && delayedFocus) || false);
 
   return (
     <>

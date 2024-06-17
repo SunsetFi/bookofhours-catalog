@@ -114,6 +114,7 @@ const OrchestrationContent = ({
         flexWrap="wrap"
         gap={2}
         justifyContent="center"
+        alignItems="center"
       >
         {content.map((elementStack) => (
           <ElementStackIcon key={elementStack.id} elementStack={elementStack} />
@@ -172,7 +173,7 @@ const OrchestrationContent = ({
   }
 
   stackItems.push(
-    <Stack key="actions" direction="row">
+    <Stack key="actions" direction="row" sx={{ mt: "auto" }}>
       {timeRemainingStr && (
         <GameTypography key="timeRemaining" variant="h6" role="timer">
           {timeRemainingStr} seconds remain.

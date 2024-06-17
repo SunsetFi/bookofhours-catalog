@@ -57,8 +57,6 @@ const ElementStackIcon = ({
     >
       <img
         loading="lazy"
-        src={iconUrl}
-        alt={label}
         style={{ display: "block", maxWidth: "100%", maxHeight: "100%" }}
       />
     </Box>

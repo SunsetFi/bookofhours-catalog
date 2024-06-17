@@ -45,8 +45,16 @@ export class Orchestrator {
     });
   }
 
+  get orchestration(): Orchestration | null {
+    return this._orchestration$.value;
+  }
+
   get orchestration$(): Observable<Orchestration | null> {
     return this._orchestration$;
+  }
+
+  get open(): boolean {
+    return this._open$.value;
   }
 
   get open$(): Observable<boolean> {
