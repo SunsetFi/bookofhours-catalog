@@ -25,7 +25,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          if (id.includes("node_modules")) {
+          if (id.includes("/node_modules/")) {
             // Check explicit groups
             for (const [name, modules] of Object.entries(NamedChunks)) {
               if (modules.some((x) => id.includes(`/node_modules/${x}/`))) {

@@ -8,7 +8,7 @@ import {
   shareReplay,
 } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
-import { APIError, APINetworkError, Token } from "secrethistories-api";
+import { APINetworkError, Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
 
 import {

@@ -59,6 +59,12 @@ export class TokenVisibilityFactory {
           return true;
         }
 
+        // FIXME: We might be in a shrouded sub-sphere.  Need to check that
+        // HACK: For now, the only case this shows up is christmas stuff
+        if (token.path.startsWith("~/library!brancrug/christmasslot.")) {
+          return false;
+        }
+
         if (
           visiblePaths.some((path) => tokenPathContainsChild(path, token.path))
         ) {
