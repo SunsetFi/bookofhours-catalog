@@ -3,6 +3,7 @@ import {
   Observable,
   combineLatest,
   distinctUntilChanged,
+  firstValueFrom,
   map,
   shareReplay,
 } from "rxjs";
@@ -373,24 +374,29 @@ export class SituationModel extends TokenModel {
     token: ElementStackModel | null
   ): Promise<boolean> {
     const slotPath = `${this.path}/${slotId}`;
+    const oldTokens = await firstValueFrom(this.thresholdContents$);
     if (token) {
-      if (token.spherePath !== slotPath) {
-        const success = await token.moveToSphere(slotPath);
-        if (success) {
-          await this.refresh();
-        }
-        return success;
+      if (token.spherePath === slotPath) {
+        // We are already there, so just say we succeeded.
+        return true;
       }
 
-      // We are already there, so just say we succeeded.
-      return true;
+      const success = await token.moveToSphere(slotPath);
+      if (!success) {
+        return false;
+      }
     } else {
       await this._api.evictTokenAtPath(slotPath);
-      await this.refresh();
-      // evict can't really fail beyond having the path not exist, and
-      // we want to throw for that.
-      return true;
     }
+
+    await this.refresh();
+
+    const oldInSlot = oldTokens[slotId];
+    if (oldInSlot) {
+      await oldInSlot.refresh();
+    }
+
+    return true;
   }
 
   async setRecipe(recipeId: string) {

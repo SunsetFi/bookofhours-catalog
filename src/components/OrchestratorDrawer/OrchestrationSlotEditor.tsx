@@ -11,11 +11,13 @@ import AspectIcon from "../Aspects/AspectIcon";
 interface OrchestrationSlotEditorProps {
   slot: OrchestrationSlot;
   recipeRequiredAspects: readonly string[];
+  autoFocus?: boolean;
 }
 
 const OrchestrationSlotEditor = ({
   slot,
   recipeRequiredAspects,
+  autoFocus,
 }: OrchestrationSlotEditorProps) => {
   const assignment = useObservation(slot.assignment$) ?? null;
 
@@ -56,6 +58,7 @@ const OrchestrationSlotEditor = ({
         displayAspects={recipeRequiredAspects}
         value={assignment}
         onChange={(stack) => slot.assign(stack)}
+        autoFocus={autoFocus}
       />
     </Stack>
   );

@@ -209,7 +209,7 @@ const OrchestrationContent = ({
       <Stack direction="column" spacing={2} sx={{ height: "100%", p: 2 }}>
         {stackItems.map((item, index) => (
           <React.Fragment key={index}>
-            {index !== 0 && <Divider />}
+            {index !== 0 && <Divider sx={{ py: 1 }} />}
             {item}
           </React.Fragment>
         ))}

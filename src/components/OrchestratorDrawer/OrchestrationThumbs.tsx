@@ -21,9 +21,9 @@ const OrchestrationThumbs = () => {
       sx={{
         position: "absolute",
         right: 20,
-        top: 60,
+        top: 70,
         isolation: "isolate",
-        height: "calc(100% - 60px)",
+        height: "calc(100% - 70px)",
         overflow: "hidden",
         pointerEvents: "none",
       }}

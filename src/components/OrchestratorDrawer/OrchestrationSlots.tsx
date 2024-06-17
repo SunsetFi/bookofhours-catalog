@@ -31,10 +31,11 @@ const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
         ...sx,
       }}
     >
-      {Object.keys(slots).map((slotId) => (
+      {Object.keys(slots).map((slotId, i) => (
         <OrchestrationSlotEditor
           key={slotId}
           slot={slots[slotId]}
+          autoFocus={i === 0}
           recipeRequiredAspects={Object.keys(requirements)}
         />
       ))}

@@ -25,7 +25,6 @@ const ElementStackIcon = ({
   elementStack,
 }: ElementStackIconProps) => {
   const iconUrl = useObservation(elementStack.iconUrl$);
-  const label = useObservation(elementStack.label$) ?? "";
   const quantity = useObservation(elementStack.quantity$) ?? 1;
 
   if (!maxWidth && !maxHeight) {
@@ -58,6 +57,7 @@ const ElementStackIcon = ({
       <img
         loading="lazy"
         style={{ display: "block", maxWidth: "100%", maxHeight: "100%" }}
+        src={iconUrl}
       />
     </Box>
   );

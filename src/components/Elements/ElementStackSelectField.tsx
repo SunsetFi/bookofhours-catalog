@@ -32,6 +32,7 @@ export interface ElementStackSelectFieldProps {
   displayAspects?: readonly string[];
   value: ElementStackModel | null;
   readOnly?: boolean;
+  autoFocus?: boolean;
   onChange(value: ElementStackModel | null): void;
 }
 
@@ -61,6 +62,7 @@ const ElementStackSelectField = ({
   displayAspects,
   value,
   readOnly,
+  autoFocus,
   onChange,
 }: ElementStackSelectFieldProps) => {
   let items =
@@ -141,6 +143,7 @@ const ElementStackSelectField = ({
               },
             },
           }}
+          autoFocus={autoFocus}
           label={label}
           InputProps={{
             ...params.InputProps,
