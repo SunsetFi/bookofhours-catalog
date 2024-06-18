@@ -52,7 +52,7 @@
     "react-router-dom": "^6.3.0",
     "rxjs": "^7.5.5",
     "scheduler": "^0.23.0",
-    "secrethistories-api": "^1.31.0",
+    "secrethistories-api": "^1.32.0",
     "type-fest": "^2.13.0"
   }
 }

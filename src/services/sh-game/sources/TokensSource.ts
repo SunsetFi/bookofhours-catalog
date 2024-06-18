@@ -40,7 +40,7 @@ import {
 
 import { filterTokenInPath } from "../observables";
 
-import { RunningSource } from "./RunningSource";
+import { GameStateSource } from "./RunningSource";
 
 const supportedPayloadTypes = [
   "ConnectedTerrain",
@@ -61,12 +61,12 @@ export class TokensSource {
 
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
-    @inject(RunningSource) runningSource: RunningSource,
+    @inject(GameStateSource) runningSource: GameStateSource,
     @inject(API) private readonly _api: API,
     @inject(TokenModelFactory)
     private readonly _tokenModelFactory: TokenModelFactory
   ) {
-    runningSource.isRunning$.subscribe((isRunning) => {
+    runningSource.isLegacyRunning$.subscribe((isRunning) => {
       if (!isRunning) {
         if (this._tokensTaskSubsciption) {
           this._tokensTaskSubsciption();

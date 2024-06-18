@@ -10,9 +10,10 @@ import { useObservation } from "@/hooks/use-observation";
 
 @injectable()
 @singleton()
-@provides(RunningSource)
-export class RunningSource {
-  private readonly _isRunningInternal$ = new BehaviorSubject(false);
+@provides(GameStateSource)
+export class GameStateSource {
+  private readonly _isRunning$ = new BehaviorSubject(false);
+  private readonly _isLegacyLoaded$ = new BehaviorSubject(false);
 
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
@@ -21,28 +22,49 @@ export class RunningSource {
     scheduler.addTask(() => this._pollRunning());
   }
 
-  private readonly _isRunning$ = this._isRunningInternal$.pipe(
-    distinctUntilChanged()
-  );
-  get isRunning$() {
+  get isGameRunning$() {
     return this._isRunning$;
   }
 
-  get isRunning() {
-    return this._isRunningInternal$.value;
+  get isGameRunning() {
+    return this._isRunning$.value;
+  }
+
+  get isLegacyRunning$() {
+    return this._isLegacyLoaded$;
+  }
+
+  get isLegacyRunning() {
+    return this._isLegacyLoaded$.value;
   }
 
   private async _pollRunning() {
     try {
       const legacy = await this._api.getLegacy();
-      this._isRunningInternal$.next(legacy !== null);
+
+      if (!this._isRunning$.value) {
+        this._isRunning$.next(true);
+      }
+
+      const isLegacyActive = legacy !== null;
+      if (isLegacyActive !== this._isLegacyLoaded$.value) {
+        this._isLegacyLoaded$.next(legacy !== null);
+      }
     } catch {
-      this._isRunningInternal$.next(false);
+      if (this._isRunning$.value) {
+        this._isRunning$.next(false);
+      }
+      if (this._isLegacyLoaded$.value) {
+        this._isLegacyLoaded$.next(false);
+      }
     }
   }
 }
 
-export function useIsRunning(): boolean | undefined {
-  const runningSource = useDIDependency(RunningSource);
-  return useObservation(runningSource.isRunning$) ?? runningSource.isRunning;
+export function useIsLegacyRunning(): boolean | undefined {
+  const runningSource = useDIDependency(GameStateSource);
+  return (
+    useObservation(runningSource.isLegacyRunning$) ??
+    runningSource.isLegacyRunning
+  );
 }

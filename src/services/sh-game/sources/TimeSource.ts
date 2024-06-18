@@ -18,7 +18,7 @@ import { Scheduler } from "@/services/scheduler";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import { RunningSource } from "./RunningSource";
+import { GameStateSource } from "./RunningSource";
 
 const timeRemainingFromRecipeExclusive: Record<string, number> = {
   "day.daybreak": /*2 + */ 58 + 60 + 60 + 60 + 60 + 60,
@@ -40,12 +40,12 @@ export class TimeSource {
   private readonly _yearSituationSource$ = new Subject<Situation>();
 
   constructor(
-    @inject(RunningSource) runningSource: RunningSource,
+    @inject(GameStateSource) runningSource: GameStateSource,
     @inject(API) private readonly _api: API,
     @inject(Scheduler) private _scheduler: Scheduler
   ) {
     let schedulerSubscription: (() => void) | null = null;
-    runningSource.isRunning$
+    runningSource.isLegacyRunning$
       .pipe(distinctUntilChanged())
       .subscribe((isRunning) => {
         if (isRunning) {

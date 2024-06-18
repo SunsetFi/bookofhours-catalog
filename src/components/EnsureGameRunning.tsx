@@ -3,10 +3,10 @@ import { Navigate } from "react-router-dom";
 
 import { index as indexPath } from "@/paths";
 
-import { useIsRunning } from "@/services/sh-game";
+import { useIsLegacyRunning } from "@/services/sh-game";
 
 const EnsureGameRunning = () => {
-  const isRunning = useIsRunning();
+  const isRunning = useIsLegacyRunning();
 
   if (isRunning === false) {
     return <Navigate to={indexPath()} />;

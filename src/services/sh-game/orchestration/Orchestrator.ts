@@ -6,7 +6,7 @@ import { filterItemObservations } from "@/observables";
 import { Compendium } from "@/services/sh-compendium";
 import { Scheduler } from "@/services/scheduler";
 
-import { RunningSource } from "../sources/RunningSource";
+import { GameStateSource } from "../sources/RunningSource";
 import { TokensSource } from "../sources/TokensSource";
 
 import { SituationModel } from "../token-models/SituationModel";
@@ -30,14 +30,14 @@ export class Orchestrator {
   private readonly _open$ = new BehaviorSubject<boolean>(false);
 
   constructor(
-    @inject(RunningSource) runningSource: RunningSource,
+    @inject(GameStateSource) runningSource: GameStateSource,
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(Scheduler) private readonly _scheduler: Scheduler,
     @inject(OrchestrationFactory)
     private readonly _orchestrationFactory: OrchestrationFactory,
     @inject(Compendium) private readonly _compendium: Compendium
   ) {
-    runningSource.isRunning$.subscribe((isRunning) => {
+    runningSource.isLegacyRunning$.subscribe((isRunning) => {
       if (!isRunning) {
         this._updateOrchestration(null);
         this._open$.next(false);

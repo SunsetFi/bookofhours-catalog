@@ -15,7 +15,7 @@ import {
 } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
 
-import { RunningSource } from "./RunningSource";
+import { GameStateSource } from "./RunningSource";
 
 @injectable()
 @singleton()
@@ -37,11 +37,11 @@ export class CharacterSource implements CharacterSource {
 
   constructor(
     @inject(Scheduler) scheduler: Scheduler,
-    @inject(RunningSource) runningSource: RunningSource,
+    @inject(GameStateSource) runningSource: GameStateSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(API) private readonly _api: API
   ) {
-    runningSource.isRunning$.subscribe((isRunning) => {
+    runningSource.isLegacyRunning$.subscribe((isRunning) => {
       if (!isRunning) {
         if (this._characterTaskSubscription) {
           this._characterTaskSubscription();
