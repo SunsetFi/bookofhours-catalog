@@ -9,7 +9,7 @@ import {
 } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { APINetworkError, PayloadType, Token } from "secrethistories-api";
-import { difference, sortBy } from "lodash";
+import { difference, flatten, sortBy } from "lodash";
 
 import {
   distinctUntilShallowArrayChanged,
@@ -269,10 +269,24 @@ export class TokensSource {
 
     let tokens: Token[];
     try {
-      tokens = await this._api.getAllTokens({
-        fucinePath: visibleSpherePaths,
-        payloadType: supportedPayloadTypes,
-      });
+      // Looks like most of the time is taken serializing.
+      // We can lower our query time like this, but we really should make
+      // the actual endpoint faster and run in parallel.
+      const brk = this._tokenModels.size / 2;
+      tokens = flatten(
+        await Promise.all([
+          this._api.getAllTokens({
+            fucinePath: visibleSpherePaths,
+            payloadType: supportedPayloadTypes,
+            limit: brk,
+          }),
+          this._api.getAllTokens({
+            fucinePath: visibleSpherePaths,
+            payloadType: supportedPayloadTypes,
+            skip: brk,
+          }),
+        ])
+      );
     } catch (e) {
       // Happens on occasion, probably as a result of us no longer
       // thread locking reads.

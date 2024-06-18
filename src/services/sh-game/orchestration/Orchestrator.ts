@@ -1,10 +1,9 @@
 import { inject, injectable, singleton } from "microinject";
-import { BehaviorSubject, Observable, firstValueFrom, map, tap } from "rxjs";
+import { BehaviorSubject, Observable, firstValueFrom, map } from "rxjs";
 
 import { filterItemObservations } from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
-import { Scheduler } from "@/services/scheduler";
 
 import { GameStateSource } from "../sources/RunningSource";
 import { TokensSource } from "../sources/TokensSource";
@@ -32,7 +31,6 @@ export class Orchestrator {
   constructor(
     @inject(GameStateSource) runningSource: GameStateSource,
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
-    @inject(Scheduler) private readonly _scheduler: Scheduler,
     @inject(OrchestrationFactory)
     private readonly _orchestrationFactory: OrchestrationFactory,
     @inject(Compendium) private readonly _compendium: Compendium
@@ -135,13 +133,9 @@ export class Orchestrator {
     this._updateOrchestration(null);
   }
 
-  private async _updateOrchestration(orchestration: Orchestration | null) {
+  private _updateOrchestration(orchestration: Orchestration | null) {
     if (this._orchestration$.value) {
       this._orchestration$.value._dispose();
-    }
-
-    if (orchestration) {
-      await this._scheduler.updateNow();
     }
 
     this._orchestration$.next(orchestration);
