@@ -23,6 +23,7 @@ import {
   Orchestrator,
   TokensSource,
   filterHasAnyAspect,
+  filterTokenInPath,
 } from "@/services/sh-game";
 
 export interface BookModelDecorations {
@@ -138,6 +139,8 @@ export function getBooksObservable(
 
   return tokensSource.visibleElementStacks$.pipe(
     filterHasAnyAspect("readable"),
+    // Ignore tokens in arrival verbs and other weird places.
+    filterTokenInPath("~/library"),
     mapArrayItemsCached((item) =>
       elementStackToBook(item, compendium, orchestrator)
     )

@@ -78,7 +78,7 @@ export const AspectsFilter = ({
     choices = allowedAspectIds;
   }
 
-  const [localValue, setLocalValue] = useDebounceCommitValue(1000, onChange);
+  const [localValue, setLocalValue] = useDebounceCommitValue(700, onChange);
 
   // This nonsense is so null localValue is respected but undefined is delegated to filterValue.
   let currentValue = localValue;

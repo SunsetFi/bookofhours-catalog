@@ -8,7 +8,7 @@ import {
   shareReplay,
 } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
-import { APINetworkError, Token } from "secrethistories-api";
+import { APINetworkError, PayloadType, Token } from "secrethistories-api";
 import { difference, sortBy } from "lodash";
 
 import {
@@ -42,7 +42,7 @@ import { filterTokenInPath } from "../observables";
 
 import { GameStateSource } from "./RunningSource";
 
-const supportedPayloadTypes = [
+const supportedPayloadTypes: PayloadType[] = [
   "ConnectedTerrain",
   "ElementStack",
   "Situation",
@@ -133,7 +133,6 @@ export class TokensSource {
   get unlockingTerrainSituation$() {
     if (!this._unlockingTerrainSituation$) {
       this._unlockingTerrainSituation$ = this._tokens$.pipe(
-        // More nasty gnarly observable chains
         filterItems(isSituationModel),
         // This isnt an observable, but the situation is created and destroyed as it is used,
         // so this is safe.
@@ -271,7 +270,7 @@ export class TokensSource {
     let tokens: Token[];
     try {
       tokens = await this._api.getAllTokens({
-        spherePrefix: visibleSpherePaths,
+        fucinePath: visibleSpherePaths,
         payloadType: supportedPayloadTypes,
       });
     } catch (e) {
@@ -284,6 +283,15 @@ export class TokensSource {
 
       throw e;
     }
+
+    // console.log(
+    //   "Got",
+    //   tokens.length,
+    //   "tokens in",
+    //   Date.now() - thisUpdate,
+    //   "ms"
+    // );
+    // const startProcess = Date.now();
 
     const existingTokenIds = Array.from(this._tokenModels.keys());
     const foundIds = tokens.map((t) => t.id);
@@ -305,6 +313,8 @@ export class TokensSource {
 
       this._tokensSubject$.next(tokenModels);
     });
+
+    // console.log("Processed tokens in", Date.now() - startProcess, "ms");
   }
 
   private _getOrUpdateTokenModel(token: Token, timestamp: number): TokenModel {

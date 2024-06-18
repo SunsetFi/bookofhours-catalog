@@ -4,21 +4,16 @@ import {
   Subscription,
   combineLatest,
   debounceTime,
-  distinctUntilChanged,
   firstValueFrom,
   map,
+  of,
   shareReplay,
   switchMap,
 } from "rxjs";
 import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
 import { flatten } from "lodash";
 
-import {
-  switchMapIfNotNull,
-  observeAllMap,
-  EmptyObject$,
-  distinctUntilShallowArrayChanged,
-} from "@/observables";
+import { switchMapIfNotNull, observeAllMap, Null$ } from "@/observables";
 import { workstationFilterAspects } from "@/aspects";
 
 import {
@@ -41,7 +36,6 @@ import {
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OrchestrationFactory } from "./OrchestrationFactory";
-import { objectShallowEquals } from "@/utils";
 
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
@@ -53,10 +47,6 @@ export class RecipeOrchestration
   private readonly _situation$ = new BehaviorSubject<SituationModel | null>(
     null
   );
-
-  private readonly _optimisticSlotAssignments$ = new BehaviorSubject<
-    Readonly<Record<string, ElementStackModel | null>>
-  >({});
 
   private readonly _availableSituations$: Observable<SituationModel[]>;
 
@@ -126,8 +116,18 @@ export class RecipeOrchestration
     this._applyDefaultsSubscription.unsubscribe();
   }
 
+  private _label$: Observable<string | null> | null = null;
   get label$(): Observable<string | null> {
-    return this._recipe.label$;
+    if (!this._label$) {
+      this._label$ = this._recipe.label$.pipe(
+        switchMap((label) =>
+          label === "."
+            ? this._situation$.pipe(switchMap((s) => s?.label$ ?? Null$))
+            : of(label)
+        )
+      );
+    }
+    return this._label$;
   }
 
   private _description$: Observable<string> | null = null;

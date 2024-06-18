@@ -21,7 +21,7 @@ export const TextFilter = ({
     [onChange]
   );
 
-  const [localValue, setLocalValue] = useDebounceCommitValue(1000, onCommit);
+  const [localValue, setLocalValue] = useDebounceCommitValue(700, onCommit);
 
   return (
     <Box
@@ -48,6 +48,7 @@ export const TextFilter = ({
         sx={{ m: 1 }}
         autoFocus
         label="Search"
+        InputProps={{ autoFocus: true }}
         value={localValue ?? filterValue ?? ""}
         onChange={(e) => setLocalValue(e.target.value)}
       />
