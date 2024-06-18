@@ -111,7 +111,7 @@ export abstract class TokenModel {
       return;
     }
 
-    const thisUpdate = (this._lastUpdate = Date.now());
+    const thisUpdate = Date.now();
     const token = await this._api.getTokenById(this.id);
 
     if (!token) {
@@ -133,6 +133,7 @@ export abstract class TokenModel {
       );
       return;
     }
+    this._lastUpdate = timestamp;
 
     this._token$.next(token);
     this._onUpdate(token);

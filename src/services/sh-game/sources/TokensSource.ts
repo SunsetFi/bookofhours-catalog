@@ -265,7 +265,7 @@ export class TokensSource {
   }
 
   private async _pollTokens() {
-    const thisUpdate = Date.now();
+    const updateStart = Date.now();
 
     let tokens: Token[];
     try {
@@ -298,6 +298,8 @@ export class TokensSource {
       throw e;
     }
 
+    const updateEnd = Date.now();
+
     // console.log(
     //   "Got",
     //   tokens.length,
@@ -321,7 +323,7 @@ export class TokensSource {
       });
 
       const tokenModels = sortBy(
-        tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
+        tokens.map((token) => this._getOrUpdateTokenModel(token, updateEnd)),
         "id"
       );
 
