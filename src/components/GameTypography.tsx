@@ -77,7 +77,7 @@ interface TransformRule {
 
 const textTransformations: TransformRule[] = [
   {
-    regex: /<sprite name=([^>]+)\/>/g,
+    regex: /<sprite name=([^>]+)>/g,
     transform: (match, index) => {
       const spriteName = match[1];
       return (
