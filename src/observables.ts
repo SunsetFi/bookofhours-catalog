@@ -42,8 +42,8 @@ export function promiseFuncToObservable<T>(
   return defer(() => from(func())).pipe(shareReplay(1));
 }
 
-export function distinctUntilShallowArrayChanged() {
-  return <T>(source: Observable<readonly T[]>): Observable<readonly T[]> => {
+export function distinctUntilShallowArrayChanged<T extends readonly any[]>() {
+  return (source: Observable<T>): Observable<T> => {
     return source.pipe(distinctUntilChanged(arrayShallowEquals));
   };
 }

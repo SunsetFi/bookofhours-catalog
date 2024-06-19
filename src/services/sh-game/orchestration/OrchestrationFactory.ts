@@ -62,9 +62,7 @@ export class OrchestrationFactory {
     return new OngoingSituationOrchestration(
       situation,
       this._tokensSource,
-      this._timeSource,
-      this,
-      updateOrchestration
+      this._timeSource
     );
   }
 

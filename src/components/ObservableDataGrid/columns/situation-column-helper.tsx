@@ -44,6 +44,7 @@ export function createSituationColumnHelper<
         header: "",
         size: 100,
         enableSorting: false,
+        enableColumnFilter: false,
         cell: VerbIconCell,
       }),
     aspectsList: (

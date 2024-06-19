@@ -37,40 +37,15 @@ export class OngoingSituationOrchestration
     ContentContainingOrchestration,
     OngoingOrchestration
 {
-  private readonly _stateSubscription: Subscription;
-
   constructor(
     private readonly _situation: SituationModel,
     tokensSource: TokensSource,
-    private readonly _timeSource: TimeSource,
-    orchestrationFactory: OrchestrationFactory,
-    private readonly _replaceOrchestration: (
-      orchestration: Orchestration | null
-    ) => void
+    private readonly _timeSource: TimeSource
   ) {
     super(tokensSource);
-    this._stateSubscription = combineLatest([
-      _situation.state$,
-      _situation.retired$,
-    ]).subscribe(([state, retired]) => {
-      if (retired) {
-        this._replaceOrchestration(null);
-      } else if (state === "Complete") {
-        const completeOrchestration =
-          orchestrationFactory.createCompletedOrchestration(
-            _situation,
-            this._replaceOrchestration
-          );
-        this._replaceOrchestration(completeOrchestration);
-      } else if (state !== "Ongoing") {
-        this._replaceOrchestration(null);
-      }
-    });
   }
 
-  _dispose() {
-    this._stateSubscription.unsubscribe();
-  }
+  _dispose() {}
 
   get label$(): Observable<string | null> {
     return this._situation.label$;

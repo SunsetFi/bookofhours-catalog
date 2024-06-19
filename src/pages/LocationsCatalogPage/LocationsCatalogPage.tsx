@@ -93,18 +93,13 @@ const LocationsCatalogPage = () => {
           header: "Workstations",
           size: 700,
           enableSorting: false,
+          enableColumnFilter: false,
           cell: WorkstationsCell,
         }
       ),
-      columnHelper.observe("description$" as any, {
+      columnHelper.observeText("description$" as any, {
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
-        enableSorting: false,
-        filterFn: "includesString",
-        meta: {
-          filterComponent: TextFilter,
-        },
-        cell: TextWrapCell,
       }),
     ],
     []

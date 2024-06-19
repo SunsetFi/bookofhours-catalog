@@ -1,7 +1,19 @@
 import { inject, injectable, singleton } from "microinject";
-import { BehaviorSubject, Observable, firstValueFrom, map } from "rxjs";
+import {
+  BehaviorSubject,
+  Observable,
+  firstValueFrom,
+  map,
+  of,
+  switchMap,
+} from "rxjs";
 
-import { filterItemObservations } from "@/observables";
+import {
+  distinctUntilShallowArrayChanged,
+  filterItemObservations,
+  switchMapIf,
+  switchMapIfNotNull,
+} from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
 
@@ -41,6 +53,53 @@ export class Orchestrator {
         this._open$.next(false);
       }
     });
+
+    // We monitor the situation state on behalf of orchestrations, as this logic
+    // is common to all orchestrations.
+    const currentSituation$ = this._orchestration$.pipe(
+      switchMapIfNotNull((o) => o.situation$)
+    );
+
+    currentSituation$
+      .pipe(
+        switchMap((situation) =>
+          situation
+            ? situation.state$.pipe(map((s) => [situation, s] as const))
+            : of([null, null])
+        ),
+        // This is very important; do not allow infinite loops.
+        distinctUntilShallowArrayChanged()
+      )
+      .subscribe(([situation, situationState]) => {
+        const orchestration = this._orchestration$.value;
+        if (!orchestration) {
+          return;
+        }
+
+        if (situation == null || situationState == null) {
+          // Assume the orchestration cleared this out and knows what it's doing.
+          return;
+        }
+
+        if (orchestration._onSituationStateUpdated) {
+          // The orchestration can handle state changes.
+          orchestration._onSituationStateUpdated(situationState);
+          return;
+        }
+
+        // The orchestration has delegated state change handling to us.
+        this._openSituationOrchestrationByState(situation);
+      });
+
+    // Currently this should never happen, but we do have aspirations of using orchestrations for unlocking terrains,
+    // which this will happen for.
+    currentSituation$
+      .pipe(switchMapIfNotNull((s) => s.retired$))
+      .subscribe((retired) => {
+        if (retired) {
+          this._updateOrchestration(null);
+        }
+      });
   }
 
   get orchestration(): Orchestration | null {
@@ -101,28 +160,15 @@ export class Orchestrator {
 
       this._updateOrchestration(orchestration);
     } else if (isSituationOrchestrationRequest(request)) {
-      const { situation } = request;
-      if (situation == null || situation.state === "Unstarted") {
+      if (!request.situation) {
         const orchestration =
           this._orchestrationFactory.createUnstartedOrchestration(
-            situation,
+            null,
             (orchestration) => this._updateOrchestration(orchestration)
           );
         this._updateOrchestration(orchestration);
-      } else if (situation.state === "Ongoing") {
-        const orchestration =
-          this._orchestrationFactory.createOngoingOrchestration(
-            situation,
-            (orchestration) => this._updateOrchestration(orchestration)
-          );
-        this._updateOrchestration(orchestration);
-      } else if (situation.state === "Complete") {
-        const orchestration =
-          this._orchestrationFactory.createCompletedOrchestration(
-            situation,
-            (orchestration) => this._updateOrchestration(orchestration)
-          );
-        this._updateOrchestration(orchestration);
+      } else {
+        this._openSituationOrchestrationByState(request.situation);
       }
     }
 
@@ -131,6 +177,41 @@ export class Orchestrator {
 
   closeOrchestration() {
     this._updateOrchestration(null);
+  }
+
+  private _openSituationOrchestrationByState(situation: SituationModel) {
+    if (
+      situation == null ||
+      situation.state === "Unstarted" ||
+      situation.state === "RequiringExecution"
+    ) {
+      const orchestration =
+        this._orchestrationFactory.createUnstartedOrchestration(
+          situation,
+          (orchestration) => this._updateOrchestration(orchestration)
+        );
+      this._updateOrchestration(orchestration);
+    } else if (
+      situation.state === "Ongoing" ||
+      situation.state === "Starting"
+    ) {
+      const orchestration =
+        this._orchestrationFactory.createOngoingOrchestration(
+          situation,
+          (orchestration) => this._updateOrchestration(orchestration)
+        );
+      this._updateOrchestration(orchestration);
+    } else if (situation.state === "Complete") {
+      const orchestration =
+        this._orchestrationFactory.createCompletedOrchestration(
+          situation,
+          (orchestration) => this._updateOrchestration(orchestration)
+        );
+      this._updateOrchestration(orchestration);
+    } else {
+      console.warn(`Unhandled situation state: ${situation.state}`);
+      this._updateOrchestration(null);
+    }
   }
 
   private _updateOrchestration(orchestration: Orchestration | null) {

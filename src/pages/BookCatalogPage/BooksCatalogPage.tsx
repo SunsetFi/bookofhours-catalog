@@ -90,6 +90,7 @@ const BookCatalogPage = () => {
         header: "",
         size: 100,
         enableSorting: false,
+        enableColumnFilter: false,
         cell: ElementIconCell,
       }),
       columnHelper.observeText("memoryLabel$", {
@@ -102,28 +103,6 @@ const BookCatalogPage = () => {
         size: 260,
         aspectsSource: (model) => model.memoryAspects$,
       }),
-      // columnHelper.aspectsList("language", (s) => s.startsWith("w."), {
-      //   header: "Language",
-      //   size: 140,
-      //   showLevel: false,
-      //   enableSorting: false,
-      // }),
-      // columnHelper.aspectsList("type", ["film", "record.phonograph"], {
-      //   header: "Type",
-      //   size: 100,
-      //   showLevel: false,
-      //   enableSorting: false,
-      // }),
-      // columnHelper.aspectsList(
-      //   "contamination",
-      //   (s) => s.startsWith("contamination."),
-      //   {
-      //     header: "Contamination",
-      //     size: 180,
-      //     showLevel: false,
-      //     enableSorting: false,
-      //   }
-      // ),
       columnHelper.description(),
     ],
     []

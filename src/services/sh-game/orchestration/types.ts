@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { Aspects, SphereSpec } from "secrethistories-api";
+import { Aspects, SituationState, SphereSpec } from "secrethistories-api";
 
 import { RecipeModel } from "@/services/sh-compendium";
 
@@ -36,6 +36,15 @@ export interface OrchestrationBase {
   readonly situation$: Observable<SituationModel | null>;
   readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
   readonly aspects$: Observable<Readonly<Aspects>>;
+
+  /**
+   * Called when the target situation state updates.
+   * If this is specified, the orchestration will not be replaced when the situation state changes.
+   * If this is not specified, the Orchestrator will replace the orchestration automatically depending
+   * on the state.
+   * @param situationState The current state of the orchestration's current situation.
+   */
+  _onSituationStateUpdated?(situationState: SituationState): void;
 
   _dispose(): void;
 }

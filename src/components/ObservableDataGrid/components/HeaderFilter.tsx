@@ -20,7 +20,11 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
 
   if (!Filter) {
     console.warn(
-      `Not rendering header filter for ${column.id} as filter component is null.`
+      "Not rendering header filter for",
+      column.id,
+      "with def",
+      column.columnDef,
+      "as filter component is null."
     );
     return null;
   }

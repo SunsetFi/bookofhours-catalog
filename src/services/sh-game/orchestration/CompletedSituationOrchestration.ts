@@ -1,10 +1,4 @@
-import {
-  BehaviorSubject,
-  Observable,
-  firstValueFrom,
-  map,
-  shareReplay,
-} from "rxjs";
+import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
 import { Aspects, combineAspects } from "secrethistories-api";
 
 import { EmptyObject$, observeAllMap } from "@/observables";

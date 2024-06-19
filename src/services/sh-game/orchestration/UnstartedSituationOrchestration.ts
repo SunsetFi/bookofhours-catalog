@@ -8,13 +8,14 @@ import {
   shareReplay,
   switchMap,
 } from "rxjs";
-import { Aspects, SphereSpec } from "secrethistories-api";
+import { Aspects, SituationState, SphereSpec } from "secrethistories-api";
 
 import {
   EmptyObject$,
   Null$,
   True$,
   filterItemObservations,
+  switchMapIfNotNull,
 } from "@/observables";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
@@ -91,6 +92,18 @@ export class UnstartedSituationOrchestration
     // TODO: If our selected situation executes without us doing so, close the orchestration.
   }
 
+  _onSituationStateUpdated(situationState: SituationState): void {
+    if (this._isExecuting) {
+      // Execution will handle it.
+      return;
+    }
+
+    // Something executed and it wasn't us.  Clear out the selected situation.
+    if (situationState !== "Unstarted") {
+      this._situation$.next(null);
+    }
+  }
+
   _dispose(): void {
     this._situationStateSubscription.unsubscribe();
   }
@@ -98,9 +111,7 @@ export class UnstartedSituationOrchestration
   private _label$: Observable<string | null> | null = null;
   get label$(): Observable<string | null> {
     if (!this._label$) {
-      this._label$ = this._situation$.pipe(
-        switchMap((s) => s?.label$ ?? Null$)
-      );
+      this._label$ = this._situation$.pipe(switchMapIfNotNull((s) => s.label$));
     }
     return this._label$;
   }
@@ -109,7 +120,7 @@ export class UnstartedSituationOrchestration
   get description$(): Observable<string | null> {
     if (!this._description$) {
       this._description$ = this._situation$.pipe(
-        switchMap((s) => s?.description$ ?? Null$)
+        switchMapIfNotNull((s) => s.description$)
       );
     }
     return this._description$;

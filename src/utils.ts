@@ -17,7 +17,7 @@ export function formatLabel(str: string): string {
   return str.replace(/(.)\(/g, "$1 (");
 }
 
-export function arrayShallowEquals<T>(a: readonly T[], b: readonly T[]) {
+export function arrayShallowEquals<T extends readonly any[]>(a: T, b: T) {
   if (a.length !== b.length) {
     return false;
   }

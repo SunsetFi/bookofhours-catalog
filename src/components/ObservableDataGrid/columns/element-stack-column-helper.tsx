@@ -43,6 +43,7 @@ export function createElementStackColumnHelper<
         header: "",
         size: 100,
         enableSorting: false,
+        enableColumnFilter: false,
         cell: (context) => (
           <ElementStackIcon
             maxWidth={75}

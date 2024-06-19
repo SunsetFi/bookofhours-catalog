@@ -8,7 +8,12 @@ import {
   firstValueFrom,
   tap,
 } from "rxjs";
-import { Aspects, SphereSpec, combineAspects } from "secrethistories-api";
+import {
+  Aspects,
+  SphereSpec,
+  aspectsMatchSphereSpec,
+  combineAspects,
+} from "secrethistories-api";
 import { isEqual, omit, pick, sortBy } from "lodash";
 
 import { isNotNull } from "@/utils";
@@ -25,8 +30,6 @@ import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
 
 import { TokensSource } from "../sources/TokensSource";
-
-import { sphereMatchesToken } from "../observables";
 
 import { OrchestrationBase, OrchestrationSlot } from "./types";
 
@@ -126,7 +129,11 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         filterItemObservations((item) =>
           this._filterSlotCandidates(spec, item)
         ),
-        filterItemObservations((item) => sphereMatchesToken(spec, item))
+        filterItemObservations((item) =>
+          item.aspects$.pipe(
+            map((aspects) => aspectsMatchSphereSpec(aspects, spec))
+          )
+        )
       ),
       this.slotAssignments$.pipe(
         map((assignments) => omit(assignments, spec.id)),
@@ -176,8 +183,9 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
     if (!setSlotContent && element) {
       // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
+      // Note: Starting to see this for other usages as well, particularly when reading books.
       console.warn(
-        "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh."
+        "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh with the assumption that it worked."
       );
 
       await element.refresh();

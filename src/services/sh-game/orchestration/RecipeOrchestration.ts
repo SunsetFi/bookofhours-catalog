@@ -9,12 +9,18 @@ import {
   of,
   shareReplay,
   switchMap,
+  throttleTime,
 } from "rxjs";
-import { Aspects, SphereSpec, actionIdMatches } from "secrethistories-api";
-import { flatten } from "lodash";
+import {
+  Aspects,
+  SituationState,
+  SphereSpec,
+  Verb,
+  actionIdMatches,
+  aspectsMatchSphereSpec,
+} from "secrethistories-api";
 
-import { switchMapIfNotNull, observeAllMap, Null$ } from "@/observables";
-import { workstationFilterAspects } from "@/aspects";
+import { switchMapIfNotNull, observeAllMap } from "@/observables";
 
 import {
   Compendium,
@@ -37,6 +43,11 @@ import {
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OrchestrationFactory } from "./OrchestrationFactory";
 
+interface ElementSlotsData {
+  element: ElementModel;
+  aspects: Aspects;
+  slots: readonly SphereSpec[];
+}
 export class RecipeOrchestration
   extends OrchestrationBaseImpl
   implements
@@ -50,19 +61,15 @@ export class RecipeOrchestration
 
   private readonly _availableSituations$: Observable<SituationModel[]>;
 
-  // Hack: Our elements have slots as well.  We need to take that into account when
-  // choosing available situations.
-  // This will observe all slots added by our desiredElements, and use them in our
-  // available situations check to see if that situation can have these slots.
-  // This is here entirely for "consider", particularly for considering skills.
-  private readonly _desiredElementThresholds$: Observable<SphereSpec[]>;
-
+  private readonly _trackSituationStateSubscription: Subscription;
   private readonly _applyDefaultsSubscription: Subscription;
+
+  private readonly _situationVerb$: Observable<Verb | null>;
 
   constructor(
     private readonly _recipe: RecipeModel,
-    private readonly _desiredElements: readonly ElementModel[],
-    private readonly _compendium: Compendium,
+    private readonly desiredElements: readonly ElementModel[],
+    compendium: Compendium,
     tokensSource: TokensSource,
     private readonly _orchestrationFactory: OrchestrationFactory,
     private readonly _replaceOrchestration: (
@@ -71,31 +78,34 @@ export class RecipeOrchestration
   ) {
     super(tokensSource);
 
-    // Must set this before accessing availableSituations$
-    this._desiredElementThresholds$ = new BehaviorSubject(
-      _desiredElements
-    ).pipe(
-      observeAllMap((item) => item.slots$),
-      map((items) => flatten(items)),
+    this._situationVerb$ = this._situation$.pipe(
+      switchMapIfNotNull((situation) =>
+        compendium.getVerbById(situation.verbId)
+      )
+    );
+
+    const desiredElementThresholds$ = of(desiredElements).pipe(
+      observeAllMap((element) =>
+        combineLatest([element.aspects$, element.slots$]).pipe(
+          map(([aspects, slots]) => ({ element, aspects, slots }))
+        )
+      ),
       shareReplay(1)
     );
 
     this._availableSituations$ = combineLatest([
-      this._tokensSource.fixedSituations$,
-      this._tokensSource.unlockedWorkstations$,
-      this._desiredElementThresholds$,
+      this._tokensSource.visibleSituations$,
+      desiredElementThresholds$,
     ]).pipe(
-      map(([fixed, workstations, elementThresholds]) => {
-        const verbs = [...fixed, ...workstations];
-
-        return verbs.filter((verb) =>
-          this._situationIsAvailable(verb, elementThresholds)
+      map(([situations, elementThresholds]) => {
+        return situations.filter((situation) =>
+          this._situationIsAvailable(situation, elementThresholds)
         );
       }),
       shareReplay(1)
     );
 
-    // Select a default situation.  This is hackish
+    // Select a default situation.
     firstValueFrom(this.availableSituations$).then((situations) => {
       const situation = situations.find((x) => x.state === "Unstarted");
       if (!situation) {
@@ -105,14 +115,31 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
+    // If our situation becomes unavailable, clear it out
+    this._trackSituationStateSubscription = this._situation$
+      .pipe(switchMapIfNotNull((situation) => situation.state$))
+      .subscribe((state) => {
+        if (this._situation$.value != null && state !== "Unstarted") {
+          this._situation$.next(null);
+        }
+      });
+
+    // Pick defaults when things have settled down.
     this._applyDefaultsSubscription = this.slots$
-      .pipe(debounceTime(5))
+      .pipe(debounceTime(5), throttleTime(500))
       .subscribe((slots) => {
         this._pickDefaults(Object.values(slots));
       });
   }
 
+  _onSituationStateUpdated(situationState: SituationState): void {
+    if (situationState !== "Unstarted" && this._situation$.value != null) {
+      this._situation$.next(null);
+    }
+  }
+
   _dispose() {
+    this._trackSituationStateSubscription.unsubscribe();
     this._applyDefaultsSubscription.unsubscribe();
   }
 
@@ -122,7 +149,7 @@ export class RecipeOrchestration
       this._label$ = this._recipe.label$.pipe(
         switchMap((label) =>
           label === "."
-            ? this._situation$.pipe(switchMap((s) => s?.label$ ?? Null$))
+            ? this._situation$.pipe(switchMapIfNotNull((s) => s.label$))
             : of(label)
         )
       );
@@ -134,10 +161,7 @@ export class RecipeOrchestration
   get description$(): Observable<string> {
     if (!this._description$) {
       this._description$ = combineLatest([
-        this._situation$.pipe(
-          switchMapIfNotNull((situation) => situation?.verbId$),
-          switchMapIfNotNull((verbId) => this._compendium.getVerbById(verbId))
-        ),
+        this._situationVerb$,
         this._recipe.startDescription$,
       ]).pipe(
         map(([verb, recipeDescription]) => {
@@ -203,6 +227,10 @@ export class RecipeOrchestration
   private _canExecute$: Observable<boolean> | null = null;
   get canExecute$(): Observable<boolean> {
     if (!this._canExecute$) {
+      // FIXME: Get this from the game.
+      // There might be other cases where the execution cannot happen,
+      // such as one-off recipes.
+      // ...although those might have been a CS only thing.
       this._canExecute$ = combineLatest([
         this._recipe.requirements$,
         this.aspects$,
@@ -277,13 +305,16 @@ export class RecipeOrchestration
 
   private _situationIsAvailable(
     situation: SituationModel,
-    additionalThresholds: SphereSpec[]
+    elementSlotsData: ElementSlotsData[]
   ): boolean {
-    const requiredAspects = [
-      ...Object.keys(this._recipe.requirements).filter((x) =>
-        workstationFilterAspects.includes(x)
-      ),
-    ];
+    // WARN: We rely on situation.thresholds, which is dependent on situation state and ongoing recipes.
+    // We should be using verb thresholds, but we currently need to be synchronous here and cannot await the verb promise.
+    // We might want to make this async to do that.
+    // For now, we are just ignoring all situations that cannot start.
+    // For UX though, we really want to show them but make them disabled.
+    if (situation.state !== "Unstarted") {
+      return false;
+    }
 
     if (
       this._recipe.actionId &&
@@ -294,43 +325,68 @@ export class RecipeOrchestration
 
     const thresholds = [
       ...situation.thresholds,
-      ...additionalThresholds.filter(
-        (spec) => actionIdMatches(spec.actionId, situation.verbId)
-        // There is another thresh controller here: ifAspectsPresent.
-        // This changes based on slotted cards, and thus is impossible to factor in for what situations
-        // are available.
-      ),
+      // We need to assume that we will have thresholds from the desired cards we wish to slot in.
+      // // This is critical in many cases, such as books being readable in consider.
+      // ...additionalThresholds.filter(
+      //   (spec) => actionIdMatches(spec.actionId, situation.verbId)
+      //   // There is another threshold controller here: ifAspectsPresent.
+      //   // This changes based on slotted cards, and thus is impossible for us to factor in.
+      //   // Maybe in practice, we can use desiredElement aspects?
+      // ),
     ];
 
-    // Let's let them through if any of the thresholds match any of the requirements.
-    // This is required to allow the fixed verb consider to be used to read books, for example
-    if (
-      !requiredAspects.some((aspect) =>
-        thresholds.some(
-          (t) =>
-            Object.keys(t.essential).includes(aspect) ||
-            (Object.keys(t.required).includes(aspect) &&
-              !Object.keys(t.forbidden).includes(aspect))
-        )
-      )
-    ) {
-      return false;
+    for (const { element, aspects, slots } of elementSlotsData) {
+      // As far as I can tell from the game code, only elements slotted into verb thresholds (situation thresholds in our case)
+      // can provide slots
+      if (
+        situation.thresholds.some((t) => aspectsMatchSphereSpec(aspects, t))
+      ) {
+        thresholds.push(...slots);
+      }
     }
+
+    // Note: Specs have ifAspectsPresent, so they might not exist if some aspects are not present.
+    // We should filter by that, but we don't really know what our final aspects will be at this point.
+
+    // I dont remember why I added this filter.  Let's try without it.
+    // const requiredAspects = [
+    //   ...Object.keys(this._recipe.requirements).filter((x) =>
+    //     workstationFilterAspects.includes(x)
+    //   ),
+    // ];
+    const requiredAspects = Object.keys(this._recipe.requirements);
+
+    // Let's let them through if any of the thresholds match any of the requirements.
+    // This doesn't take into account what cards get slotted to what, so may produce false positives.
+    // if (
+    //   !requiredAspects.some((aspect) =>
+    //     thresholds.some(
+    //       (t) =>
+    //         Object.keys(t.essential).includes(aspect) ||
+    //         (Object.keys(t.required).includes(aspect) &&
+    //           !Object.keys(t.forbidden).includes(aspect))
+    //     )
+    //   )
+    // ) {
+    //   return false;
+    // }
+
+    // This code was disabled, but re-enabling it now that we take into account element slots.
     // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.
     // This really is a special / edge case for skills, so maybe restrict the match to the skill card off-aspect.
     // Interestingly enough, this is absolutely required to 'read' phonographs and films.
-    // for (const aspect of requiredAspects) {
-    //   if (
-    //     !thresholds.some(
-    //       (t) =>
-    //         (Object.keys(t.essential).includes(aspect) ||
-    //           Object.keys(t.required).includes(aspect)) &&
-    //         !Object.keys(t.forbidden).includes(aspect)
-    //     )
-    //   ) {
-    //     return false;
-    //   }
-    // }
+    for (const aspect of requiredAspects) {
+      if (
+        !thresholds.some(
+          (t) =>
+            (Object.keys(t.essential).includes(aspect) ||
+              Object.keys(t.required).includes(aspect)) &&
+            !Object.keys(t.forbidden).includes(aspect)
+        )
+      ) {
+        return false;
+      }
+    }
 
     return true;
   }
@@ -367,7 +423,7 @@ export class RecipeOrchestration
       const desiredItem = stacks.find(
         (x) =>
           !assigned.has(x) &&
-          this._desiredElements.find(
+          this.desiredElements.find(
             (desired) => x.elementId === desired.elementId
           )
       );

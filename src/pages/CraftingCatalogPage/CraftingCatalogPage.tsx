@@ -53,8 +53,8 @@ const CraftingCatalogPage = () => {
         id: "icon",
         header: "",
         size: 75,
-        enableColumnFilter: false,
         enableSorting: false,
+        enableColumnFilter: false,
         cell: ElementIconCell,
       }),
       columnHelper.observeText("label$", {
@@ -89,8 +89,8 @@ const CraftingCatalogPage = () => {
         id: "skill_icon",
         header: "",
         size: 75,
-        enableColumnFilter: false,
         enableSorting: false,
+        enableColumnFilter: false,
         cell: ElementIconCell,
       }),
       columnHelper.observeText("skillLabel$", {
