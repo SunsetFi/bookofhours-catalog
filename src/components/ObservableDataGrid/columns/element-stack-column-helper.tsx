@@ -17,7 +17,6 @@ import {
   MultiselectOptionsFilter,
   AspectsFilter,
   aspectsFilter,
-  TextFilter,
 } from "../filters";
 
 import { AspectsListCell, TextWrapCell } from "../cells";
@@ -32,16 +31,10 @@ export function createElementStackColumnHelper<
   const columnHelper = createObservableColumnHelper<T>();
   return Object.assign(columnHelper, {
     label: (def?: Partial<IdentifiedColumnDef<T, string | null>>) =>
-      columnHelper.observe("label$" as any, {
-        id: "name",
+      columnHelper.observeText("label$" as any, {
+        id: "label",
         size: 200,
         header: "Name",
-        cell: TextWrapCell,
-        filterFn: "includesString",
-        rowHeader: true,
-        meta: {
-          filterComponent: TextFilter,
-        },
         ...def,
       }),
     elementStackIcon: () =>
@@ -108,15 +101,10 @@ export function createElementStackColumnHelper<
         }
       ),
     description: () =>
-      columnHelper.observe("description$" as any, {
+      columnHelper.observeText("description$" as any, {
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
         enableSorting: false,
-        filterFn: "includesString",
-        meta: {
-          filterComponent: TextFilter,
-        },
-        cell: TextWrapCell,
       }),
     location: () =>
       columnHelper.observe(

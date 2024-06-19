@@ -14,7 +14,7 @@ import {
   SphereSpec,
   Token,
 } from "secrethistories-api";
-import { isEqual } from "lodash";
+import { isEqual, values } from "lodash";
 
 import { tokenPathContainsChild } from "@/utils";
 
@@ -420,6 +420,11 @@ export class SituationModel extends TokenModel {
         } as Token,
         now
       );
+
+      // Refresh our threshold contents as they will now be in a different sphere.
+      const contents = await firstValueFrom(this.thresholdContents$);
+      await Promise.all(values(contents).map((token) => token?.refresh()));
+
       return true;
     } catch (e) {
       return false;
@@ -428,15 +433,22 @@ export class SituationModel extends TokenModel {
 
   async conclude() {
     try {
+      const now = Date.now();
       await this._api.concludeTokenAtPath(this.path);
-      // TODO: Could ping TokensSource with our new tokens.
+      this._update(
+        {
+          ...this._situation$.value,
+          currentRecipeId: null,
+          currentRecipeLabel: null,
+          state: "Unstarted",
+        },
+        now
+      );
 
-      this._situation$.next({
-        ...this._situation$.value,
-        currentRecipeId: null,
-        currentRecipeLabel: null,
-        state: "Unstarted",
-      });
+      // Refresh our contents so they update their locations
+      const output = await firstValueFrom(this.output$);
+      await Promise.all(output.map((o) => o.refresh()));
+
       return true;
     } catch (e) {
       return false;

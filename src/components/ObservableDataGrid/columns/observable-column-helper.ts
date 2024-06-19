@@ -11,6 +11,8 @@ import {
   ObservableAccessorFn,
   ObservableColumnDef,
 } from "../types";
+import { TextWrapCell } from "../cells";
+import { TextFilter } from "../filters";
 
 export interface ObservableColumnHelper<TData extends RowData>
   extends BaseColumnHelper<TData> {
@@ -22,6 +24,15 @@ export interface ObservableColumnHelper<TData extends RowData>
     accessor: ObservableAccessorFn<TData, TValue>,
     column: EnhancedDisplayColumnDef<TData, TValue>
   ): ObservableColumnDef<TData, TValue>;
+
+  observeText<TProp extends ObservableKeys<TData>>(
+    accessor: TProp,
+    column: EnhancedDisplayColumnDef<TData, Observation<TData[TProp]>>
+  ): ObservableColumnDef<TData, Observation<TData[TProp]>>;
+  observeText<TValue>(
+    accessor: ObservableAccessorFn<TData, TValue>,
+    column: EnhancedDisplayColumnDef<TData, TValue>
+  ): ObservableColumnDef<TData, TValue>;
 }
 export function createObservableColumnHelper<
   TData extends RowData
@@ -30,6 +41,30 @@ export function createObservableColumnHelper<
   return {
     ...base,
     observe: (accessor: any, column: any) => {
+      if (typeof accessor === "function") {
+        return {
+          ...column,
+          observationFn: accessor,
+        };
+      } else {
+        return {
+          ...column,
+          observationKey: accessor,
+        };
+      }
+    },
+    observeText: (accessor: any, column: any) => {
+      column = {
+        cell: TextWrapCell,
+        filterFn: "includesString",
+        rowHeader: true,
+        ...column,
+        meta: {
+          filterComponent: TextFilter,
+          ...(column.meta ?? {}),
+        },
+      };
+
       if (typeof accessor === "function") {
         return {
           ...column,

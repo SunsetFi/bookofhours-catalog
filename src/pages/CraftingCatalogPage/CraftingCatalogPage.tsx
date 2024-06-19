@@ -57,13 +57,10 @@ const CraftingCatalogPage = () => {
         enableSorting: false,
         cell: ElementIconCell,
       }),
-      columnHelper.observe("label$", {
-        id: "name",
+      columnHelper.observeText("label$", {
+        id: "label",
         header: "Name",
         size: 120,
-        filterFn: "includesString",
-        rowHeader: true,
-        cell: TextWrapCell,
       }),
       columnHelper.observe(
         (item) =>
@@ -96,12 +93,10 @@ const CraftingCatalogPage = () => {
         enableSorting: false,
         cell: ElementIconCell,
       }),
-      columnHelper.observe("skillLabel$", {
+      columnHelper.observeText("skillLabel$", {
         id: "skill",
         header: "Skill",
         size: 200,
-        filterFn: "includesString",
-        cell: TextWrapCell,
       }),
       columnHelper.observe("requirements$", {
         id: "requirements",
@@ -118,12 +113,10 @@ const CraftingCatalogPage = () => {
         },
         cell: (props) => <AspectsListCell {...props} showLevel />,
       }),
-      columnHelper.observe("description$", {
+      columnHelper.observeText("description$", {
         id: "description",
         header: "Description",
         size: 300,
-        filterFn: "includesString",
-        cell: TextWrapCell,
       }),
     ],
     []
@@ -147,6 +140,7 @@ const CraftingCatalogPage = () => {
           columns={columns}
           items$={craftables$}
           filters={filters}
+          defaultSortColumn="label"
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

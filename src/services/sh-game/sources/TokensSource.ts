@@ -9,7 +9,7 @@ import {
 } from "rxjs";
 import { inject, injectable, provides, singleton } from "microinject";
 import { APINetworkError, PayloadType, Token } from "secrethistories-api";
-import { difference, flatten, sortBy } from "lodash";
+import { difference, flatten, sortBy, uniqBy } from "lodash";
 
 import {
   distinctUntilShallowArrayChanged,
@@ -265,28 +265,30 @@ export class TokensSource {
   }
 
   private async _pollTokens() {
-    const updateStart = Date.now();
+    const thisUpdate = Date.now();
 
     let tokens: Token[];
     try {
       // Looks like most of the time is taken serializing.
       // We can lower our query time like this, but we really should make
       // the actual endpoint faster and run in parallel.
-      const brk = this._tokenModels.size / 2;
-      tokens = flatten(
-        await Promise.all([
-          this._api.getAllTokens({
-            fucinePath: visibleSpherePaths,
-            payloadType: supportedPayloadTypes,
-            limit: brk,
-          }),
-          this._api.getAllTokens({
-            fucinePath: visibleSpherePaths,
-            payloadType: supportedPayloadTypes,
-            skip: brk,
-          }),
-        ])
-      );
+      const brk = Math.round(this._tokenModels.size / 2);
+      const shouldSplit = brk > 100;
+      const [first, second] = await Promise.all([
+        this._api.getAllTokens({
+          fucinePath: visibleSpherePaths,
+          payloadType: supportedPayloadTypes,
+          limit: shouldSplit ? brk : undefined,
+        }),
+        shouldSplit
+          ? this._api.getAllTokens({
+              fucinePath: visibleSpherePaths,
+              payloadType: supportedPayloadTypes,
+              skip: brk,
+            })
+          : Promise.resolve([]),
+      ]);
+      tokens = flatten([first, second]);
     } catch (e) {
       // Happens on occasion, probably as a result of us no longer
       // thread locking reads.
@@ -298,7 +300,22 @@ export class TokensSource {
       throw e;
     }
 
-    const updateEnd = Date.now();
+    const prevTokens = tokens;
+    tokens = uniqBy(tokens, "id");
+    if (tokens.length !== prevTokens.length) {
+      // We were receiving duplicates for a bit.
+      // This could be the result of overlapping fucinePath items, but that shouldn't
+      // be the case for us.
+      // Either way I added a distinct filter to the api to nip that, so the only remaining possibility is
+      // our two calls return overlapping tokens.
+      console.warn(
+        "Received",
+        prevTokens.length,
+        "tokens, but only",
+        tokens.length,
+        "were unique."
+      );
+    }
 
     // console.log(
     //   "Got",
@@ -323,7 +340,7 @@ export class TokensSource {
       });
 
       const tokenModels = sortBy(
-        tokens.map((token) => this._getOrUpdateTokenModel(token, updateEnd)),
+        tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
         "id"
       );
 

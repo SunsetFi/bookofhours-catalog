@@ -58,33 +58,36 @@ const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
   );
 };
 
-const columns = [
-  columnHelper.display({
-    id: "upgrade-button",
-    header: "",
-    size: 30,
-    cell: (context) => <SkillUpgradeButton model={context.row.original} />,
-  }),
-  columnHelper.elementStackIcon(),
-  columnHelper.label({
-    header: "Skill",
-    size: 200,
-  }),
-  columnHelper.aspectsList("skill", ["skill"], {
-    header: "Level",
-    size: 180,
-    enableColumnFilter: false,
-  }),
-  columnHelper.aspectsList("aspects", powerAspects, {
-    header: "Aspects",
-    size: 200,
-  }),
-  // TODO: Pick wisdom tree aspects
-  columnHelper.description(),
-];
-
 const SkillsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
+
+  const columns = React.useMemo(
+    () => [
+      columnHelper.display({
+        id: "upgrade-button",
+        header: "",
+        size: 30,
+        cell: (context) => <SkillUpgradeButton model={context.row.original} />,
+      }),
+      columnHelper.elementStackIcon(),
+      columnHelper.label({
+        header: "Skill",
+        size: 200,
+      }),
+      columnHelper.aspectsList("skill", ["skill"], {
+        header: "Level",
+        size: 180,
+        enableColumnFilter: false,
+      }),
+      columnHelper.aspectsList("aspects", powerAspects, {
+        header: "Aspects",
+        size: 200,
+      }),
+      // TODO: Pick wisdom tree aspects
+      columnHelper.description(),
+    ],
+    []
+  );
 
   const skills$ = React.useMemo(
     () =>

@@ -25,6 +25,7 @@ import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
 import ObservableDataGrid, {
+  aspectsPresentFilter,
   createSituationColumnHelper,
 } from "@/components/ObservableDataGrid";
 
@@ -112,14 +113,20 @@ const WorkstationCatalogPage = () => {
         header: "Attunement",
         size: 200,
         aspectsSource: (model) =>
+          // Hints come in as a string of allowed aspects, but aspectsList is a list of aspects with their values.
+          // We could just supply null as the value, but that would make the aspect undefined and cause our filter
+          // to not include it.
           model.hints$.pipe(
             map((h) =>
               h.reduce(
+                // Pass null as the aspect value to prevent rendering any value.
                 (obj, h) => ({ ...obj, [h]: null }),
                 {} as Record<string, React.ReactNode>
               )
             )
           ),
+        // Because we only care about presence (and are using null values), we need to use the aspectsPresentFilter
+        filterFn: aspectsPresentFilter,
       }),
       columnHelper.aspectsList("evolves", evolutionAspects, {
         header: "Evolves",

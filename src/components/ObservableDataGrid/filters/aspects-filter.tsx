@@ -17,15 +17,22 @@ import AspectSelectionGrid from "../../Aspects/AspectSelectionGrid";
 
 import { FilterComponentProps } from "./types";
 
-type FilterValue = {
+type AspectsFilterValue = {
   [key: string]: string | number;
   $mode: "any" | "all" | "none";
 };
 
+/**
+ * A filter function to check if the aspects of a column match the filter value.
+ * @param row The row data.
+ * @param columnId The id of the column to check.
+ * @param filterValue The aspects filter value.
+ * @returns True if the row matches the filter, false otherwise.
+ */
 export function aspectsFilter(
   row: Row<any>,
   columnId: string,
-  filterValue: FilterValue
+  filterValue: AspectsFilterValue
 ): boolean {
   if (!filterValue) {
     return true;
@@ -60,7 +67,53 @@ export function aspectsFilter(
   return mode === "all" || mode === "none";
 }
 
-const defaultFilterValue: FilterValue = {
+/**
+ * A filter function to check if an aspect is present in any form in the column.
+ * @param row The row data.
+ * @param columnId The id of the column to check.
+ * @param filterValue The aspects filter value.
+ * @returns True if the row matches the filter, false otherwise.
+ */
+export function aspectsPresentFilter(
+  row: Row<any>,
+  columnId: string,
+  filterValue: AspectsFilterValue
+) {
+  if (!filterValue) {
+    return true;
+  }
+
+  const mode = filterValue.$mode ?? "any";
+  const desiredAspects = Object.keys(filterValue).filter((x) => x !== "$mode");
+  if (desiredAspects.length === 0) {
+    return true;
+  }
+
+  const valueAspects: Aspects = row.getValue(columnId) ?? {};
+
+  for (const aspect of desiredAspects) {
+    // The filter component uses 0 and 1 for this currently.
+    const required = Boolean(filterValue[aspect]);
+
+    if (mode === "all") {
+      if (valueAspects[aspect] === undefined && required) {
+        return false;
+      }
+    } else if (mode === "any") {
+      if (valueAspects[aspect] !== undefined && required) {
+        return true;
+      }
+    } else if (mode === "none") {
+      if (valueAspects[aspect] !== undefined && required) {
+        return false;
+      }
+    }
+  }
+
+  return mode === "all" || mode === "none";
+}
+
+const defaultFilterValue: AspectsFilterValue = {
   $mode: "any",
 } as any;
 export const AspectsFilter = ({
@@ -68,7 +121,7 @@ export const AspectsFilter = ({
   columnValues,
   filterValue,
   onChange,
-}: FilterComponentProps<FilterValue, Aspects> & {
+}: FilterComponentProps<AspectsFilterValue, Aspects> & {
   allowedAspectIds: readonly string[] | "auto";
 }) => {
   let choices: readonly string[] = [];

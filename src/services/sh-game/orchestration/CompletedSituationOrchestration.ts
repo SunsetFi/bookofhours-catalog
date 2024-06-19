@@ -77,8 +77,7 @@ export class CompletedSituationOrchestration
     // Special case for unlocks; they cease to exist on completion.
     // hack: Make sure the damn thing exists.  Unlocking terrains are being finicky.
     await this._situation.refresh();
-    const retired = await firstValueFrom(this._situation.retired$);
-    if (retired) {
+    if (this._situation.retired) {
       this._replaceOrchestration(null);
       return true;
     }

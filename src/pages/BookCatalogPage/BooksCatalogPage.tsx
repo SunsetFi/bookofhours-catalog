@@ -14,7 +14,6 @@ import CraftIconButton from "@/components/CraftIconButton";
 import PinElementIconButton from "@/components/PinElementIconButton";
 import ObservableDataGrid, {
   ElementIconCell,
-  TextWrapCell,
   createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid";
 
@@ -93,11 +92,10 @@ const BookCatalogPage = () => {
         enableSorting: false,
         cell: ElementIconCell,
       }),
-      columnHelper.observe("memoryLabel$", {
+      columnHelper.observeText("memoryLabel$", {
         id: "memory",
         header: "Memory",
         size: 160,
-        cell: TextWrapCell,
       }),
       columnHelper.aspectsList("memory-aspects", powerAspects, {
         header: "Memory Aspects",
