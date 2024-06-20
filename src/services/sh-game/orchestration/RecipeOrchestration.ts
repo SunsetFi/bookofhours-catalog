@@ -136,7 +136,6 @@ export class RecipeOrchestration
       )
       .subscribe(([oldSlots, newSlots]) => {
         // Only apply defaults to new slots.
-        console.log("Slots changed", oldSlots, newSlots);
         const oldKeys = Object.keys(oldSlots);
         const newKeys = Object.keys(newSlots);
         const added = difference(newKeys, oldKeys);

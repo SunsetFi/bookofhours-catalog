@@ -16,8 +16,7 @@ interface OrchestrationSlotsProps {
 }
 
 const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
-  const slots =
-    useObservation(observableObjectOrEmpty(orchestration.slots$)) ?? {};
+  const slots = useObservation(orchestration.slots$) ?? {};
   const slotKeys = Object.keys(slots);
 
   return (

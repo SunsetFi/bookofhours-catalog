@@ -153,7 +153,10 @@ const OrchestrationContent = ({
         iconSize={30}
       />
     );
-  } else {
+  } else if (
+    !isOngoingOrchestration(orchestration) &&
+    !isCompletedOrchestration(orchestration)
+  ) {
     stackItems.push(
       <Typography sx={{ height: 30, textAlign: "center" }}>
         Slot enough cards for a recipe to see its requirements.

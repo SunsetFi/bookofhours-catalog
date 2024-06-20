@@ -210,7 +210,7 @@ export class Orchestrator {
       this._updateOrchestration(orchestration);
     } else {
       console.warn(`Unhandled situation state: ${situation.state}`);
-      this._updateOrchestration(null);
+      // Just ignore it for now.  It's probably transient and will become something more sensible later.
     }
   }
 
