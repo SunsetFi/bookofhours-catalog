@@ -2,37 +2,51 @@ import React from "react";
 import { useLocation } from "react-router";
 import { Link } from "react-router-dom";
 
-import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
-import MuiLink from "@mui/material/Link";
-import GithubIcon from "@mui/icons-material/GitHub";
+import {
+  Divider,
+  Box,
+  Tooltip,
+  Typography,
+  Link as MuiLink,
+} from "@mui/material";
+import { GitHub as GithubIcon } from "@mui/icons-material";
 
-import sitemap, { SiteMapItem, getSitemapItemIconPath } from "@/sitemap";
-
-import { useObservation } from "@/hooks/use-observation";
-
-import { useAspect } from "@/services/sh-compendium";
+import sitemap, {
+  SiteMapNavItem,
+  getSitemapItemIconPath,
+  isSiteMapDividerItem,
+  isSiteMapNavItem,
+} from "@/sitemap";
 
 const PageTabs = () => {
   return (
     <Box
       component="nav"
       sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1,
         // This is stupid, but its what the titlebar does. and probably what tabs do too.
         backgroundImage:
           "linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04))",
         height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
         p: 2,
-        gap: 1,
       }}
     >
-      {sitemap.map((item) => (
-        <PageTab key={item.path} item={item} />
-      ))}
+      {sitemap.map((item, i) => {
+        if (isSiteMapDividerItem(item)) {
+          return (
+            <Box sx={{ p: 0.5, width: "100%" }}>
+              <Divider key={i} orientation="horizontal" />
+            </Box>
+          );
+        } else if (isSiteMapNavItem(item)) {
+          return <PageTab key={i} item={item} />;
+        } else {
+          return null;
+        }
+      })}
       <Box sx={{ mt: "auto" }}>
         <Tooltip
           title="View Project on Github"
@@ -51,7 +65,7 @@ const PageTabs = () => {
 };
 
 interface PageTab {
-  item: SiteMapItem;
+  item: SiteMapNavItem;
 }
 const PageTab = ({ item }: PageTab) => {
   const { label, path } = item;

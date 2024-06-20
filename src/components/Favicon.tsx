@@ -3,7 +3,7 @@ import { sortBy } from "lodash";
 
 import { useLocation } from "react-router";
 
-import sitemap, { getSitemapItemIconPath } from "@/sitemap";
+import sitemap, { getSitemapItemIconPath, isSiteMapNavItem } from "@/sitemap";
 
 const Favicon = () => {
   const { pathname } = useLocation();
@@ -14,7 +14,10 @@ const Favicon = () => {
 
   React.useEffect(() => {
     // Little hack since we have a "/" path now.
-    const siteItem = sortBy(sitemap, (x) => x.path.length)
+    const siteItem = sortBy(
+      sitemap.filter(isSiteMapNavItem),
+      (x) => x.path.length
+    )
       .reverse()
       .find((x) => pathname.startsWith(x.path));
     if (siteItem) {

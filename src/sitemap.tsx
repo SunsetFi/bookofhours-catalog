@@ -30,7 +30,7 @@ import LocationsCatalogPage from "./pages/LocationsCatalogPage";
 import IndexPage from "./pages/IndexPage";
 import BrancrugCatalogPage from "./pages/BrancrugCatalogPage";
 
-export interface SiteMapItem {
+export interface SiteMapNavItem {
   label: string;
   iconSource: "aspect" | "verb";
   iconName: string;
@@ -38,8 +38,23 @@ export interface SiteMapItem {
   searchProvider?: PageSearchProviderPipe;
   Component: React.ComponentType<{}>;
 }
+export function isSiteMapNavItem(item: SiteMapItem): item is SiteMapNavItem {
+  return (item as SiteMapNavItem).label !== undefined;
+}
 
-export function getSitemapItemIconPath(item: SiteMapItem): string {
+export interface SiteMapDividerItem {
+  divider: true;
+}
+
+export function isSiteMapDividerItem(
+  item: SiteMapItem
+): item is SiteMapDividerItem {
+  return (item as SiteMapDividerItem).divider === true;
+}
+
+export type SiteMapItem = SiteMapNavItem | SiteMapDividerItem;
+
+export function getSitemapItemIconPath(item: SiteMapNavItem): string {
   if (item.iconSource === "aspect") {
     return `api/compendium/elements/${item.iconName}/icon.png`;
   } else if (item.iconSource === "verb") {
@@ -58,12 +73,7 @@ const sitemap: SiteMapItem[] = [
     Component: IndexPage,
   },
   {
-    label: "Books",
-    iconSource: "aspect",
-    iconName: "readable",
-    path: "/books",
-    searchProvider: bookCatalogSearchProvider,
-    Component: BookCatalogPage,
+    divider: true,
   },
   {
     label: "Locations",
@@ -92,6 +102,36 @@ const sitemap: SiteMapItem[] = [
     iconName: "nectar",
     path: "/harvest",
     Component: HarvestCatalogPage,
+  },
+  {
+    divider: true,
+  },
+  {
+    label: "Skills",
+    iconSource: "aspect",
+    iconName: "skill",
+    path: "/skills",
+    searchProvider: skillsSearchProvider,
+    Component: SkillsCatalogPage,
+  },
+  {
+    label: "Craftables",
+    iconSource: "aspect",
+    iconName: "difficulty.keeper",
+    path: "/craftables",
+    searchProvider: craftingSearchProvider,
+    Component: CraftingCatalogPage,
+  },
+  {
+    divider: true,
+  },
+  {
+    label: "Books",
+    iconSource: "aspect",
+    iconName: "readable",
+    path: "/books",
+    searchProvider: bookCatalogSearchProvider,
+    Component: BookCatalogPage,
   },
   {
     label: "Provisions",
@@ -132,22 +172,6 @@ const sitemap: SiteMapItem[] = [
     path: "/furnishings",
     searchProvider: furnishingsSearchProvider,
     Component: FurnishingsCatalogPage,
-  },
-  {
-    label: "Skills",
-    iconSource: "aspect",
-    iconName: "skill",
-    path: "/skills",
-    searchProvider: skillsSearchProvider,
-    Component: SkillsCatalogPage,
-  },
-  {
-    label: "Craftables",
-    iconSource: "aspect",
-    iconName: "difficulty.keeper",
-    path: "/craftables",
-    searchProvider: craftingSearchProvider,
-    Component: CraftingCatalogPage,
   },
 ];
 
