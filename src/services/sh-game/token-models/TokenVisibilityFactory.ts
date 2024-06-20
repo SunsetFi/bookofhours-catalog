@@ -15,7 +15,7 @@ import {
   observeAllMap,
 } from "@/observables";
 
-import { playerSpherePaths } from "@/spheres";
+import { alwaysVisibleSpherePaths } from "@/spheres";
 
 import { TokensSource } from "../sources/TokensSource";
 
@@ -37,7 +37,11 @@ export class TokenVisibilityFactory {
         distinctUntilShallowArrayChanged(),
         filterItemObservations((t) =>
           combineLatest([t.shrouded$, t.sealed$]).pipe(
-            map(([shrouded, sealed]) => !shrouded && !sealed)
+            // We can still see inside WisdomNodeTerrains that are shrouded.
+            map(
+              ([shrouded, sealed]) =>
+                (!shrouded || t.payloadType === "WisdomNodeTerrain") && !sealed
+            )
           )
         ),
         observeAllMap((t) => t.path$),
@@ -52,7 +56,7 @@ export class TokenVisibilityFactory {
     return combineLatest([token$, this._visiblePaths$]).pipe(
       map(([token, visiblePaths]) => {
         if (
-          playerSpherePaths.some((path) =>
+          alwaysVisibleSpherePaths.some((path) =>
             tokenPathContainsChild(path, token.path)
           )
         ) {

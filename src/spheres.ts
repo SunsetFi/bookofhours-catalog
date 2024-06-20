@@ -6,7 +6,7 @@ export const portageSpherePaths = [
   "~/portage5",
 ];
 
-export const playerSpherePaths = [
+export const alwaysVisibleSpherePaths = [
   ...portageSpherePaths,
   "~/hand.abilities",
   "~/hand.skills",
@@ -14,9 +14,10 @@ export const playerSpherePaths = [
   "~/hand.misc",
   "~/fixedverbs",
   "~/arrivalverbs",
+  "~/wisdomtreenodes",
 ];
 
-export const visibleSpherePaths = [...playerSpherePaths, "~/library"];
+export const applicableSpherePaths = [...alwaysVisibleSpherePaths, "~/library"];
 
 export const brancrugTokens = [
   "~/library!brancrugbeach",

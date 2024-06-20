@@ -17,7 +17,7 @@ import {
   firstOrDefault,
 } from "@/observables";
 
-import { visibleSpherePaths } from "@/spheres";
+import { applicableSpherePaths } from "@/spheres";
 
 import { Scheduler, TaskUnsubscriber } from "../../scheduler";
 import { API } from "../../sh-api";
@@ -48,6 +48,9 @@ const supportedPayloadTypes: PayloadType[] = [
   "WorkstationSituation",
   "RoomWorkSituation",
 ];
+
+const WisdomTreeCommittmentRegex =
+  /\~\/wisdomtreenodes\!([a-zA-Z0-9\.])+\/commitment/;
 
 @injectable()
 @singleton()
@@ -275,19 +278,25 @@ export class TokensSource {
       const shouldSplit = brk > 100;
       const [first, second] = await Promise.all([
         this._api.getAllTokens({
-          fucinePath: visibleSpherePaths,
+          fucinePath: applicableSpherePaths,
           payloadType: supportedPayloadTypes,
           limit: shouldSplit ? brk : undefined,
         }),
         shouldSplit
           ? this._api.getAllTokens({
-              fucinePath: visibleSpherePaths,
+              fucinePath: applicableSpherePaths,
               payloadType: supportedPayloadTypes,
               skip: brk,
             })
           : Promise.resolve([]),
       ]);
-      tokens = flatten([first, second]);
+
+      // Remove wisdom tree commitments from the tokens.
+      // We could lok at their inExteriorSphere, but we often want to show non-exterior tokens
+      // when they are in situations.
+      tokens = flatten([first, second]).filter(
+        (t) => !WisdomTreeCommittmentRegex.test(t.spherePath)
+      );
     } catch (e) {
       // Happens on occasion, probably as a result of us no longer
       // thread locking reads.

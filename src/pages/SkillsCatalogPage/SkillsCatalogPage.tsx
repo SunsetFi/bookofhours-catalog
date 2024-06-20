@@ -7,7 +7,7 @@ import UpgradeIcon from "@mui/icons-material/Upgrade";
 
 import { useDIDependency } from "@/container";
 
-import { powerAspects } from "@/aspects";
+import { powerAspects, wisdomAspects } from "@/aspects";
 
 import {
   ElementStackModel,
@@ -76,12 +76,27 @@ const SkillsCatalogPage = () => {
       }),
       columnHelper.aspectsList("skill", ["skill"], {
         header: "Level",
-        size: 180,
+        size: 120,
         enableColumnFilter: false,
       }),
       columnHelper.aspectsList("aspects", powerAspects, {
         header: "Aspects",
         size: 200,
+      }),
+      columnHelper.aspectsList("wisdoms", wisdomAspects, {
+        header: "Wisdoms",
+        showLevel: false,
+        size: 190,
+      }),
+      columnHelper.aspectsList("committed", ["wisdom.committed"], {
+        header: "Committed",
+        showLevel: false,
+        size: 190,
+      }),
+      columnHelper.aspectsList("attuned", ["a.xhausted"], {
+        header: "Attuned",
+        showLevel: false,
+        size: 160,
       }),
       // TODO: Pick wisdom tree aspects
       columnHelper.description(),

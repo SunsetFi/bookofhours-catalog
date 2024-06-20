@@ -61,6 +61,18 @@ export const evolutionAspects = [
   "e.preservation",
 ] as const;
 
+export const wisdomAspects = [
+  "w.illumination",
+  "w.horomachistry",
+  "w.ithastry",
+  "w.hushery",
+  "w.nyctodromy",
+  "w.skolekosophy",
+  "w.birdsong",
+  "w.bosk",
+  "w.preservation",
+];
+
 export function aspectsMagnitude(aspects: Aspects): number {
   return Math.sqrt(
     Object.values(aspects).reduce((sum, value) => sum + value * value, 0)
