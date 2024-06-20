@@ -51,21 +51,20 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
       // FIXME: This is ripe for a refactor.
       // Every orchestration save RecipeOrchestration just wants to use situation thresholds
       // RecipeOrchestration needs to calculate them on the fly as the game would.
-      this._slots$ = this.situation$
-        .pipe(switchMap((s) => s?.thresholds$ ?? EmptyArray$))
-        .pipe(
-          distinctUntilChanged((a, b) => isEqual(a, b)),
-          mapArrayItemsCached((spec) => this._createSlot(spec)),
-          map((slots) => {
-            const result: Record<string, OrchestrationSlot> = {};
-            for (const slot of slots) {
-              result[slot.spec.id] = slot;
-            }
+      this._slots$ = this.situation$.pipe(
+        switchMap((s) => s?.thresholds$ ?? EmptyArray$),
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+        mapArrayItemsCached((spec) => this._createSlot(spec)),
+        map((slots) => {
+          const result: Record<string, OrchestrationSlot> = {};
+          for (const slot of slots) {
+            result[slot.spec.id] = slot;
+          }
 
-            return result;
-          }),
-          shareReplay(1)
-        );
+          return result;
+        }),
+        shareReplay(1)
+      );
     }
 
     return this._slots$;

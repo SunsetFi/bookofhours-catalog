@@ -114,8 +114,11 @@ export abstract class TokenModel {
     const thisUpdate = Date.now();
     const token = await this._api.getTokenById(this.id);
     const time = Date.now() - thisUpdate;
+
+    // FIXME: We do not buffer changes across async calls, so we often get 'lag' appearing here
+    // as a result of rerenders triggered by previous calls.
+    // We may want to make a 'valve' like system to withhold updates in batch.
     if (time > 100) {
-      // Why the hell is this taking over a second in just queuing time alone?
       console.warn(
         "Token id",
         this.id,

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, ButtonGroup, Divider, Stack } from "@mui/material";
+import { Button, ButtonGroup, Divider, Stack, Typography } from "@mui/material";
 
 import { mapValues } from "lodash";
 
@@ -90,7 +90,7 @@ const OrchestrationContent = ({
       <TlgNote
         key="notes"
         sx={{
-          minHeight: 75,
+          minHeight: 100,
           ["& .game-typography"]: {
             textAlign: "center",
           },
@@ -100,7 +100,12 @@ const OrchestrationContent = ({
     );
   } else if (description) {
     stackItems.push(
-      <GameTypography key="description" component="div" variant="body1">
+      <GameTypography
+        key="description"
+        component="div"
+        variant="body1"
+        sx={{ minHeight: 100 }}
+      >
         {description}
       </GameTypography>
     );
@@ -140,13 +145,19 @@ const OrchestrationContent = ({
   if (Object.keys(requirements).length > 0) {
     stackItems.push(
       <AspectsList
-        sx={{ justifyContent: "center" }}
+        sx={{ justifyContent: "center", height: 30 }}
         aspects={mapValues(
           requirements,
           (value, key) => `${aspects[key] ?? 0} / ${value}`
         )}
         iconSize={30}
       />
+    );
+  } else {
+    stackItems.push(
+      <Typography sx={{ height: 30, textAlign: "center" }}>
+        Slot enough cards for a recipe to see its requirements.
+      </Typography>
     );
   }
 
@@ -209,7 +220,7 @@ const OrchestrationContent = ({
       <Stack direction="column" spacing={2} sx={{ height: "100%", p: 2 }}>
         {stackItems.map((item, index) => (
           <React.Fragment key={index}>
-            {index !== 0 && <Divider sx={{ py: 1 }} />}
+            {index !== 0 && <Divider />}
             {item}
           </React.Fragment>
         ))}

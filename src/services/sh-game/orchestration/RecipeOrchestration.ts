@@ -2,14 +2,15 @@ import {
   BehaviorSubject,
   Observable,
   Subscription,
+  bufferCount,
   combineLatest,
   debounceTime,
   firstValueFrom,
   map,
   of,
   shareReplay,
+  startWith,
   switchMap,
-  throttleTime,
 } from "rxjs";
 import {
   Aspects,
@@ -19,6 +20,7 @@ import {
   actionIdMatches,
   aspectsMatchSphereSpec,
 } from "secrethistories-api";
+import { difference, pick } from "lodash";
 
 import { switchMapIfNotNull, observeAllMap } from "@/observables";
 
@@ -125,10 +127,20 @@ export class RecipeOrchestration
       });
 
     // Pick defaults when things have settled down.
+    // This used to be straightforward when we precomputed slots, but now
+    // we have to wait for the game to catch up and update us on the slot count.
     this._applyDefaultsSubscription = this.slots$
-      .pipe(debounceTime(5), throttleTime(500))
-      .subscribe((slots) => {
-        this._pickDefaults(Object.values(slots));
+      .pipe(
+        startWith({} as Readonly<Record<string, OrchestrationSlot>>),
+        bufferCount(2, 1)
+      )
+      .subscribe(([oldSlots, newSlots]) => {
+        // Only apply defaults to new slots.
+        console.log("Slots changed", oldSlots, newSlots);
+        const oldKeys = Object.keys(oldSlots);
+        const newKeys = Object.keys(newSlots);
+        const added = difference(newKeys, oldKeys);
+        this._pickDefaults(Object.values(pick(newSlots, added)));
       });
   }
 
@@ -358,35 +370,35 @@ export class RecipeOrchestration
 
     // Let's let them through if any of the thresholds match any of the requirements.
     // This doesn't take into account what cards get slotted to what, so may produce false positives.
-    // if (
-    //   !requiredAspects.some((aspect) =>
-    //     thresholds.some(
-    //       (t) =>
-    //         Object.keys(t.essential).includes(aspect) ||
-    //         (Object.keys(t.required).includes(aspect) &&
-    //           !Object.keys(t.forbidden).includes(aspect))
-    //     )
-    //   )
-    // ) {
-    //   return false;
-    // }
+    if (
+      !requiredAspects.some((aspect) =>
+        thresholds.some(
+          (t) =>
+            Object.keys(t.essential).includes(aspect) ||
+            (Object.keys(t.required).includes(aspect) &&
+              !Object.keys(t.forbidden).includes(aspect))
+        )
+      )
+    ) {
+      return false;
+    }
 
     // This code was disabled, but re-enabling it now that we take into account element slots.
     // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.
     // This really is a special / edge case for skills, so maybe restrict the match to the skill card off-aspect.
     // Interestingly enough, this is absolutely required to 'read' phonographs and films.
-    for (const aspect of requiredAspects) {
-      if (
-        !thresholds.some(
-          (t) =>
-            (Object.keys(t.essential).includes(aspect) ||
-              Object.keys(t.required).includes(aspect)) &&
-            !Object.keys(t.forbidden).includes(aspect)
-        )
-      ) {
-        return false;
-      }
-    }
+    // for (const aspect of requiredAspects) {
+    //   if (
+    //     !thresholds.some(
+    //       (t) =>
+    //         (Object.keys(t.essential).includes(aspect) ||
+    //           Object.keys(t.required).includes(aspect)) &&
+    //         !Object.keys(t.forbidden).includes(aspect)
+    //     )
+    //   ) {
+    //     return false;
+    //   }
+    // }
 
     return true;
   }
