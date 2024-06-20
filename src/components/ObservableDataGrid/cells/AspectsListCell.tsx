@@ -9,12 +9,13 @@ function AspectsListCell<T extends RowData>({
   showLevel,
   ...props
 }: CellContext<T, Record<string, React.ReactNode>> & { showLevel: boolean }) {
-  let value = props.getValue();
-  if (!showLevel) {
-    value = mapValues(value, () => null);
-  }
+  const value = props.getValue();
+  const renderValue = React.useMemo(
+    () => (showLevel ? value : mapValues(value, () => null)),
+    [value, showLevel]
+  );
 
-  return <AspectsList aspects={value} />;
+  return <AspectsList aspects={renderValue} />;
 }
 
 export default AspectsListCell;

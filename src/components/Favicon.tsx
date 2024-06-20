@@ -1,4 +1,5 @@
 import React from "react";
+import { sortBy } from "lodash";
 
 import { useLocation } from "react-router";
 
@@ -12,17 +13,20 @@ const Favicon = () => {
   );
 
   React.useEffect(() => {
-    if (!icon) {
-      return;
-    }
-
-    const siteItem = sitemap.find((x) => pathname.startsWith(x.path));
+    // Little hack since we have a "/" path now.
+    const siteItem = sortBy(sitemap, (x) => x.path.length)
+      .reverse()
+      .find((x) => pathname.startsWith(x.path));
     if (siteItem) {
       document.title = `${siteItem.label} - The Hush House Catalog`;
-      icon.href = `http://localhost:8081/${getSitemapItemIconPath(siteItem)}`;
+      if (icon) {
+        icon.href = `http://localhost:8081/${getSitemapItemIconPath(siteItem)}`;
+      }
     } else {
       document.title = `The Hush House Catalog`;
-      icon.href = `http://localhost:8081/api/compendium/elements/readable/icon.png`;
+      if (icon) {
+        icon.href = `http://localhost:8081/api/compendium/elements/readable/icon.png`;
+      }
     }
   }, [pathname, icon]);
 

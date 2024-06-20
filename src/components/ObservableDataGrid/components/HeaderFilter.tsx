@@ -47,25 +47,27 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
           }}
         />
       </IconButton>
-      <Popover
-        open={anchorEl != null}
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        onClose={() => {
-          setAnchorEl(null);
-        }}
-      >
-        {anchorEl != null && (
-          <Filter
-            columnValues={uniqueValues}
-            filterValue={column.getFilterValue()}
-            onChange={column.setFilterValue}
-          />
-        )}
-      </Popover>
+      {anchorEl && (
+        <Popover
+          open={true}
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          onClose={() => {
+            setAnchorEl(null);
+          }}
+        >
+          {anchorEl != null && (
+            <Filter
+              columnValues={uniqueValues}
+              filterValue={column.getFilterValue()}
+              onChange={column.setFilterValue}
+            />
+          )}
+        </Popover>
+      )}
     </>
   );
 };

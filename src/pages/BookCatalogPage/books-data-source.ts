@@ -1,8 +1,14 @@
 import React from "react";
 import { Container } from "microinject";
 
-import { pick, first } from "lodash";
-import { Observable, combineLatest, map, switchMap } from "rxjs";
+import { pick, first, isEqual } from "lodash";
+import {
+  Observable,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  switchMap,
+} from "rxjs";
 import { Aspects } from "secrethistories-api";
 
 import { useDIContainer } from "@/container";
@@ -11,9 +17,9 @@ import { decorateObjectInstance } from "@/object-decorator";
 
 import {
   Null$,
+  distinctUntilShallowArrayChanged,
   mapArrayItemsCached,
   switchMapIfNotNull,
-  observableObjectOrEmpty,
 } from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
@@ -67,6 +73,7 @@ function elementStackToBook(
         })
       );
     }),
+    distinctUntilChanged(),
     map((memoryId) => (memoryId ? compendium.getElementById(memoryId) : null))
   );
 
@@ -78,11 +85,9 @@ function elementStackToBook(
   );
 
   const memoryAspects$ = memory$.pipe(
-    switchMap((memory) =>
-      observableObjectOrEmpty(memory?.aspects$).pipe(
-        map((aspects) => pick(aspects, powerAspects))
-      )
-    )
+    switchMapIfNotNull((memory) => memory?.aspects$),
+    map((aspects) => pick(aspects ?? {}, powerAspects))
+    // distinctUntilChanged(isEqual)
   );
 
   return decorateObjectInstance(elementStack, {
@@ -141,6 +146,7 @@ export function getBooksObservable(
     filterHasAnyAspect("readable"),
     // Ignore tokens in arrival verbs and other weird places.
     filterTokenInPath("~/library"),
+    distinctUntilShallowArrayChanged(),
     mapArrayItemsCached((item) =>
       elementStackToBook(item, compendium, orchestrator)
     )

@@ -125,6 +125,7 @@ const BookCatalogPage = () => {
           columns={columns}
           items$={items$}
           filters={filter}
+          getItemKey={(item) => item.id}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

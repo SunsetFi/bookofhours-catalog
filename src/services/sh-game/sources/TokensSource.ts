@@ -1,4 +1,3 @@
-import { startTransition } from "react";
 import {
   Observable,
   Subject,
@@ -317,37 +316,25 @@ export class TokensSource {
       );
     }
 
-    // console.log(
-    //   "Got",
-    //   tokens.length,
-    //   "tokens in",
-    //   Date.now() - thisUpdate,
-    //   "ms"
-    // );
-    // const startProcess = Date.now();
-
     const existingTokenIds = Array.from(this._tokenModels.keys());
     const foundIds = tokens.map((t) => t.id);
     const tokenIdsToRemove = difference(existingTokenIds, foundIds);
 
-    startTransition(() => {
-      tokenIdsToRemove.forEach((id) => {
-        const token = this._tokenModels.get(id);
-        if (token) {
-          token._retire();
-          this._tokenModels.delete(id);
-        }
-      });
-
-      const tokenModels = sortBy(
-        tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
-        "id"
-      );
-
-      this._tokensSubject$.next(tokenModels);
+    // React 18 auto batches this by virtue of being inside a promise.
+    tokenIdsToRemove.forEach((id) => {
+      const token = this._tokenModels.get(id);
+      if (token) {
+        token._retire();
+        this._tokenModels.delete(id);
+      }
     });
 
-    // console.log("Processed tokens in", Date.now() - startProcess, "ms");
+    const tokenModels = sortBy(
+      tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
+      "id"
+    );
+
+    this._tokensSubject$.next(tokenModels);
   }
 
   private _getOrUpdateTokenModel(token: Token, timestamp: number): TokenModel {

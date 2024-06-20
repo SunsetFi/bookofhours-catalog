@@ -113,6 +113,17 @@ export abstract class TokenModel {
 
     const thisUpdate = Date.now();
     const token = await this._api.getTokenById(this.id);
+    const time = Date.now() - thisUpdate;
+    if (time > 100) {
+      // Why the hell is this taking over a second in just queuing time alone?
+      console.warn(
+        "Token id",
+        this.id,
+        "refresh took",
+        Date.now() - thisUpdate,
+        "ms"
+      );
+    }
 
     if (!token) {
       this._retire();
@@ -135,6 +146,7 @@ export abstract class TokenModel {
     }
     this._lastUpdate = timestamp;
 
+    const start = Date.now();
     this._token$.next(token);
     this._onUpdate(token);
   }

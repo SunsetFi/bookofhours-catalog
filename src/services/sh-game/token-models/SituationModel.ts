@@ -1,3 +1,4 @@
+import { unstable_batchedUpdates } from "react-dom";
 import {
   BehaviorSubject,
   Observable,
@@ -389,12 +390,14 @@ export class SituationModel extends TokenModel {
       await this._api.evictTokenAtPath(slotPath);
     }
 
-    await this.refresh();
+    const followups: Promise<void>[] = [this.refresh()];
 
     const oldInSlot = oldTokens[slotId];
     if (oldInSlot) {
-      await oldInSlot.refresh();
+      followups.push(oldInSlot.refresh());
     }
+
+    await Promise.all(followups);
 
     return true;
   }

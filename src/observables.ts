@@ -117,7 +117,12 @@ export function observeAllMap<T, K>(
 ): OperatorFunction<readonly T[], K[]> {
   return (source: Observable<readonly T[]>) => {
     return source.pipe(
-      mapArrayItemsCached((input, index) => func(input, index)),
+      // HACK: Add a shareReplay because combineLatest will resubscribe every time the top level array changes.
+      // FIXME: Write our own observeAll and observeAllMap that doesn't have this issue.
+      // We used to have our own, but it was buggy and got removed.
+      mapArrayItemsCached((input, index) =>
+        func(input, index).pipe(shareReplay(1))
+      ),
       distinctUntilShallowArrayChanged(),
       switchMap((observables) => {
         if (observables.length === 0) {

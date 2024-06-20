@@ -16,7 +16,12 @@ interface OrchestrationSlotsProps {
 }
 
 const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
-  const requirements = useObservation(orchestration.requirements$) ?? {};
+  const requirements = useObservation(orchestration.requirements$) ?? null;
+  const requiredAspects = React.useMemo(
+    () => Object.keys(requirements ?? {}),
+    [requirements]
+  );
+
   const slots =
     useObservation(observableObjectOrEmpty(orchestration.slots$)) ?? {};
 
@@ -36,7 +41,7 @@ const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
           key={slotId}
           slot={slots[slotId]}
           autoFocus={i === 0}
-          recipeRequiredAspects={Object.keys(requirements)}
+          recipeRequiredAspects={requiredAspects}
         />
       ))}
     </Box>

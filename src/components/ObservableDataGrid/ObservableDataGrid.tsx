@@ -1,5 +1,12 @@
 import React from "react";
-import { Observable, combineLatest, map, of as observableOf } from "rxjs";
+import {
+  Observable,
+  combineLatest,
+  debounceTime,
+  map,
+  of as observableOf,
+  tap,
+} from "rxjs";
 import { omit } from "lodash";
 
 import Box from "@mui/material/Box";
@@ -17,9 +24,12 @@ import Pagination from "@mui/material/Pagination";
 import { useTheme, type SxProps } from "@mui/material/styles";
 
 import {
+  Cell,
   ColumnDef,
   ColumnFiltersState,
+  HeaderGroup,
   InitialTableState,
+  Row,
   SortingState,
   TableState,
   Updater,
@@ -32,9 +42,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { useVirtualizer } from "@tanstack/react-virtual";
-
-import { Null$, observeAllMap } from "@/observables";
+import {
+  Null$,
+  distinctUntilShallowArrayChanged,
+  observeAllMap,
+} from "@/observables";
 import { decorateObjectInstance } from "@/object-decorator";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -55,6 +67,7 @@ export interface ObservableDataGridProps<T extends {}> {
   defaultSortColumn?: string;
   columns: ObservableColumnDef<T, any>[];
   items$: Observable<readonly T[]>;
+  getItemKey?(item: T, index: number): string;
   onFiltersChanged?(filters: Record<string, any>): void;
 }
 
@@ -124,17 +137,21 @@ function flattenColumn<T>(
 function itemToRow<T extends {}>(
   item: T,
   itemIndex: number,
-  columns: ObservableColumnDef<T>[]
+  columns: ObservableColumnDef<T>[],
+  getItemKey: (item: T, index: number) => string
 ): Observable<Record<string, any>> {
   columns = columns.flatMap(flattenColumn);
 
-  // Note: In practice we don't use the observations for non-observables.
-  // We need to have them passed in to make the indexes align though.
-  return combineLatest(
-    columns.map((column) => observeColumn(column, item, itemIndex))
-  ).pipe(
+  const observations = columns.map((column) =>
+    observeColumn(column, item, itemIndex)
+  );
+
+  return combineLatest(observations).pipe(
+    debounceTime(5),
     map((values) => {
-      const decoration: Record<string, any> = {};
+      const decoration: Record<string, any> = {
+        _rowId: getItemKey(item, itemIndex),
+      };
 
       for (let i = 0; i < columns.length; i++) {
         const property = autoColumnProperty(columns[i], i);
@@ -164,8 +181,6 @@ function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
   return result;
 }
 
-const RowHeightFunc = () => RowHeight;
-
 const initialState: InitialTableState = {
   pagination: {
     pageSize: 25,
@@ -178,6 +193,7 @@ function ObservableDataGrid<T extends {}>({
   defaultSortColumn,
   columns,
   items$,
+  getItemKey = (item, index) => String(index),
   onFiltersChanged,
 }: ObservableDataGridProps<T>) {
   const theme = useTheme();
@@ -210,7 +226,9 @@ function ObservableDataGrid<T extends {}>({
   const data = useObservation(
     () =>
       items$.pipe(
-        observeAllMap((item, index) => itemToRow(item, index, columns))
+        observeAllMap((item, index) =>
+          itemToRow(item, index, columns, getItemKey)
+        )
       ),
     [items$, columns],
     {
@@ -238,6 +256,7 @@ function ObservableDataGrid<T extends {}>({
     columns: tableColumns,
     state,
     initialState,
+    getRowId: (row) => row["_rowId"],
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: onTableFiltersChanged,
@@ -249,147 +268,24 @@ function ObservableDataGrid<T extends {}>({
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
-  // This is vestiegal now that we are using pagination, but i'm leaving it in.
-  // It might yet come back into use if we add options to show more items per page, which will be useful outside of
-  // a screen reader / accessibility context.
-  const virtualizer = useVirtualizer({
-    count: table.getRowModel().rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: RowHeightFunc,
-    overscan: 20,
-  });
-
-  const virtualRows = virtualizer.getVirtualItems();
-
   const headerGroups = table.getHeaderGroups();
 
   const rows = table.getRowModel().rows;
 
-  const tableElement = React.useMemo(() => {
-    const totalColumns = table.getHeaderGroups()[0].headers.length;
-
-    // Docs are pitiful for virtualizer...
-    // The only functioning example (on react-table, not on react-virtual) has us use translateY() and
-    // size the outer scrollbar content to be the total size.
-    // We cannot use that with sticky headers as we will scroll past the table bounds well before we
-    // get a fraction of the way into scrolling the table itself, causing the stickyness to go away.
-    // We cannot fix this by setting the table height directly, as the stupid thing will try to stretch its rows out,
-    // even though we set the table layout to fixed.
-    // Anyway, this is the 'old way' of doing things (which currently is the only way documented on react-virtual's docs), which is slower and jankier
-    // but makes the table be the correct height, preserving our sticky header.
-    const paddingTop =
-      virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
-    const paddingBottom =
-      virtualRows.length > 0
-        ? virtualizer.getTotalSize() -
-          (virtualRows?.[virtualRows.length - 1]?.end || 0)
-        : 0;
-
+  const tableBody = React.useMemo(() => {
     // FIXME: Because of the way firefox accessibility works, highlighting an item with a screen reader will scroll it to the top of its container.
     // This is actually a problem, as the top of the container has our stick header overlayed.
     // We want then to have our body scroll, not our table.  But i'm not sure as of yet how to pull that off, as table styling is a strange and fickle thing.
     return (
-      <Table
-        sx={{
-          tableLayout: "fixed",
-        }}
-        stickyHeader
-      >
-        <TableHead>
-          {headerGroups.map((group) => (
-            <TableRow key={group.id}>
-              {group.headers.map((header) => (
-                <HeaderCell key={header.id} header={header} />
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody>
-          {paddingTop > 0 && (
-            // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
-            <TableRow
-              aria-hidden="true"
-              style={{ height: `${paddingTop}px` }}
-            />
-          )}
-          {virtualRows.map((virtualRow) => {
-            const row = rows[virtualRow.index];
-            return (
-              <TableRow
-                key={row.id}
-                sx={{
-                  height: `${virtualRow.size}px`,
-                }}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    component={
-                      isRowHeaderColumn(cell.column.columnDef) ? "th" : "td"
-                    }
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            );
-          })}
-          {paddingBottom > 0 && (
-            // Its critical we use style and not sx here, as sx will generate a new classname every time this changes.
-            <TableRow
-              aria-hidden="true"
-              style={{ height: `${paddingBottom}px` }}
-            />
-          )}
-        </TableBody>
-        <TableFooter
-          sx={{
-            position: "sticky",
-            bottom: 0,
-            backgroundColor: theme.palette.background.default,
-          }}
-        >
-          {virtualRows.length > 0 && (
-            <TableRow>
-              <TableCell colSpan={totalColumns}>
-                <Box
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    position: "relative",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      top: 0,
-                      bottom: 0,
-                    }}
-                  >
-                    <Pagination
-                      count={table.getPageCount()}
-                      page={table.getState().pagination.pageIndex + 1}
-                      onChange={(_, value) => table.setPageIndex(value - 1)}
-                      variant="outlined"
-                      shape="rounded"
-                      showFirstButton
-                      showLastButton
-                    />
-                  </Box>
-                  <Typography variant="caption" sx={{ ml: "auto" }}>
-                    Showing {rows.length} of {data?.length} items.
-                  </Typography>
-                </Box>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableFooter>
-      </Table>
+      <TableBody>
+        {rows.map((row) => {
+          return <ObservableTableRow key={row.id} row={row} />;
+        })}
+      </TableBody>
     );
-  }, [rows, headerGroups, virtualRows]);
+  }, [rows]);
+
+  const totalColumns = table.getHeaderGroups()[0].headers.length;
 
   return (
     <TableContainer
@@ -409,9 +305,112 @@ function ObservableDataGrid<T extends {}>({
           <CircularProgress />
         </Box>
       )}
-      {data && <>{tableElement}</>}
+      {data && (
+        <Table
+          sx={{
+            tableLayout: "fixed",
+          }}
+          stickyHeader
+        >
+          <ObservableTableHeader headerGroups={headerGroups} />
+          {tableBody}
+          <TableFooter
+            sx={{
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: theme.palette.background.default,
+            }}
+          >
+            {rows.length > 0 && (
+              <TableRow>
+                <TableCell colSpan={totalColumns}>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      position: "relative",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        top: 0,
+                        bottom: 0,
+                      }}
+                    >
+                      <Pagination
+                        count={table.getPageCount()}
+                        page={table.getState().pagination.pageIndex + 1}
+                        onChange={(_, value) => table.setPageIndex(value - 1)}
+                        variant="outlined"
+                        shape="rounded"
+                        showFirstButton
+                        showLastButton
+                      />
+                    </Box>
+                    <Typography variant="caption" sx={{ ml: "auto" }}>
+                      Showing {rows.length} of {data?.length} items.
+                    </Typography>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableFooter>
+        </Table>
+      )}
     </TableContainer>
   );
 }
+
+const ObservableTableHeader = ({
+  headerGroups,
+}: {
+  headerGroups: HeaderGroup<Record<string, any>>[];
+}) => {
+  return (
+    <TableHead>
+      {headerGroups.map((group) => (
+        <TableRow key={group.id}>
+          {group.headers.map((header) => (
+            <HeaderCell key={header.id} header={header} />
+          ))}
+        </TableRow>
+      ))}
+    </TableHead>
+  );
+};
+
+const ObservableTableRow = ({ row }: { row: Row<Record<string, any>> }) => {
+  return (
+    <TableRow>
+      {row.getVisibleCells().map((cell) => (
+        <ObservableTableCell key={cell.id} cell={cell} />
+      ))}
+    </TableRow>
+  );
+};
+
+const ObservableTableCell = ({
+  cell,
+}: {
+  cell: Cell<Record<string, any>, unknown>;
+}) => {
+  // The cells are not observable, so we need to rerender here when the value changes.
+  // There doesn't seem to be anything else in the context that we need to rerender for.
+  const value = cell.getContext().getValue();
+
+  const isRowHeader = isRowHeaderColumn(cell.column.columnDef);
+  return React.useMemo(
+    () => (
+      <TableCell>
+        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      </TableCell>
+    ),
+    [cell.column.columnDef.cell, isRowHeader, value]
+  );
+};
 
 export default ObservableDataGrid;

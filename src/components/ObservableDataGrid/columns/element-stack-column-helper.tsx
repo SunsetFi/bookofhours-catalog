@@ -1,7 +1,7 @@
 import React from "react";
 import { IdentifiedColumnDef } from "@tanstack/react-table";
-import { Observable, map } from "rxjs";
-import { pick, pickBy } from "lodash";
+import { Observable, distinctUntilChanged, map, tap } from "rxjs";
+import { isEqual, pick, pickBy } from "lodash";
 
 import { switchMapIfNotNull } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
@@ -77,7 +77,8 @@ export function createElementStackColumnHelper<
               } else {
                 return pick(modelAspects, aspects);
               }
-            })
+            }),
+            distinctUntilChanged(isEqual)
           ),
         {
           id,
