@@ -1,7 +1,7 @@
 import React from "react";
 import { Container } from "microinject";
 
-import { pick, first, isEqual } from "lodash";
+import { pick, first } from "lodash";
 import {
   Observable,
   combineLatest,
@@ -29,7 +29,7 @@ import {
   Orchestrator,
   TokensSource,
   filterHasAnyAspect,
-  filterTokenInPath,
+  filterTokenNotInPath,
 } from "@/services/sh-game";
 
 export interface BookModelDecorations {
@@ -87,7 +87,6 @@ function elementStackToBook(
   const memoryAspects$ = memory$.pipe(
     switchMapIfNotNull((memory) => memory?.aspects$),
     map((aspects) => pick(aspects ?? {}, powerAspects))
-    // distinctUntilChanged(isEqual)
   );
 
   return decorateObjectInstance(elementStack, {
@@ -144,8 +143,8 @@ export function getBooksObservable(
 
   return tokensSource.visibleElementStacks$.pipe(
     filterHasAnyAspect("readable"),
-    // Ignore tokens in arrival verbs and other weird places.
-    filterTokenInPath("~/library"),
+    // Ignore tokens in arrival verbs.
+    filterTokenNotInPath("~/arrivalverbs"),
     distinctUntilShallowArrayChanged(),
     mapArrayItemsCached((item) =>
       elementStackToBook(item, compendium, orchestrator)

@@ -30,7 +30,8 @@ const LegacyNotRunningView = () => {
       <Typography variant="h1">The Hush House Catalogue</Typography>
       {saves && saves.length === 0 && <Typography>No saves found</Typography>}
       <Button onClick={() => saveManager.newGame()}>New Game</Button>
-      {saves && saves.length > 0 && (
+      {/* FIXME: Make a better UI for this*/}
+      {/* {saves && saves.length > 0 && (
         <List>
           {saves.map((save, index) => (
             <ListItemButton
@@ -41,7 +42,7 @@ const LegacyNotRunningView = () => {
             </ListItemButton>
           ))}
         </List>
-      )}
+      )} */}
     </Stack>
   );
 };

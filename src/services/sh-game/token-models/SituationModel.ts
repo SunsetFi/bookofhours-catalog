@@ -17,7 +17,7 @@ import {
 } from "secrethistories-api";
 import { isEqual, values } from "lodash";
 
-import { tokenPathContainsChild } from "@/utils";
+import { isNotNull, tokenPathContainsChild } from "@/utils";
 
 import { filterItems, observeAllMap } from "@/observables";
 
@@ -419,6 +419,10 @@ export class SituationModel extends TokenModel {
         {
           ...this._token,
           label: result.executedRecipeLabel,
+          // This is wrong, but we don't have the correct state yet.
+          // We want to blank out thresholds for now, so the current ones don't leak
+          // into ongoing ones.
+          thresholds: [],
           state: "Ongoing",
         } as Token,
         now
@@ -426,7 +430,15 @@ export class SituationModel extends TokenModel {
 
       // Refresh our threshold contents as they will now be in a different sphere.
       const contents = await firstValueFrom(this.thresholdContents$);
-      await Promise.all(values(contents).map((token) => token?.refresh()));
+
+      const promises: Promise<void>[] = values(contents)
+        .map((token) => token?.refresh())
+        .filter(isNotNull);
+
+      // Refresh ourselves properly to get the new thresholds.
+      promises.push(this.refresh());
+
+      await Promise.all(promises);
 
       return true;
     } catch (e) {

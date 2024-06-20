@@ -61,7 +61,7 @@ function craftableModelToSearchItem(
     map(([iconUrl, label]) => ({
       iconUrl: iconUrl!,
       label: label!,
-      pathQuery: `name=\"${encodeURIComponent(label!)}\"`,
+      pathQuery: `label=\"${encodeURIComponent(label!)}\"`,
     }))
   );
 }

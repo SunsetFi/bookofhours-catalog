@@ -29,7 +29,9 @@ function createQueryObservable(
     filterItemObservations((item) => elementStackMatchesQuery(query, item)),
     mapElementStacksToSearchItems((element) =>
       element.label$.pipe(
-        map((label) => (label ? `name=\"${encodeURIComponent(label)}\"` : null))
+        map((label) =>
+          label ? `label=\"${encodeURIComponent(label)}\"` : null
+        )
       )
     )
   );

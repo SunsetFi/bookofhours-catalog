@@ -22,7 +22,7 @@ export const provisionsSearchProvider: PageSearchProviderPipe = (
         mapElementStacksToSearchItems((element) =>
           element.label$.pipe(
             map((label) =>
-              label ? `name=\"${encodeURIComponent(label)}\"` : null
+              label ? `label=\"${encodeURIComponent(label)}\"` : null
             )
           )
         )
