@@ -98,7 +98,6 @@ const SkillsCatalogPage = () => {
         showLevel: false,
         size: 160,
       }),
-      // TODO: Pick wisdom tree aspects
       columnHelper.description(),
     ],
     []

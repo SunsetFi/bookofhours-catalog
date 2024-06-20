@@ -138,13 +138,15 @@ export class Orchestrator {
     }
   }
 
-  async openOrchestration(request: OrchestrationRequest) {
+  async openOrchestration(
+    request: OrchestrationRequest
+  ): Promise<Orchestration | null> {
     if (isRecipeOrchestrationRequest(request)) {
       const { recipeId, desiredElementIds } = request;
       const recipe = this._compendium.getRecipeById(recipeId);
       const exists = await firstValueFrom(recipe.exists$);
       if (!exists) {
-        return;
+        return null;
       }
 
       const desiredElements = (desiredElementIds ?? []).map((id) =>
@@ -173,6 +175,8 @@ export class Orchestrator {
     }
 
     this._open$.next(true);
+
+    return this._orchestration$.value;
   }
 
   closeOrchestration() {

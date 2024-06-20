@@ -1,6 +1,7 @@
 import React from "react";
-import { map } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 import { values } from "lodash";
+import { useTheme } from "@mui/material";
 
 import {
   List,
@@ -39,6 +40,9 @@ import FocusIconButton from "../FocusIconButton";
 import ScreenReaderContent from "../ScreenReaderContent";
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
 import { tokenPathContainsChild } from "@/utils";
+import { useDrop } from "react-dnd";
+import { ElementStackDraggable } from "@/draggables/element-stack";
+import { aspectsMatchSphereSpec } from "secrethistories-api";
 
 const OrchestrationListContent = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -115,6 +119,7 @@ interface SituationListItemProps {
   situation: SituationModel;
 }
 const SituationListItem = ({ situation }: SituationListItemProps) => {
+  const theme = useTheme();
   const orchestrator = useDIDependency(Orchestrator);
 
   const timeSource = useDIDependency(TimeSource);
@@ -129,6 +134,8 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
 
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
   const timeRemainingStr = timeRemaining.toFixed(1);
+
+  const thresholds = useObservation(situation.thresholds$) ?? [];
 
   const hasEmptyThresholds = useObservation(
     () =>
@@ -167,6 +174,50 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
     [orchestrator, onAltAction]
   );
 
+  const [{ isOver, canDrop }, dropRef] = useDrop(
+    {
+      accept: ElementStackDraggable,
+      canDrop(item: ElementStackDraggable) {
+        // TODO: We want to know if we fit any existing slots
+        return thresholds.some((spec) =>
+          aspectsMatchSphereSpec(item.elementStack.aspects, spec)
+        );
+      },
+      async drop(item, monitor) {
+        if (!monitor.canDrop()) {
+          return;
+        }
+
+        // FIXME: Lot of work here that should be wrapped into orchestrator.
+        // This should be in a parameter for the OrchestrationRequest
+
+        const orchestration = await orchestrator.openOrchestration({
+          situation,
+        });
+        if (!orchestration) {
+          return;
+        }
+
+        const slots = await firstValueFrom(orchestration.slots$);
+        const match = values(slots).find((slot) =>
+          aspectsMatchSphereSpec(item.elementStack.aspects, slot.spec)
+        );
+        if (!match) {
+          return;
+        }
+
+        match.assign(item.elementStack);
+      },
+      collect(monitor) {
+        return {
+          isOver: monitor.isOver(),
+          canDrop: monitor.canDrop(),
+        };
+      },
+    },
+    [thresholds]
+  );
+
   if (state !== "Unstarted" && state !== "Ongoing" && state !== "Complete") {
     return null;
   }
@@ -174,7 +225,19 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
   const hasLabel = label !== "." && label !== situation.verbId;
 
   return (
-    <ListItemButton onClick={onClick}>
+    <ListItemButton
+      ref={dropRef}
+      onClick={onClick}
+      sx={{
+        ...(canDrop && {
+          backgroundColor: theme.palette.action.selected,
+        }),
+        ...(canDrop &&
+          isOver && {
+            backgroundColor: theme.palette.primary.main,
+          }),
+      }}
+    >
       {!isFixed && <FocusIconButton token={situation} />}
       <ListItemText
         id={`situation-${situation.id}-label`}
