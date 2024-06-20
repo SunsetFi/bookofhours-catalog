@@ -147,19 +147,29 @@ export class RecipeOrchestration
   private _label$: Observable<string | null> | null = null;
   get label$(): Observable<string | null> {
     if (!this._label$) {
-      this._label$ = this._recipe.label$.pipe(
-        switchMap((label) =>
-          label === "."
-            ? this._situation$.pipe(switchMapIfNotNull((s) => s.label$))
-            : of(label)
-        )
+      this._label$ = combineLatest([
+        this._situationVerb$,
+        this._recipe.label$,
+      ]).pipe(
+        map(([verb, label]) => {
+          if (label === ".") {
+            if (verb) {
+              return verb.description;
+            }
+
+            return null;
+          }
+
+          return label;
+        })
       );
     }
+
     return this._label$;
   }
 
-  private _description$: Observable<string> | null = null;
-  get description$(): Observable<string> {
+  private _description$: Observable<string | null> | null = null;
+  get description$(): Observable<string | null> {
     if (!this._description$) {
       this._description$ = combineLatest([
         this._situationVerb$,
@@ -171,14 +181,14 @@ export class RecipeOrchestration
               return verb.description;
             }
 
-            return "";
+            return null;
           }
 
           if (recipeDescription) {
             return recipeDescription;
           }
 
-          return "";
+          return null;
         }),
         shareReplay(1)
       );

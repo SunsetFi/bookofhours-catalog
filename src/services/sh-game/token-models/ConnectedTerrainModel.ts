@@ -187,7 +187,7 @@ export class ConnectedTerrainModel extends TokenModel {
     return this._childTokens$;
   }
 
-  openTerrainWindow() {
+  async openTerrainWindow() {
     if (
       this._connectedTerrainInternal$.value.sealed ||
       !this._connectedTerrainInternal$.value.shrouded
@@ -196,8 +196,9 @@ export class ConnectedTerrainModel extends TokenModel {
     }
 
     try {
-      this._api.openTokenAtPath(this.path);
-    } catch {
+      await this._api.openTokenAtPath(this.path);
+    } catch (e) {
+      console.warn("Failed to open terrain window", e);
       return false;
     }
 
@@ -205,7 +206,7 @@ export class ConnectedTerrainModel extends TokenModel {
   }
 
   async unlockTerrain(input: ElementStackModel) {
-    if (!this.openTerrainWindow()) {
+    if (!(await this.openTerrainWindow())) {
       return false;
     }
 
