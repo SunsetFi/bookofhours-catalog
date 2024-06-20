@@ -98,10 +98,10 @@ const OrchestrationListContent = () => {
           onClick={() => orchestrator.openOrchestration({ situation: null })}
         >
           <ListItemText primary="Start an Activity" />
-          <Box sx={{ ml: "auto" }}>
-            <IconButton title="Start an Activity">
+          <Box sx={{ ml: "auto" }} aria-hidden={true}>
+            <Icon>
               <PlayArrow />
-            </IconButton>
+            </Icon>
           </Box>
         </ListItemButton>
         {executingSituations.length > 0 && <Divider orientation="horizontal" />}
@@ -247,9 +247,9 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
       />
       <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
         {state === "Unstarted" && (
-          <IconButton title="Start an Action">
+          <Icon title="Start an Action">
             <PlayArrow />
-          </IconButton>
+          </Icon>
         )}
         {state === "Ongoing" && (
           <>

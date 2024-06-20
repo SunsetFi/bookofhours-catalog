@@ -63,7 +63,6 @@ export class RecipeOrchestration
 
   private readonly _availableSituations$: Observable<SituationModel[]>;
 
-  private readonly _trackSituationStateSubscription: Subscription;
   private readonly _applyDefaultsSubscription: Subscription;
 
   private readonly _situationVerb$: Observable<Verb | null>;
@@ -117,15 +116,6 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
-    // If our situation becomes unavailable, clear it out
-    this._trackSituationStateSubscription = this._situation$
-      .pipe(switchMapIfNotNull((situation) => situation.state$))
-      .subscribe((state) => {
-        if (this._situation$.value != null && state !== "Unstarted") {
-          this._situation$.next(null);
-        }
-      });
-
     // Pick defaults when things have settled down.
     // This used to be straightforward when we precomputed slots, but now
     // we have to wait for the game to catch up and update us on the slot count.
@@ -150,7 +140,7 @@ export class RecipeOrchestration
   }
 
   _dispose() {
-    this._trackSituationStateSubscription.unsubscribe();
+    this._situation$.value?.close();
     this._applyDefaultsSubscription.unsubscribe();
   }
 

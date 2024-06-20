@@ -406,7 +406,14 @@ export class SituationModel extends TokenModel {
     try {
       await this._api.setRecipeAtPath(this.path, recipeId);
       return true;
-    } catch {
+    } catch (e) {
+      console.warn(
+        "Failed to set recipe",
+        recipeId,
+        "for situation",
+        this.id,
+        e
+      );
       return false;
     }
   }
@@ -442,6 +449,7 @@ export class SituationModel extends TokenModel {
 
       return true;
     } catch (e) {
+      console.warn("Failed to execute situation", this.id, e);
       return false;
     }
   }
@@ -466,6 +474,20 @@ export class SituationModel extends TokenModel {
 
       return true;
     } catch (e) {
+      console.log("Failed to conclude situation", this.id, e);
+      return false;
+    }
+  }
+
+  async close() {
+    try {
+      const now = Date.now();
+      const result = await this._api.updateTokenAtPath(this.path, {
+        open: false,
+      });
+      this._update(result, now);
+    } catch (e) {
+      console.log("Failed to close situation", this.id, e);
       return false;
     }
   }

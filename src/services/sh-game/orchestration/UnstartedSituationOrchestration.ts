@@ -105,6 +105,7 @@ export class UnstartedSituationOrchestration
   }
 
   _dispose(): void {
+    this._situation$.value?.close();
     this._situationStateSubscription.unsubscribe();
   }
 
