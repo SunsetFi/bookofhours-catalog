@@ -53,10 +53,8 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return this._canAutofill$;
   }
 
-  private _slots$: Observable<
-    Readonly<Record<string, OrchestrationSlot>>
-  > | null = null;
-  get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
+  private _slots$: Observable<readonly OrchestrationSlot[]> | null = null;
+  get slots$() {
     if (!this._slots$) {
       // FIXME: This is ripe for a refactor.
       // Every orchestration save RecipeOrchestration just wants to use situation thresholds
@@ -65,14 +63,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         switchMap((s) => s?.thresholds$ ?? EmptyArray$),
         distinctUntilChanged((a, b) => isEqual(a, b)),
         mapArrayItemsCached((spec) => this._createSlot(spec)),
-        map((slots) => {
-          const result: Record<string, OrchestrationSlot> = {};
-          for (const slot of slots) {
-            result[slot.spec.id] = slot;
-          }
-
-          return result;
-        }),
         shareReplay(1)
       );
     }
@@ -136,8 +126,9 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     // We currently work off assuming that the first item in the slot available elements list is
     // the one we want to pick.
 
-    // FIXME: This is gnarly, as slot.assign will often update slots.
-    // We are relying on that update propogating before assign() finishes.
+    // FIXME: This gnarly code is to attempt to get the most recent value of slots so that we capture
+    // new thresholds that open as a result of previous card slotting.
+    // However, it is not working, and we stop before new slots are discovered.
     while (
       (unfilledSlot =
         values(await firstValueFrom(this.slots$)).find(
@@ -240,16 +231,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
       return;
     }
 
-    const setSlotContent = await situation.setSlotContents(spec.id, element);
-
-    if (!setSlotContent && element) {
-      // TODO: Book of Hours is returning false from TryAcceptToken for ongoing thresholds even though the token is being accepted
-      // Note: Starting to see this for other usages as well, particularly when reading books.
-      console.warn(
-        "Failed to set slot content for new situation.  This is a known bug in this cultist simulator engine.  Forcing token refresh with the assumption that it worked."
-      );
-
-      await element.refresh();
-    }
+    await situation.setSlotContents(spec.id, element);
   }
 }

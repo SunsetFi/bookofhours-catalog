@@ -1,7 +1,7 @@
 import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
 import { Aspects, combineAspects } from "secrethistories-api";
 
-import { EmptyObject$, observeAllMap } from "@/observables";
+import { EmptyArray$, EmptyObject$, observeAllMap } from "@/observables";
 
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
@@ -42,8 +42,8 @@ export class CompletedSituationOrchestration
     return this._situation$;
   }
 
-  get slots$(): Observable<Readonly<Record<string, OrchestrationSlot>>> {
-    return EmptyObject$;
+  get slots$() {
+    return EmptyArray$;
   }
 
   private _aspects$: Observable<Readonly<Aspects>> | null = null;

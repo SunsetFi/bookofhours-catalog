@@ -16,8 +16,7 @@ interface OrchestrationSlotsProps {
 }
 
 const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
-  const slots = useObservation(orchestration.slots$) ?? {};
-  const slotKeys = Object.keys(slots);
+  const slots = useObservation(orchestration.slots$) ?? [];
 
   return (
     <Box
@@ -25,7 +24,7 @@ const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
         display: "grid",
         gridTemplateColumns: "repeat(2, 1fr)",
         gridTemplateRows: `repeat(${Math.ceil(
-          slotKeys.length / 2
+          slots.length / 2
         )}, fit-content(100px))`,
         rowGap: 5,
         columnGap: 3,
@@ -33,10 +32,10 @@ const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
         ...sx,
       }}
     >
-      {slotKeys.map((slotId, i) => (
+      {slots.map((slot, i) => (
         <OrchestrationSlotEditor
-          key={slotId}
-          slot={slots[slotId]}
+          key={slot.spec.id}
+          slot={slot}
           orchestration={orchestration}
           autoFocus={i === 0}
         />

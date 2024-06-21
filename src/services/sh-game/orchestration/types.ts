@@ -34,7 +34,7 @@ export interface OrchestrationBase {
 
   readonly requirements$: Observable<Readonly<Aspects>>;
   readonly situation$: Observable<SituationModel | null>;
-  readonly slots$: Observable<Readonly<Record<string, OrchestrationSlot>>>;
+  readonly slots$: Observable<readonly OrchestrationSlot[]>;
   readonly aspects$: Observable<Readonly<Aspects>>;
 
   /**

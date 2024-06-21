@@ -487,7 +487,7 @@ export class SituationModel extends TokenModel {
       });
       this._update(result, now);
     } catch (e) {
-      console.log("Failed to close situation", this.id, e);
+      console.warn("Failed to close situation", this.id, e);
       return false;
     }
   }
