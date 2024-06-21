@@ -62,12 +62,9 @@ const LocationsCatalogPage = () => {
           </Box>
         ),
       }),
-      columnHelper.observe("label$", {
+      columnHelper.observeText("label$", {
         header: "Location",
         size: 200,
-        filterFn: "includesString",
-        rowHeader: true,
-        cell: TextWrapCell,
       }),
       columnHelper.observe("shrouded$", {
         header: "Unlocked",
