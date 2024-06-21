@@ -124,7 +124,7 @@ It displays the following:
 
 ### Global Search
 
-To search the entire catalog, click the "Search" button at the top of the screen, or use it's shortcut, Ctrl+K. This will open a dialog in which you can type a search query to find any item across all pages of the catalogue. Selecting the item will open the containing page and filter it to only show that item.
+To search the entire catalogue, click the "Search" button at the top of the screen, or use it's shortcut, Ctrl+K. This will open a dialog in which you can type a search query to find any item across all pages of the catalogue. Selecting the item will open the containing page and filter it to only show that item.
 
 Currently, this search only targets the label or name of items. It is not case sensitive.
 
@@ -151,7 +151,7 @@ At the moment, pinning only serves as a visual reminder. However, it is a work i
 
 ### Accessibility / Screen Reader support
 
-The catalog is continually being tested for Screen Reader support with the NVDA screen reader. While every major operating system includes it's own screen reader, NVDA was chosen as the primary reader to optimize for due to its robust support for HTML Tables, which this site relies heavily on. Using other screen readers is fully supported, but not actively tested for.
+The catalogue is continually being tested for Screen Reader support with the NVDA screen reader. While every major operating system includes it's own screen reader, NVDA was chosen as the primary reader to optimize for due to its robust support for HTML Tables, which this site relies heavily on. Using other screen readers is fully supported, but not actively tested for.
 
 Screen reader support is a work in progress, but a high priority. Please report any issues or ideas for improvement to the GitHub issue tracker. If you run into any issues using any screen reader aside from NVDA, feel free to report those issues as well.
 
@@ -173,7 +173,7 @@ You can get an entire overview of the catalogue's current state by pressing `NVD
 
 The catalogue updates the page title based on the current selected page. If at any point you forget what page you are on, you can read the page title with `NVDA+T`.
 
-##### Catalog Landmarks
+##### Catalogue Landmarks
 
 Screen readers navigate by Landmarks. The catalogue provides landmarks for all major areas of the page.
 
@@ -360,9 +360,6 @@ Displays comforts and wall art around the house. This is an esoteric assortment 
 
 ## Known Issues
 
-- Scrolling performance on tables is bad with the Chrome browser when on a secondary monitor with a different DPI than the primary monitor.
-  - Yes, really. I don't know why. Its baffling.
-  - Firefox is unaffected.
 - Accessibility
   - Firefox and Windows Narrator both struggle on the tables. NVDA with Chrome seems much more pleasent when navigating the data tables.
   - In particular Narrator does not read out row or column headers in the table.
