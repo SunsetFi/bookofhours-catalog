@@ -1,13 +1,20 @@
 # Hush House Catalogue
 
-This is a spoiler-free cataloging and auto-spreadsheet webapp that adds searching, sorting, and filtering capabilities to [Book of Hours](https://store.steampowered.com/app/1028310/BOOK_OF_HOURS/).
-It relies on the [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) mod, which provides game data access and hosts the webapp.
+This is a spoiler-free, automatically populating webapp that adds searching, sorting, and filtering capabilities to [Book of Hours](https://store.steampowered.com/app/1028310/BOOK_OF_HOURS/). It connects directly to the game, allowing it to always be fully up to date as gameplay progresses, and providing the ability to interact with the game itself.
 
 ![ALT](/preview/preview.png)
 
 It has been designed to provide an automatic spreadsheet, akin to those we might make manually while playing the game. It can additionally interact with the game engine itself, to queue up recipes or focus the camera on in-game items.
 
 All information given is restricted to information you would have had already. This is done by only showing recipes you have discovered, items in rooms that are unlocked, cards that you currently have, and other similar restrictions.
+
+Additionally, it can interact with the game and perform various actions:
+
+- Focus the camera on specific items
+- Start, use, and conclude recipes using workstations and other verbs
+- Fast forward time to specific events, such as recipe completions or the next day.
+
+A significant focus is being put on screen reader compatibility, with the ultimate goal of providing enough control over the game for an entirely screen reader assisted playthrough of the game. To this end, this project has ambitions to be an entire new UI into all aspects of the game. For more information, see [Accessibility and Screen Reader Support](#accessibility--screen-reader-support).
 
 ## Dependencies
 
@@ -156,6 +163,17 @@ The catalogue is continually being tested for Screen Reader support with the NVD
 Screen reader support is a work in progress, but a high priority. Please report any issues or ideas for improvement to the GitHub issue tracker. If you run into any issues using any screen reader aside from NVDA, feel free to report those issues as well.
 
 The rest of this section assumes you are using NVDA, and lists shortcuts using its default configuration. References to the `NVDA` key will be whatever key you configured to be your NVDA modifier key. By default, this key is `Insert`.
+
+#### Preamble: How much of the game can be completed?
+
+With the current release, the only aspects of the game that are not implemented are:
+
+- Moving items between rooms
+- Committing skills in the Tree of Wisdom
+
+The game can be completed without moving items around, but you will find that every book you catalog ends up in the grassy field in front of the gate, where items go when the game does not have anywhere else to put them. While annoying to players playing the game with its original UI, this does not have an effect on the catalogue or with a screen reader playthrough.
+
+The Tree of Wisdom is a different story. While it is possible to beat the game without it, only one ending can be completed in extremely narrow circumstances. Tree of Wisdom support is therefor a requirement for a proper playthrough of the game. Tree of Wisdom support is under active development.
 
 #### Navigating the Catalogue
 
