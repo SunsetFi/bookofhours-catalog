@@ -11,7 +11,6 @@ import {
 import {
   distinctUntilShallowArrayChanged,
   filterItemObservations,
-  switchMapIf,
   switchMapIfNotNull,
 } from "@/observables";
 
