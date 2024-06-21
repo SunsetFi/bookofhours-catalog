@@ -62,7 +62,7 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
           {anchorEl != null && (
             <Filter
               columnValues={uniqueValues}
-              filterValue={column.getFilterValue()}
+              filterValue={column.getFilterValue() ?? null}
               onChange={column.setFilterValue}
             />
           )}

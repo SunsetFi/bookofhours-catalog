@@ -54,9 +54,21 @@ const OrchestratorDrawer = () => {
       return;
     }
 
+    if (contentRef.current.contains(document.activeElement)) {
+      // We already have focus somewhere inside us, don't re-focus.
+      lastOrchestration.current = orchestration;
+      return;
+    }
+
+    // Note: We check lastOrchestration here as we want to focus the content when the orchestration changes.
+    // Orchestrations may auto-change due to time jumps, but the only way to do that while an orchestration is open
+    // is from within the orchestration itself.
+    // We do risk having this trigger if the game is not in a paused state, but that is not a case we
+    // particularly care about.
     if (open || lastOrchestration.current != orchestration) {
       contentRef.current.focus();
     }
+
     lastOrchestration.current = orchestration;
   }, [open, orchestration]);
 
@@ -83,7 +95,7 @@ const OrchestratorDrawer = () => {
           sx={{ width: "100%", height: "100%" }}
           role="region"
           id="orchestration-drawer"
-          aria-label="Actions"
+          aria-label="Activities"
           aria-expanded="true"
         >
           {orchestration == null && <OrchestrationListContent />}

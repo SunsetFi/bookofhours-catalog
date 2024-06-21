@@ -35,7 +35,7 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
   return (
     <Badge
       role="region"
-      aria-label="Toggle Actions"
+      aria-label="Open Activities Drawer"
       badgeContent={executingSituations.length}
       color="primary"
       sx={{

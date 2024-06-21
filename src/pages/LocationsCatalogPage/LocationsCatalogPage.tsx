@@ -26,12 +26,13 @@ import { useObservation } from "@/hooks/use-observation";
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
+import VerbIcon from "@/components/VerbIcon";
+
 import ObservableDataGrid, {
-  TextFilter,
+  BooleanFilter,
   TextWrapCell,
   createObservableColumnHelper,
 } from "@/components/ObservableDataGrid";
-import VerbIcon from "@/components/VerbIcon";
 import {
   RowHeight,
   RowPaddingY,
@@ -69,8 +70,8 @@ const LocationsCatalogPage = () => {
         cell: TextWrapCell,
       }),
       columnHelper.observe("shrouded$", {
-        header: "Status",
-        size: 100,
+        header: "Unlocked",
+        size: 180,
         filterFn: "equals",
         cell: (props) => {
           const unlocker = useDIDependency(TerrainUnlocker);
@@ -85,6 +86,9 @@ const LocationsCatalogPage = () => {
           }
 
           return <LockOpenIcon sx={{ ml: 1 }} />;
+        },
+        meta: {
+          filterComponent: BooleanFilter,
         },
       }),
       columnHelper.observe(

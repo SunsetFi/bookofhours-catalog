@@ -37,8 +37,8 @@ const PageTabs = () => {
       {sitemap.map((item, i) => {
         if (isSiteMapDividerItem(item)) {
           return (
-            <Box sx={{ p: 0.5, width: "100%" }}>
-              <Divider key={i} orientation="horizontal" />
+            <Box key={i} sx={{ p: 0.5, width: "100%" }}>
+              <Divider orientation="horizontal" />
             </Box>
           );
         } else if (isSiteMapNavItem(item)) {

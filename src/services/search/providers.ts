@@ -1,16 +1,17 @@
 import { Observable, map } from "rxjs";
+import { Container } from "microinject";
 
-import sitemap from "@/sitemap";
+import sitemap, { isSiteMapNavItem } from "@/sitemap";
+
+import { mapArrayItems } from "@/observables";
 
 import { PageSearchProviderPipe, SearchProviderPipe } from "./types";
-import { isNotNull } from "@/utils";
-import { mapArrayItems } from "@/observables";
-import { Container } from "microinject";
 
 const pagesSearchProvider: SearchProviderPipe = (query) => {
   return query.pipe(
     map((query) =>
       sitemap
+        .filter(isSiteMapNavItem)
         .filter((page) =>
           page.label.toLowerCase().includes(query.toLowerCase())
         )
@@ -26,6 +27,7 @@ const pagesSearchProvider: SearchProviderPipe = (query) => {
 const providers = [
   pagesSearchProvider,
   ...sitemap
+    .filter(isSiteMapNavItem)
     .filter((x) => x.searchProvider != null)
     .map((x) => pageProviderFromPath(x.searchProvider!, x.path)),
 ];

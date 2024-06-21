@@ -107,7 +107,6 @@ const BrancrugCatalogPage = () => {
       }),
       columnHelper.verbIcon(),
       columnHelper.label(),
-      columnHelper.location(),
       columnHelper.aspectsList("attunement", powerAspects, {
         header: "Attunement",
         size: 200,
@@ -120,12 +119,6 @@ const BrancrugCatalogPage = () => {
               )
             )
           ),
-      }),
-      columnHelper.aspectsList("evolves", evolutionAspects, {
-        header: "Evolves",
-        size: 125,
-        enableSorting: false,
-        showLevel: false,
       }),
       columnHelper.aspectsList(
         "accepts",

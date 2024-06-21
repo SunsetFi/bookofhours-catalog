@@ -5,23 +5,24 @@ import {
   debounceTime,
   map,
   of as observableOf,
-  tap,
 } from "rxjs";
 import { omit } from "lodash";
 
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Table from "@mui/material/Table";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableBody from "@mui/material/TableBody";
-import TableFooter from "@mui/material/TableFooter";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
-import Pagination from "@mui/material/Pagination";
-
-import { useTheme, type SxProps } from "@mui/material/styles";
+import {
+  Box,
+  CircularProgress,
+  Table,
+  TableContainer,
+  TableHead,
+  TableBody,
+  TableFooter,
+  TableCell,
+  TableRow,
+  Typography,
+  Pagination,
+  useTheme,
+  SxProps,
+} from "@mui/material";
 
 import {
   Cell,
@@ -42,11 +43,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import {
-  Null$,
-  distinctUntilShallowArrayChanged,
-  observeAllMap,
-} from "@/observables";
+import { Null$, observeAllMap } from "@/observables";
 import { decorateObjectInstance } from "@/object-decorator";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -173,7 +170,7 @@ function recordToFilter(record: Record<string, any>): ColumnFiltersState {
 function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
   const result = {} as Record<string, any>;
   for (const { id, value } of filter) {
-    if (value) {
+    if (value != null) {
       result[id] = value;
     }
   }

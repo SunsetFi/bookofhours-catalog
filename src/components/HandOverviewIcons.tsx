@@ -22,7 +22,7 @@ const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
   const elements = useObservation(
     () =>
       tokensSource.visibleElementStacks$.pipe(
-        filterHasAnyAspect(["memory", "weather", "assistance"])
+        filterHasAnyAspect(["memory", "weather", "assistance", "visitor"])
       ),
     []
   );
