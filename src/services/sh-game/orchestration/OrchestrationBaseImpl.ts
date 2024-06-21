@@ -6,7 +6,6 @@ import {
   switchMap,
   shareReplay,
   firstValueFrom,
-  tap,
 } from "rxjs";
 import {
   Aspects,
@@ -14,7 +13,7 @@ import {
   aspectsMatchSphereSpec,
   combineAspects,
 } from "secrethistories-api";
-import { isEqual, omit, pick, sortBy } from "lodash";
+import { first, isEqual, omit, pick, sortBy, values } from "lodash";
 
 import { isNotNull } from "@/utils";
 import {
@@ -42,6 +41,17 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   abstract get description$(): Observable<string | null>;
   abstract get requirements$(): Observable<Readonly<Aspects>>;
   abstract get situation$(): Observable<SituationModel | null>;
+
+  private _canAutofill$: Observable<boolean> | null = null;
+  get canAutofill$() {
+    if (!this._canAutofill$) {
+      this._canAutofill$ = this.slotAssignments$.pipe(
+        map((slots) => values(slots).some((x) => x == null))
+      );
+    }
+
+    return this._canAutofill$;
+  }
 
   private _slots$: Observable<
     Readonly<Record<string, OrchestrationSlot>>
@@ -117,12 +127,60 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return this._aspects$;
   }
 
+  async autofill() {
+    const processedIds: string[] = [];
+    let unfilledSlot: OrchestrationSlot | null = null;
+
+    // This whole function is gnarly as we are waiting on data from observables.
+    // We might want to rewrite this to take less reliance on them.
+    // We currently work off assuming that the first item in the slot available elements list is
+    // the one we want to pick.
+
+    // FIXME: This is gnarly, as slot.assign will often update slots.
+    // We are relying on that update propogating before assign() finishes.
+    while (
+      (unfilledSlot =
+        values(await firstValueFrom(this.slots$)).find(
+          (slot) => !processedIds.includes(slot.spec.id)
+        ) ?? null) != null
+    ) {
+      processedIds.push(unfilledSlot.spec.id);
+
+      const existingValue = await firstValueFrom(unfilledSlot.assignment$);
+      if (existingValue) {
+        continue;
+      }
+
+      // TODO: Stop looking at aspects that are satisified.
+      // Leave slots blank if the recipe is fully satisfied.
+
+      const candidates = await firstValueFrom(
+        unfilledSlot.availableElementStacks$
+      );
+      const candidate = first(candidates);
+      if (candidate) {
+        await unfilledSlot.assign(candidate);
+      }
+    }
+  }
+
   protected abstract _filterSlotCandidates(
     spec: SphereSpec,
     elementStack: ElementStackModel
   ): Observable<boolean>;
 
+  protected _slotCandidateSortWeight(
+    item: ElementStackModel,
+    spec: SphereSpec
+  ) {
+    return 0;
+  }
+
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
+    const assignment$ = this.slotAssignments$.pipe(
+      map((assignments) => assignments[spec.id] ?? null),
+      shareReplay(1)
+    );
     const availableElementStacks$ = combineLatest([
       this._tokensSource.visibleElementStacks$.pipe(
         filterItemObservations((item) =>
@@ -134,18 +192,25 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           )
         )
       ),
-      this.slotAssignments$.pipe(
-        map((assignments) => omit(assignments, spec.id)),
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        map((assignments) => Object.values(assignments).filter(isNotNull))
-      ),
+      this.slotAssignments$,
     ]).pipe(
-      switchMap(([stacks, assigned]) =>
+      switchMap(([stacks, assignments]) =>
         this.requirements$.pipe(
           map((requirements) => {
+            const assignedCards = Object.values(assignments).filter(isNotNull);
             const requirementKeys = Object.keys(requirements);
-            stacks = stacks.filter((x) => !assigned.includes(x));
+
+            // Remove all cards already assigned (note, this will remove our own assignment, we will re-add)
+            stacks = stacks.filter((x) => !assignedCards.includes(x));
+            // Force include the currently assigned value, so it can show up in the list even if its not a valid candidate according to our current recipe
+            // This is because we may open up a verb already prepopulated.
+            const ownValue = assignments[spec.id];
+            if (ownValue) {
+              stacks.push(ownValue);
+            }
+
             return sortBy(stacks, [
+              (stack) => this._slotCandidateSortWeight(stack, spec),
               (stack) => aspectsMagnitude(pick(stack.aspects, requirementKeys)),
               (stack) => aspectsMagnitude(stack.aspects),
             ]).reverse();
@@ -158,10 +223,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return {
       spec,
       locked: spec.greedy,
-      assignment$: this.slotAssignments$.pipe(
-        map((assignments) => assignments[spec.id] ?? null),
-        shareReplay(1)
-      ),
+      assignment$,
       availableElementStacks$,
       assign: (element) => {
         this._assignSlot(spec, element);

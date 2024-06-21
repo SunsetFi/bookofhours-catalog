@@ -142,6 +142,10 @@ export class Orchestrator {
     request: OrchestrationRequest
   ): Promise<Orchestration | null> {
     if (isRecipeOrchestrationRequest(request)) {
+      // FIXME: If another verb is open, we should close and wait first.
+      // This is because we have a tendancy to try and snatch cards from other open verbs,
+      // but the verbs will close as part of opening this orchestration.
+
       const { recipeId, desiredElementIds } = request;
       const recipe = this._compendium.getRecipeById(recipeId);
       const exists = await firstValueFrom(recipe.exists$);

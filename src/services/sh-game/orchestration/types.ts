@@ -60,6 +60,8 @@ export function isContentContainingOrchestration(
 }
 
 export interface OngoingOrchestration extends OrchestrationBase {
+  readonly canAutofill$: Observable<boolean>;
+  autofill(): Promise<void>;
   readonly timeRemaining$: Observable<number>;
   passTime(): Promise<boolean>;
 }
@@ -80,6 +82,8 @@ export function isCompletedOrchestration(
 }
 
 export interface ExecutableOrchestration extends OrchestrationBase {
+  readonly canAutofill$: Observable<boolean>;
+  autofill(): Promise<void>;
   readonly canExecute$: Observable<boolean>;
   execute(): Promise<boolean>;
 }

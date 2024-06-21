@@ -2,15 +2,10 @@ import {
   BehaviorSubject,
   Observable,
   Subscription,
-  bufferCount,
   combineLatest,
-  debounceTime,
   firstValueFrom,
   map,
-  of,
   shareReplay,
-  startWith,
-  switchMap,
 } from "rxjs";
 import {
   Aspects,
@@ -20,9 +15,8 @@ import {
   actionIdMatches,
   aspectsMatchSphereSpec,
 } from "secrethistories-api";
-import { difference, pick } from "lodash";
 
-import { switchMapIfNotNull, observeAllMap } from "@/observables";
+import { switchMapIfNotNull } from "@/observables";
 
 import {
   Compendium,
@@ -39,13 +33,12 @@ import {
   ExecutableOrchestration,
   Orchestration,
   OrchestrationBase,
-  OrchestrationSlot,
   VariableSituationOrchestration,
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
 import { OrchestrationFactory } from "./OrchestrationFactory";
 
-interface ElementSlotsData {
+interface DesiredElementData {
   element: ElementModel;
   aspects: Aspects;
   slots: readonly SphereSpec[];
@@ -63,13 +56,13 @@ export class RecipeOrchestration
 
   private readonly _availableSituations$: Observable<SituationModel[]>;
 
-  private readonly _applyDefaultsSubscription: Subscription;
-
   private readonly _situationVerb$: Observable<Verb | null>;
+
+  private readonly _situationAutofillSubscription: Subscription;
 
   constructor(
     private readonly _recipe: RecipeModel,
-    private readonly desiredElements: readonly ElementModel[],
+    private readonly _desiredElements: readonly ElementModel[],
     compendium: Compendium,
     tokensSource: TokensSource,
     private readonly _orchestrationFactory: OrchestrationFactory,
@@ -85,22 +78,21 @@ export class RecipeOrchestration
       )
     );
 
-    const desiredElementThresholds$ = of(desiredElements).pipe(
-      observeAllMap((element) =>
+    const desiredElementData$ = combineLatest(
+      _desiredElements.map((element) =>
         combineLatest([element.aspects$, element.slots$]).pipe(
           map(([aspects, slots]) => ({ element, aspects, slots }))
         )
-      ),
-      shareReplay(1)
-    );
+      )
+    ).pipe(shareReplay(1));
 
     this._availableSituations$ = combineLatest([
       this._tokensSource.visibleSituations$,
-      desiredElementThresholds$,
+      desiredElementData$,
     ]).pipe(
-      map(([situations, elementThresholds]) => {
+      map(([situations, desiredElementData]) => {
         return situations.filter((situation) =>
-          this._situationIsAvailable(situation, elementThresholds)
+          this._situationIsAvailable(situation, desiredElementData)
         );
       }),
       shareReplay(1)
@@ -116,21 +108,13 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
-    // Pick defaults when things have settled down.
-    // This used to be straightforward when we precomputed slots, but now
-    // we have to wait for the game to catch up and update us on the slot count.
-    this._applyDefaultsSubscription = this.slots$
-      .pipe(
-        startWith({} as Readonly<Record<string, OrchestrationSlot>>),
-        bufferCount(2, 1)
-      )
-      .subscribe(([oldSlots, newSlots]) => {
-        // Only apply defaults to new slots.
-        const oldKeys = Object.keys(oldSlots);
-        const newKeys = Object.keys(newSlots);
-        const added = difference(newKeys, oldKeys);
-        this._pickDefaults(Object.values(pick(newSlots, added)));
-      });
+    this._situationAutofillSubscription = this._situation$.subscribe(
+      (situation) => {
+        if (situation) {
+          this.autofill();
+        }
+      }
+    );
   }
 
   _onSituationStateUpdated(situationState: SituationState): void {
@@ -141,7 +125,7 @@ export class RecipeOrchestration
 
   _dispose() {
     this._situation$.value?.close();
-    this._applyDefaultsSubscription.unsubscribe();
+    this._situationAutofillSubscription.unsubscribe();
   }
 
   private _label$: Observable<string | null> | null = null;
@@ -280,9 +264,22 @@ export class RecipeOrchestration
     }
 
     try {
-      await situation.setRecipe(this._recipe.recipeId);
+      if (!(await situation.setRecipe(this._recipe.recipeId))) {
+        console.warn(
+          "Failed to set recipe",
+          this._recipe.recipeId,
+          "for recipe orchestration"
+        );
+        return false;
+      }
+
       const didExecute = await situation.execute();
       if (!didExecute) {
+        console.warn(
+          "Failed to execute recipe",
+          this._recipe.recipeId,
+          "for recipe orchestration"
+        );
         return false;
       }
 
@@ -314,9 +311,21 @@ export class RecipeOrchestration
     );
   }
 
+  protected _slotCandidateSortWeight(
+    item: ElementStackModel,
+    spec: SphereSpec
+  ): number {
+    if (this._desiredElements.some((x) => x.elementId === item.elementId)) {
+      // More important items are at the bottom of the array, which are reversed in the list.
+      return 1;
+    }
+
+    return 0;
+  }
+
   private _situationIsAvailable(
     situation: SituationModel,
-    elementSlotsData: ElementSlotsData[]
+    desiredElementData: DesiredElementData[]
   ): boolean {
     // WARN: We rely on situation.thresholds, which is dependent on situation state and ongoing recipes.
     // We should be using verb thresholds, but we currently need to be synchronous here and cannot await the verb promise.
@@ -346,13 +355,22 @@ export class RecipeOrchestration
       // ),
     ];
 
-    for (const { element, aspects, slots } of elementSlotsData) {
+    for (const { aspects, slots } of desiredElementData) {
       // As far as I can tell from the game code, only elements slotted into verb thresholds (situation thresholds in our case)
       // can provide slots
       if (
         situation.thresholds.some((t) => aspectsMatchSphereSpec(aspects, t))
       ) {
         thresholds.push(...slots);
+      }
+    }
+
+    // Our desired elements must be slottable.
+    // We could probably do this in the loop above; im not sure if any recipe
+    // requires putting a desired element in anything but a default threshold.
+    for (const { aspects } of desiredElementData) {
+      if (!thresholds.some((t) => aspectsMatchSphereSpec(aspects, t))) {
+        return false;
       }
     }
 
@@ -400,70 +418,5 @@ export class RecipeOrchestration
     // }
 
     return true;
-  }
-
-  private async _pickDefaults(slots: OrchestrationSlot[]) {
-    const situation = await firstValueFrom(this._situation$);
-    if (!situation) {
-      return;
-    }
-
-    // Maybe we should recalculate all of these from the current values, but these should all be warmed up and ready.
-    const options = await Promise.all(
-      slots.map((slot) =>
-        firstValueFrom(slot.availableElementStacks$).then(
-          (stacks) => [slot, stacks] as const
-        )
-      )
-    );
-
-    const currentAssignments = await firstValueFrom(this.slotAssignments$);
-    const assignments = { ...currentAssignments };
-    const assigned = new Set<ElementStackModel>();
-
-    for (const [slot, stacks] of options) {
-      const lastSelectedItem = assignments[slot.spec.id] ?? null;
-      if (
-        lastSelectedItem &&
-        !assigned.has(lastSelectedItem) &&
-        stacks.includes(lastSelectedItem)
-      ) {
-        continue;
-      }
-
-      const desiredItem = stacks.find(
-        (x) =>
-          !assigned.has(x) &&
-          this.desiredElements.find(
-            (desired) => x.elementId === desired.elementId
-          )
-      );
-      if (desiredItem) {
-        assigned.add(desiredItem);
-        assignments[slot.spec.id] = desiredItem;
-        continue;
-      }
-
-      // TODO: Pick the item that contributes the most but don't go over.
-      const item = stacks.find(
-        (x) => !assigned.has(x) && !Object.values(assignments).includes(x)
-      );
-      if (item) {
-        assigned.add(item);
-        assignments[slot.spec.id] = item;
-        continue;
-      }
-    }
-
-    let promises: Promise<boolean>[] = [];
-    for (const [key, value] of Object.entries(assignments)) {
-      if (currentAssignments[key] === value) {
-        continue;
-      }
-
-      promises.push(situation.setSlotContents(key, value));
-    }
-
-    await Promise.all(promises);
   }
 }

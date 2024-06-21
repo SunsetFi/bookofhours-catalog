@@ -66,6 +66,16 @@ const OrchestrationContent = ({
       [orchestration]
     ) ?? [];
 
+  const canAutofill =
+    useObservation(
+      () =>
+        isExecutableOrchestration(orchestration) ||
+        isOngoingOrchestration(orchestration)
+          ? orchestration.canAutofill$
+          : Null$,
+      [orchestration]
+    ) ?? false;
+
   const canExecute =
     useObservation(
       () =>
@@ -194,6 +204,15 @@ const OrchestrationContent = ({
         </GameTypography>
       )}
       <ButtonGroup sx={{ ml: "auto" }}>
+        {(isExecutableOrchestration(orchestration) ||
+          isOngoingOrchestration(orchestration)) && (
+          <Button
+            disabled={!canAutofill}
+            onClick={() => orchestration.autofill()}
+          >
+            Autofill
+          </Button>
+        )}
         {isExecutableOrchestration(orchestration) && (
           <>
             <Button

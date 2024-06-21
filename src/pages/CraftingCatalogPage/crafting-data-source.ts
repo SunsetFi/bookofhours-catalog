@@ -47,13 +47,6 @@ function recipeToCraftableModel(
     map((elementId) =>
       elementId ? compendium.getElementById(elementId) : null
     ),
-    // tap((x) => {
-    //   if (!x) {
-    //     console.warn(
-    //       `Recipe ${recipeModel.recipeId} has no craftable element.`
-    //     );
-    //   }
-    // }),
     shareReplay(1)
   );
 
