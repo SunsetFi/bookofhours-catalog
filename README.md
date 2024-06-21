@@ -136,13 +136,13 @@ Pinning lets you stick either a recipe, a card, or even a potential card (such a
 
 Pinned items appear in the Pin List, located at the top right of the page, to the left of the Search box. It is not shown until at least one item is pinned.
 
-Pinning is useful if you want to plan ahead on what cards you will need to collect in order to execute a recipe. The pin list will show a sum of aspects for all pinned cards. If a Recipe is also pinned, it will limit its aspects to those required by the recipe, and show a totalizer showing how much of that aspect you need for the recipe compared to how much you currently have pinned.
+Pinning is useful if you want to plan ahead on what cards you will need to collect in order to execute a recipe. The pin list will show a sum of each aspect shared by all pinned cards. If a Recipe is also pinned, it will only show aspects required by the recipe, and show a totalizer showing how much of that aspect you need for the recipe.
 
 When you pin a Recipe, that recipe's name and requirements will be displayed on the top right of the screen, left of the Global Search. It will also pin the 'Primary Output' of the recipe as an icon, which can be focused with the keyboard or hovered over to display more information on that item.
 
 When you pin a Card (or a Potential Card), the card's icon and aspects will appear in the pin list.
 
-#### Future Plans
+#### Future Plans for Pinning
 
 At the moment, pinning only serves as a visual reminder. However, it is a work in progress. Plans for improvement here include:
 
@@ -210,7 +210,7 @@ Activating the Filter button will open a popup that constrains the screen reader
 
 #### Desk
 
-This provides a high level overview of the cards available to you, similar to the card trays of the main game.\
+This provides a high level overview of the cards available to you, similar to the card trays of the main game.
 
 #### Locations
 
