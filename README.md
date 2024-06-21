@@ -208,11 +208,17 @@ Activating the Filter button will open a popup that constrains the screen reader
 
 ### Page Breakdown
 
-#### Desk
+The many aspects of the game are broken down into individual categorized pages.
+
+Each page has an embellished name for the title bar, and a simple name used for tooltips, window title, and screen readers.
+
+The following is an accounting of all pages, with the embellished name first, and the simple name contained in brackets.
+
+#### Desk [Desk]
 
 This provides a high level overview of the cards available to you, similar to the card trays of the main game.
 
-#### Locations
+#### Locations [Locations]
 
 Provides a breakdown of all known locations.
 
@@ -221,7 +227,7 @@ Provides a breakdown of all known locations.
 - Workspaces in the location
 - Description
 
-#### Brancrug and Environs
+#### Brancrug and Environs [Brancrug]
 
 Displays all workstations / verbs in the town of Brancrug, once unlocked.
 
@@ -234,9 +240,9 @@ The columns are:
 - Secondary card types accepted
 - Description
 
-#### Workstations
+#### Workstations [Workstations]
 
-Displays all unlocked workstations through the house, once their containing room is unlocked.
+Displays all unlocked workstations throughout Hush House. Workstations in rooms that are not yet unlocked are not shown.
 
 The columns are:
 
@@ -249,7 +255,7 @@ The columns are:
 - Accepts (What aspect types can be accepted by the 2 additional workstation slots)
 - Description
 
-#### Gardens and Glades
+#### Gardens and Glades [Harvest]
 
 Displays all unlocked gardens and other spots of harvest
 
@@ -259,7 +265,7 @@ The columns are:
 - Location in the House
 - Description
 
-#### Esoteric Wisdoms
+#### Esoteric Wisdoms [Skills]
 
 Displays all currently known skills
 
@@ -273,7 +279,7 @@ The columns are:
 - Whether the skill is committed to the wisdom tree
 - Whether the skill has been attuned to make a new Soul card
 
-#### The Fruits of Knowledge
+#### The Fruits of Knowledge [Craftables]
 
 Displays all unlocked crafting recipes. Crafting recipes are recipes triggered by skill cards, and are unlocked when you slot enough cards with the appropriate requirements alongside a skill card. A recipe does not need to be started to be unlocked.
 
@@ -287,7 +293,7 @@ The columns are:
 - Requirements to craft the item
 - Description of the item
 
-#### Bibliographical Collection
+#### Bibliographical Collection [Books]
 
 Displays books, phonographs, and films
 
@@ -304,7 +310,7 @@ Displays books, phonographs, and films
 - Contamination
 - Description
 
-#### Stores and Provisions
+#### Stores and Provisions [Provisions]
 
 Displays consumables, servables, brewables, and drinkables
 
@@ -315,7 +321,7 @@ Displays consumables, servables, brewables, and drinkables
 - Aspects
 - Description
 
-#### Toolshed
+#### Toolshed [Tools]
 
 Displays all available tools through the house
 
@@ -326,7 +332,7 @@ Displays all available tools through the house
 - Consumable (device)
 - Description
 
-#### Malleary Shelf
+#### Malleary Shelf [Materials]
 
 Displays general crafting items
 
@@ -337,7 +343,7 @@ Displays general crafting items
 - Type (various aspects like liquid, gem, flower, and so on)
 - Description
 
-#### Antiquities and Knicknacks
+#### Antiquities and Knicknacks [Things]
 
 Displays 'things'. This is an esoteric assortment of objects tagged 'thing' by the game, and useful in crafting and book mastery.
 
@@ -347,7 +353,7 @@ Displays 'things'. This is an esoteric assortment of objects tagged 'thing' by t
 - Aspects
 - Description
 
-#### An Accounting of the Walls and Floors
+#### An Accounting of the Walls and Floors [Furnishings]
 
 Displays comforts and wall art around the house. This is an esoteric assortment of objects tagged either 'comfort' or 'wall art' by the game, and useful in book mastery.
 

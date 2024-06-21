@@ -30,7 +30,6 @@ import VerbIcon from "@/components/VerbIcon";
 
 import ObservableDataGrid, {
   BooleanFilter,
-  TextWrapCell,
   createObservableColumnHelper,
 } from "@/components/ObservableDataGrid";
 import {
