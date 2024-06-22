@@ -216,9 +216,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
       locked: spec.greedy,
       assignment$,
       availableElementStacks$,
-      assign: (element) => {
-        this._assignSlot(spec, element);
-      },
+      assign: (element) => this._assignSlot(spec, element),
     };
   }
 

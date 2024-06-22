@@ -474,7 +474,7 @@ export class SituationModel extends TokenModel {
 
       return true;
     } catch (e) {
-      console.log("Failed to conclude situation", this.id, e);
+      console.warn("Failed to conclude situation", this.id, e);
       return false;
     }
   }

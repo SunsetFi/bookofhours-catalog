@@ -3,6 +3,7 @@ import {
   Observable,
   Subscription,
   combineLatest,
+  debounceTime,
   firstValueFrom,
   map,
   shareReplay,
@@ -99,7 +100,7 @@ export class RecipeOrchestration
     );
 
     // Select a default situation.
-    firstValueFrom(this.availableSituations$).then((situations) => {
+    firstValueFrom(this.availableSituations$).then(async (situations) => {
       const situation = situations.find((x) => x.state === "Unstarted");
       if (!situation) {
         return;
@@ -108,13 +109,15 @@ export class RecipeOrchestration
       this._situation$.next(situation);
     });
 
-    this._situationAutofillSubscription = this._situation$.subscribe(
-      (situation) => {
+    // Note: debounceTime is a hack, as slots$ needs to update first, and it also depends on the situation.
+    this._situationAutofillSubscription = this._situation$
+      .pipe(debounceTime(10))
+      .subscribe((situation) => {
         if (situation) {
+          // TODO: If we get a situation with stuff in it, the stuff needs to be emptied before we can auto-fill.
           this.autofill();
         }
-      }
-    );
+      });
   }
 
   _onSituationStateUpdated(situationState: SituationState): void {

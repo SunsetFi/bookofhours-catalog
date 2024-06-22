@@ -87,7 +87,6 @@ export class Orchestrator {
         }
 
         // The orchestration has delegated state change handling to us.
-        console.log("Reopening orchestration by state", situation.state);
         this._openSituationOrchestrationByState(situation);
       });
 
