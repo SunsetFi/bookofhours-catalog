@@ -25,6 +25,8 @@ import {
   RecipeModel,
 } from "@/services/sh-compendium";
 
+import { BatchingScheduler } from "@/services/scheduler";
+
 import { TokensSource } from "../sources/TokensSource";
 
 import { ElementStackModel } from "../token-models/ElementStackModel";
@@ -66,12 +68,13 @@ export class RecipeOrchestration
     private readonly _desiredElements: readonly ElementModel[],
     compendium: Compendium,
     tokensSource: TokensSource,
+    scheduler: BatchingScheduler,
     private readonly _orchestrationFactory: OrchestrationFactory,
     private readonly _replaceOrchestration: (
       orchestration: Orchestration | null
     ) => void
   ) {
-    super(tokensSource);
+    super(tokensSource, scheduler);
 
     this._situationVerb$ = this._situation$.pipe(
       switchMapIfNotNull((situation) =>

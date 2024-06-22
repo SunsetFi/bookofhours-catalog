@@ -10,6 +10,7 @@ import {
   BehaviorSubject,
   combineLatest,
   of as observableOf,
+  SchedulerLike,
 } from "rxjs";
 
 import { arrayShallowEquals, isNotNull } from "./utils";
@@ -230,6 +231,18 @@ export function profileEnd(tag: string) {
           console.timeEnd(tag);
         }
         subscriber.next(value);
+      });
+    });
+  };
+}
+
+export function publishOn(scheduler: SchedulerLike) {
+  return <T>(source: Observable<T>): Observable<T> => {
+    return new Observable<T>((subscriber) => {
+      return source.subscribe({
+        next: (value) => scheduler.schedule(() => subscriber.next(value)),
+        error: (err) => scheduler.schedule(() => subscriber.error(err)),
+        complete: () => scheduler.schedule(() => subscriber.complete()),
       });
     });
   };

@@ -14,7 +14,7 @@ import { useDIDependency } from "@/container";
 import { isNotNull } from "@/utils";
 
 import { API } from "@/services/sh-api";
-import { Scheduler } from "@/services/scheduler";
+import { UpdatePoller } from "@/services/update-poller";
 
 import { useObservation } from "@/hooks/use-observation";
 
@@ -42,7 +42,7 @@ export class TimeSource {
   constructor(
     @inject(GameStateSource) runningSource: GameStateSource,
     @inject(API) private readonly _api: API,
-    @inject(Scheduler) private _scheduler: Scheduler
+    @inject(UpdatePoller) private _scheduler: UpdatePoller
   ) {
     let schedulerSubscription: (() => void) | null = null;
     runningSource.isLegacyRunning$

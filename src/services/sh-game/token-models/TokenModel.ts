@@ -12,22 +12,27 @@ import { API } from "@/services/sh-api";
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { isEqual } from "lodash";
 
-export abstract class TokenModel {
+export abstract class TokenModel<T extends Token = any> {
   private readonly _id: string;
   private readonly _payloadType: Token["payloadType"];
 
-  private readonly _token$: BehaviorSubject<Token>;
+  private readonly _tokenSubject$: BehaviorSubject<T>;
   private readonly _retired$ = new BehaviorSubject<boolean>(false);
 
   private _lastUpdate: number = 0;
 
-  constructor(token: Token, protected readonly _api: API) {
+  constructor(token: T, protected readonly _api: API) {
     this._id = token.id;
     this._payloadType = token.payloadType;
-    this._token$ = new BehaviorSubject(token);
+    this._tokenSubject$ = new BehaviorSubject(token);
   }
 
   get id() {
+    // Game engine is inconsistent about whether it includes the ! or not.
+    if (!this._token.id.startsWith("!")) {
+      return "!" + this._token.id;
+    }
+
     return this._id;
   }
 
@@ -61,11 +66,11 @@ export abstract class TokenModel {
   }
 
   get path() {
-    return this._token$.value.path;
+    return this._token.path;
   }
 
   get spherePath() {
-    return this._token$.value.spherePath;
+    return this._token.spherePath;
   }
 
   private _inExteriorSphere$: Observable<boolean> | null = null;
@@ -95,11 +100,15 @@ export abstract class TokenModel {
   }
 
   get occupiesSpaceAs() {
-    return this._token$.value.occupiesSpaceAs;
+    return this._token.occupiesSpaceAs;
   }
 
-  protected get _token(): Token {
-    return this._token$.value;
+  protected get _token(): T {
+    return this._tokenSubject$.value;
+  }
+
+  protected get _token$(): Observable<T> {
+    return this._tokenSubject$;
   }
 
   focus() {
@@ -132,11 +141,11 @@ export abstract class TokenModel {
     if (!token) {
       this._retire();
     } else {
-      this._update(token, thisUpdate);
+      this._update(token as T, thisUpdate);
     }
   }
 
-  _update(token: Token, timestamp: number) {
+  _update(token: T, timestamp: number) {
     if (this._retired$.value) {
       console.warn("Skipping token update as it was already retired.");
       return;
@@ -150,17 +159,14 @@ export abstract class TokenModel {
     }
     this._lastUpdate = timestamp;
 
-    if (isEqual(this._token$.value, token)) {
+    if (isEqual(this._tokenSubject$.value, token)) {
       return;
     }
 
-    this._token$.next(token);
-    this._onUpdate(token);
+    this._tokenSubject$.next(token);
   }
 
   _retire() {
     this._retired$.next(true);
   }
-
-  protected abstract _onUpdate(token: Token): void;
 }

@@ -1,6 +1,11 @@
 import React from "react";
-
 import { Observable } from "rxjs";
+
+import { useDIDependency } from "@/container";
+
+import { publishOn } from "@/observables";
+
+import { BatchingScheduler } from "@/services/scheduler";
 
 export interface UseObservationOpts {
   onError?(error: any): void;
@@ -18,6 +23,8 @@ export function useObservation<T>(
   deps?: any[],
   { onError, profileName }: UseObservationOpts = {}
 ) {
+  const scheduler = useDIDependency(BatchingScheduler);
+
   const factory = React.useMemo(
     () =>
       typeof observableOrFactory === "function"
@@ -34,23 +41,25 @@ export function useObservation<T>(
   React.useLayoutEffect(() => {
     let seenFirstValue = false;
     const start = Date.now();
-    const sub = factory().subscribe({
-      next: (value) => {
-        if (!seenFirstValue) {
-          seenFirstValue = true;
-          if (profileName)
-            console.log(
-              "PERF",
-              profileName,
-              "retrieved first value in ",
-              (Date.now() - start) / 1000,
-              "s"
-            );
-        }
-        setValue(value);
-      },
-      error: onError ?? setError,
-    });
+    const sub = factory()
+      .pipe(publishOn(scheduler))
+      .subscribe({
+        next: (value) => {
+          if (!seenFirstValue) {
+            seenFirstValue = true;
+            if (profileName)
+              console.log(
+                "PERF",
+                profileName,
+                "retrieved first value in ",
+                (Date.now() - start) / 1000,
+                "s"
+              );
+          }
+          setValue(value);
+        },
+        error: onError ?? setError,
+      });
     return () => sub.unsubscribe();
   }, [factory, onError]);
 

@@ -7,6 +7,7 @@ import searchModule from "./search/module";
 import shCompendiumModule from "./sh-compendium/module";
 import shMonitorModule from "./sh-game/module";
 import shApiModule from "./sh-api/module";
+import updatePollerModule from "./update-poller/module";
 
 export default composeModules(
   historyModule,
@@ -15,5 +16,6 @@ export default composeModules(
   searchModule,
   shCompendiumModule,
   shMonitorModule,
-  shApiModule
+  shApiModule,
+  updatePollerModule
 );

@@ -3,7 +3,7 @@ import { BehaviorSubject, distinctUntilChanged } from "rxjs";
 
 import { useDIDependency } from "@/container";
 
-import { Scheduler } from "@/services/scheduler";
+import { UpdatePoller } from "@/services/update-poller";
 import { API } from "@/services/sh-api";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -16,7 +16,7 @@ export class GameStateSource {
   private readonly _isLegacyLoaded$ = new BehaviorSubject(false);
 
   constructor(
-    @inject(Scheduler) scheduler: Scheduler,
+    @inject(UpdatePoller) scheduler: UpdatePoller,
     @inject(API) private readonly _api: API
   ) {
     scheduler.addTask(() => this._pollRunning());

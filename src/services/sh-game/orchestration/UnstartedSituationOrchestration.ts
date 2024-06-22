@@ -18,6 +18,8 @@ import {
   switchMapIfNotNull,
 } from "@/observables";
 
+import { BatchingScheduler } from "@/services/scheduler";
+
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
 import { ElementStackModel } from "../token-models/ElementStackModel";
@@ -51,12 +53,13 @@ export class UnstartedSituationOrchestration
     situation: SituationModel | null,
     tokensSource: TokensSource,
     private readonly _compendium: Compendium,
+    scheduler: BatchingScheduler,
     private readonly _orchestrationFactory: OrchestrationFactory,
     private readonly _replaceOrchestration: (
       orchestration: Orchestration | null
     ) => void
   ) {
-    super(tokensSource);
+    super(tokensSource, scheduler);
 
     this._situationStateSubscription = this._situation$
       .pipe(switchMap((s) => s?.state$ ?? Null$))

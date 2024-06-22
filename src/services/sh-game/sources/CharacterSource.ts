@@ -7,7 +7,7 @@ import {
   mapArrayItemsCached,
 } from "@/observables";
 
-import { Scheduler, TaskUnsubscriber } from "@/services/scheduler";
+import { UpdatePoller, TaskUnsubscriber } from "@/services/update-poller";
 import {
   Compendium,
   ElementModel,
@@ -36,7 +36,7 @@ export class CharacterSource implements CharacterSource {
     this._ambittableRecipeIdsSubject$.pipe(distinctUntilShallowArrayChanged());
 
   constructor(
-    @inject(Scheduler) scheduler: Scheduler,
+    @inject(UpdatePoller) scheduler: UpdatePoller,
     @inject(GameStateSource) runningSource: GameStateSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(API) private readonly _api: API

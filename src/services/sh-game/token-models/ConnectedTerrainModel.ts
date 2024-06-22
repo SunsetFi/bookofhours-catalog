@@ -27,10 +27,7 @@ const nullTerrain = new BehaviorSubject<ConnectedTerrainModel | null>(
   null
 ).asObservable();
 
-export class ConnectedTerrainModel extends TokenModel {
-  private readonly _connectedTerrainInternal$: BehaviorSubject<ConnectedTerrain>;
-  private readonly _connectedTerrain$: Observable<ConnectedTerrain>;
-
+export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
   private readonly _childTokens$: Observable<readonly TokenModel[]>;
 
   constructor(
@@ -41,26 +38,11 @@ export class ConnectedTerrainModel extends TokenModel {
   ) {
     super(terrain, api);
 
-    this._connectedTerrainInternal$ = new BehaviorSubject(terrain);
-
-    this._connectedTerrain$ = this._connectedTerrainInternal$.pipe(
-      distinctUntilChanged(isEqual)
-    );
-
     this._childTokens$ = visibleTokens$.pipe(
       // Thankfully, terrains never move, so we don't have to observe our own path here.
       filterTokenInPath(this.path),
       shareReplay(1)
     );
-  }
-
-  get id() {
-    // Game engine is inconsistent about whether it includes the ! or not.
-    if (!this._connectedTerrainInternal$.value.id.startsWith("!")) {
-      return "!" + this._connectedTerrainInternal$.value.id;
-    }
-
-    return this._connectedTerrainInternal$.value.id;
   }
 
   // Null label inherited from RecipeModel maybe not existing and returning null.
@@ -69,7 +51,7 @@ export class ConnectedTerrainModel extends TokenModel {
   get label$() {
     if (!this._label$) {
       this._label$ = combineLatest([
-        this._connectedTerrain$,
+        this._token$,
         this._infoRecipe.startLabel$,
       ]).pipe(
         map(([terrain, infoRecipeLabel]) => {
@@ -90,7 +72,7 @@ export class ConnectedTerrainModel extends TokenModel {
   get description$() {
     if (!this._description$) {
       this._description$ = combineLatest([
-        this._connectedTerrain$,
+        this._token$,
         this._infoRecipe.startDescription$,
       ]).pipe(
         map(([terrain, infoRecipeDescription]) => {
@@ -110,7 +92,7 @@ export class ConnectedTerrainModel extends TokenModel {
   private _visible$: Observable<boolean> | null = null;
   get visible$() {
     if (!this._visible$) {
-      this._visible$ = this._connectedTerrain$.pipe(
+      this._visible$ = this._token$.pipe(
         map((t) => !t.shrouded),
         shareReplay(1)
       );
@@ -125,7 +107,7 @@ export class ConnectedTerrainModel extends TokenModel {
   private _sealed$: Observable<boolean> | null = null;
   get sealed$() {
     if (!this._sealed$) {
-      this._sealed$ = this._connectedTerrain$.pipe(
+      this._sealed$ = this._token$.pipe(
         map((t) => t.sealed),
         shareReplay(1)
       );
@@ -136,7 +118,7 @@ export class ConnectedTerrainModel extends TokenModel {
   private _shrouded$: Observable<boolean> | null = null;
   get shrouded$() {
     if (!this._shrouded$) {
-      this._shrouded$ = this._connectedTerrain$.pipe(
+      this._shrouded$ = this._token$.pipe(
         map((t) => t.shrouded),
         shareReplay(1)
       );
@@ -147,7 +129,7 @@ export class ConnectedTerrainModel extends TokenModel {
   private _unlockEssentials$: Observable<Aspects> | null = null;
   get unlockEssentials$() {
     if (!this._unlockEssentials$) {
-      this._unlockEssentials$ = this._connectedTerrain$.pipe(
+      this._unlockEssentials$ = this._token$.pipe(
         map((t) => t.unlockEssentials),
         distinctUntilChanged(isEqual),
         shareReplay(1)
@@ -160,7 +142,7 @@ export class ConnectedTerrainModel extends TokenModel {
   private _unlockRequirements$: Observable<Aspects> | null = null;
   get unlockRequirements$() {
     if (!this._unlockRequirements$) {
-      this._unlockRequirements$ = this._connectedTerrain$.pipe(
+      this._unlockRequirements$ = this._token$.pipe(
         map((t) => t.unlockRequirements),
         distinctUntilChanged(isEqual),
         shareReplay(1)
@@ -173,7 +155,7 @@ export class ConnectedTerrainModel extends TokenModel {
   private _unlockForbiddens$: Observable<Aspects> | null = null;
   get unlockForbiddens$() {
     if (!this._unlockForbiddens$) {
-      this._unlockForbiddens$ = this._connectedTerrain$.pipe(
+      this._unlockForbiddens$ = this._token$.pipe(
         map((t) => t.unlockForbiddens),
         distinctUntilChanged(isEqual),
         shareReplay(1)
@@ -188,10 +170,7 @@ export class ConnectedTerrainModel extends TokenModel {
   }
 
   async openTerrainWindow() {
-    if (
-      this._connectedTerrainInternal$.value.sealed ||
-      !this._connectedTerrainInternal$.value.shrouded
-    ) {
+    if (this._token.sealed || !this._token.shrouded) {
       return false;
     }
 
@@ -221,9 +200,5 @@ export class ConnectedTerrainModel extends TokenModel {
     }
 
     return true;
-  }
-
-  _onUpdate(terrain: ConnectedTerrain) {
-    this._connectedTerrainInternal$.next(terrain);
   }
 }

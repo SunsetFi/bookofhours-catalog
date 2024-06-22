@@ -6,6 +6,8 @@ import {
   RecipeModel,
 } from "@/services/sh-compendium";
 
+import { BatchingScheduler } from "@/services/scheduler";
+
 import { TokensSource } from "../sources/TokensSource";
 import { TimeSource } from "../sources/TimeSource";
 
@@ -24,7 +26,8 @@ export class OrchestrationFactory {
   constructor(
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
-    @inject(TimeSource) private readonly _timeSource: TimeSource
+    @inject(TimeSource) private readonly _timeSource: TimeSource,
+    @inject(BatchingScheduler) private readonly _scheduler: BatchingScheduler
   ) {}
 
   createUnstartedOrchestration(
@@ -35,6 +38,7 @@ export class OrchestrationFactory {
       defaultSituation ?? null,
       this._tokensSource,
       this._compendium,
+      this._scheduler,
       this,
       updateOrchestration
     );
@@ -50,6 +54,7 @@ export class OrchestrationFactory {
       desiredElements,
       this._compendium,
       this._tokensSource,
+      this._scheduler,
       this,
       updateOrchestration
     );
@@ -62,7 +67,8 @@ export class OrchestrationFactory {
     return new OngoingSituationOrchestration(
       situation,
       this._tokensSource,
-      this._timeSource
+      this._timeSource,
+      this._scheduler
     );
   }
 

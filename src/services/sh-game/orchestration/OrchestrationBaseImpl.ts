@@ -25,6 +25,8 @@ import {
 } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
 
+import { BatchingScheduler } from "@/services/scheduler";
+
 import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
 
@@ -33,7 +35,10 @@ import { TokensSource } from "../sources/TokensSource";
 import { OrchestrationBase, OrchestrationSlot } from "./types";
 
 export abstract class OrchestrationBaseImpl implements OrchestrationBase {
-  constructor(protected readonly _tokensSource: TokensSource) {}
+  constructor(
+    protected readonly _tokensSource: TokensSource,
+    private readonly _scheduler: BatchingScheduler
+  ) {}
 
   abstract _dispose(): void;
 
@@ -118,41 +123,43 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   }
 
   async autofill() {
-    const processedIds: string[] = [];
-    let unfilledSlot: OrchestrationSlot | null = null;
+    return this._scheduler.batchUpdate(async () => {
+      const processedIds: string[] = [];
+      let unfilledSlot: OrchestrationSlot | null = null;
 
-    // This whole function is gnarly as we are waiting on data from observables.
-    // We might want to rewrite this to take less reliance on them.
-    // We currently work off assuming that the first item in the slot available elements list is
-    // the one we want to pick.
+      // This whole function is gnarly as we are waiting on data from observables.
+      // We might want to rewrite this to take less reliance on them.
+      // We currently work off assuming that the first item in the slot available elements list is
+      // the one we want to pick.
 
-    // FIXME: This gnarly code is to attempt to get the most recent value of slots so that we capture
-    // new thresholds that open as a result of previous card slotting.
-    // However, it is not working, and we stop before new slots are discovered.
-    while (
-      (unfilledSlot =
-        values(await firstValueFrom(this.slots$)).find(
-          (slot) => !processedIds.includes(slot.spec.id)
-        ) ?? null) != null
-    ) {
-      processedIds.push(unfilledSlot.spec.id);
+      // FIXME: This gnarly code is to attempt to get the most recent value of slots so that we capture
+      // new thresholds that open as a result of previous card slotting.
+      // However, it is not working, and we stop before new slots are discovered.
+      while (
+        (unfilledSlot =
+          values(await firstValueFrom(this.slots$)).find(
+            (slot) => !processedIds.includes(slot.spec.id)
+          ) ?? null) != null
+      ) {
+        processedIds.push(unfilledSlot.spec.id);
 
-      const existingValue = await firstValueFrom(unfilledSlot.assignment$);
-      if (existingValue) {
-        continue;
+        const existingValue = await firstValueFrom(unfilledSlot.assignment$);
+        if (existingValue) {
+          continue;
+        }
+
+        // TODO: Stop looking at aspects that are satisified.
+        // Leave slots blank if the recipe is fully satisfied.
+
+        const candidates = await firstValueFrom(
+          unfilledSlot.availableElementStacks$
+        );
+        const candidate = first(candidates);
+        if (candidate) {
+          await unfilledSlot.assign(candidate);
+        }
       }
-
-      // TODO: Stop looking at aspects that are satisified.
-      // Leave slots blank if the recipe is fully satisfied.
-
-      const candidates = await firstValueFrom(
-        unfilledSlot.availableElementStacks$
-      );
-      const candidate = first(candidates);
-      if (candidate) {
-        await unfilledSlot.assign(candidate);
-      }
-    }
+    });
   }
 
   protected abstract _filterSlotCandidates(

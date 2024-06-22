@@ -1,6 +1,6 @@
 import { ContainerModule } from "microinject";
-import { BatchingScheduler } from "./BatchingScheduler";
+import { UpdatePoller } from "./UpdatePoller";
 
 export default new ContainerModule((bind) => {
-  bind(BatchingScheduler);
+  bind(UpdatePoller);
 });

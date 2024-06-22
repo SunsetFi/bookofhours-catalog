@@ -3,9 +3,9 @@ import {
   ElementStack as IElementStack,
   combineAspects,
   APINetworkError,
+  ElementStack,
 } from "secrethistories-api";
 import {
-  BehaviorSubject,
   Observable,
   map,
   distinctUntilChanged,
@@ -16,6 +16,7 @@ import { isEqual, pickBy } from "lodash";
 
 import { Compendium, ElementModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
+import { BatchingScheduler } from "@/services/scheduler";
 
 import {
   ModelWithLabel,
@@ -37,7 +38,7 @@ export function isElementStackModel(
 }
 
 export class ElementStackModel
-  extends TokenModel
+  extends TokenModel<ElementStack>
   implements
     ModelWithLabel,
     ModelWithDescription,
@@ -45,8 +46,6 @@ export class ElementStackModel
     ModelWithIconUrl,
     ModelWithParentTerrain
 {
-  private readonly _elementStack$: BehaviorSubject<IElementStack>;
-
   private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
 
@@ -55,32 +54,22 @@ export class ElementStackModel
     api: API,
     private readonly _compendium: Compendium,
     visibilityFactory: TokenVisibilityFactory,
-    parentTerrainFactory: TokenParentTerrainFactory
+    parentTerrainFactory: TokenParentTerrainFactory,
+    private readonly _scheduler: BatchingScheduler
   ) {
     super(elementStack, api);
-    this._elementStack$ = new BehaviorSubject<IElementStack>(elementStack);
 
-    this._visible$ = visibilityFactory.createVisibilityObservable(
-      this._elementStack$
-    );
+    this._visible$ = visibilityFactory.createVisibilityObservable(this._token$);
 
     this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
-      this._elementStack$
+      this._token$
     );
-  }
-
-  get id(): string {
-    return this._elementStack$.value.id;
-  }
-
-  get payloadType(): "ElementStack" {
-    return "ElementStack";
   }
 
   private _elementId$: Observable<string> | null = null;
   get elementId$() {
     if (!this._elementId$) {
-      this._elementId$ = this._elementStack$.pipe(
+      this._elementId$ = this._token$.pipe(
         map((e) => e.elementId),
         distinctUntilChanged(),
         shareReplay(1)
@@ -91,13 +80,13 @@ export class ElementStackModel
   }
 
   get elementId() {
-    return this._elementStack$.value.elementId;
+    return this._token.elementId;
   }
 
   private _element$: Observable<ElementModel> | null = null;
   get element$() {
     if (!this._element$) {
-      this._element$ = this._elementStack$.pipe(
+      this._element$ = this._token$.pipe(
         map((elementStack) => elementStack.elementId),
         distinctUntilChanged(),
         map((elementId) => this._compendium.getElementById(elementId)),
@@ -111,7 +100,7 @@ export class ElementStackModel
   private _label$: Observable<string | null> | null = null;
   get label$() {
     if (!this._label$) {
-      this._label$ = this._elementStack$.pipe(
+      this._label$ = this._token$.pipe(
         map((e) => e.label),
         distinctUntilChanged(),
         shareReplay(1)
@@ -122,13 +111,13 @@ export class ElementStackModel
   }
 
   get label() {
-    return this._elementStack$.value.label;
+    return this._token.label;
   }
 
   private _description$: Observable<string | null> | null = null;
   get description$() {
     if (!this._description$) {
-      this._description$ = this._elementStack$.pipe(
+      this._description$ = this._token$.pipe(
         map((e) => e.description),
         distinctUntilChanged(),
         shareReplay(1)
@@ -142,7 +131,7 @@ export class ElementStackModel
     null;
   get illuminations$() {
     if (!this._illuminations$) {
-      this._illuminations$ = this._elementStack$.pipe(
+      this._illuminations$ = this._token$.pipe(
         map((e) => e.illuminations),
         distinctUntilChanged(isEqual),
         shareReplay(1)
@@ -163,7 +152,7 @@ export class ElementStackModel
   private _quantity$: Observable<number> | null = null;
   get quantity$() {
     if (!this._quantity$) {
-      this._quantity$ = this._elementStack$.pipe(
+      this._quantity$ = this._token$.pipe(
         map((e) => e.quantity),
         distinctUntilChanged(),
         shareReplay(1)
@@ -176,7 +165,7 @@ export class ElementStackModel
   private _iconUrl$: Observable<string> | null = null;
   get iconUrl$() {
     if (!this._iconUrl$) {
-      this._iconUrl$ = this._elementStack$.pipe(
+      this._iconUrl$ = this._token$.pipe(
         map(
           (stack) =>
             `${this._api.baseUrl}/api/compendium/elements/${stack.elementId}/icon.png`
@@ -192,7 +181,7 @@ export class ElementStackModel
   private _lifetimeRemaining$: Observable<number> | null = null;
   get lifetimeRemaining$() {
     if (!this._lifetimeRemaining$) {
-      this._lifetimeRemaining$ = this._elementStack$.pipe(
+      this._lifetimeRemaining$ = this._token$.pipe(
         map((e) => e.lifetimeRemaining),
         distinctUntilChanged(),
         shareReplay(1)
@@ -205,7 +194,7 @@ export class ElementStackModel
   private _elementAspects$: Observable<Aspects> | null = null;
   get elementAspects$() {
     if (!this._elementAspects$) {
-      this._elementAspects$ = this._elementStack$.pipe(
+      this._elementAspects$ = this._token$.pipe(
         map((e) => e.elementAspects),
         distinctUntilChanged(),
         shareReplay(1)
@@ -215,13 +204,13 @@ export class ElementStackModel
     return this._elementAspects$;
   }
   get elementAspects() {
-    return this._elementStack$.value.elementAspects;
+    return this._token.elementAspects;
   }
 
   private _mutations$: Observable<Aspects> | null = null;
   get mutations$() {
     if (!this._mutations$) {
-      this._mutations$ = this._elementStack$.pipe(
+      this._mutations$ = this._token$.pipe(
         map((e) => e.mutations),
         distinctUntilChanged(),
         shareReplay(1)
@@ -234,7 +223,7 @@ export class ElementStackModel
   private _aspects$: Observable<Aspects> | null = null;
   get aspects$() {
     if (!this._aspects$) {
-      this._aspects$ = this._elementStack$.pipe(
+      this._aspects$ = this._token$.pipe(
         map((e) =>
           pickBy(combineAspects(e.elementAspects, e.mutations), (v) => v !== 0)
         ),
@@ -247,7 +236,7 @@ export class ElementStackModel
   }
 
   get aspects() {
-    const value = this._elementStack$.value;
+    const value = this._token;
     if (!value) {
       return {};
     }
@@ -285,7 +274,7 @@ export class ElementStackModel
   private _shrouded$: Observable<boolean> | null = null;
   get shrouded$() {
     if (!this._shrouded$) {
-      this._shrouded$ = this._elementStack$.pipe(
+      this._shrouded$ = this._token$.pipe(
         map((e) => e.shrouded),
         distinctUntilChanged(),
         shareReplay(1)
@@ -298,7 +287,7 @@ export class ElementStackModel
   private _decays$: Observable<boolean> | null = null;
   get decays$() {
     if (!this._decays$) {
-      this._decays$ = this._elementStack$.pipe(
+      this._decays$ = this._token$.pipe(
         map((e) => e.decays),
         distinctUntilChanged(),
         shareReplay(1)
@@ -311,7 +300,7 @@ export class ElementStackModel
   private _unique$: Observable<boolean> | null = null;
   get unique$() {
     if (!this._unique$) {
-      this._unique$ = this._elementStack$.pipe(
+      this._unique$ = this._token$.pipe(
         map((e) => e.unique),
         distinctUntilChanged(),
         shareReplay(1)
@@ -322,40 +311,34 @@ export class ElementStackModel
   }
 
   async moveToSphere(spherePath: string) {
-    try {
-      const now = Date.now();
-      await this._api.updateTokenAtPath(this.path, {
-        spherePath,
-      });
-      this._update(
-        {
-          ...this._token,
-          path: `${spherePath}/${this.id}`,
+    return this._scheduler.batchUpdate(async () => {
+      try {
+        const now = Date.now();
+        await this._api.updateTokenAtPath(this.path, {
           spherePath,
-        },
-        now
-      );
-      return true;
-    } catch (e) {
-      if (e instanceof APINetworkError && [400, 409].includes(e.statusCode)) {
-        console.warn(
-          "Failed to move elementStack",
-          this.id,
-          "to path",
-          spherePath
+        });
+        this._update(
+          {
+            ...this._token,
+            path: `${spherePath}/${this.id}`,
+            spherePath,
+          },
+          now
         );
-        return false;
+        return true;
+      } catch (e) {
+        if (e instanceof APINetworkError && [400, 409].includes(e.statusCode)) {
+          console.warn(
+            "Failed to move elementStack",
+            this.id,
+            "to path",
+            spherePath
+          );
+          return false;
+        }
+
+        throw e;
       }
-
-      throw e;
-    }
-  }
-
-  _onUpdate(element: IElementStack) {
-    if (element.id !== this.id) {
-      throw new Error("Invalid situation update: Wrong ID.");
-    }
-
-    this._elementStack$.next(element);
+    });
   }
 }

@@ -3,6 +3,7 @@ import { Situation, Token } from "secrethistories-api";
 
 import { API } from "@/services/sh-api";
 import { Compendium } from "@/services/sh-compendium";
+import { BatchingScheduler } from "@/services/scheduler";
 
 import { TokensSource } from "../sources/TokensSource";
 
@@ -26,7 +27,8 @@ export class TokenModelFactory {
           this._container.get(API),
           this._container.get(Compendium),
           this._container.get(TokenVisibilityFactory),
-          this._container.get(TokenParentTerrainFactory)
+          this._container.get(TokenParentTerrainFactory),
+          this._container.get(BatchingScheduler)
         );
       case "ConnectedTerrain":
         return new ConnectedTerrainModel(
@@ -43,7 +45,8 @@ export class TokenModelFactory {
           this._container.get(API),
           this._container.get(TokensSource).visibleElementStacks$,
           this._container.get(TokenVisibilityFactory),
-          this._container.get(TokenParentTerrainFactory)
+          this._container.get(TokenParentTerrainFactory),
+          this._container.get(BatchingScheduler)
         );
       default:
         throw new Error(`Unknown token type: ${(token as any).payloadType}`);

@@ -19,7 +19,7 @@ import {
   switchMapIfNotNull,
 } from "@/observables";
 
-import { Scheduler } from "../scheduler";
+import { UpdatePoller } from "../update-poller";
 
 import { TokensSource } from "./sources/TokensSource";
 
@@ -40,7 +40,7 @@ export class TerrainUnlocker {
 
   constructor(
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
-    @inject(Scheduler) private readonly _scheduler: Scheduler,
+    @inject(UpdatePoller) private readonly _scheduler: UpdatePoller,
     @inject(Orchestrator) private readonly _orchestrator: Orchestrator
   ) {
     this.unlockCandidateStacks$.subscribe((items) => {

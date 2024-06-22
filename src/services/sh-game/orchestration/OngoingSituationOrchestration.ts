@@ -1,18 +1,9 @@
-import {
-  BehaviorSubject,
-  Observable,
-  Subscription,
-  combineLatest,
-  firstValueFrom,
-  map,
-  shareReplay,
-  switchMap,
-} from "rxjs";
+import { BehaviorSubject, Observable, firstValueFrom } from "rxjs";
 import { Aspects, SphereSpec } from "secrethistories-api";
 
 import { True$ } from "@/observables";
 
-import { Compendium, RecipeModel } from "@/services/sh-compendium";
+import { BatchingScheduler } from "@/services/scheduler";
 
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
@@ -23,12 +14,10 @@ import { TokensSource } from "../sources/TokensSource";
 import {
   ContentContainingOrchestration,
   OngoingOrchestration,
-  Orchestration,
   OrchestrationBase,
 } from "./types";
 
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
-import { OrchestrationFactory } from "./OrchestrationFactory";
 
 export class OngoingSituationOrchestration
   extends OrchestrationBaseImpl
@@ -40,9 +29,10 @@ export class OngoingSituationOrchestration
   constructor(
     private readonly _situation: SituationModel,
     tokensSource: TokensSource,
-    private readonly _timeSource: TimeSource
+    private readonly _timeSource: TimeSource,
+    scheduler: BatchingScheduler
   ) {
-    super(tokensSource);
+    super(tokensSource, scheduler);
   }
 
   _dispose() {}

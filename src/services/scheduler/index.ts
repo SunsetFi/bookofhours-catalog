@@ -1,1 +1,1 @@
-export * from "./Scheduler";
+export * from "./BatchingScheduler";

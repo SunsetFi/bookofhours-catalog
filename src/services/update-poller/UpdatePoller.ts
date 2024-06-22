@@ -9,7 +9,7 @@ export type TaskUnsubscriber = () => void;
 @injectable()
 @singleton()
 @provides(Initializable)
-export class Scheduler implements Initializable {
+export class UpdatePoller implements Initializable {
   private readonly _tasks: (() => Promise<void>)[] = [];
   private _currentTask = 0;
   private _pollingTimeout: NodeJS.Timeout | null = null;

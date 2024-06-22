@@ -143,7 +143,8 @@ function itemToRow<T extends {}>(
   );
 
   return combineLatest(observations).pipe(
-    debounceTime(5),
+    // This was here to help debounce changes, but with BatchingScheduler we dont seem to need it.
+    // debounceTime(5),
     map((values) => {
       const decoration: Record<string, any> = {
         _rowId: getItemKey(item, itemIndex),

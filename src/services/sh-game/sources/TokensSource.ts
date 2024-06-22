@@ -19,7 +19,7 @@ import {
 
 import { applicableSpherePaths } from "@/spheres";
 
-import { Scheduler, TaskUnsubscriber } from "../../scheduler";
+import { UpdatePoller, TaskUnsubscriber } from "../../update-poller";
 import { API } from "../../sh-api";
 
 import { TokenModel } from "../token-models/TokenModel";
@@ -40,6 +40,7 @@ import {
 import { filterTokenInPath } from "../observables";
 
 import { GameStateSource } from "./RunningSource";
+import { BatchingScheduler } from "@/services/scheduler";
 
 const supportedPayloadTypes: PayloadType[] = [
   "ConnectedTerrain",
@@ -62,11 +63,12 @@ export class TokensSource {
   private readonly _tokensSubject$ = new Subject<readonly TokenModel[]>();
 
   constructor(
-    @inject(Scheduler) scheduler: Scheduler,
+    @inject(UpdatePoller) poller: UpdatePoller,
     @inject(GameStateSource) runningSource: GameStateSource,
     @inject(API) private readonly _api: API,
     @inject(TokenModelFactory)
-    private readonly _tokenModelFactory: TokenModelFactory
+    private readonly _tokenModelFactory: TokenModelFactory,
+    @inject(BatchingScheduler) private readonly _scheduler: BatchingScheduler
   ) {
     runningSource.isLegacyRunning$.subscribe((isRunning) => {
       if (!isRunning) {
@@ -80,7 +82,7 @@ export class TokensSource {
         }
       } else {
         if (!this._tokensTaskSubsciption) {
-          this._tokensTaskSubsciption = scheduler.addTask(() =>
+          this._tokensTaskSubsciption = poller.addTask(() =>
             this._pollTokens()
           );
         }
@@ -334,20 +336,22 @@ export class TokensSource {
     const tokenIdsToRemove = difference(existingTokenIds, foundIds);
 
     // React 18 auto batches this by virtue of being inside a promise.
-    tokenIdsToRemove.forEach((id) => {
-      const token = this._tokenModels.get(id);
-      if (token) {
-        token._retire();
-        this._tokenModels.delete(id);
-      }
+    await this._scheduler.batchUpdate(async () => {
+      tokenIdsToRemove.forEach((id) => {
+        const token = this._tokenModels.get(id);
+        if (token) {
+          token._retire();
+          this._tokenModels.delete(id);
+        }
+      });
+
+      const tokenModels = sortBy(
+        tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
+        "id"
+      );
+
+      this._tokensSubject$.next(tokenModels);
     });
-
-    const tokenModels = sortBy(
-      tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
-      "id"
-    );
-
-    this._tokensSubject$.next(tokenModels);
   }
 
   private _getOrUpdateTokenModel(token: Token, timestamp: number): TokenModel {
