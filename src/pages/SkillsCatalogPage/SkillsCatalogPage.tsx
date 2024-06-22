@@ -21,7 +21,8 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
-import ObservableDataGrid, {
+import {
+  IdentifierItemDataGrid,
   createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid";
 
@@ -114,7 +115,7 @@ const SkillsCatalogPage = () => {
   return (
     <PageContainer title="Esoteric Wisdoms" backTo="/">
       <RequireRunning />
-      <ObservableDataGrid
+      <IdentifierItemDataGrid
         sx={{ height: "100%" }}
         columns={columns}
         defaultSortColumn="label"

@@ -6,14 +6,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 import { useDIDependency } from "@/container";
 
-import { portageSpherePaths } from "@/spheres";
-
 import { useObservation } from "@/hooks/use-observation";
 import { useQueryString } from "@/hooks/use-querystring";
 
 import {
   TokensSource,
-  filterTokenInPath,
   filterDoesNotOccupySpace,
   filterElementId,
   filterHasAnyAspect,
@@ -46,11 +43,9 @@ const Overview = () => {
   const tokensSource = useDIDependency(TokensSource);
   const tokens = useObservation(tokensSource.visibleTokens$);
 
-  const portage$ = React.useMemo(
+  const important$ = React.useMemo(
     () =>
-      tokensSource.visibleElementStacks$.pipe(
-        filterTokenInPath(portageSpherePaths)
-      ),
+      tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect(["journal"])),
     [tokensSource.visibleElementStacks$]
   );
 
@@ -110,13 +105,13 @@ const Overview = () => {
           </Box>
         )}
         <ElementStackTray
-          aria-label="portage"
+          aria-label="important"
           role="region"
           sx={{
             gridRow: "start / dividier",
             gridColumn: "start / end",
           }}
-          elementStacks$={portage$}
+          elementStacks$={important$}
           requireExterior
         />
         <ElementStackTray

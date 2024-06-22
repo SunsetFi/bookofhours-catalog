@@ -56,7 +56,6 @@ import {
   isObservableAccessorKeyColumnDef,
   isRowHeaderColumn,
 } from "./types";
-import { RowHeight } from "./constants";
 
 export interface ObservableDataGridProps<T extends {}> {
   sx?: SxProps;

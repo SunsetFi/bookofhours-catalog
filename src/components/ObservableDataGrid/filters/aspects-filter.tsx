@@ -17,7 +17,7 @@ import AspectSelectionGrid from "../../Aspects/AspectSelectionGrid";
 
 import { FilterComponentProps } from "./types";
 
-type AspectsFilterValue = {
+export type AspectsFilterValue = {
   [key: string]: string | number;
   $mode: "any" | "all" | "none";
 };

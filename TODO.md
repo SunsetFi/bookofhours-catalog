@@ -5,3 +5,6 @@
 - Prompt / toast the user for empty slots or new notes in recipes after time skip.
 - Flip over element stacks. Before using them? Automatically on finding them?
   - Recipe executor can make use of flipped over cards, confusing the game
+- Catalog book recipe not autofilling soul
+- Do greedy / locked slots get disabled properly? First incident arrival of game\
+- Give a proper observable grid getItemKey to all pages

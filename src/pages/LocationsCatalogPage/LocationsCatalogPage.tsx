@@ -1,10 +1,12 @@
 import React from "react";
+import { combineLatest } from "rxjs";
 
-import Box from "@mui/material/Box";
-import LockIcon from "@mui/icons-material/Lock";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
+import { Stack, Typography, IconButton, Box } from "@mui/material";
+
+import {
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon,
+} from "@mui/icons-material";
 
 import { CellContext } from "@tanstack/react-table";
 
@@ -28,14 +30,20 @@ import { RequireRunning } from "@/components/RequireLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
 import VerbIcon from "@/components/VerbIcon";
 
-import ObservableDataGrid, {
-  BooleanFilter,
+import {
+  IdentifierItemDataGrid,
   createObservableColumnHelper,
+  aspectsFilter,
+  AspectsFilter,
+  FilterComponentProps,
+  AspectsFilterValue,
 } from "@/components/ObservableDataGrid";
 import {
   RowHeight,
   RowPaddingY,
 } from "@/components/ObservableDataGrid/constants";
+import AspectsList from "@/components/Aspects/AspectsList";
+import { Aspects } from "secrethistories-api";
 
 const columnHelper = createObservableColumnHelper<ConnectedTerrainModel>();
 
@@ -65,28 +73,79 @@ const LocationsCatalogPage = () => {
         header: "Location",
         size: 200,
       }),
-      columnHelper.observe("shrouded$", {
-        header: "Unlocked",
-        size: 180,
-        filterFn: "equals",
-        cell: (props) => {
-          const unlocker = useDIDependency(TerrainUnlocker);
-          const value = props.getValue();
+      columnHelper.observe<[boolean, Aspects, Aspects]>(
+        (item) =>
+          combineLatest([
+            item.shrouded$,
+            item.unlockEssentials$,
+            item.unlockRequirements$,
+          ]),
+        {
+          header: "Unlocked",
+          size: 300,
+          filterFn: (row, column, value) => {
+            // HACK: This makes multi group rows hard.
+            // We should make filters take values, not rows and columns
+            // Or look into column groups?
+            const [shrouded, essentials, requirements] = row.getValue(
+              column
+            ) as any;
 
-          if (value) {
-            return (
-              <IconButton onClick={() => unlocker.open(props.row.original)}>
-                <LockIcon />
-              </IconButton>
+            let aspects: Aspects = {};
+            if (shrouded) {
+              aspects = { ...essentials, ...requirements };
+            }
+
+            return aspectsFilter(
+              {
+                getValue: () => aspects,
+              } as any,
+              column,
+              value
             );
-          }
+          },
+          cell: (props) => {
+            const unlocker = useDIDependency(TerrainUnlocker);
+            const [shrouded, unlockEssentials, unlockRequirements] =
+              props.getValue();
 
-          return <LockOpenIcon sx={{ ml: 1 }} />;
-        },
-        meta: {
-          filterComponent: BooleanFilter,
-        },
-      }),
+            if (shrouded) {
+              return (
+                <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
+                  <IconButton onClick={() => unlocker.open(props.row.original)}>
+                    <LockIcon />
+                  </IconButton>
+                  <Stack direction="column" spacing={1} sx={{ width: "100%" }}>
+                    <AspectsList aspects={unlockEssentials} />
+                    <AspectsList aspects={unlockRequirements} />
+                  </Stack>
+                </Stack>
+              );
+            }
+
+            return <LockOpenIcon sx={{ ml: 1 }} />;
+          },
+          meta: {
+            filterComponent: (
+              props: FilterComponentProps<
+                AspectsFilterValue,
+                [boolean, Aspects, Aspects]
+              >
+            ) => (
+              <AspectsFilter
+                {...props}
+                allowedAspectIds="auto"
+                columnValues={props.columnValues.map(
+                  ([_, essentials, requirements]) => ({
+                    ...essentials,
+                    ...requirements,
+                  })
+                )}
+              />
+            ),
+          },
+        }
+      ),
       columnHelper.observe(
         (item) => item.children$.pipe(filterItems(isSituationModel)),
         {
@@ -118,7 +177,7 @@ const LocationsCatalogPage = () => {
           height: "100%",
         }}
       >
-        <ObservableDataGrid
+        <IdentifierItemDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={items$}

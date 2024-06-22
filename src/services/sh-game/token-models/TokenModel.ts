@@ -10,6 +10,7 @@ import { Token, SpaceOccupation } from "secrethistories-api";
 import { API } from "@/services/sh-api";
 
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
+import { isEqual } from "lodash";
 
 export abstract class TokenModel {
   private readonly _id: string;
@@ -149,7 +150,10 @@ export abstract class TokenModel {
     }
     this._lastUpdate = timestamp;
 
-    const start = Date.now();
+    if (isEqual(this._token$.value, token)) {
+      return;
+    }
+
     this._token$.next(token);
     this._onUpdate(token);
   }

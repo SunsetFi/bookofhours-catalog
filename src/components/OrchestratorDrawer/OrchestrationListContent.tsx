@@ -1,6 +1,6 @@
 import React from "react";
 import { firstValueFrom, map } from "rxjs";
-import { values } from "lodash";
+import { isNull, values } from "lodash";
 import { useTheme } from "@mui/material";
 
 import {
@@ -34,6 +34,7 @@ import {
   TimeSource,
   TokensSource,
   filterTokenNotInPath,
+  isThresholdedOrchestration,
 } from "@/services/sh-game";
 
 import FocusIconButton from "../FocusIconButton";
@@ -43,6 +44,7 @@ import { tokenPathContainsChild } from "@/utils";
 import { useDrop } from "react-dnd";
 import { ElementStackDraggable } from "@/draggables/element-stack";
 import { aspectsMatchSphereSpec } from "secrethistories-api";
+import { filterItemObservations } from "@/observables";
 
 const OrchestrationListContent = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -179,6 +181,15 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
       accept: ElementStackDraggable,
       canDrop(item: ElementStackDraggable) {
         // TODO: We want to know if we fit any existing slots
+        if (state !== "Unstarted" && state !== "Ongoing") {
+          return false;
+        }
+
+        if (thresholds.length === 0) {
+          return false;
+        }
+
+        // FIXME: Make sure there is a slot that is empty.
         return thresholds.some((spec) =>
           aspectsMatchSphereSpec(item.elementStack.aspects, spec)
         );
@@ -194,11 +205,15 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
         const orchestration = await orchestrator.openOrchestration({
           situation,
         });
-        if (!orchestration) {
+        if (!orchestration || !isThresholdedOrchestration(orchestration)) {
           return;
         }
 
-        const slots = await firstValueFrom(orchestration.slots$);
+        const slots = await firstValueFrom(
+          orchestration.slots$.pipe(
+            filterItemObservations((slot) => slot.assignment$.pipe(map(isNull)))
+          )
+        );
         const match = values(slots).find((slot) =>
           aspectsMatchSphereSpec(item.elementStack.aspects, slot.spec)
         );
@@ -215,7 +230,7 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
         };
       },
     },
-    [thresholds]
+    [thresholds, state]
   );
 
   if (state !== "Unstarted" && state !== "Ongoing" && state !== "Complete") {

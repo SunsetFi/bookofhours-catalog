@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Divider, Stack, Typography } from "@mui/material";
 
 import { mapValues } from "lodash";
 
-import { Null$ } from "@/observables";
+import { EmptyArray$, Null$ } from "@/observables";
 
 import { useObservation } from "@/hooks/use-observation";
 
@@ -14,6 +14,7 @@ import {
   isContentContainingOrchestration,
   isExecutableOrchestration,
   isOngoingOrchestration,
+  isThresholdedOrchestration,
   isVariableSituationOrchestration,
 } from "@/services/sh-game";
 
@@ -46,6 +47,17 @@ const OrchestrationContent = ({
 
   const requirements = useObservation(orchestration.requirements$) ?? {};
   const aspects = useObservation(orchestration.aspects$) ?? {};
+
+  const hasSlots =
+    (
+      useObservation(
+        () =>
+          isThresholdedOrchestration(orchestration)
+            ? orchestration.slots$
+            : EmptyArray$,
+        [orchestration]
+      ) ?? []
+    ).length > 0;
 
   // TODO: Show browsable notes
   const notes =
@@ -174,7 +186,7 @@ const OrchestrationContent = ({
     );
   }
 
-  if (!isCompletedOrchestration(orchestration)) {
+  if (isThresholdedOrchestration(orchestration)) {
     stackItems.push(
       <OrchestrationSlots
         key="slots"
@@ -182,7 +194,7 @@ const OrchestrationContent = ({
         orchestration={orchestration}
       />
     );
-  } else {
+  } else if (isContentContainingOrchestration(orchestration)) {
     stackItems.push(
       <ElementStackTray
         key="final-content"
@@ -204,8 +216,7 @@ const OrchestrationContent = ({
         </GameTypography>
       )}
       <ButtonGroup sx={{ ml: "auto" }}>
-        {(isExecutableOrchestration(orchestration) ||
-          isOngoingOrchestration(orchestration)) && (
+        {isThresholdedOrchestration(orchestration) && hasSlots && (
           <Button
             disabled={!canAutofill}
             onClick={() => orchestration.autofill()}

@@ -73,6 +73,10 @@ export class TokensSource {
         if (this._tokensTaskSubsciption) {
           this._tokensTaskSubsciption();
           this._tokensTaskSubsciption = null;
+
+          this._tokenModels.forEach((x) => x._retire());
+          this._tokenModels.clear();
+          this._tokensSubject$.next([]);
         }
       } else {
         if (!this._tokensTaskSubsciption) {

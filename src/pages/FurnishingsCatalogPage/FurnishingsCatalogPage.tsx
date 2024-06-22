@@ -13,7 +13,8 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 import { RequireRunning } from "@/components/RequireLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
 import PageContainer from "@/components/PageContainer";
-import ObservableDataGrid, {
+import {
+  IdentifierItemDataGrid,
   createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid";
 
@@ -77,7 +78,7 @@ const FurnishingsCatalogPage = () => {
           height: "100%",
         }}
       >
-        <ObservableDataGrid
+        <IdentifierItemDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}

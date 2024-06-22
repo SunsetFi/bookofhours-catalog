@@ -12,7 +12,8 @@ import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
 import PinElementIconButton from "@/components/PinElementIconButton";
-import ObservableDataGrid, {
+import {
+  IdentifierItemDataGrid,
   ElementIconCell,
   createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid";
@@ -121,11 +122,10 @@ const BookCatalogPage = () => {
           height: "100%",
         }}
       >
-        <ObservableDataGrid
+        <IdentifierItemDataGrid
           columns={columns}
           items$={items$}
           filters={filter}
-          getItemKey={(item) => item.id}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

@@ -2,17 +2,15 @@ import React from "react";
 
 import { Box, SxProps } from "@mui/material";
 
-import { observableObjectOrEmpty } from "@/observables";
-
 import { useObservation } from "@/hooks/use-observation";
 
-import { Orchestration } from "@/services/sh-game";
+import { ThresholdedOrchestration } from "@/services/sh-game";
 
 import OrchestrationSlotEditor from "./OrchestrationSlotEditor";
 
 interface OrchestrationSlotsProps {
   sx?: SxProps;
-  orchestration: Orchestration;
+  orchestration: ThresholdedOrchestration;
 }
 
 const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {

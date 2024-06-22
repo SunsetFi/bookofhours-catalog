@@ -65,6 +65,13 @@ const textTransformations: TransformRule[] = [
       return <i key={index}>{text}</i>;
     },
   },
+  {
+    regex: /<b>(.*?)<\/b>/g,
+    transform: (match, index) => {
+      const text = match[1];
+      return <b key={index}>{text}</b>;
+    },
+  },
 ];
 
 function parseGameText(text: string): React.ReactNode[] {

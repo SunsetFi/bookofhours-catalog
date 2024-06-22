@@ -1,8 +1,6 @@
 import { Observable } from "rxjs";
 import { Aspects, SituationState, SphereSpec } from "secrethistories-api";
 
-import { RecipeModel } from "@/services/sh-compendium";
-
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
 
@@ -34,7 +32,6 @@ export interface OrchestrationBase {
 
   readonly requirements$: Observable<Readonly<Aspects>>;
   readonly situation$: Observable<SituationModel | null>;
-  readonly slots$: Observable<readonly OrchestrationSlot[]>;
   readonly aspects$: Observable<Readonly<Aspects>>;
 
   /**
@@ -49,6 +46,27 @@ export interface OrchestrationBase {
   _dispose(): void;
 }
 
+export interface VariableSituationOrchestration extends OrchestrationBase {
+  readonly availableSituations$: Observable<readonly SituationModel[]>;
+  selectSituation(situation: SituationModel | null): void;
+}
+export function isVariableSituationOrchestration(
+  orchestration: Orchestration
+): orchestration is VariableSituationOrchestration {
+  return "availableSituations$" in orchestration;
+}
+
+export interface ThresholdedOrchestration extends OrchestrationBase {
+  readonly slots$: Observable<readonly OrchestrationSlot[]>;
+  readonly canAutofill$: Observable<boolean>;
+  autofill(): Promise<void>;
+}
+export function isThresholdedOrchestration(
+  orchestration: Orchestration
+): orchestration is ThresholdedOrchestration {
+  return "slots$" in orchestration;
+}
+
 export interface ContentContainingOrchestration extends OrchestrationBase {
   readonly notes$: Observable<readonly ElementStackModel[]>;
   readonly content$: Observable<readonly ElementStackModel[]>;
@@ -59,9 +77,21 @@ export function isContentContainingOrchestration(
   return "content$" in orchestration;
 }
 
-export interface OngoingOrchestration extends OrchestrationBase {
-  readonly canAutofill$: Observable<boolean>;
-  autofill(): Promise<void>;
+export interface ExecutableOrchestration
+  extends OrchestrationBase,
+    ThresholdedOrchestration {
+  readonly canExecute$: Observable<boolean>;
+  execute(): Promise<boolean>;
+}
+export function isExecutableOrchestration(
+  orchestration: Orchestration
+): orchestration is ExecutableOrchestration {
+  return "canExecute$" in orchestration;
+}
+
+export interface OngoingOrchestration
+  extends OrchestrationBase,
+    ThresholdedOrchestration {
   readonly timeRemaining$: Observable<number>;
   passTime(): Promise<boolean>;
 }
@@ -81,36 +111,13 @@ export function isCompletedOrchestration(
   return "conclude" in orchestration;
 }
 
-export interface ExecutableOrchestration extends OrchestrationBase {
-  readonly canAutofill$: Observable<boolean>;
-  autofill(): Promise<void>;
-  readonly canExecute$: Observable<boolean>;
-  execute(): Promise<boolean>;
-}
-export function isExecutableOrchestration(
-  orchestration: Orchestration
-): orchestration is ExecutableOrchestration {
-  return "canExecute$" in orchestration;
-}
-
-export interface VariableSituationOrchestration extends OrchestrationBase {
-  readonly availableSituations$: Observable<readonly SituationModel[]>;
-  selectSituation(situation: SituationModel | null): void;
-}
-export function isVariableSituationOrchestration(
-  orchestration: Orchestration
-): orchestration is VariableSituationOrchestration {
-  return "availableSituations$" in orchestration;
-}
-
-export interface VariableRecipeOrchestration extends OrchestrationBase {
-  readonly availableRecipes$: Observable<readonly RecipeModel[]>;
-  selectRecipe(recipe: RecipeModel | null): void;
-}
-
 export type Orchestration = OrchestrationBase &
-  (VariableRecipeOrchestration | {}) &
-  (VariableSituationOrchestration | {});
+  (VariableSituationOrchestration | {}) &
+  (ThresholdedOrchestration | {}) &
+  (ContentContainingOrchestration | {}) &
+  (OngoingOrchestration | {}) &
+  (CompletedOrchestration | {}) &
+  (ExecutableOrchestration | {});
 
 export interface OrchestrationSlot {
   readonly spec: SphereSpec;

@@ -12,9 +12,9 @@ import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import PinRecipeIconButton from "@/components/PinRecipeIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
-import ObservableDataGrid, {
+import {
+  IdentifierItemDataGrid,
   ElementIconCell,
-  TextWrapCell,
   AspectsListCell,
   createObservableColumnHelper,
   aspectsFilter,
@@ -135,7 +135,7 @@ const CraftingCatalogPage = () => {
           height: "100%",
         }}
       >
-        <ObservableDataGrid
+        <IdentifierItemDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={craftables$}

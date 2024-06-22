@@ -24,7 +24,8 @@ import {
 import PageContainer from "@/components/PageContainer";
 import { RequireRunning } from "@/components/RequireLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
-import ObservableDataGrid, {
+import {
+  IdentifierItemDataGrid,
   aspectsPresentFilter,
   createSituationColumnHelper,
 } from "@/components/ObservableDataGrid";
@@ -161,7 +162,7 @@ const WorkstationCatalogPage = () => {
           height: "100%",
         }}
       >
-        <ObservableDataGrid
+        <IdentifierItemDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}

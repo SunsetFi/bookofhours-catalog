@@ -13,7 +13,8 @@ import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 import { RequireRunning } from "@/components/RequireLegacy";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
-import ObservableDataGrid, {
+import {
+  IdentifierItemDataGrid,
   createElementStackColumnHelper,
 } from "@/components/ObservableDataGrid";
 
@@ -77,7 +78,7 @@ const ProvisionsCatalog = () => {
         }}
       >
         <RequireRunning />
-        <ObservableDataGrid
+        <IdentifierItemDataGrid
           sx={{ height: "100%" }}
           columns={columns}
           items$={elements$}
