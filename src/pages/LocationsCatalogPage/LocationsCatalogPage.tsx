@@ -111,7 +111,12 @@ const LocationsCatalogPage = () => {
 
             if (shrouded) {
               return (
-                <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1}
+                  sx={{ width: "100%" }}
+                >
                   <IconButton onClick={() => unlocker.open(props.row.original)}>
                     <LockIcon />
                   </IconButton>

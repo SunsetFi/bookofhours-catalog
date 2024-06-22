@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
-import { Aspects, combineAspects } from "secrethistories-api";
+import { Aspects, SituationState, combineAspects } from "secrethistories-api";
 
 import { EmptyArray$, EmptyObject$, observeAllMap } from "@/observables";
 
@@ -10,7 +10,6 @@ import {
   CompletedOrchestration,
   Orchestration,
   OrchestrationBase,
-  OrchestrationSlot,
 } from "./types";
 
 export class CompletedSituationOrchestration
@@ -24,6 +23,13 @@ export class CompletedSituationOrchestration
   ) {}
 
   _dispose() {}
+
+  _onSituationStateUpdated(situationState: SituationState): void {
+    // Don't re-open in the instant of time we transition to Unstarted.
+    if (situationState !== "Complete") {
+      this._replaceOrchestration(null);
+    }
+  }
 
   get label$(): Observable<string | null> {
     return this._situation.label$;
@@ -40,10 +46,6 @@ export class CompletedSituationOrchestration
   private readonly _situation$ = new BehaviorSubject(this._situation);
   get situation$(): Observable<SituationModel | null> {
     return this._situation$;
-  }
-
-  get slots$() {
-    return EmptyArray$;
   }
 
   private _aspects$: Observable<Readonly<Aspects>> | null = null;
