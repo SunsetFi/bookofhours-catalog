@@ -81,7 +81,7 @@ const SituationThumb = ({ situation }: SituationThumbProps) => {
             minWidth: "32px",
             height: "32px",
             border: "2px solid #888",
-            borderRadius: "16px",
+            borderRadius: "50%",
             backgroundColor: "#CCC",
             color: theme.palette.getContrastText("#CCC"),
             display: "flex",

@@ -15,12 +15,13 @@ import {
   observeAllMap,
 } from "@/observables";
 
+import { tokenPathContainsChild } from "@/utils";
+
 import { alwaysVisibleSpherePaths } from "@/spheres";
 
 import { TokensSource } from "../sources/TokensSource";
 
 import { isConnectedTerrainModel } from "./ConnectedTerrainModel";
-import { tokenPathContainsChild } from "@/utils";
 
 @injectable()
 @singleton()

@@ -15,7 +15,6 @@ import {
   Badge,
   Stack,
   Tooltip,
-  Icon,
 } from "@mui/material";
 import {
   SkipNext as SkipNextIcon,
@@ -101,9 +100,7 @@ const OrchestrationListContent = () => {
         >
           <ListItemText primary="Start an Activity" />
           <Box sx={{ ml: "auto" }} aria-hidden={true}>
-            <Icon>
-              <PlayArrow />
-            </Icon>
+            <PlayArrow />
           </Box>
         </ListItemButton>
         {executingSituations.length > 0 && <Divider orientation="horizontal" />}
@@ -262,17 +259,16 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
       />
       <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
         {state === "Unstarted" && (
-          <Icon title="Start an Action">
-            <PlayArrow />
-          </Icon>
+          <Tooltip title="Start an Action">
+            {/* Dont need screen readers to see this as the entire line item is a button that starts the action. */}
+            <PlayArrow aria-hidden="true" />
+          </Tooltip>
         )}
         {state === "Ongoing" && (
           <>
             {hasEmptyThresholds && (
               <Tooltip title="Empty Card Slots" sx={{ m: 2 }}>
-                <Icon aria-hidden="false" aria-label="Empty Card Slots">
-                  <ErrorIcon aria-label="Empty Card Slots" />
-                </Icon>
+                <ErrorIcon aria-hidden="false" aria-label="Empty Card Slots" />
               </Tooltip>
             )}
             <Typography variant="caption" role="timer">

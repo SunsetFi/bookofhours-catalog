@@ -24,6 +24,7 @@ export interface SituationSelectFieldProps {
   requireUnstarted?: boolean;
   situations$: Observable<readonly SituationModel[]>;
   value: SituationModel | null;
+  autoFocus?: boolean;
   onChange(value: SituationModel | null): void;
 }
 
@@ -51,6 +52,7 @@ const SituationSelectField = ({
   requireUnstarted,
   situations$,
   value,
+  autoFocus,
   onChange,
 }: SituationSelectFieldProps) => {
   let situations =
@@ -87,6 +89,7 @@ const SituationSelectField = ({
           label={label}
           InputProps={{
             ...params.InputProps,
+            autoFocus,
             startAdornment: (
               <InputAdornment position="start">
                 <Box

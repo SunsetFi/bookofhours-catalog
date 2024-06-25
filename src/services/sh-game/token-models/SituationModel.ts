@@ -411,6 +411,10 @@ export class SituationModel extends TokenModel<Situation> {
     return this._scheduler.batchUpdate(async () => {
       try {
         const now = Date.now();
+
+        // Get our contents from the input thresholds, so we can refresh them after we execute.
+        const contents = await firstValueFrom(this.thresholdContents$);
+
         const result = await this._api.executeTokenAtPath(this.path);
         this._update(
           {
@@ -424,9 +428,6 @@ export class SituationModel extends TokenModel<Situation> {
           },
           now
         );
-
-        // Refresh our threshold contents as they will now be in a different sphere.
-        const contents = await firstValueFrom(this.thresholdContents$);
 
         const promises: Promise<void>[] = values(contents)
           .map((token) => token?.refresh())
@@ -449,6 +450,10 @@ export class SituationModel extends TokenModel<Situation> {
     return this._scheduler.batchUpdate(async () => {
       try {
         const now = Date.now();
+
+        // Capture the output content before concluding so we can refresh them after.
+        const output = await firstValueFrom(this.output$);
+
         await this._api.concludeTokenAtPath(this.path);
         this._update(
           {
@@ -460,8 +465,6 @@ export class SituationModel extends TokenModel<Situation> {
           now
         );
 
-        // Refresh our contents so they update their locations
-        const output = await firstValueFrom(this.output$);
         await Promise.all(output.map((o) => o.refresh()));
 
         return true;

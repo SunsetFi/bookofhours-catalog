@@ -11,9 +11,14 @@ import OrchestrationSlotEditor from "./OrchestrationSlotEditor";
 interface OrchestrationSlotsProps {
   sx?: SxProps;
   orchestration: ThresholdedOrchestration;
+  autoFocus?: boolean;
 }
 
-const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
+const OrchestrationSlots = ({
+  sx,
+  orchestration,
+  autoFocus,
+}: OrchestrationSlotsProps) => {
   const slots = useObservation(orchestration.slots$) ?? [];
 
   return (
@@ -35,7 +40,7 @@ const OrchestrationSlots = ({ sx, orchestration }: OrchestrationSlotsProps) => {
           key={slot.spec.id}
           slot={slot}
           orchestration={orchestration}
-          autoFocus={i === 0}
+          autoFocus={autoFocus && i === 0}
         />
       ))}
     </Box>

@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Divider, Stack, Typography } from "@mui/material";
 
 import { mapValues } from "lodash";
 
-import { EmptyArray$, Null$ } from "@/observables";
+import { EmptyArray$, False$, Null$ } from "@/observables";
 
 import { useObservation } from "@/hooks/use-observation";
 
@@ -30,6 +30,7 @@ import ElementStackTray from "../Elements/ElementStackTray";
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
 
 import OrchestrationSlots from "./OrchestrationSlots";
+import { combineLatest, map, switchMap } from "rxjs";
 
 export interface OrchestrationContentProps {
   onBack(): void;
@@ -48,16 +49,25 @@ const OrchestrationContent = ({
   const requirements = useObservation(orchestration.requirements$) ?? {};
   const aspects = useObservation(orchestration.aspects$) ?? {};
 
-  const hasSlots =
-    (
-      useObservation(
-        () =>
-          isThresholdedOrchestration(orchestration)
-            ? orchestration.slots$
-            : EmptyArray$,
-        [orchestration]
-      ) ?? []
-    ).length > 0;
+  const slots$ = isThresholdedOrchestration(orchestration)
+    ? orchestration.slots$
+    : EmptyArray$;
+  const hasSlots = (useObservation(slots$) ?? [])?.length > 0;
+  // This complex nonsense is for auto focus, which is important to screen readers
+  const hasEmptySlots = useObservation(() => {
+    if (!isThresholdedOrchestration(orchestration)) {
+      return False$;
+    }
+
+    return orchestration.slots$.pipe(
+      switchMap((slots) =>
+        slots.length === 0
+          ? EmptyArray$
+          : combineLatest(slots.map((slot) => slot.assignment$))
+      ),
+      map((assignments) => assignments.some((a) => a == null))
+    );
+  }, [orchestration]);
 
   // TODO: Show browsable notes
   const notes =
@@ -96,6 +106,26 @@ const OrchestrationContent = ({
           : Null$,
       [orchestration]
     ) ?? false;
+
+  let autofocusCandidate:
+    | "situation"
+    | "slots"
+    | "autofill"
+    | "execute"
+    | null = null;
+
+  // On second thought, this is bad for screen readers as it yoinks the focus around without the user's consent.
+  // if (!situation) {
+  //   autofocusCandidate = "situation";
+  // } else if (hasSlots && hasEmptySlots) {
+  //   if (canAutofill) {
+  //     autofocusCandidate = "autofill";
+  //   } else {
+  //     autofocusCandidate = "slots";
+  //   }
+  // } else if (canExecute) {
+  //   autofocusCandidate = "execute";
+  // }
 
   const timeRemaining =
     useObservation(situation?.timeRemaining$ ?? Null$) ?? Number.NaN;
@@ -137,7 +167,11 @@ const OrchestrationContent = ({
         alignItems="center"
       >
         {content.map((elementStack) => (
-          <ElementStackIcon key={elementStack.id} elementStack={elementStack} />
+          <ElementStackIcon
+            key={elementStack.id}
+            elementStack={elementStack}
+            interactive={false}
+          />
         ))}
       </Stack>
     );
@@ -149,6 +183,7 @@ const OrchestrationContent = ({
         label="Workstation"
         fullWidth
         requireUnstarted
+        autoFocus={autofocusCandidate === "situation"}
         situations$={orchestration.availableSituations$}
         value={situation ?? null}
         onChange={(s) => orchestration.selectSituation(s)}
@@ -183,6 +218,7 @@ const OrchestrationContent = ({
       <OrchestrationSlots
         sx={{ height: "100%" }}
         orchestration={orchestration}
+        autoFocus={autofocusCandidate === "slots"}
       />
     );
   } else if (isContentContainingOrchestration(orchestration)) {
@@ -209,6 +245,7 @@ const OrchestrationContent = ({
         {isThresholdedOrchestration(orchestration) && hasSlots && (
           <Button
             disabled={!canAutofill}
+            autoFocus={canAutofill && autofocusCandidate === "autofill"}
             onClick={() => orchestration.autofill()}
           >
             Autofill
@@ -217,6 +254,7 @@ const OrchestrationContent = ({
         {isExecutableOrchestration(orchestration) && (
           <Button
             disabled={!canExecute}
+            autoFocus={canExecute && autofocusCandidate === "execute"}
             onClick={() => orchestration.execute()}
           >
             Start Recipe

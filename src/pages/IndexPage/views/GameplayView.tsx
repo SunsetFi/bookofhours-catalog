@@ -45,7 +45,7 @@ const Overview = () => {
 
   const important$ = React.useMemo(
     () =>
-      tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect(["journal"])),
+      tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("journal")),
     [tokensSource.visibleElementStacks$]
   );
 
@@ -71,7 +71,7 @@ const Overview = () => {
         filterDoesNotOccupySpace(["PhysicalObject"]),
         // We pick up tons of notes, which are text tokens that show up in situations.
         filterElementId((x) => x !== "tlg.note"),
-        filterHasNoneOfAspect(["memory", "ability", "skill"])
+        filterHasNoneOfAspect(["memory", "ability", "skill", "journal"])
       ),
     [tokensSource.visibleElementStacks$]
   );
@@ -112,7 +112,6 @@ const Overview = () => {
             gridColumn: "start / end",
           }}
           elementStacks$={important$}
-          requireExterior
         />
         <ElementStackTray
           aria-label="memories"
@@ -122,7 +121,6 @@ const Overview = () => {
             gridColumn: "start / memories-soul",
           }}
           elementStacks$={memories$}
-          requireExterior
         />
         <ElementStackTray
           aria-label="abilities"
@@ -132,7 +130,6 @@ const Overview = () => {
             gridColumn: "memories-soul / soul-skill",
           }}
           elementStacks$={abilities$}
-          requireExterior
         />
         <ElementStackTray
           aria-label="skills"
@@ -142,7 +139,6 @@ const Overview = () => {
             gridColumn: "soul-skill / skill-misc",
           }}
           elementStacks$={skills$}
-          requireExterior
         />
         <ElementStackTray
           aria-label="miscelanious"
@@ -152,7 +148,6 @@ const Overview = () => {
             gridColumn: "skill-misc / end",
           }}
           elementStacks$={misc$}
-          requireExterior
         />
       </Box>
     </Box>

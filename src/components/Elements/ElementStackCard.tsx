@@ -1,8 +1,7 @@
 import React from "react";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import { useTheme, type SxProps } from "@mui/material/styles";
+import { Box, Typography, useTheme, SxProps } from "@mui/material";
+import { Lock as LockIcon } from "@mui/icons-material";
 
 import { useDrag } from "react-dnd";
 
@@ -40,6 +39,8 @@ const ElementStackCard = ({
   const iconUrl = useObservation(elementStack.iconUrl$);
   const label = useObservation(elementStack.label$) ?? "";
   const quantity = useObservation(elementStack.quantity$) ?? 0;
+  const inExteriorSphere =
+    useObservation(elementStack.inExteriorSphere$) ?? true;
 
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
@@ -62,7 +63,11 @@ const ElementStackCard = ({
       title={<ElementStackDetails elementStack={elementStack} />}
       disabled={isDragging}
     >
-      <Box sx={{ position: "relative" }}>
+      <Box
+        sx={{
+          position: "relative",
+        }}
+      >
         <Box
           ref={dragRef}
           sx={{
@@ -73,6 +78,9 @@ const ElementStackCard = ({
             height: `${width * aspectRatio}px`,
             backgroundColor: textBackgroundColor,
             overflow: "hidden",
+            filter: !inExteriorSphere
+              ? "brightness(75%) grayscale(0.8)"
+              : undefined,
           }}
         >
           <Box
@@ -124,9 +132,9 @@ const ElementStackCard = ({
               minWidth: "32px",
               height: "32px",
               border: "2px solid #888",
-              borderRadius: "16px",
-              backgroundColor: "#ABB",
-              color: theme.palette.getContrastText("#ABB"),
+              borderRadius: "50%",
+              backgroundColor: "#CCC",
+              color: theme.palette.getContrastText("#CCC"),
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -138,6 +146,32 @@ const ElementStackCard = ({
           >
             {quantity}
           </Typography>
+        )}
+        {!inExteriorSphere && (
+          <Box
+            sx={{
+              border: "2px solid #888",
+              borderRadius: "50%",
+              backgroundColor: "#CCC",
+              color: theme.palette.getContrastText("#CCC"),
+              height: "32px",
+              width: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "absolute",
+              top: -10,
+              left: -10,
+              zIndex: 1,
+            }}
+          >
+            <LockIcon
+              aria-hidden={false}
+              aria-label="This card is currently in use"
+              color="inherit"
+              scale={0.8}
+            />
+          </Box>
         )}
       </Box>
     </Tooltip>
