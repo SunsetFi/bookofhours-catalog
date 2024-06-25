@@ -49,7 +49,7 @@ const HarvestCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Gardens and Glades" backTo="/">
+    <PageContainer title="Gardens and Glades">
       <Box
         sx={{
           display: "flex",

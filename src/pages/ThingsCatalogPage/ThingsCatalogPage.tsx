@@ -61,7 +61,7 @@ const ThingsCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Antiquities and Knicknacks" backTo="/">
+    <PageContainer title="Antiquities and Knicknacks">
       <RequireRunning />
       <Box
         sx={{

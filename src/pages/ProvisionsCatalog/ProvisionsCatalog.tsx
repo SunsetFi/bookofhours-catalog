@@ -68,7 +68,7 @@ const ProvisionsCatalog = () => {
   const [filter, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Stores and Provisions" backTo="/">
+    <PageContainer title="Stores and Provisions">
       <Box
         sx={{
           display: "flex",

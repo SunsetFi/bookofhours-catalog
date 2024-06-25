@@ -152,7 +152,7 @@ const WorkstationCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Workstations" backTo="/">
+    <PageContainer title="Workstations">
       <RequireRunning />
       <Box
         sx={{

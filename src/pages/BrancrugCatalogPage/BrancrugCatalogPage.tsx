@@ -138,7 +138,7 @@ const BrancrugCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Brancrug and Environs" backTo="/">
+    <PageContainer title="Brancrug and Environs">
       <RequireRunning />
       <Box
         sx={{

@@ -69,7 +69,7 @@ const MaterialsCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Malleary Shelf" backTo="/">
+    <PageContainer title="Malleary Shelf">
       <RequireRunning />
       <Box
         sx={{

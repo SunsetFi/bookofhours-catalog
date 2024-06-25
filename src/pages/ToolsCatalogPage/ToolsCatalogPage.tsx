@@ -66,7 +66,7 @@ const ToolsCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Toolshed" backTo="/">
+    <PageContainer title="Toolshed">
       <RequireRunning />
       <Box
         sx={{

@@ -10,7 +10,6 @@ import OrchestratorDrawer from "./OrchestratorDrawer";
 
 export interface PageContainerProps {
   title: string;
-  backTo?: string;
   children: React.ReactNode;
 }
 
@@ -32,7 +31,7 @@ const Main = styled("main", {
   isolation: "isolate",
 }));
 
-const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
+const PageContainer = ({ title, children }: PageContainerProps) => {
   return (
     <Stack direction="row" sx={{ width: "100%", height: "100%" }}>
       <Stack
@@ -44,7 +43,7 @@ const PageContainer = ({ title, backTo, children }: PageContainerProps) => {
         }}
       >
         <GameNotPausedWarning />
-        <PageHeader title={title} backTo={backTo} />
+        <PageHeader title={title} />
         <Box
           sx={{
             display: "flex",

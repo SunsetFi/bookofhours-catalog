@@ -125,7 +125,7 @@ const CraftingCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="The Fruits of Knowledge" backTo="/">
+    <PageContainer title="The Fruits of Knowledge">
       <RequireRunning />
       <Box
         sx={{

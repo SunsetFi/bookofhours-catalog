@@ -68,7 +68,7 @@ const FurnishingsCatalogPage = () => {
   const [filters, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="An Accounting of the Walls and Floors" backTo="/">
+    <PageContainer title="An Accounting of the Walls and Floors">
       <RequireRunning />
       <Box
         sx={{

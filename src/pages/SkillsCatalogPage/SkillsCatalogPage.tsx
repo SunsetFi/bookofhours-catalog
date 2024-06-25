@@ -113,7 +113,7 @@ const SkillsCatalogPage = () => {
   const [filter, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Esoteric Wisdoms" backTo="/">
+    <PageContainer title="Esoteric Wisdoms">
       <RequireRunning />
       <IdentifierItemDataGrid
         sx={{ height: "100%" }}

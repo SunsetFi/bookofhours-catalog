@@ -112,7 +112,7 @@ const BookCatalogPage = () => {
   const [filter, onFiltersChanged] = useQueryObjectState();
 
   return (
-    <PageContainer title="Bibliographical Collection" backTo="/">
+    <PageContainer title="Bibliographical Collection">
       <RequireRunning />
       <Box
         sx={{
