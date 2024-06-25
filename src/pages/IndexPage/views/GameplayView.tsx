@@ -45,7 +45,9 @@ const Overview = () => {
 
   const important$ = React.useMemo(
     () =>
-      tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("journal")),
+      tokensSource.visibleElementStacks$.pipe(
+        filterHasAnyAspect(["journal", "visitor", "incident"])
+      ),
     [tokensSource.visibleElementStacks$]
   );
 
@@ -71,7 +73,14 @@ const Overview = () => {
         filterDoesNotOccupySpace(["PhysicalObject"]),
         // We pick up tons of notes, which are text tokens that show up in situations.
         filterElementId((x) => x !== "tlg.note"),
-        filterHasNoneOfAspect(["memory", "ability", "skill", "journal"])
+        filterHasNoneOfAspect([
+          "memory",
+          "ability",
+          "skill",
+          "journal",
+          "visitor",
+          "incident",
+        ])
       ),
     [tokensSource.visibleElementStacks$]
   );

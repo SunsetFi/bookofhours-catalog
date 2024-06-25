@@ -7,6 +7,7 @@ import {
   of,
   switchMap,
 } from "rxjs";
+import { SituationState } from "secrethistories-api";
 
 import {
   distinctUntilShallowArrayChanged,
@@ -29,6 +30,15 @@ import {
 } from "./types";
 
 import { OrchestrationFactory } from "./OrchestrationFactory";
+
+// These states don't last long and seem to be stepping stones to other states.
+// We get them intermittently, but can't really act on them.
+const TransientStates: SituationState[] = [
+  "Halting",
+  "Inchoate",
+  "RequiringExecution",
+  "Starting",
+];
 
 @injectable()
 @singleton()
@@ -77,6 +87,12 @@ export class Orchestrator {
 
         if (situation == null || situationState == null) {
           // Assume the orchestration cleared this out and knows what it's doing.
+          return;
+        }
+
+        // Weird states we can't act on.
+        // Particularly, we get flickers of RequiringExecution when passing time to conclude a situation.
+        if (TransientStates.includes(situationState)) {
           return;
         }
 
@@ -187,21 +203,14 @@ export class Orchestrator {
   }
 
   private _openSituationOrchestrationByState(situation: SituationModel) {
-    if (
-      situation == null ||
-      situation.state === "Unstarted" ||
-      situation.state === "RequiringExecution"
-    ) {
+    if (situation == null || situation.state === "Unstarted") {
       const orchestration =
         this._orchestrationFactory.createUnstartedOrchestration(
           situation,
           (orchestration) => this._updateOrchestration(orchestration)
         );
       this._updateOrchestration(orchestration);
-    } else if (
-      situation.state === "Ongoing" ||
-      situation.state === "Starting"
-    ) {
+    } else if (situation.state === "Ongoing") {
       const orchestration =
         this._orchestrationFactory.createOngoingOrchestration(
           situation,
