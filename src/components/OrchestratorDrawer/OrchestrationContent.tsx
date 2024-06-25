@@ -49,26 +49,6 @@ const OrchestrationContent = ({
   const requirements = useObservation(orchestration.requirements$) ?? {};
   const aspects = useObservation(orchestration.aspects$) ?? {};
 
-  const slots$ = isThresholdedOrchestration(orchestration)
-    ? orchestration.slots$
-    : EmptyArray$;
-  const hasSlots = (useObservation(slots$) ?? [])?.length > 0;
-  // This complex nonsense is for auto focus, which is important to screen readers
-  const hasEmptySlots = useObservation(() => {
-    if (!isThresholdedOrchestration(orchestration)) {
-      return False$;
-    }
-
-    return orchestration.slots$.pipe(
-      switchMap((slots) =>
-        slots.length === 0
-          ? EmptyArray$
-          : combineLatest(slots.map((slot) => slot.assignment$))
-      ),
-      map((assignments) => assignments.some((a) => a == null))
-    );
-  }, [orchestration]);
-
   // TODO: Show browsable notes
   const notes =
     useObservation(
@@ -106,26 +86,6 @@ const OrchestrationContent = ({
           : Null$,
       [orchestration]
     ) ?? false;
-
-  let autofocusCandidate:
-    | "situation"
-    | "slots"
-    | "autofill"
-    | "execute"
-    | null = null;
-
-  // On second thought, this is bad for screen readers as it yoinks the focus around without the user's consent.
-  // if (!situation) {
-  //   autofocusCandidate = "situation";
-  // } else if (hasSlots && hasEmptySlots) {
-  //   if (canAutofill) {
-  //     autofocusCandidate = "autofill";
-  //   } else {
-  //     autofocusCandidate = "slots";
-  //   }
-  // } else if (canExecute) {
-  //   autofocusCandidate = "execute";
-  // }
 
   const timeRemaining =
     useObservation(situation?.timeRemaining$ ?? Null$) ?? Number.NaN;
@@ -183,7 +143,6 @@ const OrchestrationContent = ({
         label="Workstation"
         fullWidth
         requireUnstarted
-        autoFocus={autofocusCandidate === "situation"}
         situations$={orchestration.availableSituations$}
         value={situation ?? null}
         onChange={(s) => orchestration.selectSituation(s)}
@@ -218,7 +177,6 @@ const OrchestrationContent = ({
       <OrchestrationSlots
         sx={{ height: "100%" }}
         orchestration={orchestration}
-        autoFocus={autofocusCandidate === "slots"}
       />
     );
   } else if (isContentContainingOrchestration(orchestration)) {
@@ -242,10 +200,9 @@ const OrchestrationContent = ({
         </GameTypography>
       )}
       <ButtonGroup sx={{ ml: "auto" }}>
-        {isThresholdedOrchestration(orchestration) && hasSlots && (
+        {isThresholdedOrchestration(orchestration) && canAutofill && (
           <Button
             disabled={!canAutofill}
-            autoFocus={canAutofill && autofocusCandidate === "autofill"}
             onClick={() => orchestration.autofill()}
           >
             Autofill
@@ -254,7 +211,6 @@ const OrchestrationContent = ({
         {isExecutableOrchestration(orchestration) && (
           <Button
             disabled={!canExecute}
-            autoFocus={canExecute && autofocusCandidate === "execute"}
             onClick={() => orchestration.execute()}
           >
             Start Recipe
