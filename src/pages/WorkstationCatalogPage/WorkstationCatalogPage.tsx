@@ -22,7 +22,7 @@ import {
 } from "@/services/sh-game";
 
 import PageContainer from "@/components/PageContainer";
-import { RequireRunning } from "@/components/RequireLegacy";
+import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
@@ -153,7 +153,7 @@ const WorkstationCatalogPage = () => {
 
   return (
     <PageContainer title="Workstations">
-      <RequireRunning />
+      <RequireActiveLegacy />
       <Box
         sx={{
           display: "flex",

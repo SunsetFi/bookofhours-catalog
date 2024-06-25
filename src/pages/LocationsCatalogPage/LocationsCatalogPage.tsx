@@ -26,7 +26,7 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 import { useObservation } from "@/hooks/use-observation";
 
 import PageContainer from "@/components/PageContainer";
-import { RequireRunning } from "@/components/RequireLegacy";
+import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
 import VerbIcon from "@/components/VerbIcon";
 
@@ -173,7 +173,7 @@ const LocationsCatalogPage = () => {
 
   return (
     <PageContainer title="Locations">
-      <RequireRunning />
+      <RequireActiveLegacy />
       <Box
         sx={{
           display: "flex",

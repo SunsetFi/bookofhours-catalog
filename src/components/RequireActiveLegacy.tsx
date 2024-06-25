@@ -4,7 +4,7 @@ import { Navigate, useLocation } from "react-router";
 
 import { useIsLegacyRunning } from "@/services/sh-game";
 
-export const RequireRunning = () => {
+export const RequireActiveLegacy = () => {
   const path = useLocation().pathname;
 
   const isRunning = useIsLegacyRunning();

@@ -27,7 +27,7 @@ import ToolsCatalogPage, {
 } from "./pages/ToolsCatalogPage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
 import LocationsCatalogPage from "./pages/LocationsCatalogPage";
-import IndexPage from "./pages/IndexPage";
+import IndexPage from "./pages/DeskPage";
 import BrancrugCatalogPage from "./pages/BrancrugCatalogPage";
 
 export interface SiteMapNavItem {
@@ -69,7 +69,7 @@ const sitemap: SiteMapItem[] = [
     label: "Desk",
     iconSource: "verb",
     iconName: "library.desk.nonna.consider",
-    path: "/",
+    path: "/desk",
     Component: IndexPage,
   },
   {

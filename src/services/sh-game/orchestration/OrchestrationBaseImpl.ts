@@ -50,8 +50,18 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   private _canAutofill$: Observable<boolean> | null = null;
   get canAutofill$() {
     if (!this._canAutofill$) {
-      this._canAutofill$ = this.slotAssignments$.pipe(
-        map((slots) => values(slots).some((x) => x == null))
+      this._canAutofill$ = combineLatest([
+        this.slotAssignments$,
+        this.requirements$,
+      ]).pipe(
+        map(([slots, requirements]) => {
+          // Autofill is only useful if we know what we are making.
+          if (Object.keys(requirements).length === 0) {
+            return false;
+          }
+
+          return values(slots).some((x) => x == null);
+        })
       );
     }
 

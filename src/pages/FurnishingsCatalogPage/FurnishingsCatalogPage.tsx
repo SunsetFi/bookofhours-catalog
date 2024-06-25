@@ -10,7 +10,7 @@ import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
-import { RequireRunning } from "@/components/RequireLegacy";
+import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import FocusIconButton from "@/components/FocusIconButton";
 import PageContainer from "@/components/PageContainer";
 import {
@@ -69,7 +69,7 @@ const FurnishingsCatalogPage = () => {
 
   return (
     <PageContainer title="An Accounting of the Walls and Floors">
-      <RequireRunning />
+      <RequireActiveLegacy />
       <Box
         sx={{
           display: "flex",

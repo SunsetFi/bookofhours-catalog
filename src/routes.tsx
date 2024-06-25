@@ -8,7 +8,7 @@ const AppRoutes = () => (
     {sitemap.filter(isSiteMapNavItem).map(({ path, Component }) => (
       <Route key={path} path={path} Component={Component} />
     ))}
-    <Route path="*" Component={() => <Navigate to="/" />} />
+    <Route path="*" Component={() => <Navigate to="/desk" />} />
   </Routes>
 );
 

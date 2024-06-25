@@ -7,7 +7,7 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
-import { RequireRunning } from "@/components/RequireLegacy";
+import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
@@ -113,7 +113,7 @@ const BookCatalogPage = () => {
 
   return (
     <PageContainer title="Bibliographical Collection">
-      <RequireRunning />
+      <RequireActiveLegacy />
       <Box
         sx={{
           display: "flex",

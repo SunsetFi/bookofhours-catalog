@@ -1,13 +1,6 @@
 import React from "react";
 
-import {
-  Stack,
-  Typography,
-  List,
-  ListItemButton,
-  CircularProgress,
-  Button,
-} from "@mui/material";
+import { Stack, Typography, Button } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 
@@ -15,7 +8,7 @@ import { SaveManager } from "@/services/sh-game/SaveManager";
 
 import { useObservation } from "@/hooks/use-observation";
 
-const LegacyNotRunningView = () => {
+const ChooseGamePage = () => {
   const saveManager = useDIDependency(SaveManager);
   const saves = useObservation(saveManager.saves$);
 
@@ -47,4 +40,4 @@ const LegacyNotRunningView = () => {
   );
 };
 
-export default LegacyNotRunningView;
+export default ChooseGamePage;

@@ -61,10 +61,17 @@ export class GameStateSource {
   }
 }
 
-export function useIsLegacyRunning(): boolean | undefined {
+export function useIsLegacyRunning(): boolean {
   const runningSource = useDIDependency(GameStateSource);
   return (
     useObservation(runningSource.isLegacyRunning$) ??
     runningSource.isLegacyRunning
+  );
+}
+
+export function useIsGameRunning(): boolean {
+  const runningSource = useDIDependency(GameStateSource);
+  return (
+    useObservation(runningSource.isGameRunning$) ?? runningSource.isGameRunning
   );
 }

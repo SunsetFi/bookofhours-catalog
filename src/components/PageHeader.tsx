@@ -1,13 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router";
 
-import Typography from "@mui/material/Typography";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Box from "@mui/material/Box";
+import { Typography, AppBar, Toolbar, IconButton, Box } from "@mui/material";
 
-import ArrowBack from "@mui/icons-material/ArrowBack";
+import { ArrowBack } from "@mui/icons-material";
 
 import HandOverviewIcons from "./HandOverviewIcons";
 import PinboardHeader from "./PinboardHeader";
