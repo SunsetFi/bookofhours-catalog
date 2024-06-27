@@ -157,12 +157,14 @@ interface ElementStackRegionProps {
   sx?: SxProps;
   label: string;
   elementStacks$: Observable<ElementStackModel[]>;
+  emptyContent?: React.ReactNode;
 }
 
 const ElementStackRegion: React.FC<ElementStackRegionProps> = ({
   sx,
   label,
   elementStacks$,
+  emptyContent,
 }) => {
   return (
     <Stack aria-label={label} role="region" direction="column" gap={2} sx={sx}>
@@ -179,7 +181,10 @@ const ElementStackRegion: React.FC<ElementStackRegionProps> = ({
           }}
         />
       </Stack>
-      <ElementStackTray elementStacks$={elementStacks$} />
+      <ElementStackTray
+        elementStacks$={elementStacks$}
+        emptyContent={emptyContent}
+      />
     </Stack>
   );
 };

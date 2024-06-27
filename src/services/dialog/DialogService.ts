@@ -31,9 +31,7 @@ export class DialogService {
   showDialog(request: DialogRequest): Promise<string | null> {
     const details = this._openDialog(request);
     if (!details) {
-      return Promise.reject(
-        new Error(`Unknown dialog type for keys ${Object.keys(request)}`)
-      );
+      return Promise.reject(new Error(`Unknown dialog type ${request.type}`));
     }
 
     return details.promise;
@@ -42,7 +40,7 @@ export class DialogService {
   private _openDialog(request: DialogRequest) {
     let model: DialogModel | null = null;
     if (isTextDialogRequest(request)) {
-      model = new TextDialogModel(
+      model = new ActionPromptDialogModel(
         request.text,
         request.actions,
         this._resolveDialog.bind(this)
@@ -65,9 +63,20 @@ export class DialogService {
     return details;
   }
 
-  closeDialog() {
-    this._dialogDetailQueue.pop();
-    this._currentDialogDetails$.next(last(this._dialogDetailQueue) ?? null);
+  closeDialog(dialogPromise: Promise<string | null>) {
+    const index = this._dialogDetailQueue.findIndex(
+      ({ promise }) => promise === dialogPromise
+    );
+    if (index === -1) {
+      return;
+    }
+
+    this._dialogDetailQueue.splice(index, 1);
+
+    // Was the last index.
+    if (index === this._dialogDetailQueue.length) {
+      this._currentDialogDetails$.next(last(this._dialogDetailQueue) ?? null);
+    }
   }
 
   private _resolveDialog(completionResult: string | null) {
@@ -77,7 +86,7 @@ export class DialogService {
     }
 
     currentDialog.resolve(completionResult);
-    this.closeDialog();
+    this.closeDialog(currentDialog.promise);
   }
 }
 
@@ -94,7 +103,7 @@ export class DialogModel {
   readonly actions: DialogActionModel[];
 }
 
-export class TextDialogModel extends DialogModel {
+export class ActionPromptDialogModel extends DialogModel {
   constructor(
     readonly text: string,
     actions: DialogAction[],

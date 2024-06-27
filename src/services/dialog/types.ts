@@ -1,14 +1,13 @@
-export type DialogRequest = TextDialogRequest;
-
-export interface TextDialogRequest {
+export interface ActionPromptDialogRequest {
+  type: "action-prompt";
   text: string;
   actions: DialogAction[];
 }
 
 export function isTextDialogRequest(
   request: DialogRequest
-): request is TextDialogRequest {
-  return "text" in request;
+): request is ActionPromptDialogRequest {
+  return request.type === "action-prompt";
 }
 
 export interface DialogAction {
@@ -18,3 +17,5 @@ export interface DialogAction {
   default?: boolean;
   onClick?(): void;
 }
+
+export type DialogRequest = ActionPromptDialogRequest;

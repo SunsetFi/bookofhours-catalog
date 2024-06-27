@@ -29,6 +29,20 @@ const Root = () => {
   }
 
   if (loadingState !== "idle") {
+    let message: string;
+    switch (loadingState) {
+      case "game-loading":
+        message = "Loading game...";
+        break;
+      case "tokens-loading":
+        message = "Loading Catalogue...";
+      case "game-saving":
+        message = "Saving game...";
+        break;
+      default:
+        message = "Busy...";
+        break;
+    }
     return (
       <Box
         sx={{
@@ -40,11 +54,7 @@ const Root = () => {
           height: "100%",
         }}
       >
-        <Typography variant="h4">
-          {loadingState === "game-loading"
-            ? "Loading game..."
-            : "Loading Catalogue..."}
-        </Typography>
+        <Typography variant="h4">{message}</Typography>
         <CircularProgress sx={{ mt: 1 }} color="inherit" />
       </Box>
     );

@@ -1,10 +1,7 @@
 import React from "react";
-import { Observable, map } from "rxjs";
+import { Observable } from "rxjs";
 
-import Box from "@mui/material/Box";
-import type { SxProps } from "@mui/material/styles";
-
-import { observeAllMap } from "@/observables";
+import { Box, SxProps, CircularProgress } from "@mui/material";
 
 import { useObservation } from "@/hooks/use-observation";
 
@@ -17,41 +14,19 @@ import ElementStackCard, {
 export interface ElementStackTrayProps {
   sx?: SxProps;
   elementStacks$: Observable<readonly ElementStackModel[]>;
-  requireExterior?: boolean;
   "aria-label"?: string;
   role?: string;
-}
-
-interface ElementStackTrayItem {
-  elementStack: ElementStackModel;
-  exterior: boolean;
-}
-function observeTrayItem(
-  model: ElementStackModel
-): Observable<ElementStackTrayItem> {
-  return model.inExteriorSphere$.pipe(
-    map((exterior) => ({
-      elementStack: model,
-      exterior,
-    }))
-  );
+  emptyContent?: React.ReactNode;
 }
 
 const ElementStackTray = ({
   elementStacks$,
   sx,
-  requireExterior,
   "aria-label": ariaLabel,
   role,
+  emptyContent,
 }: ElementStackTrayProps) => {
-  const items = useObservation(
-    () => elementStacks$.pipe(observeAllMap(observeTrayItem)),
-    [elementStacks$]
-  );
-
-  if (!items) {
-    return null;
-  }
+  const items = useObservation(elementStacks$);
 
   return (
     <Box
@@ -69,15 +44,12 @@ const ElementStackTray = ({
         ...sx,
       }}
     >
-      {items.map(
-        ({ elementStack, exterior }) =>
-          (exterior || !requireExterior) && (
-            <ElementStackCard
-              key={elementStack.id}
-              elementStack={elementStack}
-            />
-          )
-      )}
+      {!items && <CircularProgress color="inherit" />}
+      {items &&
+        items.map((elementStack) => (
+          <ElementStackCard key={elementStack.id} elementStack={elementStack} />
+        ))}
+      {items && items.length === 0 && emptyContent}
     </Box>
   );
 };

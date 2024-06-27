@@ -10,6 +10,7 @@ import PinboardHeader from "./PinboardHeader";
 import SeasonAndTimeHeader from "./SeasonAndTimeHeader";
 import SearchButtonHeader from "./SearchButtonHeader";
 import RecipeExecutionsHeader from "./RecipeExecutionsHeader";
+import GameMenuButton from "./GameMenuButton";
 
 export interface PageHeaderProps {
   title: string;
@@ -56,8 +57,9 @@ const PageHeader = ({ title, backTo }: PageHeaderProps) => {
               <ArrowBack />
             </IconButton>
           )}
+          {!backTo && <GameMenuButton />}
         </Box>
-        <HandOverviewIcons />
+        <HandOverviewIcons sx={{ ml: 2 }} />
         <Box sx={{ ml: "auto" }} />
         <PinboardHeader sx={{ py: 1 }} />
         <SearchButtonHeader sx={{ ml: 2 }} />

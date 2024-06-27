@@ -18,7 +18,7 @@ import { GameStateSource } from "./sources/GameStateSource";
 @singleton()
 export class SaveManager {
   private readonly _loadingState$ = new BehaviorSubject<
-    "idle" | "game-loading" | "tokens-loading"
+    "idle" | "game-loading" | "tokens-loading" | "game-saving"
   >("idle");
   private readonly _saves$: Observable<readonly SaveInfo[]>;
 
@@ -65,6 +65,23 @@ export class SaveManager {
     await this._doLoad(() => this._api.loadSave(saveName));
   }
 
+  async autosave(): Promise<void> {
+    if (!this._gameState.isLegacyRunning) {
+      return;
+    }
+
+    await this._doSave(() => this._api.autosave());
+  }
+
+  async saveAs(saveName: string): Promise<void> {
+    if (!this._gameState.isLegacyRunning) {
+      return;
+    }
+
+    // TODO: Capture errors for corrupt saves.
+    await this._doSave(() => this._api.createSave(saveName));
+  }
+
   private async _doLoad(loader: () => void) {
     this._loadingState$.next("game-loading");
     try {
@@ -76,8 +93,18 @@ export class SaveManager {
     }
   }
 
+  private async _doSave(saver: () => void) {
+    this._loadingState$.next("game-saving");
+    try {
+      await saver();
+    } finally {
+      this._loadingState$.next("idle");
+    }
+  }
+
   private async _checkAutosaveOverride(forNewGame: boolean) {
     const result = await this._dialogService.showDialog({
+      type: "action-prompt",
       text: `${
         forNewGame ? "Creating a new game" : "Loading an existing save"
       } will override your last autosave.  Are you sure you wish to continue?`,
@@ -99,6 +126,7 @@ export class SaveManager {
     if (isRunning) {
       // TODO: Offer to let the user save.
       const result = await this._dialogService.showDialog({
+        type: "action-prompt",
         text: "Loading a new game will loose progress on the current game.  Are you sure you wish to continue?",
         actions: [
           { label: "No", completionResult: "cancel" },

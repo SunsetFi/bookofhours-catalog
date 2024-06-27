@@ -5,7 +5,7 @@ import { useDIDependency } from "@/container";
 import {
   DialogActionModel,
   DialogService,
-  TextDialogModel,
+  ActionPromptDialogModel,
 } from "@/services/dialog/DialogService";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -25,7 +25,7 @@ const DialogServiceDialog = () => {
     return null;
   }
 
-  if (currentDialog instanceof TextDialogModel) {
+  if (currentDialog instanceof ActionPromptDialogModel) {
     return <TextDialog model={currentDialog} />;
   }
 
@@ -37,7 +37,7 @@ const DialogServiceDialog = () => {
 export default DialogServiceDialog;
 
 interface TextDialogProps {
-  model: TextDialogModel;
+  model: ActionPromptDialogModel;
 }
 
 const TextDialog = ({ model }: TextDialogProps) => {
