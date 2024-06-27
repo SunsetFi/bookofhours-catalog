@@ -2,7 +2,17 @@ import { injectable, singleton } from "microinject";
 import { BehaviorSubject, map } from "rxjs";
 import { last } from "lodash";
 
-import { DialogAction, DialogRequest, isTextDialogRequest } from "./types";
+import {
+  DialogAction,
+  DialogRequest,
+  isComponentDialogRequest,
+  isTextDialogRequest,
+} from "./types";
+import {
+  ActionPromptDialogModel,
+  ComponentDialogModel,
+  DialogModel,
+} from "./DialogModel";
 
 interface CurrentDialogDetails {
   model: DialogModel;
@@ -43,6 +53,11 @@ export class DialogService {
       model = new ActionPromptDialogModel(
         request.text,
         request.actions,
+        this._resolveDialog.bind(this)
+      );
+    } else if (isComponentDialogRequest(request)) {
+      model = new ComponentDialogModel(
+        request.component,
         this._resolveDialog.bind(this)
       );
     }
@@ -87,56 +102,5 @@ export class DialogService {
 
     currentDialog.resolve(completionResult);
     this.closeDialog(currentDialog.promise);
-  }
-}
-
-export class DialogModel {
-  constructor(
-    actions: DialogAction[],
-    resolveDialog: (completionResult: string | null) => void
-  ) {
-    this.actions = actions.map(
-      (action) => new DialogActionModel(action, resolveDialog)
-    );
-  }
-
-  readonly actions: DialogActionModel[];
-}
-
-export class ActionPromptDialogModel extends DialogModel {
-  constructor(
-    readonly text: string,
-    actions: DialogAction[],
-    resolveDialog: (completionResult: string | null) => void
-  ) {
-    super(actions, resolveDialog);
-  }
-}
-
-export class DialogActionModel {
-  constructor(
-    private readonly _action: DialogAction,
-    private readonly _resolveDialog: (completionResult: string | null) => void
-  ) {}
-
-  get label() {
-    return this._action.label;
-  }
-
-  get default() {
-    return this._action.default ?? false;
-  }
-
-  onClick() {
-    if (this._action.onClick) {
-      this._action.onClick();
-    }
-
-    // Handle resolutions.
-    if (this._action.completionResult) {
-      this._resolveDialog(this._action.completionResult);
-    } else if (this._action.closeOnClick) {
-      this._resolveDialog(null);
-    }
   }
 }

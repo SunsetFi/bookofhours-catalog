@@ -13,7 +13,7 @@ import { TokenVisibilityFactory } from "./token-models/TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./token-models/TokenParentTerrainFactory";
 
 import { TerrainUnlocker } from "./TerrainUnlocker";
-import { SaveManager } from "./SaveManager";
+import { SaveManager } from "./SaveManager/SaveManager";
 
 export default new ContainerModule((bind) => {
   bind(Orchestrator);

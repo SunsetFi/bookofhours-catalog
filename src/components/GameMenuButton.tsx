@@ -12,7 +12,7 @@ import { Menu } from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
 
-import { SaveManager } from "@/services/sh-game/SaveManager";
+import { SaveManager } from "@/services/sh-game/SaveManager/SaveManager";
 
 const GameMenuButton = () => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -37,15 +37,23 @@ interface GameMenuProps {
 }
 const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
   const saveManager = useDIDependency(SaveManager);
+
+  const onAutosave = React.useCallback(() => {
+    saveManager.autosave();
+    onClose();
+  }, [saveManager, onClose]);
+  const onLoad = React.useCallback(() => {
+    saveManager.openLoadGameDialog();
+    onClose();
+  }, [saveManager, onClose]);
+
   return (
     <Popover open={anchorEl != null} anchorEl={anchorEl} onClose={onClose}>
       <List sx={{ width: 200 }}>
-        <ListItemButton onClick={() => saveManager.autosave()}>
-          Save
-        </ListItemButton>
+        <ListItemButton onClick={onAutosave}>Save</ListItemButton>
         <ListItemButton disabled>Save As</ListItemButton>
         <Divider />
-        <ListItemButton disabled>Load</ListItemButton>
+        <ListItemButton onClick={onLoad}>Load</ListItemButton>
       </List>
     </Popover>
   );

@@ -5,7 +5,7 @@ import { useDIDependency } from "./container";
 
 import AppRoutes from "./routes";
 
-import { SaveManager } from "./services/sh-game/SaveManager";
+import { SaveManager } from "./services/sh-game/SaveManager/SaveManager";
 import { useIsGameRunning, useIsLegacyRunning } from "./services/sh-game";
 
 import { useObservation } from "./hooks/use-observation";
@@ -36,6 +36,7 @@ const Root = () => {
         break;
       case "tokens-loading":
         message = "Loading Catalogue...";
+        break;
       case "game-saving":
         message = "Saving game...";
         break;

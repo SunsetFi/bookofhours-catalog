@@ -6,7 +6,8 @@ import {
   DialogActionModel,
   DialogService,
   ActionPromptDialogModel,
-} from "@/services/dialog/DialogService";
+  ComponentDialogModel,
+} from "@/services/dialog";
 
 import { useObservation } from "@/hooks/use-observation";
 import {
@@ -27,6 +28,8 @@ const DialogServiceDialog = () => {
 
   if (currentDialog instanceof ActionPromptDialogModel) {
     return <TextDialog model={currentDialog} />;
+  } else if (currentDialog instanceof ComponentDialogModel) {
+    return <ComponentDialog model={currentDialog} />;
   }
 
   console.warn("Unknown dialog model type", currentDialog);
@@ -47,6 +50,19 @@ const TextDialog = ({ model }: TextDialogProps) => {
         <DialogContentText variant="body1">{model.text}</DialogContentText>
       </DialogContent>
       <DialogActionsBar actions={model.actions} />
+    </Dialog>
+  );
+};
+
+interface ComponentDialogProps {
+  model: ComponentDialogModel;
+}
+
+const ComponentDialog = ({ model }: ComponentDialogProps) => {
+  const Component = model.component;
+  return (
+    <Dialog open maxWidth="xl">
+      <Component model={model} />
     </Dialog>
   );
 };

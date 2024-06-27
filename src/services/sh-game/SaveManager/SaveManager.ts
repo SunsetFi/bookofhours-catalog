@@ -1,3 +1,5 @@
+import React from "react";
+
 import { inject, injectable, singleton } from "microinject";
 import {
   BehaviorSubject,
@@ -9,10 +11,12 @@ import {
 } from "rxjs";
 import { LegacyId, SaveInfo } from "secrethistories-api";
 
-import { API } from "../sh-api";
-import { UpdatePoller } from "../update-poller";
-import { DialogService } from "../dialog/DialogService";
-import { GameStateSource } from "./sources/GameStateSource";
+import { API } from "../../sh-api";
+import { UpdatePoller } from "../../update-poller";
+import { DialogService } from "../../dialog/DialogService";
+import { GameStateSource } from "../sources/GameStateSource";
+
+import NewGameDialogContent from "./NewGameDialogContent";
 
 @injectable()
 @singleton()
@@ -21,6 +25,8 @@ export class SaveManager {
     "idle" | "game-loading" | "tokens-loading" | "game-saving"
   >("idle");
   private readonly _saves$: Observable<readonly SaveInfo[]>;
+
+  private _loadSaveDialogHandle: Promise<any> | null = null;
 
   constructor(
     @inject(API) private readonly _api: API,
@@ -65,6 +71,21 @@ export class SaveManager {
     await this._doLoad(() => this._api.loadSave(saveName));
   }
 
+  openLoadGameDialog() {
+    if (this._loadSaveDialogHandle) {
+      return;
+    }
+
+    this._loadSaveDialogHandle = this._dialogService.showDialog({
+      type: "component",
+      // This is a little janky... vite wont let us use tsx with decorators.
+      component: NewGameDialogContent,
+    });
+    this._loadSaveDialogHandle.then(() => {
+      this._loadSaveDialogHandle = null;
+    });
+  }
+
   async autosave(): Promise<void> {
     if (!this._gameState.isLegacyRunning) {
       return;
@@ -83,6 +104,12 @@ export class SaveManager {
   }
 
   private async _doLoad(loader: () => void) {
+    // Little hacky, as the dialog doesn't tell us when it wants to close.
+    if (this._loadSaveDialogHandle) {
+      this._dialogService.closeDialog(this._loadSaveDialogHandle);
+      this._loadSaveDialogHandle = null;
+    }
+
     this._loadingState$.next("game-loading");
     try {
       await loader();
