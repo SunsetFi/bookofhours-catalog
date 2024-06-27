@@ -1,9 +1,6 @@
 import React from "react";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import CircularProgress from "@mui/material/CircularProgress";
-import type { SxProps } from "@mui/material";
+import { Box, Typography, CircularProgress, SxProps } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 
@@ -39,7 +36,7 @@ const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
         ...sx,
       }}
     >
-      {elements == null && <CircularProgress />}
+      {elements == null && <CircularProgress color="inherit" />}
       {elements && (
         <>
           {elements.slice(0, 10).map((element) => (

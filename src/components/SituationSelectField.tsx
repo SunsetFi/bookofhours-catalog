@@ -2,12 +2,14 @@ import React from "react";
 import { Observable, combineLatest, map } from "rxjs";
 import { sortBy } from "lodash";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import CircularProgress from "@mui/material/CircularProgress";
-import InputAdornment from "@mui/material/InputAdornment";
+import {
+  Box,
+  Typography,
+  Autocomplete,
+  TextField,
+  CircularProgress,
+  InputAdornment,
+} from "@mui/material";
 
 import { observeAll } from "@/observables";
 
@@ -66,7 +68,7 @@ const SituationSelectField = ({
     ) ?? null;
 
   if (!situations) {
-    return <CircularProgress />;
+    return <CircularProgress color="inherit" />;
   }
 
   situations = situations.filter((x) => x.label !== null);

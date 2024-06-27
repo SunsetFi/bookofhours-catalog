@@ -27,7 +27,7 @@ const DeskPage = () => {
   const tokensSource = useDIDependency(TokensSource);
   const tokens = useObservation(tokensSource.visibleTokens$);
 
-  const important$ = React.useMemo(
+  const notable$ = React.useMemo(
     () =>
       tokensSource.visibleElementStacks$.pipe(
         filterHasAnyAspect([
@@ -104,7 +104,7 @@ const DeskPage = () => {
                 height: "100%",
               }}
             >
-              <CircularProgress />
+              <CircularProgress color="inherit" />
             </Box>
           )}
           <ElementStackRegion
@@ -113,7 +113,7 @@ const DeskPage = () => {
               gridColumn: "start / end",
             }}
             label="Notables"
-            elementStacks$={important$}
+            elementStacks$={notable$}
           />
           <ElementStackRegion
             sx={{

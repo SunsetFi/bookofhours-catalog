@@ -299,7 +299,7 @@ function ObservableDataGrid<T extends {}>({
             height: "100%",
           }}
         >
-          <CircularProgress />
+          <CircularProgress color="inherit" />
         </Box>
       )}
       {data && (

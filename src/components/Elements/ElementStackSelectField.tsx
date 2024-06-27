@@ -3,13 +3,15 @@ import { Observable, combineLatest, map } from "rxjs";
 import { pick } from "lodash";
 import { useDrop } from "react-dnd";
 
-import Popper from "@mui/material/Popper";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import CircularProgress from "@mui/material/CircularProgress";
-import InputAdornment from "@mui/material/InputAdornment";
+import {
+  Popper,
+  Box,
+  Typography,
+  Autocomplete,
+  TextField,
+  CircularProgress,
+  InputAdornment,
+} from "@mui/material";
 
 import { observeAllMap } from "@/observables";
 
@@ -106,7 +108,7 @@ const ElementStackSelectField = ({
   );
 
   if (!items) {
-    return <CircularProgress />;
+    return <CircularProgress color="inherit" />;
   }
 
   items = items.filter((x) => x.label != null) ?? null;

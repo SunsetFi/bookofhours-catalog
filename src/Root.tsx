@@ -45,7 +45,7 @@ const Root = () => {
             ? "Loading game..."
             : "Loading Catalogue..."}
         </Typography>
-        <CircularProgress sx={{ mt: 1 }} />
+        <CircularProgress sx={{ mt: 1 }} color="inherit" />
       </Box>
     );
   }

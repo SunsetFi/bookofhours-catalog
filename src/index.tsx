@@ -3,8 +3,6 @@ import "@/style.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import { Box, CircularProgress, Typography } from "@mui/material";
-
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
