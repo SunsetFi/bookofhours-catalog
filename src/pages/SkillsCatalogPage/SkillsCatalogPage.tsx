@@ -20,7 +20,6 @@ import { useObservation } from "@/hooks/use-observation";
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
-import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
@@ -114,7 +113,6 @@ const SkillsCatalogPage = () => {
 
   return (
     <PageContainer title="Esoteric Wisdoms">
-      <RequireActiveLegacy />
       <IdentifierItemDataGrid
         sx={{ height: "100%" }}
         columns={columns}

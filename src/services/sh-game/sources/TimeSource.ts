@@ -18,7 +18,7 @@ import { UpdatePoller } from "@/services/update-poller";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import { GameStateSource } from "./RunningSource";
+import { GameStateSource } from "./GameStateSource";
 
 const timeRemainingFromRecipeExclusive: Record<string, number> = {
   "day.daybreak": /*2 + */ 58 + 60 + 60 + 60 + 60 + 60,

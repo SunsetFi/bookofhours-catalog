@@ -10,7 +10,6 @@ import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
@@ -77,7 +76,6 @@ const ProvisionsCatalog = () => {
           height: "100%",
         }}
       >
-        <RequireActiveLegacy />
         <IdentifierItemDataGrid
           sx={{ height: "100%" }}
           columns={columns}

@@ -8,7 +8,6 @@ import { SituationModel, TokensSource } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
-import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
@@ -58,7 +57,6 @@ const HarvestCatalogPage = () => {
           height: "100%",
         }}
       >
-        <RequireActiveLegacy />
         <IdentifierItemDataGrid
           sx={{ height: "100%" }}
           columns={columns}

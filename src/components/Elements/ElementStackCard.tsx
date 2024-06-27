@@ -24,13 +24,17 @@ export interface ElementStackCardProps {
 
 // Card is 256x406
 // text area is 150 height
-const aspectRatio = 1.59;
+export const ElementStackCardAspectRatio = 1.59;
+
+export const DefaultElementStackCardWidth = 125;
+export const DefaultElementStackCardHeight =
+  DefaultElementStackCardWidth * ElementStackCardAspectRatio;
 
 const textBackgroundColor = "#444";
 
 const ElementStackCard = ({
   elementStack,
-  width = 125,
+  width = DefaultElementStackCardWidth,
   sx,
 }: ElementStackCardProps) => {
   const theme = useTheme();
@@ -75,7 +79,7 @@ const ElementStackCard = ({
             display: "flex",
             flexDirection: "column",
             width: widthPx,
-            height: `${width * aspectRatio}px`,
+            height: `${width * ElementStackCardAspectRatio}px`,
             backgroundColor: textBackgroundColor,
             overflow: "hidden",
             filter: !inExteriorSphere

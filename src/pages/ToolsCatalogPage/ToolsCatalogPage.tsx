@@ -10,8 +10,6 @@ import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
-import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
-
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
@@ -67,7 +65,6 @@ const ToolsCatalogPage = () => {
 
   return (
     <PageContainer title="Toolshed">
-      <RequireActiveLegacy />
       <Box
         sx={{
           display: "flex",

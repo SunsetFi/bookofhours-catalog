@@ -1,10 +1,18 @@
 import React from "react";
-import { Box, CircularProgress } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Stack,
+  SxProps,
+  Typography,
+} from "@mui/material";
+import { Observable } from "rxjs";
 
 import { useDIDependency } from "@/container";
 
 import { useObservation } from "@/hooks/use-observation";
 import {
+  ElementStackModel,
   TokensSource,
   filterDoesNotOccupySpace,
   filterElementId,
@@ -22,7 +30,13 @@ const DeskPage = () => {
   const important$ = React.useMemo(
     () =>
       tokensSource.visibleElementStacks$.pipe(
-        filterHasAnyAspect(["journal", "visitor", "incident"])
+        filterHasAnyAspect([
+          "journal",
+          "visitor",
+          "incident",
+          "correspondence",
+          "form.order",
+        ])
       ),
     [tokensSource.visibleElementStacks$]
   );
@@ -50,12 +64,15 @@ const DeskPage = () => {
         // We pick up tons of notes, which are text tokens that show up in situations.
         filterElementId((x) => x !== "tlg.note"),
         filterHasNoneOfAspect([
+          // In general, this excludes every card we have in the above lists.
           "memory",
           "ability",
           "skill",
           "journal",
           "visitor",
           "incident",
+          "correspondence",
+          "form.order",
         ])
       ),
     [tokensSource.visibleElementStacks$]
@@ -72,7 +89,7 @@ const DeskPage = () => {
             display: "grid",
             gridTemplateRows: `[start] max-content [dividier] 1fr [end]`,
             gridTemplateColumns: `[start] 2fr [memories-soul] 3fr [soul-skill] 4fr [skill-misc] 2fr [end]`,
-            gap: 2,
+            gap: 4,
           }}
         >
           {tokens == null && (
@@ -90,54 +107,80 @@ const DeskPage = () => {
               <CircularProgress />
             </Box>
           )}
-          <ElementStackTray
-            aria-label="important"
-            role="region"
+          <ElementStackRegion
             sx={{
               gridRow: "start / dividier",
               gridColumn: "start / end",
             }}
+            label="Notables"
             elementStacks$={important$}
           />
-          <ElementStackTray
-            aria-label="memories"
-            role="region"
+          <ElementStackRegion
             sx={{
               gridRow: "dividier / end",
               gridColumn: "start / memories-soul",
             }}
+            label="Memories and Lessons"
             elementStacks$={memories$}
           />
-          <ElementStackTray
-            aria-label="abilities"
-            role="region"
+          <ElementStackRegion
             sx={{
               gridRow: "dividier / end",
               gridColumn: "memories-soul / soul-skill",
             }}
+            label="Aspects of the Soul"
             elementStacks$={abilities$}
           />
-          <ElementStackTray
-            aria-label="skills"
-            role="region"
+          <ElementStackRegion
             sx={{
               gridRow: "dividier / end",
               gridColumn: "soul-skill / skill-misc",
             }}
+            label="Skills and Languages"
             elementStacks$={skills$}
           />
-          <ElementStackTray
-            aria-label="miscelanious"
-            role="region"
+          <ElementStackRegion
             sx={{
               gridRow: "dividier / end",
               gridColumn: "skill-misc / end",
             }}
+            label="Sundries"
             elementStacks$={misc$}
           />
         </Box>
       </Box>
     </PageContainer>
+  );
+};
+
+interface ElementStackRegionProps {
+  sx?: SxProps;
+  label: string;
+  elementStacks$: Observable<ElementStackModel[]>;
+}
+
+const ElementStackRegion: React.FC<ElementStackRegionProps> = ({
+  sx,
+  label,
+  elementStacks$,
+}) => {
+  return (
+    <Stack aria-label={label} role="region" direction="column" gap={2} sx={sx}>
+      <Stack direction="row" gap={2} alignItems="center">
+        <Typography variant="h6" aria-hidden="true" flexShrink={0}>
+          {label}
+        </Typography>
+        <Box
+          sx={{
+            height: 0,
+            width: "100%",
+            borderBottom: "1px solid",
+            borderColor: "text.primary",
+          }}
+        />
+      </Stack>
+      <ElementStackTray elementStacks$={elementStacks$} />
+    </Stack>
   );
 };
 

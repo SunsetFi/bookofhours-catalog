@@ -10,7 +10,9 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { ElementStackModel } from "@/services/sh-game";
 
-import ElementStackCard from "./ElementStackCard";
+import ElementStackCard, {
+  DefaultElementStackCardHeight,
+} from "./ElementStackCard";
 
 export interface ElementStackTrayProps {
   sx?: SxProps;
@@ -63,6 +65,7 @@ const ElementStackTray = ({
         alignContent: "flex-start",
         isolation: "isolate",
         gap: 1,
+        minHeight: DefaultElementStackCardHeight,
         ...sx,
       }}
     >

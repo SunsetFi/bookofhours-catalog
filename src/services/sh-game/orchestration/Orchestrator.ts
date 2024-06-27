@@ -17,7 +17,7 @@ import {
 
 import { Compendium } from "@/services/sh-compendium";
 
-import { GameStateSource } from "../sources/RunningSource";
+import { GameStateSource } from "../sources/GameStateSource";
 import { TokensSource } from "../sources/TokensSource";
 
 import { SituationModel } from "../token-models/SituationModel";

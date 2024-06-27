@@ -1,6 +1,6 @@
 export * from "./orchestration";
 export * from "./sources/CharacterSource";
-export * from "./sources/RunningSource";
+export * from "./sources/GameStateSource";
 export * from "./sources/TimeSource";
 export * from "./sources/TokensSource";
 export * from "./token-models/ConnectedTerrainModel";

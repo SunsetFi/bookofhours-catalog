@@ -15,7 +15,7 @@ import {
 } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
 
-import { GameStateSource } from "./RunningSource";
+import { GameStateSource } from "./GameStateSource";
 
 @injectable()
 @singleton()

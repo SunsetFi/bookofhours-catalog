@@ -39,7 +39,7 @@ import {
 
 import { filterTokenInPath } from "../observables";
 
-import { GameStateSource } from "./RunningSource";
+import { GameStateSource } from "./GameStateSource";
 import { BatchingScheduler } from "@/services/scheduler";
 
 const supportedPayloadTypes: PayloadType[] = [

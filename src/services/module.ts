@@ -1,5 +1,6 @@
 import { composeModules } from "microinject";
 
+import dialogModule from "./dialog/module";
 import historyModule from "./history/module";
 import pinsModule from "./pins/module";
 import schedulerModule from "./scheduler/module";
@@ -10,6 +11,7 @@ import shApiModule from "./sh-api/module";
 import updatePollerModule from "./update-poller/module";
 
 export default composeModules(
+  dialogModule,
   historyModule,
   pinsModule,
   schedulerModule,

@@ -9,7 +9,6 @@ import { aspectsMagnitude } from "@/aspects";
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
-import { RequireActiveLegacy } from "@/components/RequireActiveLegacy";
 import PinRecipeIconButton from "@/components/PinRecipeIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
 import {
@@ -126,7 +125,6 @@ const CraftingCatalogPage = () => {
 
   return (
     <PageContainer title="The Fruits of Knowledge">
-      <RequireActiveLegacy />
       <Box
         sx={{
           display: "flex",

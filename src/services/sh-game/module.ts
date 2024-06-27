@@ -4,7 +4,7 @@ import { Orchestrator } from "./orchestration/Orchestrator";
 import { OrchestrationFactory } from "./orchestration/OrchestrationFactory";
 
 import { CharacterSource } from "./sources/CharacterSource";
-import { GameStateSource } from "./sources/RunningSource";
+import { GameStateSource } from "./sources/GameStateSource";
 import { TimeSource } from "./sources/TimeSource";
 import { TokensSource } from "./sources/TokensSource";
 
