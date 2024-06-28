@@ -174,13 +174,22 @@ export class TimeSource {
   }
 
   private async _pollTime() {
-    const [speed, [daySituation], [yearSituation]] = await Promise.all([
+    const [speed, dateTokens] = await Promise.all([
       this._api.getSpeed(),
-      this._api.getTokensAtPath("~/day", { payloadType: "Situation" }),
-      this._api.getTokensAtPath("~/year", { payloadType: "Situation" }),
+      this._api.getAllTokens({
+        payloadType: "Situation",
+        fucinePath: ["~/day", "~/year"],
+      }),
     ]);
 
     this._gameSpeedSource$.next(speed);
+
+    const daySituation = dateTokens.find(
+      (token) => token.spherePath === "~/day"
+    );
+    const yearSituation = dateTokens.find(
+      (token) => token.spherePath === "~/year"
+    );
 
     if (
       daySituation &&

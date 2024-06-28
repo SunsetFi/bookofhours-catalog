@@ -1,42 +1,46 @@
 import { DialogAction } from "./types";
 
-export class DialogModel {
+export class DialogModel<TResult = string> {
   constructor(
-    private readonly _resolveDialog: (completionResult: string | null) => void
+    private readonly _resolveDialog: (completionResult: TResult | null) => void
   ) {}
 
-  resolve(completionResult: string | null) {
+  resolve(completionResult: TResult | null) {
     this._resolveDialog(completionResult);
   }
 }
 
-export class ActionDialogModel extends DialogModel {
+export class ActionDialogModel<TResult = string> extends DialogModel<TResult> {
   constructor(
-    actions: DialogAction[],
-    resolveDialog: (completionResult: string | null) => void
+    actions: DialogAction<TResult>[],
+    resolveDialog: (completionResult: TResult | null) => void
   ) {
     super(resolveDialog);
 
-    this.actions = actions.map((action) => new DialogActionModel(action, this));
+    this.actions = actions.map(
+      (action) => new DialogActionModel<TResult>(action, this)
+    );
   }
 
-  readonly actions: DialogActionModel[];
+  readonly actions: DialogActionModel<TResult>[];
 }
 
-export class ActionPromptDialogModel extends ActionDialogModel {
+export class ActionPromptDialogModel<
+  TResult = string
+> extends ActionDialogModel<TResult> {
   constructor(
     readonly text: string,
-    actions: DialogAction[],
-    resolveDialog: (completionResult: string | null) => void
+    actions: DialogAction<TResult>[],
+    resolveDialog: (completionResult: TResult | null) => void
   ) {
     super(actions, resolveDialog);
   }
 }
 
-export class DialogActionModel {
+export class DialogActionModel<TResult = string> {
   constructor(
-    private readonly _action: DialogAction,
-    private readonly _model: DialogModel
+    private readonly _action: DialogAction<TResult>,
+    private readonly _model: DialogModel<TResult>
   ) {}
 
   get label() {

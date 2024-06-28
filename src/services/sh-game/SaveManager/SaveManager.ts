@@ -1,11 +1,10 @@
-import React from "react";
-
 import { inject, injectable, singleton } from "microinject";
 import {
   BehaviorSubject,
   Observable,
   defer,
   from,
+  map,
   retry,
   shareReplay,
 } from "rxjs";
@@ -14,9 +13,11 @@ import { LegacyId, SaveInfo } from "secrethistories-api";
 import { API } from "../../sh-api";
 import { UpdatePoller } from "../../update-poller";
 import { DialogService } from "../../dialog/DialogService";
+
 import { GameStateSource } from "../sources/GameStateSource";
 
 import NewGameDialogContent from "./NewGameDialogContent";
+import SaveGameDialogContent from "./SaveGameDialogContent";
 
 @injectable()
 @singleton()
@@ -26,7 +27,7 @@ export class SaveManager {
   >("idle");
   private readonly _saves$: Observable<readonly SaveInfo[]>;
 
-  private _loadSaveDialogHandle: Promise<any> | null = null;
+  private _dialogHandle: Promise<any> | null = null;
 
   constructor(
     @inject(API) private readonly _api: API,
@@ -39,8 +40,25 @@ export class SaveManager {
     );
   }
 
+  get canSave$() {
+    return this._gameState.isLegacyRunning$;
+  }
+
   get saves$() {
     return this._saves$;
+  }
+
+  private _autosave$: Observable<SaveInfo | null> | null = null;
+  get autosave$() {
+    if (!this._autosave$) {
+      this._autosave$ = this.saves$.pipe(
+        map(
+          (saves) => saves.find((save) => save.saveName === "AUTOSAVE") ?? null
+        )
+      );
+    }
+
+    return this._autosave$;
   }
 
   get loadingState$() {
@@ -64,26 +82,66 @@ export class SaveManager {
       return;
     }
 
-    if (!(await this._checkAutosaveOverride(false))) {
-      return;
+    if (saveName !== "AUTOSAVE") {
+      if (!(await this._checkAutosaveOverride(false))) {
+        return;
+      }
     }
 
     await this._doLoad(() => this._api.loadSave(saveName));
   }
 
-  openLoadGameDialog() {
-    if (this._loadSaveDialogHandle) {
+  async showSaveGameDialog() {
+    if (this._dialogHandle) {
       return;
     }
 
-    this._loadSaveDialogHandle = this._dialogService.showDialog({
+    var saveDialogPromise = (this._dialogHandle =
+      this._dialogService.showDialog({
+        type: "component",
+        component: SaveGameDialogContent,
+      }));
+
+    this._dialogHandle.then(() => {
+      if (this._dialogHandle === saveDialogPromise) {
+        this._dialogHandle = null;
+      }
+    });
+
+    const saveName = await saveDialogPromise;
+    if (!saveName) {
+      return;
+    }
+
+    await this.saveAs(saveName);
+  }
+
+  async openLoadGameDialog() {
+    if (this._dialogHandle) {
+      return;
+    }
+
+    // This uses the shared SelectGameContent component,
+    // which calls back into us.
+    // We do not get a result back from this dialog.
+    // Instead, we close it when a load is invoked.
+    var dialogPromise = (this._dialogHandle = this._dialogService.showDialog({
       type: "component",
-      // This is a little janky... vite wont let us use tsx with decorators.
       component: NewGameDialogContent,
+    }));
+
+    this._dialogHandle.then(() => {
+      if (this._dialogHandle === dialogPromise) {
+        this._dialogHandle = null;
+      }
     });
-    this._loadSaveDialogHandle.then(() => {
-      this._loadSaveDialogHandle = null;
-    });
+
+    const saveName = await dialogPromise;
+    if (saveName == null) {
+      return;
+    }
+
+    await this.loadSave(saveName);
   }
 
   async autosave(): Promise<void> {
@@ -99,15 +157,14 @@ export class SaveManager {
       return;
     }
 
-    // TODO: Capture errors for corrupt saves.
     await this._doSave(() => this._api.createSave(saveName));
   }
 
   private async _doLoad(loader: () => void) {
     // Little hacky, as the dialog doesn't tell us when it wants to close.
-    if (this._loadSaveDialogHandle) {
-      this._dialogService.closeDialog(this._loadSaveDialogHandle);
-      this._loadSaveDialogHandle = null;
+    if (this._dialogHandle) {
+      this._dialogService.closeDialog(this._dialogHandle);
+      this._dialogHandle = null;
     }
 
     this._loadingState$.next("game-loading");

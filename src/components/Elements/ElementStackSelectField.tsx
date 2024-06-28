@@ -25,6 +25,7 @@ import AspectsList from "../Aspects/AspectsList";
 
 import ElementStackDetails from "./ElementStackDetails";
 import ElementIcon from "./ElementIcon";
+import Tooltip from "../Tooltip";
 
 export interface ElementStackSelectFieldProps {
   label: string;
@@ -132,6 +133,8 @@ const ElementStackSelectField = ({
       autoHighlight
       getOptionLabel={(option) => option.label!}
       getOptionDisabled={(option) => requireExterior && !option.exterior}
+      value={selectedValue}
+      onChange={(_, value) => onChange(value?.elementStack ?? null)}
       renderInput={(params) => (
         <TextField
           ref={drop}
@@ -173,8 +176,6 @@ const ElementStackSelectField = ({
           }}
         />
       )}
-      value={selectedValue}
-      onChange={(_, value) => onChange(value?.elementStack ?? null)}
       renderOption={(props, option) => (
         <ElementStackSelectItem
           key={option.elementStack.id}
@@ -214,71 +215,55 @@ const ElementStackSelectItem = ({
   }
 
   return (
-    <Box
-      component="li"
-      sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
-      {...props}
-    >
-      <Box
-        sx={{ display: "flex", flexDirection: "row", gap: 2 }}
-        onMouseOver={(e) => setAnchorEl(e.currentTarget)}
-        onMouseOut={() => setAnchorEl(null)}
+    <Box component="li" sx={{ width: "100%" }} {...props}>
+      <Tooltip
+        sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
+        title={<ElementStackDetails elementStack={elementStack} />}
       >
+        <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+          <Box
+            sx={{
+              width: "30px",
+              height: "30px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              aria-hidden="true"
+              loading="lazy"
+              src={iconUrl}
+              style={{
+                display: "block",
+                maxWidth: "30px",
+                maxHeight: "30px",
+              }}
+            />
+          </Box>
+          {/* FIXME: Shrink this text to fit the aspects in.  Not working for some reason. */}
+          <Typography
+            variant="body1"
+            sx={{ flex: "1 1", textOverflow: "ellipsis", minWidth: 0 }}
+          >
+            {label}
+          </Typography>
+        </Box>
         <Box
           sx={{
-            width: "30px",
-            height: "30px",
+            ml: "auto",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            flexDirection: "row",
+            gap: 1,
           }}
         >
-          <img
-            loading="lazy"
-            src={iconUrl}
-            alt={label ?? ""}
-            style={{
-              display: "block",
-              maxWidth: "30px",
-              maxHeight: "30px",
-            }}
+          <AspectsList
+            sx={{ flexWrap: "nowrap" }}
+            aspects={aspects}
+            iconSize={30}
           />
         </Box>
-        {/* FIXME: Shrink this text to fit the aspects in.  Not working for some reason. */}
-        <Typography
-          variant="body1"
-          sx={{ flex: "1 1", textOverflow: "ellipsis", minWidth: 0 }}
-        >
-          {label}
-        </Typography>
-      </Box>
-      <Box
-        sx={{
-          ml: "auto",
-          display: "flex",
-          flexDirection: "row",
-          gap: 1,
-        }}
-      >
-        <AspectsList
-          sx={{ flexWrap: "nowrap" }}
-          aspects={aspects}
-          iconSize={30}
-        />
-      </Box>
-      <Popper
-        anchorEl={anchorEl}
-        open={anchorEl != null}
-        sx={{
-          // This is here because this is used in a modal
-          // You would think that the new popper would order further on in the document from the portal, but nope.
-          // FIXME: Fix ElementStackSelectField z order issues.
-          // I hate z indexes so much...  This is a disgustingly high value, but Popper is using 1300 by default.
-          zIndex: 2000,
-        }}
-      >
-        <ElementStackDetails elementStack={elementStack} />
-      </Popper>
+      </Tooltip>
     </Box>
   );
 };

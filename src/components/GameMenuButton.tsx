@@ -5,7 +5,10 @@ import {
   IconButton,
   List,
   ListItemButton,
+  ListItemText,
   Popover,
+  Stack,
+  Typography,
 } from "@mui/material";
 
 import { Menu } from "@mui/icons-material";
@@ -13,6 +16,9 @@ import { Menu } from "@mui/icons-material";
 import { useDIDependency } from "@/container";
 
 import { SaveManager } from "@/services/sh-game/SaveManager/SaveManager";
+
+import { useObservation } from "@/hooks/use-observation";
+import { DateTime } from "luxon";
 
 const GameMenuButton = () => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -37,23 +43,59 @@ interface GameMenuProps {
 }
 const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
   const saveManager = useDIDependency(SaveManager);
+  const canSave = useObservation(saveManager.canSave$);
+  const autosave = useObservation(saveManager.autosave$);
 
   const onAutosave = React.useCallback(() => {
     saveManager.autosave();
     onClose();
   }, [saveManager, onClose]);
+
+  const onSaveAs = React.useCallback(() => {
+    saveManager.showSaveGameDialog();
+    onClose();
+  }, [saveManager, onClose]);
+
+  const onLoadAutosave = React.useCallback(() => {
+    saveManager.loadSave("AUTOSAVE");
+    onClose();
+  }, [saveManager, onClose]);
+
   const onLoad = React.useCallback(() => {
     saveManager.openLoadGameDialog();
     onClose();
   }, [saveManager, onClose]);
 
+  const onNewGame = React.useCallback(() => {
+    saveManager.newGame();
+    onClose();
+  }, [saveManager, onClose]);
+
   return (
     <Popover open={anchorEl != null} anchorEl={anchorEl} onClose={onClose}>
-      <List sx={{ width: 200 }}>
-        <ListItemButton onClick={onAutosave}>Save</ListItemButton>
-        <ListItemButton disabled>Save As</ListItemButton>
+      <List sx={{ width: 250 }}>
+        <ListItemButton disabled={!canSave} onClick={onAutosave}>
+          Save Game
+        </ListItemButton>
+        <ListItemButton disabled={!canSave} onClick={onSaveAs}>
+          Save Game As
+        </ListItemButton>
         <Divider />
-        <ListItemButton onClick={onLoad}>Load</ListItemButton>
+        <ListItemButton disabled={autosave === null} onClick={onLoadAutosave}>
+          <Stack direction="column">
+            <Typography variant="body2">Load Last Autosave</Typography>
+            {autosave && (
+              <Typography variant="caption">
+                {DateTime.fromISO(autosave.saveDate).toLocaleString(
+                  DateTime.DATETIME_SHORT
+                )}
+              </Typography>
+            )}
+          </Stack>
+        </ListItemButton>
+        <ListItemButton onClick={onLoad}>Load Game</ListItemButton>
+        <Divider />
+        <ListItemButton onClick={onNewGame}>New Game</ListItemButton>
       </List>
     </Popover>
   );

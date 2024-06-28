@@ -1,9 +1,9 @@
 import { DialogModel } from "./DialogModel";
 
-export interface ActionPromptDialogRequest {
+export interface ActionPromptDialogRequest<TResult = string> {
   type: "action-prompt";
   text: string;
-  actions: DialogAction[];
+  actions: DialogAction<TResult>[];
 }
 
 export function isTextDialogRequest(
@@ -14,9 +14,9 @@ export function isTextDialogRequest(
 
 export interface ComponentDialogRequest {
   type: "component";
-  component: React.ComponentType<ComponentDialogRequestProps>;
+  component: React.ComponentType<ComponentDialogProps>;
 }
-export type ComponentDialogRequestProps = { model: DialogModel };
+export type ComponentDialogProps = { model: DialogModel };
 
 export function isComponentDialogRequest(
   request: DialogRequest
@@ -24,10 +24,10 @@ export function isComponentDialogRequest(
   return request.type === "component";
 }
 
-export interface DialogAction {
+export interface DialogAction<T = string> {
   label: string;
   closeOnClick?: boolean;
-  completionResult?: string;
+  completionResult?: T;
   default?: boolean;
   onClick?(): void;
 }

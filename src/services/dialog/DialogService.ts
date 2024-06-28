@@ -3,7 +3,6 @@ import { BehaviorSubject, map } from "rxjs";
 import { last } from "lodash";
 
 import {
-  DialogAction,
   DialogRequest,
   isComponentDialogRequest,
   isTextDialogRequest,
@@ -16,8 +15,8 @@ import {
 
 interface CurrentDialogDetails {
   model: DialogModel;
-  resolve(completionResult: string | null): void;
-  promise: Promise<string | null>;
+  resolve(completionResult: any): void;
+  promise: Promise<any>;
 }
 
 @injectable()
@@ -66,8 +65,8 @@ export class DialogService {
       return null;
     }
 
-    let resolve: (result: string) => void;
-    const promise = new Promise<string | null>((r) => (resolve = r));
+    let resolve: (result: any) => void;
+    const promise = new Promise<any>((r) => (resolve = r));
     const details: CurrentDialogDetails = {
       model,
       resolve: resolve!,
@@ -86,15 +85,19 @@ export class DialogService {
       return;
     }
 
+    const { resolve } = this._dialogDetailQueue[index];
+
     this._dialogDetailQueue.splice(index, 1);
 
     // Was the last index.
     if (index === this._dialogDetailQueue.length) {
       this._currentDialogDetails$.next(last(this._dialogDetailQueue) ?? null);
     }
+
+    resolve(null);
   }
 
-  private _resolveDialog(completionResult: string | null) {
+  private _resolveDialog(completionResult: any) {
     const currentDialog = this._currentDialogDetails$.value;
     if (!currentDialog) {
       return;

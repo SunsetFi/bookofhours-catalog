@@ -40,7 +40,7 @@ const DialogServiceDialog = () => {
 export default DialogServiceDialog;
 
 interface TextDialogProps {
-  model: ActionPromptDialogModel;
+  model: ActionPromptDialogModel<any>;
 }
 
 const TextDialog = ({ model }: TextDialogProps) => {
@@ -68,7 +68,7 @@ const ComponentDialog = ({ model }: ComponentDialogProps) => {
 };
 
 interface DialogActionsBarProps {
-  actions: DialogActionModel[];
+  actions: DialogActionModel<any>[];
 }
 
 const DialogActionsBar = ({ actions }: DialogActionsBarProps) => {

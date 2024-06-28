@@ -7,18 +7,23 @@ import {
   Typography,
 } from "@mui/material";
 
-import { ComponentDialogRequestProps } from "@/services/dialog";
+import { useDIDependency } from "@/container";
 
-import SelectGameContent from "@/components/LoadGameContent";
+import { ComponentDialogProps } from "@/services/dialog";
 
-const NewGameDialogContent = ({ model }: ComponentDialogRequestProps) => {
+import SavedGamesGrid from "@/components/SavedGamesGrid";
+
+import { SaveManager } from "./SaveManager";
+
+const NewGameDialogContent = ({ model }: ComponentDialogProps) => {
+  const saveManager = useDIDependency(SaveManager);
   return (
     <>
       <DialogTitle>
         <Typography variant="h3">Load a Game</Typography>
       </DialogTitle>
       <DialogContent>
-        <SelectGameContent />
+        <SavedGamesGrid onLoad={(saveName) => model.resolve(saveName)} />
       </DialogContent>
       <DialogActions>
         <Button onClick={() => model.resolve(null)}>Cancel</Button>
