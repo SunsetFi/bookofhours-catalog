@@ -1,6 +1,6 @@
 import React from "react";
 
-import Box from "@mui/material/Box";
+import { Box, Stack } from "@mui/material";
 
 import { powerAspects } from "@/aspects";
 import { useObservation } from "@/hooks/use-observation";
@@ -31,16 +31,10 @@ const BookCatalogPage = () => {
         size: 50,
         cell: (props) => {
           return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
+            <Stack direction="column" alignItems="center">
               <FocusIconButton token={props.row.original} />
               <CraftIconButton onClick={() => props.row.original.read()} />
-            </Box>
+            </Stack>
           );
         },
       }),

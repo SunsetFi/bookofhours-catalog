@@ -29,6 +29,7 @@ import {
   Orchestrator,
   TokensSource,
   filterHasAnyAspect,
+  filterHasNoneOfAspect,
   filterTokenNotInPath,
 } from "@/services/sh-game";
 
@@ -96,6 +97,7 @@ function elementStackToBook(
     memoryElementId$,
     memoryLabel$,
     memoryAspects$,
+    // Journal has a lot of complex unique recipes that we are not dealing with currently.
     read() {
       if (elementStack.elementId.startsWith("uncatbook.")) {
         const period = elementStack.elementId.substring(10);
@@ -112,10 +114,12 @@ function elementStackToBook(
         const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
           aspectId.startsWith("mastery.")
         );
+
+        const recipeId = isMastered
+          ? `study.mystery.${mystery}.mastered`
+          : `study.mystery.${mystery}.mastering.begin`;
         orchestrator.openOrchestration({
-          recipeId: isMastered
-            ? `study.mystery.${mystery}.mastered`
-            : `study.mystery.${mystery}.mastering.begin`,
+          recipeId,
           desiredElementIds: [elementStack.elementId],
         });
       }
@@ -143,7 +147,9 @@ export function getBooksObservable(
 
   return tokensSource.visibleElementStacks$.pipe(
     filterHasAnyAspect("readable"),
+    filterHasNoneOfAspect(["journal", "correspondence"]),
     // Ignore tokens in arrival verbs.
+    // These can be books oriflame is selling us.
     filterTokenNotInPath("~/arrivalverbs"),
     distinctUntilShallowArrayChanged(),
     mapArrayItemsCached((item) =>
