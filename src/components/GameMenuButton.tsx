@@ -74,13 +74,14 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
   return (
     <Popover open={anchorEl != null} anchorEl={anchorEl} onClose={onClose}>
       <List sx={{ width: 250 }}>
-        <ListItemButton disabled={!canSave} onClick={onAutosave}>
+        <ListItemButton disabled={!canSave} onClick={onSaveAs}>
           Save Game
         </ListItemButton>
-        <ListItemButton disabled={!canSave} onClick={onSaveAs}>
-          Save Game As
-        </ListItemButton>
+        <ListItemButton onClick={onLoad}>Load Game</ListItemButton>
         <Divider />
+        <ListItemButton disabled={!canSave} onClick={onAutosave}>
+          Save as Autosave
+        </ListItemButton>
         <ListItemButton disabled={autosave === null} onClick={onLoadAutosave}>
           <Stack direction="column">
             <Typography variant="body2">Load Last Autosave</Typography>
@@ -93,7 +94,6 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
             )}
           </Stack>
         </ListItemButton>
-        <ListItemButton onClick={onLoad}>Load Game</ListItemButton>
         <Divider />
         <ListItemButton onClick={onNewGame}>New Game</ListItemButton>
       </List>
