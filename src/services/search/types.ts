@@ -9,6 +9,7 @@ export interface SearchItemAction {
 export interface SearchItemResult {
   iconUrl: string;
   label: string;
+  secondaryText?: string;
   path: string;
   actions?: SearchItemAction[];
 }

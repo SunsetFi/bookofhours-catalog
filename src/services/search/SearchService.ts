@@ -11,7 +11,6 @@ import {
 
 import { isNotNull } from "@/utils";
 
-import { SearchItemResult } from "./types";
 import providers from "./providers";
 
 @injectable()
@@ -19,32 +18,42 @@ import providers from "./providers";
 export class SearchService {
   private _lastQuery: string | null = null;
 
+  private _searchQueryVersion = 0;
   private readonly _searchQueryInput$ = new BehaviorSubject<string | null>(
     null
   );
 
   private readonly _searchBusy$ = new BehaviorSubject(false);
 
-  private readonly _searchQueryResponse$ = this._searchQueryInput$.pipe(
-    debounceTime(700)
+  private readonly _searchQueryDebounced$ = this._searchQueryInput$.pipe(
+    debounceTime(500)
   );
 
-  private readonly _searchQueryResponseNotEmpty$ =
-    this._searchQueryResponse$.pipe(
-      filter(isNotNull),
-      filter((x) => x != ""),
-      shareReplay(1)
-    );
+  private readonly _searchActiveQuery$ = this._searchQueryDebounced$.pipe(
+    filter(isNotNull),
+    map((x) => x.trim()),
+    filter((x) => x != ""),
+    shareReplay(1)
+  );
 
   private readonly _searchResults$ = combineLatest(
     providers.map((provider) =>
-      provider(this._searchQueryResponseNotEmpty$, this._container)
+      provider(this._searchActiveQuery$, this._container)
     )
   ).pipe(map((results) => results.flat()));
 
   constructor(@inject(Container) private readonly _container: Container) {
-    this._searchQueryInput$.subscribe((q) => this._searchBusy$.next(q !== ""));
-    this._searchQueryResponse$.subscribe(() => this._searchBusy$.next(false));
+    let listeningVersion: number | null = null;
+    this._searchQueryInput$.subscribe((q) => {
+      listeningVersion = ++this._searchQueryVersion;
+      this._searchBusy$.next(q !== "");
+    });
+    this._searchResults$.subscribe(() => {
+      if (listeningVersion === this._searchQueryVersion) {
+        this._searchBusy$.next(false);
+        listeningVersion = null;
+      }
+    });
   }
 
   private _isOpen$: Observable<boolean> | null = null;

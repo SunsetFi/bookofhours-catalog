@@ -60,13 +60,20 @@ function filterCraftableToQuery(
 function craftableModelToSearchItem(
   craftable: CraftableModel
 ): Observable<PageSearchItemResult> {
-  return combineLatest([craftable.iconUrl$, craftable.label$]).pipe(
-    filter(([iconUrl, label]) => !!iconUrl && !!label),
+  return combineLatest([
+    craftable.iconUrl$,
+    craftable.label$,
+    craftable.skillLabel$,
+  ]).pipe(
+    filter(
+      ([iconUrl, label, skillLabel]) => !!iconUrl && !!label && !!skillLabel
+    ),
     map(
-      ([iconUrl, label]) =>
+      ([iconUrl, label, skillLabel]) =>
         ({
           iconUrl: iconUrl!,
           label: label!,
+          secondaryText: `Skill: ${skillLabel}`,
           pathQuery: `label=\"${encodeURIComponent(label!)}\"`,
           actions: [
             {

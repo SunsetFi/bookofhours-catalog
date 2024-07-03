@@ -19,8 +19,6 @@ import {
 
 import { Search as SearchIcon } from "@mui/icons-material";
 
-import sitemap, { isSiteMapNavItem } from "@/sitemap";
-
 import { useDIDependency } from "@/container";
 
 import { useHistory } from "@/services/history";
@@ -100,7 +98,21 @@ const SearchDialog = () => {
           gap: 1,
         }}
       >
-        <SearchIcon fontSize="large" color="primary" />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 50,
+            height: 50,
+          }}
+        >
+          {isBusy ? (
+            <CircularProgress />
+          ) : (
+            <SearchIcon fontSize="large" color="primary" />
+          )}
+        </Box>
         <TextField
           ref={onTextFieldMount}
           onKeyDown={onTextFieldKeyDown}
@@ -133,18 +145,6 @@ const SearchDialog = () => {
             Type a query to search
           </Typography>
         )}
-        {isBusy && (
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        )}
         {hasQuery && !isBusy && searchResults.length === 0 && (
           <Typography sx={{ width: "100%", textAlign: "center" }} variant="h5">
             No results found
@@ -163,15 +163,7 @@ const SearchDialog = () => {
 };
 
 const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
-  const { iconUrl, label, path } = item;
-
-  let secondaryText: string | undefined = undefined;
-  const pathItem = sitemap
-    .filter(isSiteMapNavItem)
-    .find((x) => x.path === item.path);
-  if (pathItem) {
-    secondaryText = pathItem.label;
-  }
+  const { iconUrl, label, path, secondaryText } = item;
 
   const navigate = useNavigate();
   const searchService = useDIDependency(SearchService);

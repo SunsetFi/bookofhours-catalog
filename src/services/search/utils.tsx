@@ -1,9 +1,14 @@
+import React from "react";
+
 import { Observable, combineLatest, map, filter } from "rxjs";
+
+import { Visibility as VisibilityIcon } from "@mui/icons-material";
+
+import { observeAllMap, switchMapIfNotNull } from "@/observables";
 
 import { ElementStackModel } from "../sh-game";
 
 import { PageSearchItemResult } from "./types";
-import { observeAllMap } from "@/observables";
 
 export function mapElementStacksToSearchItems(
   produceQuery: (elementStack: ElementStackModel) => Observable<string | null>
@@ -24,18 +29,28 @@ function elementStackToSearchItem(
   return combineLatest([
     elementStack.iconUrl$,
     elementStack.label$,
+    elementStack.parentTerrain$.pipe(
+      switchMapIfNotNull((terrain) => terrain.label$)
+    ),
     produceQuery(elementStack),
   ]).pipe(
     filter(
       ([iconUrl, label, searchFragment]) =>
         iconUrl != null && label != null && searchFragment != null
     ),
-    map(([iconUrl, label, pathQuery]) => {
+    map(([iconUrl, label, location, pathQuery]) => {
       return {
         iconUrl: iconUrl,
         label: label!,
+        secondaryText: location ?? undefined,
         pathQuery: pathQuery!,
-      };
+        actions: [
+          {
+            icon: <VisibilityIcon />,
+            onClick: () => elementStack.focus(),
+          },
+        ],
+      } satisfies PageSearchItemResult;
     })
   );
 }
