@@ -13,6 +13,7 @@ import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { SituationModel } from "./SituationModel";
 import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
+import { WisdomNodeTerrainModel } from "./WisdomNodeTerrainModel";
 
 @injectable()
 @singleton()
@@ -36,6 +37,13 @@ export class TokenModelFactory {
           this._container.get(API),
           this._container.get(Compendium).getRecipeById(token.infoRecipeId),
           this._container.get(TokensSource).visibleTokens$
+        );
+      case "WisdomNodeTerrain":
+        return new WisdomNodeTerrainModel(
+          token,
+          this._container.get(API),
+          this._container.get(TokensSource).tokens$,
+          this._container.get(Compendium)
         );
       case "Situation":
       case "WorkstationSituation" as any:

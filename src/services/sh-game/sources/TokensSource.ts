@@ -3,6 +3,7 @@ import {
   Subject,
   combineLatest,
   distinctUntilChanged,
+  filter,
   map,
   shareReplay,
 } from "rxjs";
@@ -41,6 +42,10 @@ import { filterTokenInPath } from "../observables";
 
 import { GameStateSource } from "./GameStateSource";
 import { BatchingScheduler } from "@/services/scheduler";
+import {
+  WisdomNodeTerrainModel,
+  isWisdomNodeTerrainModel,
+} from "../token-models/WisdomNodeTerrainModel";
 
 const supportedPayloadTypes: PayloadType[] = [
   "ConnectedTerrain",
@@ -48,6 +53,7 @@ const supportedPayloadTypes: PayloadType[] = [
   "Situation",
   "WorkstationSituation",
   "RoomWorkSituation",
+  "WisdomNodeTerrain",
 ];
 
 const WisdomTreeCommittmentRegex =
@@ -99,6 +105,14 @@ export class TokensSource {
 
   private readonly _visibleTokens$ = this._tokens$.pipe(
     filterItemObservations((model) => model.visible$),
+    // Dont count committed wisdom tree nodes as visible.
+    // This is a bit hackish, but we don't want the duplicate skills to appear as somethig we 'have'.
+    // WisdomNodeModel uses tokens$ directly and skips this, so it is unaffected.
+    map((models) =>
+      models.filter(
+        (model) => !WisdomTreeCommittmentRegex.test(model.spherePath)
+      )
+    ),
     distinctUntilShallowArrayChanged(),
     shareReplay(1)
   );
@@ -198,21 +212,6 @@ export class TokensSource {
     return this._unsealedTerrains$;
   }
 
-  private _unlockedTerrains$: Observable<
-    readonly ConnectedTerrainModel[]
-  > | null = null;
-  get unlockedTerrains$(): Observable<readonly ConnectedTerrainModel[]> {
-    if (!this._unlockedTerrains$) {
-      this._unlockedTerrains$ = this._tokens$.pipe(
-        filterItems(isConnectedTerrainModel),
-        distinctUntilShallowArrayChanged(),
-        shareReplay(1)
-      );
-    }
-
-    return this._unlockedTerrains$;
-  }
-
   private _visibleElementStacks$: Observable<
     readonly ElementStackModel[]
   > | null = null;
@@ -272,6 +271,21 @@ export class TokensSource {
     return this._unlockedHarvestStations$;
   }
 
+  private _wisdomTreeNodes$: Observable<
+    readonly WisdomNodeTerrainModel[]
+  > | null = null;
+  get wisdomTreeNodes$() {
+    if (!this._wisdomTreeNodes$) {
+      this._wisdomTreeNodes$ = this._tokens$.pipe(
+        filterItems(isWisdomNodeTerrainModel),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._wisdomTreeNodes$;
+  }
+
   private async _pollTokens() {
     const thisUpdate = Date.now();
 
@@ -297,12 +311,7 @@ export class TokensSource {
           : Promise.resolve([]),
       ]);
 
-      // Remove wisdom tree commitments from the tokens.
-      // We could lok at their inExteriorSphere, but we often want to show non-exterior tokens
-      // when they are in situations.
-      tokens = flatten([first, second]).filter(
-        (t) => !WisdomTreeCommittmentRegex.test(t.spherePath)
-      );
+      tokens = flatten([first, second]);
     } catch (e) {
       // Happens on occasion, probably as a result of us no longer
       // thread locking reads.
@@ -335,7 +344,6 @@ export class TokensSource {
     const foundIds = tokens.map((t) => t.id);
     const tokenIdsToRemove = difference(existingTokenIds, foundIds);
 
-    // React 18 auto batches this by virtue of being inside a promise.
     await this._scheduler.batchUpdate(async () => {
       tokenIdsToRemove.forEach((id) => {
         const token = this._tokenModels.get(id);

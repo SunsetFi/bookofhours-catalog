@@ -4,13 +4,13 @@ import { pick } from "lodash";
 import { useDrop } from "react-dnd";
 
 import {
-  Popper,
   Box,
   Typography,
   Autocomplete,
   TextField,
   CircularProgress,
   InputAdornment,
+  SxProps,
 } from "@mui/material";
 
 import { observeAllMap } from "@/observables";
@@ -28,6 +28,7 @@ import ElementIcon from "./ElementIcon";
 import Tooltip from "../Tooltip";
 
 export interface ElementStackSelectFieldProps {
+  sx?: SxProps;
   label: string;
   fullWidth?: boolean;
   elementStacks$: Observable<readonly ElementStackModel[]>;
@@ -58,6 +59,7 @@ function observeAutocompleteItem(
 }
 
 const ElementStackSelectField = ({
+  sx,
   label,
   fullWidth,
   elementStacks$,
@@ -127,6 +129,7 @@ const ElementStackSelectField = ({
 
   return (
     <Autocomplete
+      sx={sx}
       fullWidth={fullWidth}
       options={items}
       readOnly={readOnly}

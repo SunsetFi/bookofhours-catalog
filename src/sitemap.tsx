@@ -3,13 +3,16 @@ import { PageSearchProviderPipe } from "./services/search";
 import BookCatalogPage, {
   bookCatalogSearchProvider,
 } from "./pages/BookCatalogPage";
+import BrancrugCatalogPage from "./pages/BrancrugCatalogPage";
 import CraftingCatalogPage, {
   craftingSearchProvider,
 } from "./pages/CraftingCatalogPage";
+import DeskPage from "./pages/DeskPage";
 import FurnishingsCatalogPage, {
   furnishingsSearchProvider,
 } from "./pages/FurnishingsCatalogPage";
 import HarvestCatalogPage from "./pages/HarvestCatalogPage";
+import LocationsCatalogPage from "./pages/LocationsCatalogPage";
 import MaterialsCatalogPage, {
   materialsSearchProvider,
 } from "./pages/MaterialsCatalogPage";
@@ -25,10 +28,8 @@ import ThingsCatalogPage, {
 import ToolsCatalogPage, {
   toolsSearchProvider,
 } from "./pages/ToolsCatalogPage";
+import WisdomTreePage from "./pages/WisdomTreePage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
-import LocationsCatalogPage from "./pages/LocationsCatalogPage";
-import IndexPage from "./pages/DeskPage";
-import BrancrugCatalogPage from "./pages/BrancrugCatalogPage";
 
 export interface SiteMapNavItem {
   label: string;
@@ -70,7 +71,7 @@ const sitemap: SiteMapItem[] = [
     iconSource: "verb",
     iconName: "library.desk.nonna.consider",
     path: "/desk",
-    Component: IndexPage,
+    Component: DeskPage,
   },
   {
     divider: true,
@@ -114,6 +115,13 @@ const sitemap: SiteMapItem[] = [
     searchProvider: skillsSearchProvider,
     Component: SkillsCatalogPage,
   },
+  // {
+  //   label: "Wisdoms",
+  //   iconSource: "aspect",
+  //   iconName: "difficulty.keeper",
+  //   path: "/wisdoms",
+  //   Component: WisdomTreePage,
+  // },
   {
     label: "Craftables",
     iconSource: "aspect",

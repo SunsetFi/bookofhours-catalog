@@ -46,11 +46,10 @@ const SaveGamesGrid = ({ onLoad }: SaveGamesGridProps) => {
         display: "flex",
         flexDirection: "row",
         flexWrap: "wrap",
-        height: "100%",
-        overflow: "auto",
+        gap: `${GapWidth}px`,
         width: SaveGamesGridWidth,
+        overflow: "auto",
       }}
-      gap={`${GapWidth}px`}
     >
       {saves && saves.length === 0 && (
         <Typography justifySelf="center">No saves found</Typography>

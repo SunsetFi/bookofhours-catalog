@@ -20,6 +20,7 @@ export interface ElementStackCardProps {
   sx?: SxProps;
   elementStack: ElementStackModel;
   width?: number;
+  interactable?: boolean;
 }
 
 // Card is 256x406
@@ -36,6 +37,7 @@ const ElementStackCard = ({
   elementStack,
   width = DefaultElementStackCardWidth,
   sx,
+  interactable = true,
 }: ElementStackCardProps) => {
   const theme = useTheme();
   const widthPx = `${width}px`;
@@ -50,11 +52,12 @@ const ElementStackCard = ({
     () => ({
       type: ElementStackDraggable,
       item: { elementStack } satisfies ElementStackDraggable,
+      canDrag: interactable,
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [elementStack]
+    [elementStack, interactable]
   );
 
   if (!iconUrl) {
@@ -82,9 +85,10 @@ const ElementStackCard = ({
             height: `${width * ElementStackCardAspectRatio}px`,
             backgroundColor: textBackgroundColor,
             overflow: "hidden",
-            filter: !inExteriorSphere
-              ? "brightness(75%) grayscale(0.8)"
-              : undefined,
+            filter:
+              interactable && !inExteriorSphere
+                ? "brightness(75%) grayscale(0.8)"
+                : undefined,
           }}
         >
           <Box
@@ -151,7 +155,7 @@ const ElementStackCard = ({
             {quantity}
           </Typography>
         )}
-        {!inExteriorSphere && (
+        {interactable && !inExteriorSphere && (
           <Box
             sx={{
               border: "2px solid #888",

@@ -47,7 +47,7 @@ const OrchestrationSlotEditor = React.memo(
 
     return (
       <Stack direction="column" gap={1} sx={{ width: "100%" }}>
-        <Stack direction="row" gap={1} sx={{ width: "100%" }}>
+        <Stack direction="row" gap={1} sx={{ width: "100%" }} flexWrap="wrap">
           <Typography variant="body1" sx={{ mr: "auto" }}>
             {slot.spec.label}
           </Typography>
@@ -70,6 +70,7 @@ const OrchestrationSlotEditor = React.memo(
           </Stack>
         </Stack>
         <ElementStackSelectField
+          sx={{ mt: 1 }}
           label="Element"
           fullWidth
           readOnly={slot.locked}
