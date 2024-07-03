@@ -57,6 +57,10 @@ export class TokenParentTerrainFactory {
           }
         }
 
+        // FIXME: Don't consider cards in workstations of this terrain to be 'in' this terrain.
+        // This is really difficult, as workstations are not in a consistently named path.
+        // This is another instance where we really want to know the TokenModel path of the element.
+
         return null;
       }),
       distinctUntilChanged(),

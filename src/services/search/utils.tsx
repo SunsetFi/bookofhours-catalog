@@ -5,6 +5,7 @@ import { Observable, combineLatest, map, filter } from "rxjs";
 import { Visibility as VisibilityIcon } from "@mui/icons-material";
 
 import { observeAllMap, switchMapIfNotNull } from "@/observables";
+import { isNotNull } from "@/utils";
 
 import { ElementStackModel } from "../sh-game";
 
@@ -45,11 +46,13 @@ function elementStackToSearchItem(
         secondaryText: location ?? undefined,
         pathQuery: pathQuery!,
         actions: [
-          {
-            icon: <VisibilityIcon />,
-            onClick: () => elementStack.focus(),
-          },
-        ],
+          location
+            ? {
+                icon: <VisibilityIcon />,
+                onClick: () => elementStack.focus(),
+              }
+            : null,
+        ].filter(isNotNull),
       } satisfies PageSearchItemResult;
     })
   );
