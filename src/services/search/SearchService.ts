@@ -23,8 +23,10 @@ export class SearchService {
     null
   );
 
+  private readonly _searchBusy$ = new BehaviorSubject(false);
+
   private readonly _searchQueryResponse$ = this._searchQueryInput$.pipe(
-    debounceTime(1000)
+    debounceTime(700)
   );
 
   private readonly _searchQueryResponseNotEmpty$ =
@@ -34,7 +36,16 @@ export class SearchService {
       shareReplay(1)
     );
 
-  constructor(@inject(Container) private readonly _container: Container) {}
+  private readonly _searchResults$ = combineLatest(
+    providers.map((provider) =>
+      provider(this._searchQueryResponseNotEmpty$, this._container)
+    )
+  ).pipe(map((results) => results.flat()));
+
+  constructor(@inject(Container) private readonly _container: Container) {
+    this._searchQueryInput$.subscribe((q) => this._searchBusy$.next(q !== ""));
+    this._searchQueryResponse$.subscribe(() => this._searchBusy$.next(false));
+  }
 
   private _isOpen$: Observable<boolean> | null = null;
   get isOpen$() {
@@ -42,6 +53,10 @@ export class SearchService {
       this._isOpen$ = this._searchQueryInput$.pipe(map((x) => x !== null));
     }
     return this._isOpen$;
+  }
+
+  get isBusy$(): Observable<boolean> {
+    return this._searchBusy$;
   }
 
   private _searchQuery$: Observable<string> | null = null;
@@ -52,17 +67,7 @@ export class SearchService {
     return this._searchQuery$;
   }
 
-  private _searchResults$: Observable<SearchItemResult[]> | null = null;
   get searchResults$() {
-    if (!this._searchResults$) {
-      const observables = providers.map((provider) =>
-        provider(this._searchQueryResponseNotEmpty$, this._container)
-      );
-      this._searchResults$ = combineLatest(observables).pipe(
-        map((results) => results.flat())
-      );
-    }
-
     return this._searchResults$;
   }
 

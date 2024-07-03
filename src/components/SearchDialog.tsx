@@ -14,6 +14,7 @@ import {
   ListItemText,
   Stack,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 
 import { Search as SearchIcon } from "@mui/icons-material";
@@ -32,6 +33,7 @@ const SearchDialog = () => {
 
   const searchService = useDIDependency(SearchService);
   const isOpen = useObservation(searchService.isOpen$);
+  const isBusy = useObservation(searchService.isBusy$);
   const searchQuery = useObservation(searchService.searchQuery$) ?? "";
   const searchResults = useObservation(searchService.searchResults$) ?? [];
 
@@ -131,7 +133,19 @@ const SearchDialog = () => {
             Type a query to search
           </Typography>
         )}
-        {hasQuery && searchResults.length === 0 && (
+        {isBusy && (
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+        {hasQuery && !isBusy && searchResults.length === 0 && (
           <Typography sx={{ width: "100%", textAlign: "center" }} variant="h5">
             No results found
           </Typography>
