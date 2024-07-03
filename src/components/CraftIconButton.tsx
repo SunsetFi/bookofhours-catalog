@@ -1,7 +1,7 @@
 import React from "react";
 
-import IconButton, { IconButtonProps } from "@mui/material/IconButton";
-import PlayCircle from "@mui/icons-material/PlayCircle";
+import { IconButton, IconButtonProps } from "@mui/material";
+import { PlayCircle } from "@mui/icons-material";
 
 const CraftIconButton = (props: IconButtonProps) => (
   <IconButton

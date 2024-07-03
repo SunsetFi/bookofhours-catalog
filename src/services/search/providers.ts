@@ -1,5 +1,6 @@
 import { Observable, map } from "rxjs";
 import { Container } from "microinject";
+import { omit } from "lodash";
 
 import sitemap, { isSiteMapNavItem } from "@/sitemap";
 
@@ -38,7 +39,10 @@ function pageProviderFromPath(
 ) {
   return (query: Observable<string>, container: Container) => {
     return pageProvider(query, container).pipe(
-      mapArrayItems((item) => ({ ...item, path }))
+      mapArrayItems((item) => ({
+        ...omit(item, "pathQuery"),
+        path: `${path}?${item.pathQuery}`,
+      }))
     );
   };
 }

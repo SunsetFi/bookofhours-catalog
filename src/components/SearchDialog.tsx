@@ -1,24 +1,31 @@
 import React from "react";
 import { useNavigate } from "react-router";
 
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import {
+  Dialog,
+  DialogContent,
+  TextField,
+  Typography,
+  Box,
+  Divider,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  IconButton,
+} from "@mui/material";
 
-import SearchIcon from "@mui/icons-material/Search";
+import { Search as SearchIcon } from "@mui/icons-material";
+
+import sitemap, { isSiteMapNavItem } from "@/sitemap";
 
 import { useDIDependency } from "@/container";
-import { useObservation } from "@/hooks/use-observation";
 
-import { SearchService, SearchItemResult } from "@/services/search";
 import { useHistory } from "@/services/history";
+import { SearchService, SearchItemResult } from "@/services/search";
+
+import { useObservation } from "@/hooks/use-observation";
 
 const SearchDialog = () => {
   const navigate = useNavigate();
@@ -39,6 +46,7 @@ const SearchDialog = () => {
     [isOpen]
   );
 
+  const firstItem = searchResults[0];
   const onTextFieldKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key !== "Enter") {
@@ -48,15 +56,15 @@ const SearchDialog = () => {
       e.preventDefault();
       e.stopPropagation();
 
-      const firstItem = searchResults[0];
       if (!firstItem) {
         return;
       }
 
       searchService.close();
+
       navigate(firstItem.path);
     },
-    [searchService, searchResults]
+    [searchService, firstItem ?? null]
   );
 
   if (!isOpen) {
@@ -131,7 +139,7 @@ const SearchDialog = () => {
         {searchQuery != "" && (
           <List component="nav" sx={{ pt: 1 }}>
             {searchResults.map((item, i) => (
-              <SearchResultItem key={i} {...item} />
+              <SearchResultListItem key={i} item={item} />
             ))}
           </List>
         )}
@@ -140,29 +148,44 @@ const SearchDialog = () => {
   );
 };
 
-const SearchResultItem = ({
-  iconUrl,
-  label,
-  path,
-  pathQuery,
-}: SearchItemResult) => {
+const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
+  const { iconUrl, label, path } = item;
+
+  let secondaryText: string | undefined = undefined;
+  const pathItem = sitemap
+    .filter(isSiteMapNavItem)
+    .find((x) => x.path === item.path);
+  if (pathItem) {
+    secondaryText = pathItem.label;
+  }
+
   const navigate = useNavigate();
   const searchService = useDIDependency(SearchService);
   const history = useHistory();
-  const href = React.useMemo(
-    () => history.createHref(`${path}?${pathQuery}`),
-    [history, path, pathQuery]
-  );
+  const href = React.useMemo(() => history.createHref(path), [history, path]);
 
   const onClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       searchService.close();
-      navigate(`${path}?${pathQuery}`);
+      navigate(path);
     },
-    [path, pathQuery, searchService, navigate]
+    [path, searchService, navigate]
   );
+
+  let actions: React.ReactNode | null = null;
+  if (item.actions) {
+    actions = (
+      <Stack direction="row" sx={{ ml: "auto" }}>
+        {item.actions.map((action, i) => (
+          <IconButton key={i} onClick={action.onClick}>
+            {action.icon}
+          </IconButton>
+        ))}
+      </Stack>
+    );
+  }
 
   return (
     <ListItemButton component="a" href={href} onClick={onClick}>
@@ -177,7 +200,8 @@ const SearchResultItem = ({
           }}
         />
       </ListItemIcon>
-      <ListItemText primary={label} secondary={path} />
+      <ListItemText primary={label} secondary={secondaryText} />
+      {actions}
     </ListItemButton>
   );
 };

@@ -1,3 +1,6 @@
+import React from "react";
+import { PlayCircle } from "@mui/icons-material";
+
 import { Observable, combineLatest, filter, map, switchMap } from "rxjs";
 
 import { filterItemObservations, observeAllMap } from "@/observables";
@@ -11,6 +14,7 @@ import {
   CraftableModel,
   getCraftablesObservable,
 } from "./crafting-data-source";
+import { Orchestrator } from "@/services/sh-game";
 
 export const craftingSearchProvider: PageSearchProviderPipe = (
   query$,
@@ -58,10 +62,19 @@ function craftableModelToSearchItem(
 ): Observable<PageSearchItemResult> {
   return combineLatest([craftable.iconUrl$, craftable.label$]).pipe(
     filter(([iconUrl, label]) => !!iconUrl && !!label),
-    map(([iconUrl, label]) => ({
-      iconUrl: iconUrl!,
-      label: label!,
-      pathQuery: `label=\"${encodeURIComponent(label!)}\"`,
-    }))
+    map(
+      ([iconUrl, label]) =>
+        ({
+          iconUrl: iconUrl!,
+          label: label!,
+          pathQuery: `label=\"${encodeURIComponent(label!)}\"`,
+          actions: [
+            {
+              icon: <PlayCircle />,
+              onClick: () => craftable.craft(),
+            },
+          ],
+        } satisfies PageSearchItemResult)
+    )
   );
 }
