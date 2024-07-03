@@ -20,3 +20,5 @@ export * from "./cells";
 export * from "./columns";
 export * from "./filters";
 export * from "./types";
+
+export * from "./use-query-sort";

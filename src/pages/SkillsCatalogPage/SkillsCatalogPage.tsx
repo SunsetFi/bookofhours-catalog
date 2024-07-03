@@ -23,6 +23,7 @@ import PageContainer from "@/components/PageContainer";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -110,16 +111,19 @@ const SkillsCatalogPage = () => {
   );
 
   const [filter, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Esoteric Wisdoms">
       <IdentifierItemDataGrid
         sx={{ height: "100%" }}
+        items$={skills$}
         columns={columns}
         defaultSortColumn="label"
         filters={filter}
+        sorting={sortState}
+        onSortingChanged={onSortingChanged}
         onFiltersChanged={onFiltersChanged}
-        items$={skills$}
       />
     </PageContainer>
   );

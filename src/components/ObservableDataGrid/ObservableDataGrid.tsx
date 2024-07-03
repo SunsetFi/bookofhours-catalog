@@ -61,10 +61,12 @@ export interface ObservableDataGridProps<T extends {}> {
   sx?: SxProps;
   filters?: Record<string, any>;
   defaultSortColumn?: string;
+  sorting?: SortingState;
   columns: ObservableColumnDef<T, any>[];
   items$: Observable<readonly T[]>;
   getItemKey?(item: T, index: number): string;
   onFiltersChanged?(filters: Record<string, any>): void;
+  onSortingChanged?(sorting: SortingState): void;
 }
 
 function autoColumnProperty<T>(
@@ -189,9 +191,11 @@ function ObservableDataGrid<T extends {}>({
   filters,
   defaultSortColumn,
   columns,
+  sorting,
   items$,
   getItemKey = (item, index) => String(index),
   onFiltersChanged,
+  onSortingChanged,
 }: ObservableDataGridProps<T>) {
   const theme = useTheme();
 
@@ -201,23 +205,42 @@ function ObservableDataGrid<T extends {}>({
     [columns]
   );
 
-  const [sorting, setSorting] = React.useState<SortingState>(
-    defaultSortColumn
-      ? [
-          {
-            id: defaultSortColumn,
-            desc: false,
-          },
-        ]
-      : []
-  );
+  const [uncontrolledSorting, setUncontrolledSorting] =
+    React.useState<SortingState>(
+      defaultSortColumn
+        ? [
+            {
+              id: defaultSortColumn,
+              desc: false,
+            },
+          ]
+        : []
+    );
 
   const state = React.useMemo<Partial<TableState>>(
     () => ({
-      sorting,
+      sorting: sorting ?? uncontrolledSorting,
       columnFilters: filters ? recordToFilter(filters) : undefined,
     }),
-    [sorting, filters]
+    [sorting, uncontrolledSorting, filters]
+  );
+
+  const setSorting = React.useCallback(
+    (updater: Updater<SortingState>) => {
+      let newValue = sorting ?? uncontrolledSorting;
+      if (typeof updater === "function") {
+        newValue = updater(newValue);
+      } else {
+        newValue = updater;
+      }
+
+      if (onSortingChanged) {
+        onSortingChanged(newValue);
+      } else {
+        setUncontrolledSorting(newValue);
+      }
+    },
+    [sorting, uncontrolledSorting, onSortingChanged]
   );
 
   const data = useObservation(

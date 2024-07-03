@@ -18,6 +18,7 @@ import {
   createObservableColumnHelper,
   aspectsFilter,
   AspectsFilter,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 import { CraftableModel, useCraftables } from "./crafting-data-source";
@@ -122,6 +123,7 @@ const CraftingCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="The Fruits of Knowledge">
@@ -138,6 +140,8 @@ const CraftingCatalogPage = () => {
           columns={columns}
           items$={craftables$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           defaultSortColumn="label"
           onFiltersChanged={onFiltersChanged}
         />

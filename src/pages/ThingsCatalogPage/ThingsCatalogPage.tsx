@@ -15,6 +15,7 @@ import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -57,6 +58,7 @@ const ThingsCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Antiquities and Knicknacks">
@@ -73,6 +75,8 @@ const ThingsCatalogPage = () => {
           columns={columns}
           items$={elements$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

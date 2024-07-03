@@ -15,6 +15,7 @@ import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -62,6 +63,7 @@ const ToolsCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Toolshed">
@@ -78,6 +80,8 @@ const ToolsCatalogPage = () => {
           columns={columns}
           items$={elements$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

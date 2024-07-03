@@ -1,6 +1,5 @@
 ## Do this
 
-- Sorting available on URL for bookmarking
 - Show paginated notes for situations
 - Do greedy / locked slots get disabled properly? First incident arrival of game
 - Unlock for various terrains have icons. Add iconUrl to terrain and show it in unlock menu.

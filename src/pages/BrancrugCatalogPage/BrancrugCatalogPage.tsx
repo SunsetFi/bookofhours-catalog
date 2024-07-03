@@ -26,6 +26,7 @@ import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createSituationColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
@@ -135,6 +136,7 @@ const BrancrugCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Brancrug and Environs">
@@ -151,6 +153,8 @@ const BrancrugCatalogPage = () => {
           columns={columns}
           items$={elements$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

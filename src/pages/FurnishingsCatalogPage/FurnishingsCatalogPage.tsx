@@ -15,6 +15,7 @@ import PageContainer from "@/components/PageContainer";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -65,6 +66,7 @@ const FurnishingsCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="An Accounting of the Walls and Floors">
@@ -81,6 +83,8 @@ const FurnishingsCatalogPage = () => {
           columns={columns}
           items$={elements$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

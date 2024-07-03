@@ -13,6 +13,7 @@ import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createSituationColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createSituationColumnHelper();
@@ -46,6 +47,7 @@ const HarvestCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Gardens and Glades">
@@ -62,6 +64,8 @@ const HarvestCatalogPage = () => {
           columns={columns}
           items$={tokensSource.unlockedHarvestStations$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

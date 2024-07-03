@@ -36,6 +36,7 @@ import {
   AspectsFilter,
   FilterComponentProps,
   AspectsFilterValue,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 import {
   RowHeight,
@@ -169,6 +170,7 @@ const LocationsCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Locations">
@@ -185,6 +187,8 @@ const LocationsCatalogPage = () => {
           columns={columns}
           items$={items$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

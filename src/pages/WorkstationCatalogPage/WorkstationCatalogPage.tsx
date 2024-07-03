@@ -27,6 +27,7 @@ import {
   IdentifierItemDataGrid,
   aspectsPresentFilter,
   createSituationColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
@@ -149,6 +150,7 @@ const WorkstationCatalogPage = () => {
   );
 
   const [filters, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Workstations">
@@ -165,6 +167,8 @@ const WorkstationCatalogPage = () => {
           columns={columns}
           items$={elements$}
           filters={filters}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>

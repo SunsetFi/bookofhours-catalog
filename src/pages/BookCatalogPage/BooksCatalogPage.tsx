@@ -15,6 +15,7 @@ import {
   IdentifierItemDataGrid,
   ElementIconCell,
   createElementStackColumnHelper,
+  useQuerySort,
 } from "@/components/ObservableDataGrid";
 
 import { BookModel, useBooks } from "./books-data-source";
@@ -103,6 +104,7 @@ const BookCatalogPage = () => {
   );
 
   const [filter, onFiltersChanged] = useQueryObjectState();
+  const [sortState, onSortingChanged] = useQuerySort();
 
   return (
     <PageContainer title="Bibliographical Collection">
@@ -118,6 +120,8 @@ const BookCatalogPage = () => {
           columns={columns}
           items$={items$}
           filters={filter}
+          sorting={sortState}
+          onSortingChanged={onSortingChanged}
           onFiltersChanged={onFiltersChanged}
         />
       </Box>
