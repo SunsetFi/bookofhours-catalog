@@ -108,23 +108,14 @@ const BookCatalogPage = () => {
 
   return (
     <PageContainer title="Bibliographical Collection">
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <IdentifierItemDataGrid
-          columns={columns}
-          items$={items$}
-          filters={filter}
-          sorting={sortState}
-          onSortingChanged={onSortingChanged}
-          onFiltersChanged={onFiltersChanged}
-        />
-      </Box>
+      <IdentifierItemDataGrid
+        columns={columns}
+        items$={items$}
+        filters={filter}
+        sorting={sortState}
+        onSortingChanged={onSortingChanged}
+        onFiltersChanged={onFiltersChanged}
+      />
     </PageContainer>
   );
 };
