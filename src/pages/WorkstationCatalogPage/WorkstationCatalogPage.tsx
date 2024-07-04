@@ -154,24 +154,15 @@ const WorkstationCatalogPage = () => {
 
   return (
     <PageContainer title="Workstations">
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <IdentifierItemDataGrid
-          sx={{ height: "100%" }}
-          columns={columns}
-          items$={elements$}
-          filters={filters}
-          sorting={sortState}
-          onSortingChanged={onSortingChanged}
-          onFiltersChanged={onFiltersChanged}
-        />
-      </Box>
+      <IdentifierItemDataGrid
+        sx={{ height: "100%" }}
+        columns={columns}
+        items$={elements$}
+        filters={filters}
+        sorting={sortState}
+        onSortingChanged={onSortingChanged}
+        onFiltersChanged={onFiltersChanged}
+      />
     </PageContainer>
   );
 };

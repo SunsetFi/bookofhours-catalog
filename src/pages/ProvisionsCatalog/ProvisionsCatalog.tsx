@@ -70,24 +70,15 @@ const ProvisionsCatalog = () => {
 
   return (
     <PageContainer title="Stores and Provisions">
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <IdentifierItemDataGrid
-          sx={{ height: "100%" }}
-          columns={columns}
-          items$={elements$}
-          filters={filter}
-          sorting={sortState}
-          onSortingChanged={onSortingChanged}
-          onFiltersChanged={onFiltersChanged}
-        />
-      </Box>
+      <IdentifierItemDataGrid
+        sx={{ height: "100%" }}
+        columns={columns}
+        items$={elements$}
+        filters={filter}
+        sorting={sortState}
+        onSortingChanged={onSortingChanged}
+        onFiltersChanged={onFiltersChanged}
+      />
     </PageContainer>
   );
 };
