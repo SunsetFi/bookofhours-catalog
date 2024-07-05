@@ -8,3 +8,23 @@ html, body, #root {
   height: 100%;
   margin: 0;
 }
+
+/* width */
+::-webkit-scrollbar {
+  background: transparent;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
