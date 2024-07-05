@@ -3,7 +3,10 @@ import { map } from "rxjs";
 import { createElementStackSearchProvider } from "@/services/search";
 
 export const thingsSearchProvider = createElementStackSearchProvider(
-  "thing",
+  (elementStack) =>
+    elementStack.aspects$.pipe(
+      map((aspects) => Boolean(aspects["thing"] && !aspects["readable"]))
+    ),
   (element) =>
     element.label$.pipe(
       map((label) => (label ? `label=\"${encodeURIComponent(label)}\"` : null))

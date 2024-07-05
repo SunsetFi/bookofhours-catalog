@@ -2,9 +2,7 @@ import React from "react";
 
 import type { Instance as PopperInstance } from "@popperjs/core";
 
-import Box from "@mui/material/Box";
-import Popper from "@mui/material/Popper";
-import { type SxProps } from "@mui/material/styles";
+import { Box, Popper, SxProps } from "@mui/material";
 
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";

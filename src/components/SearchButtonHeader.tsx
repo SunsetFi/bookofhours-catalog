@@ -1,8 +1,6 @@
 import React from "react";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import type { SxProps } from "@mui/material/styles";
+import { Box, Typography, SxProps } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
 import { useDIDependency } from "@/container";

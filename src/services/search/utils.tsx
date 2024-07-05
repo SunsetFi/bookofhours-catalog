@@ -17,8 +17,13 @@ import {
   TokensSource,
 } from "../sh-game";
 
-import { PageSearchItemResult, PageSearchProviderPipe } from "./types";
-import { Compendium } from "../sh-compendium";
+import {
+  PageSearchItemResult,
+  PageSearchProviderPipe,
+  SearchQuery,
+} from "./types";
+import { Compendium, ElementModel } from "../sh-compendium";
+import { Aspects } from "secrethistories-api";
 
 export type QueryProducer = (
   elementStack: ElementStackModel
@@ -45,7 +50,6 @@ export function createElementStackSearchProvider(
 ): PageSearchProviderPipe {
   return (query$, container) => {
     const tokensSource = container.get(TokensSource);
-    const compendium = container.get(Compendium);
     let filterPipe: (
       source: Observable<readonly ElementStackModel[]>
     ) => Observable<readonly ElementStackModel[]>;
@@ -60,7 +64,7 @@ export function createElementStackSearchProvider(
         tokensSource.visibleElementStacks$.pipe(
           filterPipe,
           filterItemObservations((item) =>
-            elementStackMatchesQuery(query, item, compendium)
+            elementStackMatchesQuery(query, item)
           ),
           mapElementStacksToSearchItems(produceQuery)
         )
@@ -81,7 +85,7 @@ function mapElementStacksToSearchItems(
   };
 }
 
-function elementStackToSearchItem(
+export function elementStackToSearchItem(
   elementStack: ElementStackModel,
   produceQuery: (elementStack: ElementStackModel) => Observable<string | null>
 ): Observable<PageSearchItemResult> {
@@ -116,42 +120,70 @@ function elementStackToSearchItem(
   );
 }
 
+export function elementToSearchItem(
+  element: ElementModel,
+  produceQuery: (element: ElementModel) => Observable<string | null>
+): Observable<PageSearchItemResult> {
+  return combineLatest([
+    produceQuery(element),
+    element.iconUrl$,
+    element.label$,
+  ]).pipe(
+    filter(
+      ([searchFragment, iconUrl, label]) =>
+        iconUrl != null && label != null && searchFragment != null
+    ),
+    map(([pathQuery, iconUrl, label]) => {
+      return {
+        iconUrl: iconUrl,
+        label: label!,
+        pathQuery: pathQuery!,
+      } satisfies PageSearchItemResult;
+    })
+  );
+}
+
 function elementStackMatchesQuery(
-  query: string,
-  elementStack: ElementStackModel,
-  compendium: Compendium
+  query: SearchQuery,
+  elementStack: ElementStackModel
 ): Observable<boolean> {
   return combineLatest([
     elementStack.label$,
-    elementStack.aspects$.pipe(
-      map((aspects) =>
-        Object.keys(aspects).map((aspect) => compendium.getAspectById(aspect))
-      ),
-      filterItemObservations((aspect) =>
-        aspect.hidden$.pipe(map((hidden) => !hidden))
-      ),
-      observeAllMap((aspect) => aspect.label$)
-    ),
+    elementStack.aspects$,
     elementStack.description$,
   ]).pipe(
     map(([label, aspects, description]) => {
-      if (!label || !aspects || !description) {
-        return false;
-      }
-
-      if (label.toLowerCase().includes(query)) {
-        return true;
-      }
-
-      if (description.toLowerCase().includes(query)) {
-        return true;
-      }
-
-      if (aspects.some((aspect) => aspect && aspect.includes(query))) {
-        return true;
-      }
-
-      return false;
+      return matchesSearchQuery(query, {
+        freeText: [label, description].filter(isNotNull),
+        aspects,
+      });
     })
   );
+}
+
+export interface ItemSearchFacets {
+  freeText?: string[];
+  aspects?: Aspects;
+}
+export function matchesSearchQuery(
+  query: SearchQuery,
+  item: ItemSearchFacets
+): boolean {
+  if (query.type === "and") {
+    return query.queries.every((subQuery) =>
+      matchesSearchQuery(subQuery, item)
+    );
+  }
+
+  if (query.type === "text" && item.freeText) {
+    return item.freeText.some((text) =>
+      text.toLowerCase().includes(query.text)
+    );
+  }
+
+  if (query.type === "aspect" && item.aspects) {
+    return item.aspects[query.aspect] > 0;
+  }
+
+  return false;
 }

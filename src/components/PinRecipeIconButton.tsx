@@ -1,8 +1,7 @@
 import React from "react";
 
-import IconButton from "@mui/material/IconButton";
-import PushPin from "@mui/icons-material/PushPin";
-import type { SxProps } from "@mui/material/styles";
+import { IconButton, SxProps } from "@mui/material";
+import { PushPin } from "@mui/icons-material";
 
 import { useObservation } from "@/hooks/use-observation";
 import { useDIDependency } from "@/container";

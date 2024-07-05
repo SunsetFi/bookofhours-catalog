@@ -1,7 +1,6 @@
 import React from "react";
 
-import Box from "@mui/material/Box";
-import { type SxProps } from "@mui/material/styles";
+import { Box, SxProps } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 

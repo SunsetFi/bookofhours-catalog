@@ -1,9 +1,7 @@
 import React from "react";
 import { sortBy } from "lodash";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import type { SxProps } from "@mui/material/styles";
+import { Box, Typography, SxProps } from "@mui/material";
 
 import { useObservation } from "@/hooks/use-observation";
 import { aspectOrder } from "@/aspects";

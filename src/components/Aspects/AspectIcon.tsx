@@ -1,10 +1,6 @@
 import React from "react";
 
-import type { SxProps } from "@mui/material/styles";
-
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import Typography from "@mui/material/Typography";
+import { Box, Card, Typography, SxProps } from "@mui/material";
 
 import { useObservation } from "@/hooks/use-observation";
 

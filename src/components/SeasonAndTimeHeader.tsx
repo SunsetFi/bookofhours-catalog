@@ -1,10 +1,7 @@
 import React from "react";
 import { map } from "rxjs";
 
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
-import type { SxProps } from "@mui/material/styles";
+import { Box, Typography, Tooltip, SxProps } from "@mui/material";
 
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 

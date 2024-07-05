@@ -6,7 +6,11 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects } from "@/aspects";
 
-import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
+import {
+  TokensSource,
+  filterHasAnyAspect,
+  filterHasNoneOfAspect,
+} from "@/services/sh-game";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 
@@ -24,7 +28,11 @@ const ThingsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
 
   const elements$ = React.useMemo(
-    () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("thing")),
+    () =>
+      tokensSource.visibleElementStacks$.pipe(
+        filterHasAnyAspect("thing"),
+        filterHasNoneOfAspect("readable")
+      ),
     [tokensSource]
   );
 

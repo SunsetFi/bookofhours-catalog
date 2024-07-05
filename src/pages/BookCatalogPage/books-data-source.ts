@@ -22,7 +22,7 @@ import {
   switchMapIfNotNull,
 } from "@/observables";
 
-import { Compendium } from "@/services/sh-compendium";
+import { Compendium, ElementModel } from "@/services/sh-compendium";
 
 import {
   ElementStackModel,
@@ -35,6 +35,7 @@ import {
 
 export interface BookModelDecorations {
   id: string;
+  memory$: Observable<ElementModel | null>;
   memoryElementId$: Observable<string | null>;
   memoryLabel$: Observable<string | null>;
   memoryAspects$: Observable<Aspects>;
@@ -94,6 +95,7 @@ function elementStackToBook(
     get id() {
       return elementStack.id;
     },
+    memory$,
     memoryElementId$,
     memoryLabel$,
     memoryAspects$,

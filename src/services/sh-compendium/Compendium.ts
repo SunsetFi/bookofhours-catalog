@@ -49,10 +49,18 @@ export class Compendium {
         () => this._resolveAspectById(id),
         this._api
       );
+
       this._aspectModels.set(id, model);
     }
 
     return this._aspectModels.get(id)!;
+  }
+
+  searchAspects(query: string): Promise<readonly Element[]> {
+    return this._api.getAspects({
+      hidden: false,
+      labelContains: query,
+    });
   }
 
   getRecipeById(id: string): RecipeModel {

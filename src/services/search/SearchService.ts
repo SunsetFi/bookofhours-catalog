@@ -7,12 +7,15 @@ import {
   map,
   shareReplay,
   debounceTime,
+  switchMap,
 } from "rxjs";
 
 import { isNotNull } from "@/utils";
 
+import { Compendium } from "../sh-compendium";
+
 import providers from "./providers";
-import { SearchItemResult } from "./types";
+import { SearchItemResult, SearchQuery } from "./types";
 
 @injectable()
 @singleton()
@@ -30,15 +33,19 @@ export class SearchService {
     debounceTime(500)
   );
 
-  private readonly _searchActiveQuery$: Observable<string>;
+  private readonly _searchActiveQuery$: Observable<SearchQuery>;
 
   private readonly _searchResults$: Observable<SearchItemResult[]>;
 
-  constructor(@inject(Container) private readonly _container: Container) {
+  constructor(
+    @inject(Container) private readonly _container: Container,
+    @inject(Compendium) private readonly _compendium: Compendium
+  ) {
     this._searchActiveQuery$ = this._searchQueryDebounced$.pipe(
       filter(isNotNull),
       map((x) => x.trim()),
       filter((x) => x != ""),
+      switchMap((x) => this._parseSearchQuery(x)),
       shareReplay(1)
     );
 
@@ -98,5 +105,33 @@ export class SearchService {
 
   close() {
     this._searchQueryInput$.next(null);
+  }
+
+  private async _parseSearchQuery(query: string): Promise<SearchQuery> {
+    query = query.toLowerCase();
+
+    // This could be more complex in the future, using groupings and ORs and such
+    const parseFragment = async (fragment: string): Promise<SearchQuery> => {
+      const aspects = await this._compendium.searchAspects(fragment);
+      const exact = aspects.find((x) => x.label.toLowerCase() === fragment);
+      if (exact) {
+        return {
+          type: "aspect",
+          aspect: exact.id,
+        };
+      }
+
+      return {
+        type: "text",
+        text: fragment,
+      };
+    };
+
+    const queries = await Promise.all(query.split(" ").map(parseFragment));
+
+    return {
+      type: "and",
+      queries,
+    };
   }
 }

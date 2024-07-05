@@ -1,10 +1,7 @@
 import React from "react";
 import { mapValues } from "lodash";
 
-import type { SxProps } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
+import { Box, Divider, Typography, SxProps } from "@mui/material";
 
 import { useObservation } from "@/hooks/use-observation";
 import { switchMapIfNotNull } from "@/observables";

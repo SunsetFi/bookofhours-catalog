@@ -6,15 +6,17 @@ import { Observable, combineLatest, filter, map, switchMap } from "rxjs";
 import { filterItemObservations, observeAllMap } from "@/observables";
 
 import {
+  matchesSearchQuery,
   PageSearchItemResult,
   PageSearchProviderPipe,
+  SearchQuery,
 } from "@/services/search";
 
 import {
   CraftableModel,
   getCraftablesObservable,
 } from "./crafting-data-source";
-import { Orchestrator } from "@/services/sh-game";
+import { isNotNull } from "@/utils";
 
 export const craftingSearchProvider: PageSearchProviderPipe = (
   query$,
@@ -31,7 +33,7 @@ export const craftingSearchProvider: PageSearchProviderPipe = (
 };
 
 function filterCraftableToQuery(
-  query: string,
+  query: SearchQuery,
   craftable: CraftableModel
 ): Observable<boolean> {
   return combineLatest([
@@ -41,18 +43,10 @@ function filterCraftableToQuery(
     craftable.aspects$,
   ]).pipe(
     map(([label, skillLabel, description, aspects]) => {
-      const labelMatch = label?.toLowerCase().includes(query.toLowerCase());
-      const skillLabelMatch = skillLabel
-        ?.toLowerCase()
-        .includes(query.toLowerCase());
-      const descriptionMatch = description
-        ?.toLowerCase()
-        .includes(query.toLowerCase());
-      const aspectsMatch = Object.keys(aspects).some((aspectId) =>
-        aspectId.includes(query)
-      );
-
-      return labelMatch || skillLabelMatch || descriptionMatch || aspectsMatch;
+      return matchesSearchQuery(query, {
+        freeText: [label, skillLabel, description].filter(isNotNull),
+        aspects,
+      });
     })
   );
 }

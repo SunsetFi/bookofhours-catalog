@@ -129,7 +129,11 @@ export function filterHasAnyAspect(
   };
 }
 
-export function filterHasNoneOfAspect(match: readonly string[]) {
+export function filterHasNoneOfAspect(match: string | readonly string[]) {
+  if (typeof match === "string") {
+    match = [match];
+  }
+
   return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
     return source.pipe(
       filterItemObservations((element) =>

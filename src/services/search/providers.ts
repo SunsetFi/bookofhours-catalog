@@ -6,16 +6,19 @@ import sitemap, { isSiteMapNavItem } from "@/sitemap";
 
 import { mapArrayItems } from "@/observables";
 
-import { PageSearchProviderPipe, SearchProviderPipe } from "./types";
+import {
+  PageSearchProviderPipe,
+  SearchProviderPipe,
+  SearchQuery,
+} from "./types";
+import { matchesSearchQuery } from "./utils";
 
 const pagesSearchProvider: SearchProviderPipe = (query) => {
   return query.pipe(
     map((query) =>
       sitemap
         .filter(isSiteMapNavItem)
-        .filter((page) =>
-          page.label.toLowerCase().includes(query.toLowerCase())
-        )
+        .filter((page) => matchesSearchQuery(query, { freeText: [page.label] }))
         .map((page) => ({
           iconUrl: `http://localhost:8081/api/compendium/elements/${page.iconName}/icon.png`,
           label: page.label,
@@ -37,7 +40,7 @@ function pageProviderFromPath(
   pageProvider: PageSearchProviderPipe,
   path: string
 ) {
-  return (query: Observable<string>, container: Container) => {
+  return (query: Observable<SearchQuery>, container: Container) => {
     return pageProvider(query, container).pipe(
       mapArrayItems((item) => ({
         ...omit(item, "pathQuery"),

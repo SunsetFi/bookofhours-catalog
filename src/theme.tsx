@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider, createTheme } from "@mui/material";
 
 const headerFontFamily = "'Tangerine', cursive";
 const theme = createTheme({
