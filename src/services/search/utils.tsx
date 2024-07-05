@@ -140,17 +140,14 @@ function elementStackMatchesQuery(
       }
 
       if (label.toLowerCase().includes(query)) {
-        console.log(elementStack.id, "matches on label", label);
         return true;
       }
 
       if (description.toLowerCase().includes(query)) {
-        console.log(elementStack.id, "matches on description", description);
         return true;
       }
 
       if (aspects.some((aspect) => aspect && aspect.includes(query))) {
-        console.log(elementStack.id, "matches on aspects", aspects);
         return true;
       }
 

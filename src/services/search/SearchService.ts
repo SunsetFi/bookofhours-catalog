@@ -52,14 +52,12 @@ export class SearchService {
     this._searchQueryInput$.subscribe((q) => {
       listeningVersion = ++this._searchQueryVersion;
       this._searchBusy$.next(q !== "");
-      console.log("Got search query", q);
     });
     this._searchResults$.subscribe((s) => {
       if (listeningVersion === this._searchQueryVersion) {
         this._searchBusy$.next(false);
         listeningVersion = null;
       }
-      console.log("Got search results", s);
     });
   }
 
