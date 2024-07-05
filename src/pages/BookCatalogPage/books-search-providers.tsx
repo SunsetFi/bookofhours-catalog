@@ -31,7 +31,7 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
 
   return query$.pipe(
     switchMap((query) =>
-      merge(
+      combineLatest([
         books$.pipe(
           filterItemObservations((book) =>
             combineLatest([book.label$, book.description$, book.aspects$]).pipe(
@@ -92,8 +92,8 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
               })
             )
           )
-        )
-      )
+        ),
+      ]).pipe(map((results) => results.flat()))
     )
   );
 };
