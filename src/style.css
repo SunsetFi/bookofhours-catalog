@@ -9,6 +9,19 @@ html, body, #root {
   margin: 0;
 }
 
+/*
+Scrollbar customization.
+
+There seems very limited support in what actually works here.
+Firefox in particular seems to only support backgrounds.
+
+Let's at least colorize the scrollbar to match the rest of the app.
+
+Funnily enough, this looks the best in firefox.
+In edge and chrome, this causes edge to remove the up/down arrows on vertical scrolls,
+resulting in a weird looking bar sitting around.
+*/
+
 /* width */
 ::-webkit-scrollbar {
   background: transparent;

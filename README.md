@@ -145,11 +145,13 @@ Players who use the catalogue as an addenda to the game's own UI should take car
 
 ### Global Search
 
-To search the entire catalogue, click the "Search" button at the top of the screen, or use it's shortcut, Ctrl+K. This will open a dialog in which you can type a search query to find any item across all pages of the catalogue. Selecting the item will open the containing page and filter it to only show that item.
+To search the entire catalogue, click the "Search" button at the top of the screen, or use it's shortcut, Ctrl+K. This will open a dialog in which you can type a search query to find any item across all pages of the catalogue.
 
-Currently, this search only targets the label or name of items. It is not case sensitive.
+Typing a search query will attempt to find items matching the search. Generally, the search will take into account names, descriptions, and aspects of various items and recipes. When using multiple words, items will be returned that contain all words regardless of their order. Where words match aspect names, the search will look for items with that aspect, rather than searching for the aspect name in their text.
 
-More advanced searching, such as by aspect requirements, is planned.
+Selecting search result items will open the containing page and filter it to only show that item.
+
+Items may also have buttons for quick access to functions such as camera focus and crafting.
 
 ### Pinning
 
