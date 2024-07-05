@@ -12,6 +12,7 @@ import {
 import { isNotNull } from "@/utils";
 
 import providers from "./providers";
+import { SearchItemResult } from "./types";
 
 @injectable()
 @singleton()
@@ -29,30 +30,36 @@ export class SearchService {
     debounceTime(500)
   );
 
-  private readonly _searchActiveQuery$ = this._searchQueryDebounced$.pipe(
-    filter(isNotNull),
-    map((x) => x.trim()),
-    filter((x) => x != ""),
-    shareReplay(1)
-  );
+  private readonly _searchActiveQuery$: Observable<string>;
 
-  private readonly _searchResults$ = combineLatest(
-    providers.map((provider) =>
-      provider(this._searchActiveQuery$, this._container)
-    )
-  ).pipe(map((results) => results.flat()));
+  private readonly _searchResults$: Observable<SearchItemResult[]>;
 
   constructor(@inject(Container) private readonly _container: Container) {
+    this._searchActiveQuery$ = this._searchQueryDebounced$.pipe(
+      filter(isNotNull),
+      map((x) => x.trim()),
+      filter((x) => x != ""),
+      shareReplay(1)
+    );
+
+    this._searchResults$ = combineLatest(
+      providers.map((provider) =>
+        provider(this._searchActiveQuery$, this._container)
+      )
+    ).pipe(map((results) => results.flat()));
+
     let listeningVersion: number | null = null;
     this._searchQueryInput$.subscribe((q) => {
       listeningVersion = ++this._searchQueryVersion;
       this._searchBusy$.next(q !== "");
+      console.log("Got search query", q);
     });
-    this._searchResults$.subscribe(() => {
+    this._searchResults$.subscribe((s) => {
       if (listeningVersion === this._searchQueryVersion) {
         this._searchBusy$.next(false);
         listeningVersion = null;
       }
+      console.log("Got search results", s);
     });
   }
 

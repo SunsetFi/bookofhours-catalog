@@ -17,6 +17,8 @@ export interface ElementStackTrayProps {
   "aria-label"?: string;
   role?: string;
   emptyContent?: React.ReactNode;
+  value?: ElementStackModel | null;
+  onClick?(elementStack: ElementStackModel): void;
 }
 
 const ElementStackTray = ({
@@ -25,6 +27,8 @@ const ElementStackTray = ({
   "aria-label": ariaLabel,
   role,
   emptyContent,
+  value,
+  onClick,
 }: ElementStackTrayProps) => {
   const items = useObservation(elementStacks$);
 
@@ -47,7 +51,16 @@ const ElementStackTray = ({
       {!items && <CircularProgress color="inherit" />}
       {items &&
         items.map((elementStack) => (
-          <ElementStackCard key={elementStack.id} elementStack={elementStack} />
+          <ElementStackCard
+            sx={{
+              ["& .element-stack-card--card"]: {
+                border: value === elementStack ? "4px solid white" : undefined,
+              },
+            }}
+            key={elementStack.id}
+            elementStack={elementStack}
+            onClick={onClick ? () => onClick(elementStack) : undefined}
+          />
         ))}
       {items && items.length === 0 && emptyContent}
     </Box>

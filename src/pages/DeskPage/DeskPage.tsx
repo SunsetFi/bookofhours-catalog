@@ -156,7 +156,7 @@ const DeskPage = () => {
 interface ElementStackRegionProps {
   sx?: SxProps;
   label: string;
-  elementStacks$: Observable<ElementStackModel[]>;
+  elementStacks$: Observable<readonly ElementStackModel[]>;
   emptyContent?: React.ReactNode;
 }
 

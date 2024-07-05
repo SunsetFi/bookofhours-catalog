@@ -81,7 +81,7 @@ const WisdomTreePage = () => {
         spacing={2}
         alignItems="center"
       >
-        {locus && <WisdomNodeSlot node={locus} />}
+        {locus && <WisdomNodeSlot wisdomLabel="Locus" node={locus} />}
         <Box
           sx={{
             width: "100%",
@@ -116,6 +116,7 @@ const WisdomTreePage = () => {
                   .map((node, ni) => (
                     <WisdomNodeSlot
                       sx={{ gridRow: i + 1, gridColumn: ni + 2 }}
+                      wisdomLabel={`${wisdom.name} ${toRomanNumerals(ni + 1)}`}
                       key={node.id}
                       node={node}
                     />
@@ -128,5 +129,22 @@ const WisdomTreePage = () => {
     </PageContainer>
   );
 };
+
+function toRomanNumerals(value: number): string {
+  const romanNumerals = [
+    ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
+    ["", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"],
+    ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"],
+    ["", "M", "MM", "MMM"],
+  ];
+
+  return value
+    .toString()
+    .split("")
+    .reverse()
+    .map((x, i) => romanNumerals[i][parseInt(x)])
+    .reverse()
+    .join("");
+}
 
 export default WisdomTreePage;

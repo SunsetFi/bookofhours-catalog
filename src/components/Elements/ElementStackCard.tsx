@@ -21,6 +21,7 @@ export interface ElementStackCardProps {
   elementStack: ElementStackModel;
   width?: number;
   interactable?: boolean;
+  onClick?(): void;
 }
 
 // Card is 256x406
@@ -38,6 +39,7 @@ const ElementStackCard = ({
   width = DefaultElementStackCardWidth,
   sx,
   interactable = true,
+  onClick,
 }: ElementStackCardProps) => {
   const theme = useTheme();
   const widthPx = `${width}px`;
@@ -77,6 +79,7 @@ const ElementStackCard = ({
       >
         <Box
           ref={dragRef}
+          className="element-stack-card--card"
           sx={{
             borderRadius: 2,
             display: "flex",
@@ -89,7 +92,9 @@ const ElementStackCard = ({
               interactable && !inExteriorSphere
                 ? "brightness(75%) grayscale(0.8)"
                 : undefined,
+            cursor: interactable && onClick ? "pointer" : undefined,
           }}
+          onClick={interactable ? onClick : undefined}
         >
           <Box
             sx={{

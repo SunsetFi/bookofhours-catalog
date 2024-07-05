@@ -43,7 +43,8 @@ export class TokenModelFactory {
           token,
           this._container.get(API),
           this._container.get(TokensSource).tokens$,
-          this._container.get(Compendium)
+          this._container.get(Compendium),
+          this._container.get(BatchingScheduler)
         );
       case "Situation":
       case "WorkstationSituation" as any:

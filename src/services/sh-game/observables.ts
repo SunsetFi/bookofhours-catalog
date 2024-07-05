@@ -1,9 +1,5 @@
 import { Observable, map } from "rxjs";
-import {
-  SpaceOccupation,
-  SphereSpec,
-  aspectsMatchSphereSpec,
-} from "secrethistories-api";
+import { Aspects, SpaceOccupation } from "secrethistories-api";
 
 import { filterItemObservations } from "@/observables";
 import { tokenPathContainsChild } from "@/utils";
@@ -104,7 +100,9 @@ export function filterDoesNotOccupySpace(
 export function filterHasAnyAspect(
   match: string | readonly string[] | ((aspectId: string) => boolean)
 ) {
-  return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
+  return <T extends ModelWithAspects>(
+    source: Observable<readonly T[]>
+  ): Observable<readonly T[]> => {
     return source.pipe(
       filterItemObservations((element) =>
         element.aspects$.pipe(
@@ -140,6 +138,54 @@ export function filterHasNoneOfAspect(match: readonly string[]) {
             match.every(
               (item) =>
                 elementAspects[item] == null || elementAspects[item] === 0
+            )
+          )
+        )
+      )
+    );
+  };
+}
+
+export function filterMatchesRequirements(requirements: Aspects) {
+  return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
+    return source.pipe(
+      filterItemObservations((element) =>
+        element.aspects$.pipe(
+          map((aspects) =>
+            Object.keys(requirements).some(
+              (key) => aspects[key] >= requirements[key]
+            )
+          )
+        )
+      )
+    );
+  };
+}
+
+export function filterMatchesEssentials(essentials: Aspects) {
+  return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
+    return source.pipe(
+      filterItemObservations((element) =>
+        element.aspects$.pipe(
+          map((aspects) =>
+            Object.keys(essentials).every(
+              (key) => aspects[key] >= essentials[key]
+            )
+          )
+        )
+      )
+    );
+  };
+}
+
+export function filterMatchesForbiddens(forbiddens: Aspects) {
+  return <T extends ModelWithAspects>(source: Observable<readonly T[]>) => {
+    return source.pipe(
+      filterItemObservations((element) =>
+        element.aspects$.pipe(
+          map((aspects) =>
+            Object.keys(forbiddens).every(
+              (key) => aspects[key] == null || aspects[key] === 0
             )
           )
         )

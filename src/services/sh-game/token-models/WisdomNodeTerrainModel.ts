@@ -1,11 +1,18 @@
-import { WisdomNodeTerrain } from "secrethistories-api";
-import { Observable, distinctUntilChanged, map, shareReplay } from "rxjs";
+import { Aspects, WisdomNodeTerrain } from "secrethistories-api";
+import {
+  Observable,
+  distinctUntilChanged,
+  firstValueFrom,
+  map,
+  shareReplay,
+} from "rxjs";
 import { first } from "lodash";
 
 import { Null$, True$, filterItems, switchMapIfNotNull } from "@/observables";
 
 import { API } from "@/services/sh-api";
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
+import { BatchingScheduler } from "@/services/scheduler";
 
 import { filterTokenInPath } from "../observables";
 
@@ -18,7 +25,8 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     token: WisdomNodeTerrain,
     api: API,
     private readonly _allTokens$: Observable<readonly TokenModel[]>,
-    private readonly _compendium: Compendium
+    private readonly _compendium: Compendium,
+    private readonly _scheduler: BatchingScheduler
   ) {
     super(token, api);
   }
@@ -36,7 +44,8 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     if (!this._label$) {
       this._label$ = this.wisdomRecipe$.pipe(
         switchMapIfNotNull((t) => t.label$),
-        distinctUntilChanged()
+        distinctUntilChanged(),
+        shareReplay(1)
       );
     }
 
@@ -48,7 +57,8 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     if (!this._description$) {
       this._description$ = this.wisdomRecipe$.pipe(
         switchMapIfNotNull((t) => t.description$),
-        distinctUntilChanged()
+        distinctUntilChanged(),
+        shareReplay(1)
       );
     }
 
@@ -77,6 +87,54 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     return this._sealed$;
   }
 
+  private _requirements$: Observable<Aspects> | null = null;
+  get requirements$() {
+    if (!this._requirements$) {
+      this._requirements$ = this._token$.pipe(
+        map((t) => t.wisdomSkillRequirements),
+        shareReplay(1)
+      );
+    }
+    return this._requirements$;
+  }
+
+  private _essentials$: Observable<Aspects> | null = null;
+  get essentials$() {
+    if (!this._essentials$) {
+      this._essentials$ = this._token$.pipe(
+        map((t) => t.wisdomSkillEssentials),
+        shareReplay(1)
+      );
+    }
+    return this._essentials$;
+  }
+
+  private _forbiddens$: Observable<Aspects> | null = null;
+  get forbiddens$() {
+    if (!this._forbiddens$) {
+      this._forbiddens$ = this._token$.pipe(
+        map((t) => t.wisdomSkillForbiddens),
+        shareReplay(1)
+      );
+    }
+    return this._forbiddens$;
+  }
+
+  private _input$: Observable<ElementStackModel | null> | null = null;
+  get input$() {
+    if (!this._input$) {
+      this._input$ = this._allTokens$.pipe(
+        filterTokenInPath(`${this._token.path}/input`),
+        filterItems(isElementStackModel),
+        map((tokens) => first(tokens) ?? null),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._input$;
+  }
+
   get committed() {
     return this._token.committed;
   }
@@ -88,7 +146,8 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
         filterTokenInPath(`${this._token.path}/commitment`),
         filterItems(isElementStackModel),
         map((tokens) => first(tokens) ?? null),
-        distinctUntilChanged()
+        distinctUntilChanged(),
+        shareReplay(1)
       );
     }
 
@@ -104,11 +163,34 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
             ? this._compendium.getRecipeById(t.wisdomRecipeId)
             : null
         ),
-        distinctUntilChanged()
+        distinctUntilChanged(),
+        shareReplay(1)
       );
     }
 
     return this._wisdomRecipe$;
+  }
+
+  async slotInput(elementStack: ElementStackModel): Promise<boolean> {
+    return this._scheduler.batchUpdate(async () => {
+      try {
+        const currentToken = await firstValueFrom(this.input$);
+        await this._api.evictTokenAtPath(`${this._token.path}/input`);
+        await this._api.updateTokenById(elementStack.id, {
+          spherePath: `${this._token.path}/input`,
+        });
+
+        const refreshers: Promise<void>[] = [this.refresh()];
+        if (currentToken) {
+          refreshers.push(currentToken.refresh());
+        }
+        await Promise.all(refreshers);
+        return true;
+      } catch (e) {
+        console.warn("Failed to slot wisdom tree node input", e);
+        return false;
+      }
+    });
   }
 }
 
