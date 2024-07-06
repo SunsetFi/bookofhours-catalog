@@ -63,7 +63,6 @@ const ElementStackIcon = ({
       title={<ElementStackDetails elementStack={elementStack} />}
     >
       <Box
-        aria-label={label}
         sx={{
           position: "relative",
         }}
@@ -81,6 +80,7 @@ const ElementStackIcon = ({
                 ? "brightness(75%) grayscale(0.8)"
                 : undefined,
           }}
+          aria-label={label}
         >
           <img
             loading="lazy"
@@ -93,8 +93,8 @@ const ElementStackIcon = ({
             component="div"
             variant="body1"
             sx={{
-              minWidth: "32px",
-              height: "32px",
+              minWidth: "24px",
+              height: "24px",
               border: "2px solid #888",
               borderRadius: "50%",
               backgroundColor: "#CCC",
@@ -128,13 +128,9 @@ const ElementStackIcon = ({
               left: -10,
               zIndex: 1,
             }}
+            aria-label="This card is currently in use"
           >
-            <LockIcon
-              aria-hidden={false}
-              aria-label="This card is currently in use"
-              color="inherit"
-              scale={0.8}
-            />
+            <LockIcon aria-hidden="true" color="inherit" scale={0.8} />
           </Box>
         )}
       </Box>

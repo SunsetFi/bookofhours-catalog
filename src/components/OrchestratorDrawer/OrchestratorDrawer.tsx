@@ -85,6 +85,7 @@ const OrchestratorDrawer = () => {
         open={open}
         anchor="right"
         variant="persistent"
+        aria-labelledby="orchestration-drawer-title"
         width={
           orchestration ? OrchestrationContentWidth : OrchestrationListWidth
         }

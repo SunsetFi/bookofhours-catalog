@@ -149,8 +149,8 @@ const ElementStackCard = ({
             component="div"
             variant="body1"
             sx={{
-              minWidth: "32px",
-              height: "32px",
+              minWidth: "28px",
+              height: "28px",
               border: "2px solid #888",
               borderRadius: "50%",
               backgroundColor: "#CCC",

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { styled, Typography, IconButton, Divider } from "@mui/material";
+import { styled, Typography, IconButton, Divider, Box } from "@mui/material";
 import {
   ChevronRight as ChevronRightIcon,
   ArrowBack as ArrowBackIcon,
@@ -11,6 +11,7 @@ import { useDIDependency } from "@/container";
 import { Orchestrator } from "@/services/sh-game";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
+  position: "relative",
   display: "flex",
   alignItems: "center",
   padding: theme.spacing(0, 1),
@@ -31,14 +32,25 @@ const OrchestrationContentHeader = ({
   return (
     <>
       <DrawerHeader>
+        {/* Play games with absolute positioning to make this the first thing the screen reader sees.*/}
+        <Box
+          sx={{
+            position: "absolute",
+            left: onBack ? 50 : 16,
+            top: 0,
+            bottom: 0,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h5">{title}</Typography>
+        </Box>
         {onBack && (
           <IconButton aria-label="Back to Actions List" onClick={onBack}>
             <ArrowBackIcon />
           </IconButton>
         )}
-        <Typography variant="h5" sx={{ ml: 2 }}>
-          {title}
-        </Typography>
+
         <IconButton
           sx={{ ml: "auto" }}
           aria-label="Close Actions Drawer"
@@ -49,7 +61,7 @@ const OrchestrationContentHeader = ({
           <ChevronRightIcon />
         </IconButton>
       </DrawerHeader>
-      <Divider />
+      <Divider aria-hidden="true" />
     </>
   );
 };

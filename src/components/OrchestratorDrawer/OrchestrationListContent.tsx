@@ -88,13 +88,13 @@ const OrchestrationListContent = () => {
                 </IconButton>
               </Box>
             </ListItem>
-            <Divider orientation="horizontal" />
+            <Divider aria-hidden="true" orientation="horizontal" />
           </>
         )}
         {fixedSituations.map((situation) => (
           <SituationListItem situation={situation} key={situation.id} />
         ))}
-        <Divider />
+        <Divider aria-hidden="true" />
         <ListItemButton
           onClick={() => orchestrator.openOrchestration({ situation: null })}
         >
