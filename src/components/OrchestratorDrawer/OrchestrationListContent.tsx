@@ -273,7 +273,7 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
             )}
             <Typography variant="caption" role="timer">
               <ScreenReaderContent>
-                {timeRemainingStr} seconds left in recipe
+                {timeRemainingStr} seconds left
               </ScreenReaderContent>
               <span aria-hidden="true">{timeRemainingStr}s</span>
             </Typography>

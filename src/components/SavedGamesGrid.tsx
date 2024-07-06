@@ -23,10 +23,11 @@ export const SaveGamesGridWidth = ItemWidth * 4 + GapWidth * 3; // Enough room f
 
 export interface SaveGamesGridProps {
   id?: string;
+  autoFocus?: boolean;
   onLoad(saveName: string): void;
 }
 
-const SaveGamesGrid = ({ id, onLoad }: SaveGamesGridProps) => {
+const SaveGamesGrid = ({ id, autoFocus, onLoad }: SaveGamesGridProps) => {
   const saveManager = useDIDependency(SaveManager);
   const saves = useObservation(saveManager.saves$);
 
@@ -38,6 +39,7 @@ const SaveGamesGrid = ({ id, onLoad }: SaveGamesGridProps) => {
         width: SaveGamesGridWidth,
       }}
       aria-busy={!saves ? "true" : "false"}
+      aria-live="assertive"
     >
       {!saves && <CircularProgress aria-busy="true" color="inherit" />}
       {saves && saves.length === 0 && (
@@ -56,7 +58,12 @@ const SaveGamesGrid = ({ id, onLoad }: SaveGamesGridProps) => {
       >
         {saves &&
           saves.map((save, index) => (
-            <SaveGameItem key={index} save={save} onLoad={onLoad} />
+            <SaveGameItem
+              key={index}
+              autoFocus={index === 0 && autoFocus}
+              save={save}
+              onLoad={onLoad}
+            />
           ))}
       </Box>
     </Stack>
@@ -64,9 +71,11 @@ const SaveGamesGrid = ({ id, onLoad }: SaveGamesGridProps) => {
 };
 
 const SaveGameItem = ({
+  autoFocus,
   save,
   onLoad,
 }: {
+  autoFocus?: boolean;
   save: SaveInfo;
   onLoad: (saveName: string) => void;
 }) => {
@@ -106,6 +115,7 @@ const SaveGameItem = ({
           sx={{ ml: "auto" }}
           onClick={() => onLoad(saveName)}
           aria-describedby={`${id}-label`}
+          autoFocus={autoFocus}
         >
           Load
         </Button>

@@ -16,7 +16,7 @@ import { DialogService } from "../../dialog/DialogService";
 
 import { GameStateSource } from "../sources/GameStateSource";
 
-import NewGameDialogContent from "./NewGameDialogContent";
+import LoadGameDialogContent from "./LoadGameDialogContent";
 import SaveGameDialogContent from "./SaveGameDialogContent";
 
 @injectable()
@@ -127,7 +127,7 @@ export class SaveManager {
     // Instead, we close it when a load is invoked.
     var dialogPromise = (this._dialogHandle = this._dialogService.showDialog({
       type: "component",
-      component: NewGameDialogContent,
+      component: LoadGameDialogContent,
     }));
 
     this._dialogHandle.then(() => {

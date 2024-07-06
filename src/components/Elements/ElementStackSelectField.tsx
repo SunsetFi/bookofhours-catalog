@@ -29,7 +29,7 @@ import Tooltip from "../Tooltip";
 
 export interface ElementStackSelectFieldProps {
   sx?: SxProps;
-  label: string;
+  label?: string;
   fullWidth?: boolean;
   elementStacks$: Observable<readonly ElementStackModel[]>;
   requireExterior?: boolean;
@@ -37,6 +37,7 @@ export interface ElementStackSelectFieldProps {
   value: ElementStackModel | null;
   readOnly?: boolean;
   autoFocus?: boolean;
+  ["aria-labelledby"]?: string;
   onChange(value: ElementStackModel | null): void;
 }
 
@@ -68,6 +69,7 @@ const ElementStackSelectField = ({
   value,
   readOnly,
   autoFocus,
+  "aria-labelledby": ariaLabelledBy,
   onChange,
 }: ElementStackSelectFieldProps) => {
   let items =
@@ -130,6 +132,7 @@ const ElementStackSelectField = ({
   return (
     <Autocomplete
       sx={sx}
+      aria-labelledby={ariaLabelledBy}
       fullWidth={fullWidth}
       options={items}
       readOnly={readOnly}

@@ -28,6 +28,7 @@ const HandOverviewIcons = ({ sx }: HandOverviewIconsProps) => {
     <Box
       role="region"
       aria-label="Hand overview"
+      aria-live="polite"
       sx={{
         display: "flex",
         flexDirection: "row",

@@ -72,12 +72,6 @@ const OrchestratorDrawer = () => {
     lastOrchestration.current = orchestration;
   }, [open, orchestration]);
 
-  // Getting some frames where open is undefined, causing the drawer to think its closed, and resulting in
-  // it rerunning its animation when it realizes it is open.
-  if (open === undefined) {
-    return null;
-  }
-
   return (
     <>
       <OrchestrationThumbs />

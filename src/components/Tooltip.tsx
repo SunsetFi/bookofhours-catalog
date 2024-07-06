@@ -6,7 +6,6 @@ import { Box, Popper, SxProps } from "@mui/material";
 
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
-import { useNativeEvent } from "@/hooks/native-event";
 
 export interface TooltipProps {
   sx?: SxProps;
@@ -35,7 +34,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   const [escaped, setEscaped] = React.useState(false);
 
   const [immediateFocus, focusChange] = useDebounceCommitValue<boolean>(
-    1300,
+    900,
     setDelayedFocus
   );
 
@@ -53,12 +52,12 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   const onKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
       if (!open) {
-        // We might be nested, so if we are not open, let the parent handle it.
+        // We might be nested in other poppers, so if we are not open, let the parent handle it.
         return;
       }
 
       if (e.key === "Escape") {
-        // We might be nested, so stop propogation here.
+        // We might be nested in other poppers, so stop propagation here.
         e.preventDefault();
         e.stopPropagation();
         setEscaped(true);

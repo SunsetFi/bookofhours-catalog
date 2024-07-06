@@ -21,6 +21,8 @@ interface OrchestrationSlotEditorProps {
 
 const OrchestrationSlotEditor = React.memo(
   ({ slot, orchestration, autoFocus }: OrchestrationSlotEditorProps) => {
+    const id = React.useId();
+
     const assignment = useObservation(slot.assignment$) ?? null;
     const assignmentAspects =
       useObservation(
@@ -48,7 +50,7 @@ const OrchestrationSlotEditor = React.memo(
     return (
       <Stack direction="column" gap={1} sx={{ width: "100%" }}>
         <Stack direction="row" gap={1} sx={{ width: "100%" }} flexWrap="wrap">
-          <Typography variant="body1" sx={{ mr: "auto" }}>
+          <Typography variant="body1" sx={{ mr: "auto" }} id={`${id}-label`}>
             {slot.spec.label}
           </Typography>
           <Stack
@@ -71,7 +73,7 @@ const OrchestrationSlotEditor = React.memo(
         </Stack>
         <ElementStackSelectField
           sx={{ mt: 1 }}
-          label="Element"
+          label={slot.spec.label}
           fullWidth
           readOnly={slot.locked}
           elementStacks$={slot.availableElementStacks$}
@@ -80,6 +82,7 @@ const OrchestrationSlotEditor = React.memo(
           value={assignment}
           onChange={(stack) => slot.assign(stack)}
           autoFocus={autoFocus}
+          aria-labelledby={`${id}-label`}
         />
         <AspectsList
           sx={{ justifyContent: "flex-end", height: 30 }}

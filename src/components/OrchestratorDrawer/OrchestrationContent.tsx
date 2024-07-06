@@ -226,7 +226,7 @@ const OrchestrationContent = ({
   );
 
   return (
-    <Stack direction="column" sx={{ height: "100%" }}>
+    <Stack direction="column" sx={{ height: "100%" }} aria-live="assertive">
       <OrchestrationContentHeader
         title={label ?? "Orchestration"}
         onBack={onBack}

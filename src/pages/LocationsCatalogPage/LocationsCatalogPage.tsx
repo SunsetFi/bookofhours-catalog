@@ -69,6 +69,7 @@ const LocationsCatalogPage = () => {
       }),
       columnHelper.observeText("label$", {
         header: "Location",
+        rowHeader: true,
         size: 200,
       }),
       columnHelper.observe<[boolean, Aspects, Aspects]>(
@@ -115,7 +116,10 @@ const LocationsCatalogPage = () => {
                   spacing={1}
                   sx={{ width: "100%" }}
                 >
-                  <IconButton onClick={() => unlocker.open(props.row.original)}>
+                  <IconButton
+                    onClick={() => unlocker.open(props.row.original)}
+                    aria-label="Unlock"
+                  >
                     <LockIcon />
                   </IconButton>
                   <Stack direction="column" spacing={1} sx={{ width: "100%" }}>

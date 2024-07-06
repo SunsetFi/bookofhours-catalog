@@ -10,7 +10,7 @@ import { ComponentDialogProps } from "@/services/dialog";
 
 import SavedGamesGrid from "@/components/SavedGamesGrid";
 
-const NewGameDialogContent = ({ model }: ComponentDialogProps) => {
+const LoadGameDialogContent = ({ model }: ComponentDialogProps) => {
   return (
     <>
       <DialogTitle id="dialog-title" variant="h3">
@@ -19,6 +19,7 @@ const NewGameDialogContent = ({ model }: ComponentDialogProps) => {
       <DialogContent>
         <SavedGamesGrid
           id="dialog-content"
+          autoFocus
           onLoad={(saveName) => model.resolve(saveName)}
         />
       </DialogContent>
@@ -29,4 +30,4 @@ const NewGameDialogContent = ({ model }: ComponentDialogProps) => {
   );
 };
 
-export default NewGameDialogContent;
+export default LoadGameDialogContent;

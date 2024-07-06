@@ -311,6 +311,7 @@ function ObservableDataGrid<T extends {}>({
     <TableContainer
       ref={parentRef}
       sx={{ width: "100%", height: "100%", ...sx }}
+      aria-live="polite"
     >
       {!data && (
         <Box

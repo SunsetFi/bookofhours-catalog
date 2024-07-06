@@ -7,9 +7,10 @@ import { useHistory } from "@/services/history";
 export type QueryObjectMapper = (
   value: Record<string, any>
 ) => Record<string, any>;
-export function useQueryObjectState(
-  mapping: { fromUrl?: QueryObjectMapper; toUrl?: QueryObjectMapper } = {}
-): [obj: Record<string, any>, setValue: (value: Record<string, any>) => void] {
+export function useQueryObjectState(): [
+  obj: Record<string, any>,
+  setValue: (value: Record<string, any>) => void
+] {
   const history = useHistory();
 
   const location = useLocation();
@@ -25,19 +26,12 @@ export function useQueryObjectState(
       } catch {}
     }
 
-    if (mapping.fromUrl) {
-      obj = mapping.fromUrl(obj);
-    }
-
     setObj(obj);
-  }, [location.search, mapping.fromUrl ?? null]);
+  }, [location.search]);
 
   const setValue = React.useCallback(
     (value: Record<string, any>) => {
-      const newParams = new URLSearchParams(location.search);
-      if (mapping.toUrl) {
-        value = mapping.toUrl(value);
-      }
+      const newParams = new URLSearchParams();
 
       for (const key in value) {
         newParams.set(key, JSON.stringify(value[key]));
@@ -45,7 +39,7 @@ export function useQueryObjectState(
 
       history.replace(`${location.pathname}?${newParams.toString()}`);
     },
-    [location.search, history, mapping.toUrl ?? null]
+    [history]
   );
 
   return [obj, setValue];

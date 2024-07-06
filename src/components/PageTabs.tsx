@@ -72,6 +72,7 @@ const PageTab = ({ item }: PageTab) => {
   const iconUrl = `http://localhost:8081/${getSitemapItemIconPath(item)}`;
   const { pathname } = useLocation();
   const value = firstPathPart(pathname);
+  const isActive = value === path;
   return (
     <Tooltip
       title={<Typography variant="body1">{label}</Typography>}
@@ -81,8 +82,7 @@ const PageTab = ({ item }: PageTab) => {
         <Box
           sx={{
             cursor: "pointer",
-            filter:
-              path !== value ? "brightness(75%) grayscale(0.9)" : undefined,
+            filter: !isActive ? "brightness(75%) grayscale(0.9)" : undefined,
           }}
         >
           <img
