@@ -21,6 +21,8 @@ export interface ElementStackCardProps {
   elementStack: ElementStackModel;
   width?: number;
   interactable?: boolean;
+  role?: string;
+  ["aria-selected"]?: boolean;
   onClick?(): void;
 }
 
@@ -39,6 +41,8 @@ const ElementStackCard = ({
   width = DefaultElementStackCardWidth,
   sx,
   interactable = true,
+  role,
+  ["aria-selected"]: ariaSelected,
   onClick,
 }: ElementStackCardProps) => {
   const theme = useTheme();
@@ -79,6 +83,7 @@ const ElementStackCard = ({
       >
         <Box
           ref={dragRef}
+          component="div"
           className="element-stack-card--card"
           sx={{
             borderRadius: 2,
@@ -95,6 +100,8 @@ const ElementStackCard = ({
             cursor: interactable && onClick ? "pointer" : undefined,
           }}
           onClick={interactable ? onClick : undefined}
+          role={role}
+          aria-selected={ariaSelected}
         >
           <Box
             sx={{

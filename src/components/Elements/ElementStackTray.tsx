@@ -35,13 +35,13 @@ const ElementStackTray = ({
   return (
     <Box
       aria-label={ariaLabel}
-      role={role}
+      role={role ?? (onClick ? "listbox" : undefined)}
       sx={{
         display: "flex",
         flexDirection: "row",
         flexWrap: "wrap",
         justifyContent: "flex-start",
-        alignContent: "flex-start",
+        alignItems: "flex-start",
         isolation: "isolate",
         gap: 1,
         minHeight: DefaultElementStackCardHeight,
@@ -60,6 +60,8 @@ const ElementStackTray = ({
             key={elementStack.id}
             elementStack={elementStack}
             onClick={onClick ? () => onClick(elementStack) : undefined}
+            role="option"
+            aria-selected={value === elementStack}
           />
         ))}
       {items && items.length === 0 && emptyContent}

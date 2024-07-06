@@ -176,9 +176,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
       try {
         const currentToken = await firstValueFrom(this.input$);
         await this._api.evictTokenAtPath(`${this._token.path}/input`);
-        await this._api.updateTokenById(elementStack.id, {
-          spherePath: `${this._token.path}/input`,
-        });
+        await elementStack.moveToSphere(`${this._token.path}/input`);
 
         const refreshers: Promise<void>[] = [this.refresh()];
         if (currentToken) {
@@ -188,6 +186,29 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
         return true;
       } catch (e) {
         console.warn("Failed to slot wisdom tree node input", e);
+        return false;
+      }
+    });
+  }
+
+  async commit(): Promise<boolean> {
+    if (this._token.committed) {
+      return false;
+    }
+
+    const input = await firstValueFrom(this.input$);
+    if (!input) {
+      return false;
+    }
+
+    return this._scheduler.batchUpdate(async () => {
+      try {
+        await this._api.executeTokenAtPath(this.path);
+        await this._api.evictTokensAtPath(`${this.path}/output`);
+        await Promise.all([input.refresh(), this.refresh()]);
+        return true;
+      } catch (e) {
+        console.warn("Failed to commit wisdom tree node", e);
         return false;
       }
     });

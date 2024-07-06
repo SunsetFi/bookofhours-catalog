@@ -7,9 +7,12 @@ import { Lock as LockIcon } from "@mui/icons-material";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Stack,
   SxProps,
   Typography,
@@ -24,7 +27,6 @@ import {
   filterMatchesEssentials,
   filterMatchesForbiddens,
   filterMatchesRequirements,
-  filterTokenInPath,
   TokensSource,
   WisdomNodeTerrainModel,
 } from "@/services/sh-game";
@@ -36,6 +38,7 @@ import ElementStackCard, {
   DefaultElementStackCardWidth,
 } from "@/components/Elements/ElementStackCard";
 import ElementStackTray from "@/components/Elements/ElementStackTray";
+import ElementIcon from "@/components/Elements/ElementIcon";
 
 export interface WisdomNodeSlotProps {
   sx?: SxProps;
@@ -92,7 +95,7 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
       {committed && (
         <ElementStackCard elementStack={committed} interactable={false} />
       )}
-      {possibilities.length > 0 && (
+      {committed == null && !sealed && possibilities.length > 0 && (
         <Button onClick={() => setChoosingCandidate(true)}>
           {possibilities.length} candidates
         </Button>
@@ -136,19 +139,75 @@ const ChooseWisdomCardDialog = ({
     [node]
   );
 
+  const effects = useObservation(
+    () =>
+      node.wisdomRecipe$.pipe(switchMapIfNotNull((recipe) => recipe.effects$)),
+    [node]
+  );
+
+  const [committing, setCommitting] = React.useState(false);
+
+  const onCardSelected = React.useCallback(
+    (elementStack: ElementStackModel) => {
+      if (!committing) {
+        node.slotInput(elementStack);
+      }
+    },
+    [committing, node]
+  );
+
   return (
     <Dialog open={true} onClose={onClose}>
       <DialogTitle>{label}</DialogTitle>
       <DialogContent>
-        <Stack direction="column" spacing={2} sx={{ width: 480 }}>
-          <ElementStackTray
-            elementStacks$={elementStacks$}
-            onClick={(elementStack) => node.slotInput(elementStack)}
-            value={input}
-          />
-          <Typography textAlign="center">{description}</Typography>
+        <Stack direction="column" spacing={2} sx={{ width: 500 }}>
+          {committing && (
+            <CircularProgress sx={{ alignSelf: "center" }} color="inherit" />
+          )}
+          {!committing && (
+            <ElementStackTray
+              elementStacks$={elementStacks$}
+              onClick={onCardSelected}
+              value={input}
+            />
+          )}
+          <Divider />
+          <Stack
+            direction="column"
+            spacing={1}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Typography>{description ?? "Choose a Card"}</Typography>
+
+            <Stack direction="row" spacing={2}>
+              {Object.keys(effects ?? {}).map((id) => (
+                <ElementIcon key={id} elementId={id} />
+              ))}
+            </Stack>
+          </Stack>
         </Stack>
       </DialogContent>
+      {!committing && (
+        <DialogActions>
+          <Button
+            variant="contained"
+            disabled={input == null}
+            onClick={async () => {
+              console.log("We are committing and setting commit to true.");
+              setCommitting(true);
+              try {
+                await node.commit();
+                onClose();
+              } finally {
+                setCommitting(false);
+              }
+            }}
+          >
+            Commit
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   );
 };

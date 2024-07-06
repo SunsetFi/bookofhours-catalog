@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 
@@ -69,63 +69,81 @@ const wisdoms: readonly WisdomDef[] = [
 
 const WisdomTreePage = () => {
   const tokensSource = useDIDependency(TokensSource);
-  const nodes = useObservation(tokensSource.wisdomTreeNodes$) ?? [];
+  const nodes = useObservation(tokensSource.wisdomTreeNodes$);
 
-  const locus = nodes.find((x) => x.id === "!wt.memorylocus");
+  const locus = (nodes ?? []).find((x) => x.id === "!wt.memorylocus");
 
   return (
     <PageContainer title="Wisdoms">
-      <Stack
-        sx={{ width: "100%", height: "100%", pl: 2 }}
-        direction="row"
-        spacing={2}
-        alignItems="center"
-      >
-        {locus && <WisdomNodeSlot wisdomLabel="Locus" node={locus} />}
+      {!nodes && (
         <Box
           sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             width: "100%",
             height: "100%",
-            display: "grid",
-            gridTemplateRows: `repeat(${wisdoms.length}, 1fr)`,
-            gridTemplateColumns: "repeat(10, fit-content(100%))",
-            gap: 2,
-            overflowY: "scroll",
-            py: 2,
           }}
         >
-          {wisdoms.map((wisdom, i) => {
-            return (
-              <React.Fragment key={wisdom.name}>
-                <Stack
-                  direction="column"
-                  sx={{ gridRow: i + 1, gridColumn: 1, pr: 3 }}
-                  spacing={2}
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Typography variant="h4">{wisdom.name}</Typography>
-                  <Stack direction="row" spacing={1}>
-                    {wisdom.aspects.map((aspect) => (
-                      <AspectIcon key={aspect} aspectId={aspect} />
-                    ))}
-                  </Stack>
-                </Stack>
-                {nodes
-                  .filter((x) => x.id.startsWith(wisdom.nodePrefix))
-                  .map((node, ni) => (
-                    <WisdomNodeSlot
-                      sx={{ gridRow: i + 1, gridColumn: ni + 2 }}
-                      wisdomLabel={`${wisdom.name} ${toRomanNumerals(ni + 1)}`}
-                      key={node.id}
-                      node={node}
-                    />
-                  ))}
-              </React.Fragment>
-            );
-          })}
+          <CircularProgress />
         </Box>
-      </Stack>
+      )}
+
+      {nodes && (
+        <Stack
+          sx={{ width: "100%", height: "100%", pl: 2 }}
+          direction="row"
+          spacing={2}
+          alignItems="center"
+        >
+          {locus && <WisdomNodeSlot wisdomLabel="Locus" node={locus} />}
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "grid",
+              gridTemplateRows: `repeat(${wisdoms.length}, 1fr)`,
+              gridTemplateColumns: "repeat(10, fit-content(100%))",
+              gap: 2,
+              overflowY: "scroll",
+              py: 2,
+            }}
+          >
+            {wisdoms.map((wisdom, i) => {
+              return (
+                <React.Fragment key={wisdom.name}>
+                  <Stack
+                    direction="column"
+                    sx={{ gridRow: i + 1, gridColumn: 1, pr: 3 }}
+                    spacing={2}
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <Typography variant="h4">{wisdom.name}</Typography>
+                    <Stack direction="row" spacing={1}>
+                      {wisdom.aspects.map((aspect) => (
+                        <AspectIcon key={aspect} aspectId={aspect} />
+                      ))}
+                    </Stack>
+                  </Stack>
+                  {nodes
+                    .filter((x) => x.id.startsWith(wisdom.nodePrefix))
+                    .map((node, ni) => (
+                      <WisdomNodeSlot
+                        sx={{ gridRow: i + 1, gridColumn: ni + 2 }}
+                        wisdomLabel={`${wisdom.name} ${toRomanNumerals(
+                          ni + 1
+                        )}`}
+                        key={node.id}
+                        node={node}
+                      />
+                    ))}
+                </React.Fragment>
+              );
+            })}
+          </Box>
+        </Stack>
+      )}
     </PageContainer>
   );
 };

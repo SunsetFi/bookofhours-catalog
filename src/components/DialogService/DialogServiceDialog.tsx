@@ -45,8 +45,8 @@ interface TextDialogProps {
 
 const TextDialog = ({ model }: TextDialogProps) => {
   return (
-    <Dialog open>
-      <DialogContent>
+    <Dialog open aria-describedby="dialog-content">
+      <DialogContent id="dialog-content">
         <DialogContentText variant="body1">{model.text}</DialogContentText>
       </DialogContent>
       <DialogActionsBar actions={model.actions} />

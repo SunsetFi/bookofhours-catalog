@@ -30,21 +30,10 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
     null
   );
 
-  const [mouseOver, setMouseOver] = React.useState(false);
   const [delayedFocus, setDelayedFocus] = React.useState(false);
-
-  const onMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
-    setMouseOver(true);
-  }, []);
-
-  const onMouseOut = React.useCallback(() => {
-    setDelayedFocus(false);
-    setMouseOver(false);
-  }, []);
 
   const onKeyPress = React.useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      setMouseOver(false);
       setDelayedFocus(false);
     }
   }, []);
@@ -62,8 +51,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
     popperRef.current.update();
   });
 
-  const open =
-    !disabled && (mouseOver || (immediateFocus && delayedFocus) || false);
+  const open = !disabled && ((immediateFocus && delayedFocus) || false);
 
   return (
     <>
@@ -74,8 +62,8 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
         aria-describedby={open ? `${id}-tooltip` : undefined}
         ref={setAnchorRef}
         tabIndex={0}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
+        onMouseOver={() => focusChange(true)}
+        onMouseOut={() => focusChange(false)}
         onFocus={() => focusChange(true)}
         onBlur={() => focusChange(false)}
         onKeyDown={onKeyPress}

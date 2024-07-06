@@ -14,7 +14,6 @@ import ElementDetails from "./ElementDetails";
 
 export interface ElementIconBaseProps {
   sx?: SxProps;
-  title?: string;
   maxWidth?: number;
   maxHeight?: number;
   onClick?(): void;
@@ -31,7 +30,6 @@ export type ElementIconProps = ElementIconBaseProps &
 
 const ElementIcon = ({
   sx,
-  title,
   maxWidth,
   maxHeight,
   onClick,
@@ -70,13 +68,14 @@ const ElementIcon = ({
           cursor: onClick ? "pointer" : undefined,
           ...sx,
         }}
+        aria-label={label}
         tabIndex={onClick ? 0 : undefined}
         onClick={onClick}
       >
         <img
           loading="lazy"
           src={iconUrl}
-          alt={label}
+          aria-hidden="true"
           style={{ display: "block", maxWidth: "100%", maxHeight: "100%" }}
         />
       </Box>
