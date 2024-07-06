@@ -45,7 +45,7 @@ interface TextDialogProps {
 
 const TextDialog = ({ model }: TextDialogProps) => {
   return (
-    <Dialog open aria-describedby="dialog-content">
+    <Dialog open aria-modal="true" aria-describedby="dialog-content">
       <DialogContent id="dialog-content">
         <DialogContentText variant="body1">{model.text}</DialogContentText>
       </DialogContent>
@@ -61,7 +61,14 @@ interface ComponentDialogProps {
 const ComponentDialog = ({ model }: ComponentDialogProps) => {
   const Component = model.component;
   return (
-    <Dialog open maxWidth="xl">
+    <Dialog
+      open
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-content"
+      maxWidth="xl"
+      // TODO: Only if the model supports this
+      onClose={() => model.resolve(null)}
+    >
       <Component model={model} />
     </Dialog>
   );

@@ -46,8 +46,16 @@ const UnlockTerrainDialog = () => {
   }
 
   return (
-    <Dialog open onClose={() => unlocker.close()}>
-      <DialogTitle sx={{ display: "flex", flexDirection: "row" }}>
+    <Dialog
+      open
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-content"
+      onClose={() => unlocker.close()}
+    >
+      <DialogTitle
+        id="dialog-title"
+        sx={{ display: "flex", flexDirection: "row" }}
+      >
         <span>Unlock {targetLabel}</span>
         <IconButton
           sx={{ ml: "auto", alignSelf: "flex-start" }}
@@ -56,7 +64,7 @@ const UnlockTerrainDialog = () => {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent id="dialog-content">
         {unlocking && (
           <Typography variant="body1" color="error">
             Only one terrain can be unlocked at a time

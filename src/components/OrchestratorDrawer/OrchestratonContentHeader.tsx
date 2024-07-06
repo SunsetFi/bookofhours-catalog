@@ -43,7 +43,9 @@ const OrchestrationContentHeader = ({
             alignItems: "center",
           }}
         >
-          <Typography variant="h5">{title}</Typography>
+          <Typography variant="h5" id="orchestration-drawer-title">
+            {title}
+          </Typography>
         </Box>
         {onBack && (
           <IconButton aria-label="Back to Actions List" onClick={onBack}>

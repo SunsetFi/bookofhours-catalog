@@ -157,9 +157,14 @@ const ChooseWisdomCardDialog = ({
   );
 
   return (
-    <Dialog open={true} onClose={onClose}>
-      <DialogTitle>{label}</DialogTitle>
-      <DialogContent>
+    <Dialog
+      open={true}
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-content"
+      onClose={onClose}
+    >
+      <DialogTitle id="dialog-title">{label}</DialogTitle>
+      <DialogContent id="dialog-content">
         <Stack direction="column" spacing={2} sx={{ width: 500 }}>
           {committing && (
             <CircularProgress sx={{ alignSelf: "center" }} color="inherit" />

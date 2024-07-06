@@ -44,10 +44,10 @@ const SaveGameDialogContent = ({ model }: ComponentDialogProps) => {
 
   return (
     <>
-      <DialogTitle>
+      <DialogTitle id="dialog-title">
         <Typography variant="h3">Save the Game</Typography>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent id="dialog-content">
         <Stack direction="column" spacing={2} sx={{ mt: 2, width: 450 }}>
           <Autocomplete
             fullWidth
