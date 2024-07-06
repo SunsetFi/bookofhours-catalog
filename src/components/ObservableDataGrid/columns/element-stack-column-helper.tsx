@@ -1,5 +1,4 @@
 import React from "react";
-import { IdentifiedColumnDef } from "@tanstack/react-table";
 import { Observable, distinctUntilChanged, map, tap } from "rxjs";
 import { isEqual, pick, pickBy } from "lodash";
 
@@ -22,6 +21,7 @@ import {
 import { AspectsListCell, TextWrapCell } from "../cells";
 
 import { RowHeight, RowPaddingY } from "../constants";
+import { EnhancedColumnDefBase } from "../types";
 
 import { createObservableColumnHelper } from "./observable-column-helper";
 
@@ -30,11 +30,12 @@ export function createElementStackColumnHelper<
 >() {
   const columnHelper = createObservableColumnHelper<T>();
   return Object.assign(columnHelper, {
-    label: (def?: Partial<IdentifiedColumnDef<T, string | null>>) =>
+    label: (def?: Partial<EnhancedColumnDefBase<T, string | null>>) =>
       columnHelper.observeText("label$" as any, {
         id: "label",
         size: 200,
         header: "Name",
+        rowHeader: true,
         ...def,
       }),
     elementStackIcon: () =>
@@ -61,7 +62,7 @@ export function createElementStackColumnHelper<
         showLevel = true,
         aspectsSource = (model) => model.aspects$,
         ...def
-      }: Partial<IdentifiedColumnDef<T, Record<string, React.ReactNode>>> & {
+      }: Partial<EnhancedColumnDefBase<T, Record<string, React.ReactNode>>> & {
         showLevel?: boolean;
         aspectsSource?: (
           model: T

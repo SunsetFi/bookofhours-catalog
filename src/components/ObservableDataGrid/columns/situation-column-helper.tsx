@@ -1,5 +1,4 @@
 import React from "react";
-import { IdentifiedColumnDef } from "@tanstack/react-table";
 import { Observable, map } from "rxjs";
 import { pick, pickBy } from "lodash";
 
@@ -15,6 +14,7 @@ import {
   aspectsFilter,
   TextFilter,
 } from "../filters";
+import { EnhancedColumnDefBase } from "../types";
 
 import { AspectsListCell, TextWrapCell, VerbIconCell } from "../cells";
 
@@ -25,14 +25,13 @@ export function createSituationColumnHelper<
 >() {
   const columnHelper = createObservableColumnHelper<T>();
   return Object.assign(columnHelper, {
-    label: (def?: Partial<IdentifiedColumnDef<T, string | null>>) =>
+    label: (def?: Partial<EnhancedColumnDefBase<T, string | null>>) =>
       columnHelper.observe("verbLabel$" as any, {
         id: "label",
         size: 200,
         header: "Name",
         cell: TextWrapCell,
         filterFn: "includesString",
-        rowHeader: true,
         meta: {
           filterComponent: TextFilter,
         },
@@ -54,7 +53,7 @@ export function createSituationColumnHelper<
         showLevel = true,
         aspectsSource = (model) => model.aspects$,
         ...def
-      }: Partial<IdentifiedColumnDef<T, Record<string, React.ReactNode>>> & {
+      }: Partial<EnhancedColumnDefBase<T, Record<string, React.ReactNode>>> & {
         showLevel?: boolean;
         aspectsSource?: (
           model: T

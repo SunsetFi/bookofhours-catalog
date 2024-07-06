@@ -57,7 +57,6 @@ export function createObservableColumnHelper<
       column = {
         cell: TextWrapCell,
         filterFn: "includesString",
-        rowHeader: true,
         ...column,
         meta: {
           filterComponent: TextFilter,

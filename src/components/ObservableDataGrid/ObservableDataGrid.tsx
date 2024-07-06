@@ -425,7 +425,7 @@ const ObservableTableCell = ({
   const isRowHeader = isRowHeaderColumn(cell.column.columnDef);
   return React.useMemo(
     () => (
-      <TableCell>
+      <TableCell component={isRowHeader ? "th" : "td"}>
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
       </TableCell>
     ),

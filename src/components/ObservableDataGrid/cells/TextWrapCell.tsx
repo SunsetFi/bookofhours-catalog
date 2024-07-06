@@ -35,6 +35,7 @@ function TextWrapCell<T extends RowData>(props: CellContext<T, string | null>) {
         height: `${RowHeight - RowPaddingY * 2}px`,
         width: "100%",
         display: "flex",
+        alignItems: textTooBig ? undefined : "center",
         py: 1,
         overflow: "hidden",
         maskImage: textTooBig

@@ -2,8 +2,8 @@ import { ObservableKeys } from "@/observables";
 import {
   AccessorFn,
   ColumnDef,
-  ColumnDefBase,
   GroupColumnDef,
+  IdentifiedColumnDef,
   RowData,
   StringOrTemplateHeader,
 } from "@tanstack/react-table";
@@ -26,7 +26,7 @@ type ColumnIdentifiers<TData extends RowData, TValue> =
 // Begin enhanced column defs
 
 export interface EnhancedColumnDefBase<TData extends RowData, TValue = unknown>
-  extends ColumnDefBase<TData, TValue> {
+  extends IdentifiedColumnDef<TData, TValue> {
   rowHeader?: boolean;
 }
 
