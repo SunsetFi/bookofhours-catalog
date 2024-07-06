@@ -68,7 +68,7 @@ function craftableModelToSearchItem(
           iconUrl: iconUrl!,
           label: label!,
           secondaryText: `Skill: ${skillLabel}`,
-          pathQuery: `label=\"${encodeURIComponent(label!)}\"`,
+          pathQuery: `filter-label=\"${encodeURIComponent(label!)}\"`,
           actions: [
             {
               icon: <PlayCircle />,

@@ -9,6 +9,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Stack,
 } from "@mui/material";
 
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
@@ -180,11 +181,10 @@ export const AspectsFilter = ({
   );
 
   return (
-    <Box
+    <Stack
+      direction="column"
+      alignItems="center"
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
         p: 1,
       }}
     >
@@ -206,14 +206,8 @@ export const AspectsFilter = ({
           Select All
         </Button>
       </Box>
-      <AspectSelectionGrid
-        sx={{ justifyContent: "center" }}
-        items={choices}
-        value={aspects}
-        onChange={onAspectsChanged}
-      />
       <RadioGroup
-        sx={{ px: 1 }}
+        sx={{ px: 1, pb: 1 }}
         row
         value={matchMode}
         onChange={(e) => onModeChanged(e.target.value as any)}
@@ -222,6 +216,12 @@ export const AspectsFilter = ({
         <FormControlLabel value="all" control={<Radio />} label="All" />
         <FormControlLabel value="none" control={<Radio />} label="None" />
       </RadioGroup>
-    </Box>
+      <AspectSelectionGrid
+        sx={{ justifyContent: "center" }}
+        items={choices}
+        value={aspects}
+        onChange={onAspectsChanged}
+      />
+    </Stack>
   );
 };

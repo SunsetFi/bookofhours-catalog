@@ -56,7 +56,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
       ]).pipe(
         map(([terrain, infoRecipeLabel]) => {
           if (terrain.shrouded) {
-            return infoRecipeLabel;
+            return infoRecipeLabel === "." ? terrain.label : infoRecipeLabel;
           }
 
           return terrain.label;

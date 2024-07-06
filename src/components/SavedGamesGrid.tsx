@@ -31,28 +31,35 @@ const SaveGamesGrid = ({ id, onLoad }: SaveGamesGridProps) => {
   const saves = useObservation(saveManager.saves$);
 
   return (
-    <Box
+    <Stack
       id={id}
+      direction="column"
       sx={{
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: `${GapWidth}px`,
         width: SaveGamesGridWidth,
-        overflow: "auto",
       }}
-      role="list"
       aria-busy={!saves ? "true" : "false"}
     >
       {!saves && <CircularProgress aria-busy="true" color="inherit" />}
       {saves && saves.length === 0 && (
         <Typography justifySelf="center">No saves found</Typography>
       )}
-      {saves &&
-        saves.map((save, index) => (
-          <SaveGameItem key={index} save={save} onLoad={onLoad} />
-        ))}
-    </Box>
+      <Box
+        role="list"
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: `${GapWidth}px`,
+          width: SaveGamesGridWidth,
+          overflow: "auto",
+        }}
+      >
+        {saves &&
+          saves.map((save, index) => (
+            <SaveGameItem key={index} save={save} onLoad={onLoad} />
+          ))}
+      </Box>
+    </Stack>
   );
 };
 
@@ -95,7 +102,11 @@ const SaveGameItem = ({
           width: "100%",
         }}
       >
-        <Button sx={{ ml: "auto" }} onClick={() => onLoad(saveName)}>
+        <Button
+          sx={{ ml: "auto" }}
+          onClick={() => onLoad(saveName)}
+          aria-describedby={`${id}-label`}
+        >
           Load
         </Button>
       </Box>

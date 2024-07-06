@@ -6,6 +6,8 @@ export const skillsSearchProvider = createElementStackSearchProvider(
   "skill",
   (element) =>
     element.label$.pipe(
-      map((label) => (label ? `label=\"${encodeURIComponent(label)}\"` : null))
+      map((label) =>
+        label ? `filter-label=\"${encodeURIComponent(label)}\"` : null
+      )
     )
 );

@@ -6,6 +6,7 @@ import { Box, Popper, SxProps } from "@mui/material";
 
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
+import { useNativeEvent } from "@/hooks/native-event";
 
 export interface TooltipProps {
   sx?: SxProps;
@@ -31,17 +32,15 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   );
 
   const [delayedFocus, setDelayedFocus] = React.useState(false);
-
-  const onKeyPress = React.useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setDelayedFocus(false);
-    }
-  }, []);
+  const [escaped, setEscaped] = React.useState(false);
 
   const [immediateFocus, focusChange] = useDebounceCommitValue<boolean>(
-    2000,
+    1300,
     setDelayedFocus
   );
+
+  const open =
+    !escaped && !disabled && ((immediateFocus && delayedFocus) || false);
 
   useMutationObserver(contentRef, () => {
     if (popperRef.current == null) {
@@ -51,7 +50,32 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
     popperRef.current.update();
   });
 
-  const open = !disabled && ((immediateFocus && delayedFocus) || false);
+  const onKeyDown = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!open) {
+        // We might be nested, so if we are not open, let the parent handle it.
+        return;
+      }
+
+      if (e.key === "Escape") {
+        // We might be nested, so stop propogation here.
+        e.preventDefault();
+        e.stopPropagation();
+        setEscaped(true);
+      }
+    },
+    [open]
+  );
+
+  const focusOff = React.useCallback(() => {
+    focusChange(false);
+    setDelayedFocus(false);
+    setEscaped(false);
+  }, [focusChange]);
+
+  const focusOn = React.useCallback(() => {
+    focusChange(true);
+  }, [focusChange]);
 
   return (
     <>
@@ -61,11 +85,11 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
         id={id}
         aria-describedby={open ? `${id}-tooltip` : undefined}
         ref={setAnchorRef}
-        onMouseOver={() => focusChange(true)}
-        onMouseOut={() => focusChange(false)}
-        onFocus={() => focusChange(true)}
-        onBlur={() => focusChange(false)}
-        onKeyDown={onKeyPress}
+        onMouseOver={focusOn}
+        onFocus={focusOn}
+        onMouseOut={focusOff}
+        onBlur={focusOff}
+        onKeyDown={onKeyDown}
       >
         {children}
       </Box>

@@ -8,6 +8,8 @@ export const materialsSearchProvider = createElementStackSearchProvider(
   materialAspects,
   (element) =>
     element.label$.pipe(
-      map((label) => (label ? `label=\"${encodeURIComponent(label)}\"` : null))
+      map((label) =>
+        label ? `filter-label=\"${encodeURIComponent(label)}\"` : null
+      )
     )
 );

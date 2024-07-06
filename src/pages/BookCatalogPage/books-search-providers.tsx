@@ -47,7 +47,7 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
             elementStackToSearchItem(book, (book) =>
               book.label$.pipe(
                 map((label) =>
-                  label ? `label=\"${encodeURIComponent(label)}\"` : null
+                  label ? `filter-label=\"${encodeURIComponent(label)}\"` : null
                 )
               )
             )
@@ -79,7 +79,7 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
                   iconUrl: iconUrl,
                   label: label!,
                   secondaryText: `Book: ${bookLabel}`,
-                  pathQuery: `memory=\"${encodeURIComponent(label!)}\"`,
+                  pathQuery: `filter-memory=\"${encodeURIComponent(label!)}\"`,
                   actions: [
                     {
                       icon: <PlayCircle />,
