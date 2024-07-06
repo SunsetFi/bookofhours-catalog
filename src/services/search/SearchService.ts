@@ -9,6 +9,7 @@ import {
   debounceTime,
   switchMap,
 } from "rxjs";
+import { take } from "lodash";
 
 import { isNotNull } from "@/utils";
 
@@ -36,6 +37,7 @@ export class SearchService {
   private readonly _searchActiveQuery$: Observable<SearchQuery>;
 
   private readonly _searchResults$: Observable<SearchItemResult[]>;
+  private readonly _searchTotal$: Observable<number>;
 
   constructor(
     @inject(Container) private readonly _container: Container,
@@ -49,18 +51,27 @@ export class SearchService {
       shareReplay(1)
     );
 
-    this._searchResults$ = combineLatest(
+    const rawResults$ = combineLatest(
       providers.map((provider) =>
         provider(this._searchActiveQuery$, this._container)
       )
-    ).pipe(map((results) => results.flat()));
+    ).pipe(
+      map((results) => results.flat()),
+      shareReplay(1)
+    );
+
+    this._searchTotal$ = rawResults$.pipe(map((x) => x.length));
+    this._searchResults$ = rawResults$.pipe(
+      map((x) => take(x, 25)),
+      shareReplay(1)
+    );
 
     let listeningVersion: number | null = null;
     this._searchQueryInput$.subscribe((q) => {
       listeningVersion = ++this._searchQueryVersion;
       this._searchBusy$.next(q !== "");
     });
-    this._searchResults$.subscribe((s) => {
+    this._searchResults$.subscribe(() => {
       if (listeningVersion === this._searchQueryVersion) {
         this._searchBusy$.next(false);
         listeningVersion = null;
@@ -86,6 +97,10 @@ export class SearchService {
       this._searchQuery$ = this._searchQueryInput$.pipe(map((x) => x || ""));
     }
     return this._searchQuery$;
+  }
+
+  get searchTotal$() {
+    return this._searchTotal$;
   }
 
   get searchResults$() {

@@ -34,6 +34,7 @@ const SearchDialog = () => {
   const isBusy = useObservation(searchService.isBusy$);
   const searchQuery = useObservation(searchService.searchQuery$) ?? "";
   const searchResults = useObservation(searchService.searchResults$) ?? [];
+  const searchTotal = useObservation(searchService.searchTotal$) ?? null;
 
   const hasQuery = searchQuery != "";
 
@@ -138,7 +139,7 @@ const SearchDialog = () => {
           esc
         </Typography>
       </Box>
-      <Divider />
+      <Divider aria-hidden="true" />
       <DialogContent>
         {!hasQuery && (
           <Typography sx={{ width: "100%", textAlign: "center" }} variant="h5">
@@ -150,12 +151,25 @@ const SearchDialog = () => {
             No results found
           </Typography>
         )}
-        {searchQuery != "" && (
-          <List component="nav" sx={{ pt: 1 }}>
-            {searchResults.map((item, i) => (
-              <SearchResultListItem key={i} item={item} />
-            ))}
-          </List>
+
+        {!isBusy && searchQuery != "" && (
+          <>
+            {searchResults && searchTotal && (
+              <Typography
+                component="div"
+                sx={{ width: "100%" }}
+                textAlign="center"
+                variant="caption"
+              >
+                Showing {searchResults.length} of {searchTotal} items
+              </Typography>
+            )}
+            <List component="nav" sx={{ pt: 1 }}>
+              {searchResults.map((item, i) => (
+                <SearchResultListItem key={i} item={item} />
+              ))}
+            </List>
+          </>
         )}
       </DialogContent>
     </Dialog>

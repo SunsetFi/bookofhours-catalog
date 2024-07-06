@@ -64,6 +64,7 @@ export interface ObservableDataGridProps<T extends {}> {
   sorting?: SortingState;
   columns: ObservableColumnDef<T, any>[];
   items$: Observable<readonly T[]>;
+  autoFocus?: boolean;
   getItemKey?(item: T, index: number): string;
   onFiltersChanged?(filters: Record<string, any>): void;
   onSortingChanged?(sorting: SortingState): void;
@@ -193,6 +194,7 @@ function ObservableDataGrid<T extends {}>({
   columns,
   sorting,
   items$,
+  autoFocus,
   getItemKey = (item, index) => String(index),
   onFiltersChanged,
   onSortingChanged,
@@ -297,13 +299,13 @@ function ObservableDataGrid<T extends {}>({
     // This is actually a problem, as the top of the container has our stick header overlayed.
     // We want then to have our body scroll, not our table.  But i'm not sure as of yet how to pull that off, as table styling is a strange and fickle thing.
     return (
-      <TableBody>
+      <TableBody tabIndex={0} autoFocus={autoFocus}>
         {rows.map((row) => {
           return <ObservableTableRow key={row.id} row={row} />;
         })}
       </TableBody>
     );
-  }, [rows]);
+  }, [rows, autoFocus]);
 
   const totalColumns = table.getHeaderGroups()[0].headers.length;
 

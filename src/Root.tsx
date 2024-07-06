@@ -85,39 +85,65 @@ const Root = () => {
   }
 
   return (
-    <Hotkeys>
-      <Stack direction="row" sx={{ width: "100%", height: "100%" }}>
-        <Stack
-          direction="column"
+    <SuspenseBoundary>
+      <Hotkeys>
+        <Stack direction="row" sx={{ width: "100%", height: "100%" }}>
+          <Stack
+            direction="column"
+            sx={{
+              width: "100%",
+              height: "100%",
+              minWidth: 0,
+            }}
+          >
+            <PageHeader />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                flexGrow: 1,
+                width: "100%",
+                height: "100%",
+                minHeight: 0,
+              }}
+            >
+              <PageTabs />
+              <Main>
+                <SuspenseBoundary>
+                  <AppRoutes />
+                </SuspenseBoundary>
+              </Main>
+            </Box>
+          </Stack>
+          <OrchestratorDrawer />
+        </Stack>
+        <UnlockTerrainDialog />
+        <SearchDialog />
+        <GameNotPausedWarning />
+      </Hotkeys>
+    </SuspenseBoundary>
+  );
+};
+
+const SuspenseBoundary = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <React.Suspense
+      fallback={
+        <Box
           sx={{
             width: "100%",
             height: "100%",
-            minWidth: 0,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <PageHeader />
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              flexGrow: 1,
-              width: "100%",
-              height: "100%",
-              minHeight: 0,
-            }}
-          >
-            <PageTabs />
-            <Main>
-              <AppRoutes />
-            </Main>
-          </Box>
-        </Stack>
-        <OrchestratorDrawer />
-      </Stack>
-      <UnlockTerrainDialog />
-      <SearchDialog />
-      <GameNotPausedWarning />
-    </Hotkeys>
+          <CircularProgress color="inherit" />
+        </Box>
+      }
+    >
+      {children}
+    </React.Suspense>
   );
 };
 
