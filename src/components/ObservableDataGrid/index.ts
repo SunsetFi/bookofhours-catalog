@@ -21,4 +21,4 @@ export * from "./columns";
 export * from "./filters";
 export * from "./types";
 
-export * from "./use-query-sort";
+export * from "./use-query-settings";

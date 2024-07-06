@@ -1,5 +1,6 @@
 import React from "react";
 import { combineLatest } from "rxjs";
+import { Aspects } from "secrethistories-api";
 
 import { Stack, Typography, IconButton, Box } from "@mui/material";
 
@@ -22,13 +23,11 @@ import {
   Orchestrator,
 } from "@/services/sh-game";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
 import { useObservation } from "@/hooks/use-observation";
 
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import VerbIcon from "@/components/VerbIcon";
-
 import {
   IdentifierItemDataGrid,
   createObservableColumnHelper,
@@ -36,14 +35,13 @@ import {
   AspectsFilter,
   FilterComponentProps,
   AspectsFilterValue,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 import {
   RowHeight,
   RowPaddingY,
 } from "@/components/ObservableDataGrid/constants";
 import AspectsList from "@/components/Aspects/AspectsList";
-import { Aspects } from "secrethistories-api";
 
 const columnHelper = createObservableColumnHelper<ConnectedTerrainModel>();
 
@@ -169,8 +167,7 @@ const LocationsCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Locations">
@@ -178,10 +175,7 @@ const LocationsCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={items$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

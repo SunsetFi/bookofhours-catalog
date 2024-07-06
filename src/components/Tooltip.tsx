@@ -39,7 +39,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   }, []);
 
   const [immediateFocus, focusChange] = useDebounceCommitValue<boolean>(
-    500,
+    2000,
     setDelayedFocus
   );
 
@@ -61,7 +61,6 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
         id={id}
         aria-describedby={open ? `${id}-tooltip` : undefined}
         ref={setAnchorRef}
-        tabIndex={0}
         onMouseOver={() => focusChange(true)}
         onMouseOut={() => focusChange(false)}
         onFocus={() => focusChange(true)}

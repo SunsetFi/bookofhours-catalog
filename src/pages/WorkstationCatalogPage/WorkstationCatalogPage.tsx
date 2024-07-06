@@ -12,8 +12,6 @@ import { evolutionAspects, powerAspects } from "@/aspects";
 import { brancrugTokens } from "@/spheres";
 import { decorateObjectInstance } from "@/object-decorator";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import {
   Orchestrator,
   SituationModel,
@@ -27,7 +25,7 @@ import {
   IdentifierItemDataGrid,
   aspectsPresentFilter,
   createSituationColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
@@ -149,8 +147,7 @@ const WorkstationCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Workstations">
@@ -158,10 +155,7 @@ const WorkstationCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={elements$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

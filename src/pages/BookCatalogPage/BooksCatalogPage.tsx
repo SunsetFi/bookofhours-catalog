@@ -5,8 +5,6 @@ import { Box, Stack } from "@mui/material";
 import { powerAspects } from "@/aspects";
 import { useObservation } from "@/hooks/use-observation";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
@@ -15,7 +13,7 @@ import {
   IdentifierItemDataGrid,
   ElementIconCell,
   createElementStackColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 import { BookModel, useBooks } from "./books-data-source";
@@ -103,18 +101,15 @@ const BookCatalogPage = () => {
     []
   );
 
-  const [filter, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Bibliographical Collection">
       <IdentifierItemDataGrid
+        sx={{ height: "100%" }}
         columns={columns}
         items$={items$}
-        filters={filter}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

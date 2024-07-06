@@ -8,14 +8,12 @@ import { furnishingAspects, powerAspects } from "@/aspects";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import FocusIconButton from "@/components/FocusIconButton";
 import PageContainer from "@/components/PageContainer";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -65,8 +63,7 @@ const FurnishingsCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="An Accounting of the Walls and Floors">
@@ -74,10 +71,7 @@ const FurnishingsCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={elements$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

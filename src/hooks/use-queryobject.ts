@@ -30,11 +30,11 @@ export function useQueryObjectState(
     }
 
     setObj(obj);
-  }, [location, mapping.fromUrl ?? null]);
+  }, [location.search, mapping.fromUrl ?? null]);
 
   const setValue = React.useCallback(
     (value: Record<string, any>) => {
-      const newParams = new URLSearchParams();
+      const newParams = new URLSearchParams(location.search);
       if (mapping.toUrl) {
         value = mapping.toUrl(value);
       }
@@ -45,7 +45,7 @@ export function useQueryObjectState(
 
       history.replace(`${location.pathname}?${newParams.toString()}`);
     },
-    [location, history, mapping.toUrl ?? null]
+    [location.search, history, mapping.toUrl ?? null]
   );
 
   return [obj, setValue];

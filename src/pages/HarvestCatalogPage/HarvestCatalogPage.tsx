@@ -6,14 +6,12 @@ import { useDIDependency } from "@/container";
 
 import { SituationModel, TokensSource } from "@/services/sh-game";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createSituationColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createSituationColumnHelper();
@@ -46,8 +44,7 @@ const HarvestCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Gardens and Glades">
@@ -55,10 +52,7 @@ const HarvestCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={tokensSource.unlockedHarvestStations$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

@@ -8,14 +8,12 @@ import { materialAspects, powerAspects } from "@/aspects";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -66,8 +64,7 @@ const MaterialsCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Malleary Shelf">
@@ -75,10 +72,7 @@ const MaterialsCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={elements$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

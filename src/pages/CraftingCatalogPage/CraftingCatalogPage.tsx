@@ -6,8 +6,6 @@ import Box from "@mui/material/Box";
 
 import { aspectsMagnitude } from "@/aspects";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import PageContainer from "@/components/PageContainer";
 import PinRecipeIconButton from "@/components/PinRecipeIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
@@ -18,7 +16,7 @@ import {
   createObservableColumnHelper,
   aspectsFilter,
   AspectsFilter,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 import { CraftableModel, useCraftables } from "./crafting-data-source";
@@ -60,6 +58,7 @@ const CraftingCatalogPage = () => {
       columnHelper.observeText("label$", {
         id: "label",
         header: "Name",
+        rowHeader: true,
         size: 120,
       }),
       columnHelper.observe(
@@ -122,8 +121,7 @@ const CraftingCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="The Fruits of Knowledge">
@@ -131,11 +129,8 @@ const CraftingCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={craftables$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
         defaultSortColumn="label"
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

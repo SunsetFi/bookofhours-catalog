@@ -12,8 +12,6 @@ import { evolutionAspects, powerAspects } from "@/aspects";
 import { brancrugTokens } from "@/spheres";
 import { decorateObjectInstance } from "@/object-decorator";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import {
   Orchestrator,
   SituationModel,
@@ -26,7 +24,7 @@ import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createSituationColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
@@ -135,8 +133,7 @@ const BrancrugCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Brancrug and Environs">
@@ -144,10 +141,7 @@ const BrancrugCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={elements$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

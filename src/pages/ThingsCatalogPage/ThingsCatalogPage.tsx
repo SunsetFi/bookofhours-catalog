@@ -12,14 +12,12 @@ import {
   filterHasNoneOfAspect,
 } from "@/services/sh-game";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -65,8 +63,7 @@ const ThingsCatalogPage = () => {
     []
   );
 
-  const [filters, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Antiquities and Knicknacks">
@@ -74,10 +71,7 @@ const ThingsCatalogPage = () => {
         sx={{ height: "100%" }}
         columns={columns}
         items$={elements$}
-        filters={filters}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );

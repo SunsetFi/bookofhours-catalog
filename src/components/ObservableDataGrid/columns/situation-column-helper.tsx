@@ -32,6 +32,7 @@ export function createSituationColumnHelper<
         header: "Name",
         cell: TextWrapCell,
         filterFn: "includesString",
+        rowHeader: true,
         meta: {
           filterComponent: TextFilter,
         },

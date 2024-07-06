@@ -6,7 +6,6 @@
 - Unlock for various terrains have icons. Add iconUrl to terrain and show it in unlock menu.
   - Use this icon in Locations page.
 - Pinning for items in search dialog.
-- useQueryObject and useQuerySort fight each other. Combine them.
 
 ## Maybe
 

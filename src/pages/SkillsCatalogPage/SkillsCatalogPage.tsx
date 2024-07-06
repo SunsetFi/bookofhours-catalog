@@ -17,13 +17,12 @@ import {
 } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
-import { useQueryObjectState } from "@/hooks/use-queryobject";
 
 import PageContainer from "@/components/PageContainer";
 import {
   IdentifierItemDataGrid,
   createElementStackColumnHelper,
-  useQuerySort,
+  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 
 const columnHelper = createElementStackColumnHelper();
@@ -110,8 +109,7 @@ const SkillsCatalogPage = () => {
     [tokensSource]
   );
 
-  const [filter, onFiltersChanged] = useQueryObjectState();
-  const [sortState, onSortingChanged] = useQuerySort();
+  const settings = useQuerySettings();
 
   return (
     <PageContainer title="Esoteric Wisdoms">
@@ -120,10 +118,7 @@ const SkillsCatalogPage = () => {
         items$={skills$}
         columns={columns}
         defaultSortColumn="label"
-        filters={filter}
-        sorting={sortState}
-        onSortingChanged={onSortingChanged}
-        onFiltersChanged={onFiltersChanged}
+        {...settings}
       />
     </PageContainer>
   );
