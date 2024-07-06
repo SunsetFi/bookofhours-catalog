@@ -12,7 +12,7 @@ export interface PageContainerProps {
 const PageContainer = ({ title, children }: PageContainerProps) => {
   const pageManager = useDIDependency(PageManager);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     pageManager.setTitle(title);
     return () => {
       pageManager.setTitle(null);
