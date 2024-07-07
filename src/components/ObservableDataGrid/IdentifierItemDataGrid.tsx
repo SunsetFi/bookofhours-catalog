@@ -4,9 +4,11 @@ import ObservableDataGrid, {
   ObservableDataGridProps,
 } from "./ObservableDataGrid";
 
-export type IdentifierItemDataGridProps<
-  T extends { readonly id: string | number }
-> = Omit<ObservableDataGridProps<T>, "getItemKey">;
+export type IdentifierItem = { readonly id: string | number };
+export type IdentifierItemDataGridProps<T extends IdentifierItem> = Omit<
+  ObservableDataGridProps<T>,
+  "getItemKey"
+>;
 
 function IdentifierItemDataGrid<T extends { readonly id: string | number }>(
   props: IdentifierItemDataGridProps<T>

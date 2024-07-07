@@ -35,7 +35,7 @@ const ElementStackTray = ({
   return (
     <Box
       aria-label={ariaLabel}
-      role={role ?? (onClick ? "listbox" : undefined)}
+      role={role ?? (onClick ? "listbox" : "list")}
       sx={{
         display: "flex",
         flexDirection: "row",
@@ -60,7 +60,7 @@ const ElementStackTray = ({
             key={elementStack.id}
             elementStack={elementStack}
             onClick={onClick ? () => onClick(elementStack) : undefined}
-            role="option"
+            role={onClick ? "option" : "listitem"}
             aria-selected={value === elementStack}
           />
         ))}

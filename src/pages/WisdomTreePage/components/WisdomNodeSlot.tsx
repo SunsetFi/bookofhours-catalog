@@ -90,13 +90,17 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
         alignItems: "center",
         justifyContent: "center",
       }}
+      aria-label={`${wisdomLabel}${sealed ? " locked" : ""}`}
     >
       {committed == null && sealed && <LockIcon />}
       {committed && (
         <ElementStackCard elementStack={committed} interactable={false} />
       )}
       {committed == null && !sealed && possibilities.length > 0 && (
-        <Button onClick={() => setChoosingCandidate(true)}>
+        <Button
+          aria-description={wisdomLabel}
+          onClick={() => setChoosingCandidate(true)}
+        >
           {possibilities.length} candidates
         </Button>
       )}
@@ -159,8 +163,11 @@ const ChooseWisdomCardDialog = ({
   return (
     <Dialog
       open={true}
+      PaperProps={{
+        "aria-model": "true",
+        role: "document",
+      }}
       aria-labelledby="dialog-title"
-      aria-describedby="dialog-content"
       onClose={onClose}
     >
       <DialogTitle id="dialog-title">{label}</DialogTitle>
@@ -182,6 +189,7 @@ const ChooseWisdomCardDialog = ({
             spacing={1}
             alignItems="center"
             justifyContent="center"
+            aria-live="polite"
           >
             <Typography>{description ?? "Choose a Card"}</Typography>
 

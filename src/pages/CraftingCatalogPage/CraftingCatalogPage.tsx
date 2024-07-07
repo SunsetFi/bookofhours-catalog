@@ -6,18 +6,16 @@ import Box from "@mui/material/Box";
 
 import { aspectsMagnitude } from "@/aspects";
 
-import PageContainer from "@/components/PageContainer";
 import PinRecipeIconButton from "@/components/PinRecipeIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
 import {
-  IdentifierItemDataGrid,
   ElementIconCell,
   AspectsListCell,
   createObservableColumnHelper,
   aspectsFilter,
   AspectsFilter,
-  useQuerySettings,
 } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 import { CraftableModel, useCraftables } from "./crafting-data-source";
 
@@ -121,18 +119,13 @@ const CraftingCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="The Fruits of Knowledge">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={craftables$}
-        defaultSortColumn="label"
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="The Fruits of Knowledge"
+      columns={columns}
+      items$={craftables$}
+      defaultSortColumn="label"
+    />
   );
 };
 

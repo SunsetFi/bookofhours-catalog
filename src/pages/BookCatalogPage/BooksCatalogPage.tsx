@@ -5,16 +5,14 @@ import { Box, Stack } from "@mui/material";
 import { powerAspects } from "@/aspects";
 import { useObservation } from "@/hooks/use-observation";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import CraftIconButton from "@/components/CraftIconButton";
 import PinElementIconButton from "@/components/PinElementIconButton";
 import {
-  IdentifierItemDataGrid,
   ElementIconCell,
   createElementStackColumnHelper,
-  useQuerySettings,
 } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 import { BookModel, useBooks } from "./books-data-source";
 
@@ -101,17 +99,12 @@ const BookCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Bibliographical Collection">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={items$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="Bibliographical Collection"
+      columns={columns}
+      items$={items$}
+    />
   );
 };
 

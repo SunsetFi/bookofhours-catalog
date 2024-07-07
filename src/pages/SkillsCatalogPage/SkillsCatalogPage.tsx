@@ -18,12 +18,8 @@ import {
 
 import { useObservation } from "@/hooks/use-observation";
 
-import PageContainer from "@/components/PageContainer";
-import {
-  IdentifierItemDataGrid,
-  createElementStackColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createElementStackColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createElementStackColumnHelper();
 
@@ -109,18 +105,13 @@ const SkillsCatalogPage = () => {
     [tokensSource]
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Esoteric Wisdoms">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        items$={skills$}
-        columns={columns}
-        defaultSortColumn="label"
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="Esoteric Wisdoms"
+      items$={skills$}
+      columns={columns}
+      defaultSortColumn="label"
+    />
   );
 };
 

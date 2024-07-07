@@ -4,15 +4,11 @@ import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
 
-import { SituationModel, TokensSource } from "@/services/sh-game";
+import { TokensSource } from "@/services/sh-game";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
-import {
-  IdentifierItemDataGrid,
-  createSituationColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createSituationColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createSituationColumnHelper();
 
@@ -44,17 +40,12 @@ const HarvestCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Gardens and Glades">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={tokensSource.unlockedHarvestStations$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="Gardens and Glades"
+      columns={columns}
+      items$={tokensSource.unlockedHarvestStations$}
+    />
   );
 };
 

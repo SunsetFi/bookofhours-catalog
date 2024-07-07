@@ -75,6 +75,11 @@ const SearchDialog = () => {
   return (
     <Dialog
       open
+      PaperProps={{
+        "aria-model": "true",
+        role: "document",
+      }}
+      aria-label="Search"
       onClose={() => searchService.close()}
       fullWidth
       maxWidth="md"

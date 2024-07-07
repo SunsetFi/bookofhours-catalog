@@ -16,7 +16,13 @@ const LoadGameDialogContent = ({ model }: ComponentDialogProps) => {
       <DialogTitle id="dialog-title" variant="h3">
         Load a Game
       </DialogTitle>
-      <DialogContent>
+      {/*
+      Per NVDA discussions, we need a document inside the dialog to pick this up as a browsable document object
+      Otherwise, NVDA treats this as a typical notification+options dialog, as you would see in traditional win32 applications.
+      Its worth noting that NVDA said they would change this years ago, but never have.
+      See https://github.com/nvaccess/nvda/issues/4493
+      */}
+      <DialogContent role="document">
         <SavedGamesGrid
           id="dialog-content"
           autoFocus

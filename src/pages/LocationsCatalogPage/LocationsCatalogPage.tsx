@@ -25,23 +25,21 @@ import {
 
 import { useObservation } from "@/hooks/use-observation";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import VerbIcon from "@/components/VerbIcon";
 import {
-  IdentifierItemDataGrid,
   createObservableColumnHelper,
   aspectsFilter,
   AspectsFilter,
   FilterComponentProps,
   AspectsFilterValue,
-  useQuerySettings,
 } from "@/components/ObservableDataGrid";
 import {
   RowHeight,
   RowPaddingY,
 } from "@/components/ObservableDataGrid/constants";
 import AspectsList from "@/components/Aspects/AspectsList";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createObservableColumnHelper<ConnectedTerrainModel>();
 
@@ -171,18 +169,7 @@ const LocationsCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
-  return (
-    <PageContainer title="Locations">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={items$}
-        {...settings}
-      />
-    </PageContainer>
-  );
+  return <DataGridPage title="Locations" columns={columns} items$={items$} />;
 };
 
 const WorkstationsCell = (

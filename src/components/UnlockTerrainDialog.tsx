@@ -48,8 +48,11 @@ const UnlockTerrainDialog = () => {
   return (
     <Dialog
       open
+      PaperProps={{
+        "aria-model": "true",
+        role: "document",
+      }}
       aria-labelledby="dialog-title"
-      aria-describedby="dialog-content"
       onClose={() => unlocker.close()}
     >
       <DialogTitle

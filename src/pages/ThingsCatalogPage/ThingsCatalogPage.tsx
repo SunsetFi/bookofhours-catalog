@@ -12,13 +12,9 @@ import {
   filterHasNoneOfAspect,
 } from "@/services/sh-game";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
-import {
-  IdentifierItemDataGrid,
-  createElementStackColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createElementStackColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createElementStackColumnHelper();
 
@@ -63,17 +59,12 @@ const ThingsCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Antiquities and Knicknacks">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={elements$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="Antiquities and Knicknacks"
+      columns={columns}
+      items$={elements$}
+    />
   );
 };
 

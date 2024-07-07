@@ -8,13 +8,9 @@ import { materialAspects, powerAspects } from "@/aspects";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
-import {
-  IdentifierItemDataGrid,
-  createElementStackColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createElementStackColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createElementStackColumnHelper();
 
@@ -64,17 +60,8 @@ const MaterialsCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Malleary Shelf">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={elements$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage title="Malleary Shelf" columns={columns} items$={elements$} />
   );
 };
 

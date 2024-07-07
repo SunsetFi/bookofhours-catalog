@@ -6,17 +6,11 @@ import { useDIDependency } from "@/container";
 
 import { powerAspects, provisionsAspects } from "@/aspects";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
-import {
-  IdentifierItemDataGrid,
-  createElementStackColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createElementStackColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createElementStackColumnHelper();
 
@@ -65,17 +59,12 @@ const ProvisionsCatalog = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Stores and Provisions">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={elements$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="Stores and Provisions"
+      columns={columns}
+      items$={elements$}
+    />
   );
 };
 

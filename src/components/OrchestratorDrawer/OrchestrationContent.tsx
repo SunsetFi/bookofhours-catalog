@@ -110,7 +110,12 @@ const OrchestrationContent = ({
     );
   } else if (description) {
     stackItems.push(
-      <GameTypography component="div" variant="body1" sx={{ minHeight: 100 }}>
+      <GameTypography
+        component="div"
+        variant="body1"
+        sx={{ minHeight: 100 }}
+        aria-live="assertive"
+      >
         {description}
       </GameTypography>
     );
@@ -234,7 +239,7 @@ const OrchestrationContent = ({
       <Stack direction="column" spacing={2} sx={{ height: "100%", p: 2 }}>
         {stackItems.map((item, index) => (
           <React.Fragment key={index}>
-            {index !== 0 && <Divider />}
+            {index !== 0 && <Divider aria-hidden="true" />}
             {item}
           </React.Fragment>
         ))}

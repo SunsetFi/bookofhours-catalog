@@ -8,7 +8,7 @@ import { PlayCircle } from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
 import { mapArrayItemsCached } from "@/observables";
-import { evolutionAspects, powerAspects } from "@/aspects";
+import { powerAspects } from "@/aspects";
 import { brancrugTokens } from "@/spheres";
 import { decorateObjectInstance } from "@/object-decorator";
 
@@ -19,13 +19,9 @@ import {
   filterTokenInPath,
 } from "@/services/sh-game";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
-import {
-  IdentifierItemDataGrid,
-  createSituationColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createSituationColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
 interface WorkstationModelDecorators {
@@ -133,17 +129,12 @@ const BrancrugCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Brancrug and Environs">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={elements$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="Brancrug and Environs"
+      columns={columns}
+      items$={elements$}
+    />
   );
 };
 

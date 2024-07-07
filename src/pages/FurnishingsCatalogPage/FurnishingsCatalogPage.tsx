@@ -9,12 +9,8 @@ import { furnishingAspects, powerAspects } from "@/aspects";
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
 import FocusIconButton from "@/components/FocusIconButton";
-import PageContainer from "@/components/PageContainer";
-import {
-  IdentifierItemDataGrid,
-  createElementStackColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createElementStackColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createElementStackColumnHelper();
 
@@ -63,17 +59,12 @@ const FurnishingsCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="An Accounting of the Walls and Floors">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={elements$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage
+      title="An Accounting of the Walls and Floors"
+      columns={columns}
+      items$={elements$}
+    />
   );
 };
 

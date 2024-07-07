@@ -8,15 +8,9 @@ import { powerAspects } from "@/aspects";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
-import { useQueryObjectState } from "@/hooks/use-queryobject";
-
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
-import {
-  IdentifierItemDataGrid,
-  createElementStackColumnHelper,
-  useQuerySettings,
-} from "@/components/ObservableDataGrid";
+import { createElementStackColumnHelper } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 const columnHelper = createElementStackColumnHelper();
 
@@ -62,18 +56,7 @@ const ToolsCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
-  return (
-    <PageContainer title="Toolshed">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={elements$}
-        {...settings}
-      />
-    </PageContainer>
-  );
+  return <DataGridPage title="Toolshed" columns={columns} items$={elements$} />;
 };
 
 export default ToolsCatalogPage;

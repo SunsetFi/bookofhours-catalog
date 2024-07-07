@@ -19,14 +19,12 @@ import {
   filterTokenNotInPath,
 } from "@/services/sh-game";
 
-import PageContainer from "@/components/PageContainer";
 import FocusIconButton from "@/components/FocusIconButton";
 import {
-  IdentifierItemDataGrid,
   aspectsPresentFilter,
   createSituationColumnHelper,
-  useQuerySettings,
 } from "@/components/ObservableDataGrid";
+import DataGridPage from "@/components/DataGridPage";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
 interface WorkstationModelDecorators {
@@ -147,17 +145,8 @@ const WorkstationCatalogPage = () => {
     []
   );
 
-  const settings = useQuerySettings();
-
   return (
-    <PageContainer title="Workstations">
-      <IdentifierItemDataGrid
-        sx={{ height: "100%" }}
-        columns={columns}
-        items$={elements$}
-        {...settings}
-      />
-    </PageContainer>
+    <DataGridPage title="Workstations" columns={columns} items$={elements$} />
   );
 };
 

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Observable,
-  combineLatest,
-  debounceTime,
-  map,
-  of as observableOf,
-} from "rxjs";
+import { Observable, combineLatest, map, of as observableOf } from "rxjs";
 import { omit } from "lodash";
 
 import {
@@ -65,120 +59,10 @@ export interface ObservableDataGridProps<T extends {}> {
   columns: ObservableColumnDef<T, any>[];
   items$: Observable<readonly T[]>;
   autoFocus?: boolean;
+  ["aria-labelledby"]?: string;
   getItemKey?(item: T, index: number): string;
   onFiltersChanged?(filters: Record<string, any>): void;
   onSortingChanged?(sorting: SortingState): void;
-}
-
-function autoColumnProperty<T>(
-  column: ObservableColumnDef<T>,
-  index: number
-): string {
-  if (column.id) {
-    return `col::${column.id}:${index}`;
-  } else if (typeof column.header === "string") {
-    return `col::${column.header}:${index}`;
-  } else {
-    return `col::unknown:${index}`;
-  }
-}
-
-function observableToColumnDef<T extends {}>(
-  observableColumn: ObservableColumnDef<T>,
-  index: number
-): ColumnDef<Record<string, any>> {
-  if (
-    isObservableAccessorKeyColumnDef(observableColumn) ||
-    isObservableAccessorFnColumnDef(observableColumn)
-  ) {
-    const accessorKey = autoColumnProperty(observableColumn, index);
-    return {
-      ...omit(observableColumn, ["observationKey", "observationFn"]),
-      accessorKey,
-    } as any;
-  }
-
-  // TODO: Process group columns.
-  // This will throw off our index, so we need to track index
-  // externally.
-
-  return observableColumn as any;
-}
-
-function observeColumn<TData extends {}>(
-  column: ObservableColumnDef<TData>,
-  item: TData,
-  itemIndex: number
-): Observable<any> {
-  if (isObservableAccessorFnColumnDef(column)) {
-    return column.observationFn(item, itemIndex);
-  } else if (isObservableAccessorKeyColumnDef(column)) {
-    return item[column.observationKey] as Observable<any>;
-  } else if ("accessorKey" in column) {
-    return observableOf((item as any)[column.accessorKey]);
-  } else if ("accessorFn" in column) {
-    return observableOf(column.accessorFn(item, itemIndex));
-  }
-
-  return Null$;
-}
-
-function flattenColumn<T>(
-  column: ObservableColumnDef<T>
-): ObservableColumnDef<T>[] {
-  if ("columns" in column && Array.isArray(column.columns)) {
-    return column.columns.flatMap(flattenColumn);
-  }
-
-  return [column];
-}
-
-function itemToRow<T extends {}>(
-  item: T,
-  itemIndex: number,
-  columns: ObservableColumnDef<T>[],
-  getItemKey: (item: T, index: number) => string
-): Observable<Record<string, any>> {
-  columns = columns.flatMap(flattenColumn);
-
-  const observations = columns.map((column) =>
-    observeColumn(column, item, itemIndex)
-  );
-
-  return combineLatest(observations).pipe(
-    // This was here to help debounce changes, but with BatchingScheduler we dont seem to need it.
-    // debounceTime(5),
-    map((values) => {
-      const decoration: Record<string, any> = {
-        _rowId: getItemKey(item, itemIndex),
-      };
-
-      for (let i = 0; i < columns.length; i++) {
-        const property = autoColumnProperty(columns[i], i);
-        const value = values[i];
-        decoration[property] = value;
-      }
-
-      return decorateObjectInstance(item, decoration);
-    })
-  );
-}
-
-function recordToFilter(record: Record<string, any>): ColumnFiltersState {
-  return Object.keys(record).map((key) => ({
-    id: key,
-    value: record[key],
-  }));
-}
-function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
-  const result = {} as Record<string, any>;
-  for (const { id, value } of filter) {
-    if (value != null) {
-      result[id] = value;
-    }
-  }
-
-  return result;
 }
 
 const initialState: InitialTableState = {
@@ -195,6 +79,7 @@ function ObservableDataGrid<T extends {}>({
   sorting,
   items$,
   autoFocus,
+  ["aria-labelledby"]: ariaLabelledBy,
   getItemKey = (item, index) => String(index),
   onFiltersChanged,
   onSortingChanged,
@@ -313,7 +198,7 @@ function ObservableDataGrid<T extends {}>({
     <TableContainer
       ref={parentRef}
       sx={{ width: "100%", height: "100%", ...sx }}
-      aria-live="polite"
+      aria-labelledby={ariaLabelledBy}
     >
       {!data && (
         <Box
@@ -386,6 +271,117 @@ function ObservableDataGrid<T extends {}>({
       )}
     </TableContainer>
   );
+}
+
+function autoColumnProperty<T>(
+  column: ObservableColumnDef<T>,
+  index: number
+): string {
+  if (column.id) {
+    return `col::${column.id}:${index}`;
+  } else if (typeof column.header === "string") {
+    return `col::${column.header}:${index}`;
+  } else {
+    return `col::unknown:${index}`;
+  }
+}
+
+function observableToColumnDef<T extends {}>(
+  observableColumn: ObservableColumnDef<T>,
+  index: number
+): ColumnDef<Record<string, any>> {
+  if (
+    isObservableAccessorKeyColumnDef(observableColumn) ||
+    isObservableAccessorFnColumnDef(observableColumn)
+  ) {
+    const accessorKey = autoColumnProperty(observableColumn, index);
+    return {
+      ...omit(observableColumn, ["observationKey", "observationFn"]),
+      accessorKey,
+    } as any;
+  }
+
+  // TODO: Process group columns.
+  // This will throw off our index, so we need to track index
+  // externally.
+
+  return observableColumn as any;
+}
+
+function observeColumn<TData extends {}>(
+  column: ObservableColumnDef<TData>,
+  item: TData,
+  itemIndex: number
+): Observable<any> {
+  if (isObservableAccessorFnColumnDef(column)) {
+    return column.observationFn(item, itemIndex);
+  } else if (isObservableAccessorKeyColumnDef(column)) {
+    return item[column.observationKey] as Observable<any>;
+  } else if ("accessorKey" in column) {
+    return observableOf((item as any)[column.accessorKey]);
+  } else if ("accessorFn" in column) {
+    return observableOf(column.accessorFn(item, itemIndex));
+  }
+
+  return Null$;
+}
+
+function flattenColumn<T>(
+  column: ObservableColumnDef<T>
+): ObservableColumnDef<T>[] {
+  if ("columns" in column && Array.isArray(column.columns)) {
+    return column.columns.flatMap(flattenColumn);
+  }
+
+  return [column];
+}
+
+function itemToRow<T extends {}>(
+  item: T,
+  itemIndex: number,
+  columns: ObservableColumnDef<T>[],
+  getItemKey: (item: T, index: number) => string
+): Observable<Record<string, any>> {
+  columns = columns.flatMap(flattenColumn);
+
+  const observations = columns.map((column) =>
+    observeColumn(column, item, itemIndex)
+  );
+
+  return combineLatest(observations).pipe(
+    // This was here to help debounce changes, but with BatchingScheduler we dont seem to need it.
+    // debounceTime(5),
+    map((values) => {
+      const decoration: Record<string, any> = {
+        _rowId: getItemKey(item, itemIndex),
+      };
+
+      for (let i = 0; i < columns.length; i++) {
+        const property = autoColumnProperty(columns[i], i);
+        const value = values[i];
+        decoration[property] = value;
+      }
+
+      return decorateObjectInstance(item, decoration);
+    })
+  );
+}
+
+function recordToFilter(record: Record<string, any>): ColumnFiltersState {
+  return Object.keys(record).map((key) => ({
+    id: key,
+    value: record[key],
+  }));
+}
+function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
+  const result = {} as Record<string, any>;
+  for (const { id, value } of filter) {
+    if (value != null) {
+      result[id] = value;
+    }
+  }
+
+  return result;
 }
 
 const ObservableTableHeader = ({

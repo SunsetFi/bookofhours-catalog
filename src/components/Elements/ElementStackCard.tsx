@@ -66,6 +66,16 @@ const ElementStackCard = ({
     [elementStack, interactable]
   );
 
+  const onKeyDown = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && onClick) {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
+
   if (!iconUrl) {
     return null;
   }
@@ -100,6 +110,8 @@ const ElementStackCard = ({
             cursor: interactable && onClick ? "pointer" : undefined,
           }}
           onClick={interactable ? onClick : undefined}
+          tabIndex={interactable && onClick ? 0 : undefined}
+          onKeyDown={onKeyDown}
           role={role}
           aria-selected={ariaSelected}
         >

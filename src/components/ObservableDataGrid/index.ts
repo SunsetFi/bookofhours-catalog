@@ -6,6 +6,7 @@ import ObservableDataGrid, {
 } from "./ObservableDataGrid";
 import IdentifierItemDataGrid, {
   type IdentifierItemDataGridProps,
+  type IdentifierItem,
 } from "./IdentifierItemDataGrid";
 
 export default ObservableDataGrid;
@@ -13,6 +14,7 @@ export default ObservableDataGrid;
 export {
   IdentifierItemDataGrid,
   IdentifierItemDataGridProps,
+  IdentifierItem,
   ObservableDataGridProps,
 };
 
