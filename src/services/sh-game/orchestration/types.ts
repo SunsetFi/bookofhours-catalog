@@ -119,6 +119,10 @@ export type Orchestration = OrchestrationBase &
   (CompletedOrchestration | {}) &
   (ExecutableOrchestration | {});
 
+export type PendingOrchestration = OrchestrationBase &
+  (VariableSituationOrchestration | {}) &
+  ExecutableOrchestration;
+export const isPendingOrchestration = isExecutableOrchestration;
 export interface OrchestrationSlot {
   readonly spec: SphereSpec;
   readonly locked: boolean;
