@@ -85,6 +85,12 @@ const SituationSelectField = ({
       getOptionDisabled={(option) =>
         requireUnstarted ? option.state !== "Unstarted" : false
       }
+      componentsProps={{
+        // Neither of these have titles, and NVDA reads both.
+        // Not sure about other screen readers
+        clearIndicator: { "aria-label": "" },
+        popupIndicator: { "aria-label": "" },
+      }}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -93,7 +99,7 @@ const SituationSelectField = ({
             ...params.InputProps,
             autoFocus,
             startAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment position="start" aria-hidden="true">
                 <Box
                   sx={{
                     display: "flex",
@@ -151,10 +157,17 @@ const SituationSelectItem = ({
   return (
     <Box
       component="li"
-      sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        gap: 1,
+        width: "100%",
+        alignItems: "center",
+      }}
       {...props}
     >
       <Box
+        aria-hidden="true"
         sx={{
           width: "30px",
           height: "30px",

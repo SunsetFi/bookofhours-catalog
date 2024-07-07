@@ -8,6 +8,7 @@ import {
   Typography,
   Autocomplete,
   TextField,
+  Input,
   CircularProgress,
   InputAdornment,
   SxProps,
@@ -30,6 +31,7 @@ import Tooltip from "../Tooltip";
 export interface ElementStackSelectFieldProps {
   sx?: SxProps;
   label?: string;
+  helperText?: React.ReactNode;
   fullWidth?: boolean;
   elementStacks$: Observable<readonly ElementStackModel[]>;
   requireExterior?: boolean;
@@ -37,7 +39,6 @@ export interface ElementStackSelectFieldProps {
   value: ElementStackModel | null;
   readOnly?: boolean;
   autoFocus?: boolean;
-  ["aria-labelledby"]?: string;
   onChange(value: ElementStackModel | null): void;
 }
 
@@ -62,6 +63,7 @@ function observeAutocompleteItem(
 const ElementStackSelectField = ({
   sx,
   label,
+  helperText,
   fullWidth,
   elementStacks$,
   requireExterior = false,
@@ -69,7 +71,6 @@ const ElementStackSelectField = ({
   value,
   readOnly,
   autoFocus,
-  "aria-labelledby": ariaLabelledBy,
   onChange,
 }: ElementStackSelectFieldProps) => {
   let items =
@@ -132,7 +133,6 @@ const ElementStackSelectField = ({
   return (
     <Autocomplete
       sx={sx}
-      aria-labelledby={ariaLabelledBy}
       fullWidth={fullWidth}
       options={items}
       readOnly={readOnly}
@@ -141,6 +141,12 @@ const ElementStackSelectField = ({
       getOptionDisabled={(option) => requireExterior && !option.exterior}
       value={selectedValue}
       onChange={(_, value) => onChange(value?.elementStack ?? null)}
+      componentsProps={{
+        // Neither of these have titles, and NVDA reads both.
+        // Not sure about other screen readers
+        clearIndicator: { "aria-label": "" },
+        popupIndicator: { "aria-label": "" },
+      }}
       renderInput={(params) => (
         <TextField
           ref={drop}
@@ -156,10 +162,11 @@ const ElementStackSelectField = ({
           }}
           autoFocus={autoFocus}
           label={label}
+          helperText={helperText}
           InputProps={{
             ...params.InputProps,
             startAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment position="start" aria-hidden="true">
                 <Box
                   sx={{
                     display: "flex",
@@ -207,8 +214,6 @@ const ElementStackSelectItem = ({
   elementStack,
   displayAspects,
 }: ElementStackSelectItemProps) => {
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-
   let aspects = useObservation(elementStack.aspects$);
   const iconUrl = useObservation(elementStack.iconUrl$);
 
@@ -226,8 +231,16 @@ const ElementStackSelectItem = ({
         sx={{ display: "flex", flexDirection: "row", gap: 1, width: "100%" }}
         title={<ElementStackDetails elementStack={elementStack} />}
       >
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 2,
+            alignItems: "center",
+          }}
+        >
           <Box
+            aria-hidden="true"
             sx={{
               width: "30px",
               height: "30px",

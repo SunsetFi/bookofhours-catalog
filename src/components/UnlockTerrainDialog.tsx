@@ -78,41 +78,37 @@ const UnlockTerrainDialog = () => {
             <Typography variant="body1" sx={{ textAlign: "center", mb: 2 }}>
               {targetDescription}
             </Typography>
-            <Stack
-              direction="row"
-              justifyContent="flex-end"
-              gap={1}
-              sx={{ width: "100%", mb: 2 }}
-            >
-              <Stack
-                direction="row"
-                gap={1}
-                sx={{
-                  // FIXME: We are getting an aspect that is hidden here... See skill upgrade recipes on consider slot.
-                  mr: essentialAspects.length > 0 ? 2 : 0,
-                }}
-              >
-                {requiredAspectsMap &&
-                  requiredAspects.map((aspectId) => (
-                    <Stack key={aspectId} direction="row" gap={1}>
-                      <AspectIcon aspectId={aspectId} size={30} />
-                      <Typography>{requiredAspectsMap[aspectId]}</Typography>
-                    </Stack>
-                  ))}
-              </Stack>
-              <Stack direction="row" gap={1}>
-                {essentialAspectsMap &&
-                  essentialAspects.map((aspectId) => (
-                    <Stack key={aspectId} direction="row" gap={1}>
-                      <AspectIcon aspectId={aspectId} size={30} />
-                      <Typography>{essentialAspectsMap[aspectId]}</Typography>
-                    </Stack>
-                  ))}
-              </Stack>
-            </Stack>
             <ElementStackSelectField
               elementStacks$={unlocker.unlockCandidateStacks$}
               label="Unlock with"
+              helperText={
+                <Stack direction="column" gap={1}>
+                  {requiredAspects.length > 0 && (
+                    <Stack direction="row" gap={1}>
+                      <Typography sx={{ mr: "auto" }}>Requires</Typography>
+                      {requiredAspects.map((aspectId) => (
+                        <AspectIcon
+                          key={aspectId}
+                          aspectId={aspectId}
+                          size={30}
+                        />
+                      ))}
+                    </Stack>
+                  )}
+                  {essentialAspects.length > 0 && (
+                    <Stack direction="row" gap={1}>
+                      <Typography sx={{ mr: "auto" }}>Essential</Typography>
+                      {essentialAspects.map((aspectId) => (
+                        <AspectIcon
+                          key={aspectId}
+                          aspectId={aspectId}
+                          size={30}
+                        />
+                      ))}
+                    </Stack>
+                  )}
+                </Stack>
+              }
               value={selectedStack}
               onChange={(stack) => unlocker.selectStack(stack)}
             />

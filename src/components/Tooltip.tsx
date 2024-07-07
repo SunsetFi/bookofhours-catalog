@@ -81,6 +81,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
       <Box
         sx={sx}
         component="span"
+        role="none"
         id={id}
         aria-describedby={open ? `${id}-tooltip` : undefined}
         ref={setAnchorRef}

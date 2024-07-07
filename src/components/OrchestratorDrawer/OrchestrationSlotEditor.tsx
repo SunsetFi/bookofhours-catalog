@@ -1,5 +1,5 @@
 import React from "react";
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { pick } from "lodash";
 import { switchMap } from "rxjs";
 
@@ -12,6 +12,7 @@ import { Orchestration, OrchestrationSlot } from "@/services/sh-game";
 import ElementStackSelectField from "../Elements/ElementStackSelectField";
 import AspectIcon from "../Aspects/AspectIcon";
 import AspectsList from "../Aspects/AspectsList";
+import ScreenReaderContent from "../ScreenReaderContent";
 
 interface OrchestrationSlotEditorProps {
   slot: OrchestrationSlot;
@@ -48,48 +49,48 @@ const OrchestrationSlotEditor = React.memo(
     const essentialAspects = Object.keys(slot.spec.essential);
 
     return (
-      <Stack direction="column" gap={1} sx={{ width: "100%" }}>
-        <Stack direction="row" gap={1} sx={{ width: "100%" }} flexWrap="wrap">
-          <Typography variant="body1" sx={{ mr: "auto" }} id={`${id}-label`}>
-            {slot.spec.label}
-          </Typography>
-          <Stack
-            direction="row"
-            gap={1}
-            sx={{
-              // FIXME: We are getting an aspect that is hidden here... See skill upgrade recipes on consider slot.
-              mr: essentialAspects.length > 0 ? 2 : 0,
-            }}
-          >
-            {requiredAspects.map((aspectId) => (
-              <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
-            ))}
+      <ElementStackSelectField
+        sx={{ mt: 1 }}
+        fullWidth
+        label={slot.spec.label}
+        helperText={
+          <Stack direction="column" gap={1}>
+            {requiredAspects.length > 0 && (
+              <Stack direction="row" gap={1}>
+                <Typography sx={{ mr: "auto" }}>Requires</Typography>
+                {requiredAspects.map((aspectId) => (
+                  <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
+                ))}
+              </Stack>
+            )}
+            {essentialAspects.length > 0 && (
+              <Stack direction="row" gap={1}>
+                <Typography sx={{ mr: "auto" }}>Essential</Typography>
+                {essentialAspects.map((aspectId) => (
+                  <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
+                ))}
+              </Stack>
+            )}
+            {Object.keys(slotContributingAspects).length > 0 && (
+              <Stack direction="row" gap={1}>
+                <Typography sx={{ mr: "auto" }}>Contributes</Typography>
+                <AspectsList
+                  sx={{ justifyContent: "flex-end" }}
+                  aspects={slotContributingAspects}
+                  iconSize={30}
+                />
+              </Stack>
+            )}
           </Stack>
-          <Stack direction="row" gap={1}>
-            {essentialAspects.map((aspectId) => (
-              <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
-            ))}
-          </Stack>
-        </Stack>
-        <ElementStackSelectField
-          sx={{ mt: 1 }}
-          label={slot.spec.label}
-          fullWidth
-          readOnly={slot.locked}
-          elementStacks$={slot.availableElementStacks$}
-          requireExterior
-          displayAspects={recipeRequiredAspects}
-          value={assignment}
-          onChange={(stack) => slot.assign(stack)}
-          autoFocus={autoFocus}
-          aria-labelledby={`${id}-label`}
-        />
-        <AspectsList
-          sx={{ justifyContent: "flex-end", height: 30 }}
-          aspects={slotContributingAspects}
-          iconSize={30}
-        />
-      </Stack>
+        }
+        readOnly={slot.locked}
+        elementStacks$={slot.availableElementStacks$}
+        requireExterior
+        displayAspects={recipeRequiredAspects}
+        value={assignment}
+        onChange={(stack) => slot.assign(stack)}
+        autoFocus={autoFocus}
+      />
     );
   }
 );

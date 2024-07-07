@@ -1,12 +1,15 @@
 import React from "react";
 
-import { Box, Card, Typography, SxProps } from "@mui/material";
+import { Box, Card, Typography, SxProps, styled } from "@mui/material";
 
 import { useObservation } from "@/hooks/use-observation";
 
 import { useAspect } from "@/services/sh-compendium";
 
 import Tooltip from "../Tooltip";
+import ScreenReaderContent from "../ScreenReaderContent";
+
+const Img = styled("img")();
 
 export interface AspectIconProps extends React.HTMLAttributes<HTMLSpanElement> {
   aspectId: string;
@@ -27,34 +30,27 @@ const AspectIcon = ({
   const iconUrl = useObservation(aspect.iconUrl$);
   const hidden = useObservation(aspect.hidden$);
 
-  if (hidden) {
+  if (hidden || !iconUrl) {
     return null;
   }
 
   return (
     <Tooltip title={<AspectDetails aspectId={aspectId} />}>
-      <Box
-        {...props}
-        component="span"
-        aria-label={label}
+      <ScreenReaderContent>{label}</ScreenReaderContent>
+      <Img
+        aria-hidden="true"
         sx={{
           cursor: onClick ? "pointer" : undefined,
           ...sx,
         }}
         tabIndex={onClick ? 0 : undefined}
         onClick={onClick}
-      >
-        {iconUrl && (
-          <img
-            aria-hidden="true"
-            loading="lazy"
-            style={{ display: "block" }}
-            src={iconUrl}
-            width={size}
-            height={size}
-          />
-        )}
-      </Box>
+        loading="lazy"
+        style={{ display: "block" }}
+        src={iconUrl}
+        width={size}
+        height={size}
+      />
     </Tooltip>
   );
 };
