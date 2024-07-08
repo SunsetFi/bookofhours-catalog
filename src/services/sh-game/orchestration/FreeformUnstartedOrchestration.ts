@@ -8,12 +8,11 @@ import {
   shareReplay,
   switchMap,
 } from "rxjs";
-import { Aspects, SituationState, SphereSpec } from "secrethistories-api";
+import { Aspects, SituationState } from "secrethistories-api";
 
 import {
   EmptyObject$,
   Null$,
-  True$,
   filterItemObservations,
   switchMapIfNotNull,
 } from "@/observables";
@@ -22,7 +21,6 @@ import { BatchingScheduler } from "@/services/scheduler";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
 
-import { ElementStackModel } from "../token-models/ElementStackModel";
 import { SituationModel } from "../token-models/SituationModel";
 
 import { TokensSource } from "../sources/TokensSource";
@@ -35,7 +33,14 @@ import {
   VariableSituationOrchestration,
 } from "./types";
 
-export class UnstartedSituationOrchestration
+/**
+ * A generalized orchestration for arbitrary recipes on any unstarted situation.
+ *
+ * This orchestration does not have a specific recipe or situation, but instead
+ * lets the user slot whatever will fit and monitors the situation for whatever recipe
+ * the game offers.
+ */
+export class FreeformUnstartedOrchestration
   extends OrchestrationBaseImpl
   implements VariableSituationOrchestration, ExecutableOrchestration
 {
@@ -53,11 +58,7 @@ export class UnstartedSituationOrchestration
     situation: SituationModel | null,
     tokensSource: TokensSource,
     private readonly _compendium: Compendium,
-    scheduler: BatchingScheduler,
-    private readonly _orchestrationFactory: OrchestrationFactory,
-    private readonly _replaceOrchestration: (
-      orchestration: Orchestration | null
-    ) => void
+    scheduler: BatchingScheduler
   ) {
     super(tokensSource, scheduler);
 
@@ -91,20 +92,19 @@ export class UnstartedSituationOrchestration
       ),
       shareReplay(1)
     );
-
-    // TODO: If our selected situation executes without us doing so, close the orchestration.
   }
 
-  _onSituationStateUpdated(situationState: SituationState): void {
+  _onSituationStateUpdated(situationState: SituationState) {
     if (this._isExecuting) {
-      // Execution will handle it.
-      return;
+      return "update-orchestration";
     }
 
     // Something executed and it wasn't us.  Clear out the selected situation.
-    if (situationState !== "Unstarted") {
+    if (situationState !== "Unstarted" && this._situation$.value != null) {
       this._situation$.next(null);
     }
+
+    return null;
   }
 
   _dispose(): void {
@@ -190,14 +190,18 @@ export class UnstartedSituationOrchestration
   private _canExecute$: Observable<boolean> | null = null;
   get canExecute$(): Observable<boolean> {
     if (!this._canExecute$) {
+      // FIXME: This mostly reproduces TryStart, but does not take into account
+      // global aspects as the game does.
+      // Create and use situation.canExecute from the api mod.
       this._canExecute$ = combineLatest([
         this._recipe$.pipe(
-          switchMap((recipe) => (recipe ? recipe.requirements$ : Null$))
+          switchMapIfNotNull((recipe) => recipe.requirements$)
         ),
+        this._recipe$.pipe(switchMapIfNotNull((recipe) => recipe?.craftable$)),
         this.aspects$,
       ]).pipe(
-        map(([requirements, aspects]) => {
-          if (!requirements) {
+        map(([requirements, craftable, aspects]) => {
+          if (!requirements || !craftable) {
             return false;
           }
 
@@ -228,42 +232,17 @@ export class UnstartedSituationOrchestration
       return false;
     }
 
+    const situation = await firstValueFrom(this._situation$);
+    if (!situation) {
+      return false;
+    }
+
     this._isExecuting = true;
-    let executed = false;
-    try {
-      const situation = await firstValueFrom(this._situation$);
-      if (!situation) {
-        return false;
-      }
-
-      // Don't need to do this, mod api will tell us if it succeeds.
-      // const canExecute = firstValueFrom(this.canExecute$);
-      // if (!canExecute) {
-      //   return false;
-      // }
-
-      // Unsubscribe from our watcher so we dont flicker and remove the orchestration before establishing the ongoing one
-      executed = await situation.execute();
-
-      if (executed) {
-        this._replaceOrchestration(
-          this._orchestrationFactory.createOngoingOrchestration(
-            situation,
-            this._replaceOrchestration
-          )
-        );
-      }
-    } finally {
+    const executed = await situation.execute();
+    if (!executed) {
       this._isExecuting = false;
     }
 
     return executed;
-  }
-
-  protected _filterSlotCandidates(
-    spec: SphereSpec,
-    elementStack: ElementStackModel
-  ): Observable<boolean> {
-    return True$;
   }
 }

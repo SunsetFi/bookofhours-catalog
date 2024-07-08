@@ -30,6 +30,7 @@ import {
 } from "./types";
 
 import { OrchestrationFactory } from "./OrchestrationFactory";
+import { SituationStateChangedResponse } from "./internal";
 
 // These states don't last long and seem to be stepping stones to other states.
 // We get them intermittently, but can't really act on them.
@@ -96,14 +97,18 @@ export class Orchestrator {
           return;
         }
 
+        let response: SituationStateChangedResponse = "update-orchestration";
         if (orchestration._onSituationStateUpdated) {
           // The orchestration can handle state changes.
-          orchestration._onSituationStateUpdated(situationState);
-          return;
+          response = orchestration._onSituationStateUpdated(situationState);
         }
 
-        // The orchestration has delegated state change handling to us.
-        this._openSituationOrchestrationByState(situation);
+        if (response === "update-orchestration") {
+          // The orchestration has delegated state change handling to us.
+          this._openSituationOrchestrationByState(situation);
+        } else if (response === "clear-orchestration") {
+          this._updateOrchestration(null);
+        }
       });
 
     // Currently this should never happen, but we do have aspirations of using orchestrations for unlocking terrains,
@@ -175,18 +180,14 @@ export class Orchestrator {
       const orchestration =
         this._orchestrationFactory.createRecipeOrchestration(
           recipe,
-          desiredElements,
-          (orchestration) => this._updateOrchestration(orchestration)
+          desiredElements
         );
 
       this._updateOrchestration(orchestration);
     } else if (isSituationOrchestrationRequest(request)) {
       if (!request.situation) {
         const orchestration =
-          this._orchestrationFactory.createUnstartedOrchestration(
-            null,
-            (orchestration) => this._updateOrchestration(orchestration)
-          );
+          this._orchestrationFactory.createUnstartedOrchestration(null);
         this._updateOrchestration(orchestration);
       } else {
         this._openSituationOrchestrationByState(request.situation);
@@ -205,24 +206,15 @@ export class Orchestrator {
   private _openSituationOrchestrationByState(situation: SituationModel) {
     if (situation == null || situation.state === "Unstarted") {
       const orchestration =
-        this._orchestrationFactory.createUnstartedOrchestration(
-          situation,
-          (orchestration) => this._updateOrchestration(orchestration)
-        );
+        this._orchestrationFactory.createUnstartedOrchestration(situation);
       this._updateOrchestration(orchestration);
     } else if (situation.state === "Ongoing") {
       const orchestration =
-        this._orchestrationFactory.createOngoingOrchestration(
-          situation,
-          (orchestration) => this._updateOrchestration(orchestration)
-        );
+        this._orchestrationFactory.createOngoingOrchestration(situation);
       this._updateOrchestration(orchestration);
     } else if (situation.state === "Complete") {
       const orchestration =
-        this._orchestrationFactory.createCompletedOrchestration(
-          situation,
-          (orchestration) => this._updateOrchestration(orchestration)
-        );
+        this._orchestrationFactory.createCompletedOrchestration(situation);
       this._updateOrchestration(orchestration);
     } else {
       console.warn(`Unhandled situation state: ${situation.state}`);

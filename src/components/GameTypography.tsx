@@ -25,8 +25,7 @@ const GameTypography = React.forwardRef<HTMLSpanElement, GameTypographyProps>(
         className={clsx("game-typography", props.className)}
         ref={ref}
       >
-        {/* Bug fix: Edge typography div with minHeight causes it to shrink smaller than its content height.*/}
-        <span role="presentation">{parts}</span>
+        {parts}
       </Typography>
     );
   }

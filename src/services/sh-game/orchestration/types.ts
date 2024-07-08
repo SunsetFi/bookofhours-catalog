@@ -3,6 +3,7 @@ import { Aspects, SituationState, SphereSpec } from "secrethistories-api";
 
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
+import { SituationStateChangedResponse } from "./internal";
 
 export type OrchestrationRequest =
   | RecipeOrchestrationRequest
@@ -41,7 +42,9 @@ export interface OrchestrationBase {
    * on the state.
    * @param situationState The current state of the orchestration's current situation.
    */
-  _onSituationStateUpdated?(situationState: SituationState): void;
+  _onSituationStateUpdated?(
+    situationState: SituationState
+  ): SituationStateChangedResponse;
 
   _dispose(): void;
 }

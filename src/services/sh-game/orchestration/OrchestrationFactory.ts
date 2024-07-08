@@ -13,12 +13,10 @@ import { TimeSource } from "../sources/TimeSource";
 
 import { SituationModel } from "../token-models/SituationModel";
 
-import { Orchestration } from "./types";
-
 import { RecipeOrchestration } from "./RecipeOrchestration";
 import { OngoingSituationOrchestration } from "./OngoingSituationOrchestration";
 import { CompletedSituationOrchestration } from "./CompletedSituationOrchestration";
-import { UnstartedSituationOrchestration } from "./UnstartedSituationOrchestration";
+import { FreeformUnstartedOrchestration } from "./FreeformUnstartedOrchestration";
 
 @injectable()
 @singleton()
@@ -30,40 +28,29 @@ export class OrchestrationFactory {
     @inject(BatchingScheduler) private readonly _scheduler: BatchingScheduler
   ) {}
 
-  createUnstartedOrchestration(
-    defaultSituation: SituationModel | null,
-    updateOrchestration: (orchestration: Orchestration | null) => void
-  ) {
-    return new UnstartedSituationOrchestration(
+  createUnstartedOrchestration(defaultSituation: SituationModel | null) {
+    return new FreeformUnstartedOrchestration(
       defaultSituation ?? null,
       this._tokensSource,
       this._compendium,
-      this._scheduler,
-      this,
-      updateOrchestration
+      this._scheduler
     );
   }
 
   createRecipeOrchestration(
     recipe: RecipeModel,
-    desiredElements: ElementModel[],
-    updateOrchestration: (orchestration: Orchestration | null) => void
+    desiredElements: ElementModel[]
   ) {
     return new RecipeOrchestration(
       recipe,
       desiredElements,
       this._compendium,
       this._tokensSource,
-      this._scheduler,
-      this,
-      updateOrchestration
+      this._scheduler
     );
   }
 
-  createOngoingOrchestration(
-    situation: SituationModel,
-    updateOrchestration: (orchestration: Orchestration | null) => void
-  ) {
+  createOngoingOrchestration(situation: SituationModel) {
     return new OngoingSituationOrchestration(
       situation,
       this._tokensSource,
@@ -72,10 +59,7 @@ export class OrchestrationFactory {
     );
   }
 
-  createCompletedOrchestration(
-    situation: SituationModel,
-    updateOrchestration: (orchestration: Orchestration | null) => void
-  ) {
-    return new CompletedSituationOrchestration(situation, updateOrchestration);
+  createCompletedOrchestration(situation: SituationModel) {
+    return new CompletedSituationOrchestration(situation);
   }
 }

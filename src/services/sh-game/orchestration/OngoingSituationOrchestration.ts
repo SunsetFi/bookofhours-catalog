@@ -91,9 +91,9 @@ export class OngoingSituationOrchestration
     }
   }
 
-  protected _filterSlotCandidates(
-    spec: SphereSpec,
-    elementStack: ElementStackModel
+  protected _createSlotCandidateFilter(
+    elementStack: ElementStackModel,
+    spec: SphereSpec
   ): Observable<boolean> {
     // We have no additional logic to add.
     // Let the base apply its own matching.

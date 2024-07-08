@@ -213,6 +213,7 @@ export class SituationModel extends TokenModel<Situation> {
   > | null = null;
   get thresholdContents$() {
     if (!this._thresholdContents$) {
+      // TODO: Use thresholdContents from the mod api and map it to elements by id
       this._thresholdContents$ = combineLatest([
         this.thresholds$,
         this._elementStacks$.pipe(

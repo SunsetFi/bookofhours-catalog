@@ -1,34 +1,27 @@
 import { BehaviorSubject, Observable, map, shareReplay } from "rxjs";
 import { Aspects, SituationState, combineAspects } from "secrethistories-api";
 
-import { EmptyArray$, EmptyObject$, observeAllMap } from "@/observables";
+import { EmptyObject$, observeAllMap } from "@/observables";
 
 import { SituationModel } from "../token-models/SituationModel";
 import { ElementStackModel } from "../token-models/ElementStackModel";
 
-import {
-  CompletedOrchestration,
-  Orchestration,
-  OrchestrationBase,
-} from "./types";
+import { CompletedOrchestration, OrchestrationBase } from "./types";
 
 export class CompletedSituationOrchestration
   implements OrchestrationBase, CompletedOrchestration
 {
-  constructor(
-    private readonly _situation: SituationModel,
-    private readonly _replaceOrchestration: (
-      orchestration: Orchestration | null
-    ) => void
-  ) {}
+  constructor(private readonly _situation: SituationModel) {}
 
   _dispose() {}
 
-  _onSituationStateUpdated(situationState: SituationState): void {
+  _onSituationStateUpdated(situationState: SituationState) {
     // Don't re-open in the instant of time we transition to Unstarted.
     if (situationState !== "Complete") {
-      this._replaceOrchestration(null);
+      return "clear-orchestration";
     }
+
+    return null;
   }
 
   get label$(): Observable<string | null> {
@@ -70,16 +63,7 @@ export class CompletedSituationOrchestration
   }
 
   async conclude(): Promise<boolean> {
-    // Special case for unlocks; they cease to exist on completion.
-    // hack: Make sure the damn thing exists.  Unlocking terrains are being finicky.
-    await this._situation.refresh();
-    if (this._situation.retired) {
-      this._replaceOrchestration(null);
-      return true;
-    }
-
     if (await this._situation.conclude()) {
-      this._replaceOrchestration(null);
       return true;
     }
 

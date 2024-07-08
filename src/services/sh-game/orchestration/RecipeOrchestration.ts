@@ -63,16 +63,14 @@ export class RecipeOrchestration
 
   private readonly _situationAutofillSubscription: Subscription;
 
+  private _isExecuting = false;
+
   constructor(
     private readonly _recipe: RecipeModel,
     private readonly _desiredElements: readonly ElementModel[],
     compendium: Compendium,
     tokensSource: TokensSource,
-    scheduler: BatchingScheduler,
-    private readonly _orchestrationFactory: OrchestrationFactory,
-    private readonly _replaceOrchestration: (
-      orchestration: Orchestration | null
-    ) => void
+    scheduler: BatchingScheduler
   ) {
     super(tokensSource, scheduler);
 
@@ -123,10 +121,16 @@ export class RecipeOrchestration
       });
   }
 
-  _onSituationStateUpdated(situationState: SituationState): void {
+  _onSituationStateUpdated(situationState: SituationState) {
+    if (this._isExecuting) {
+      return "update-orchestration";
+    }
+
     if (situationState !== "Unstarted" && this._situation$.value != null) {
       this._situation$.next(null);
     }
+
+    return null;
   }
 
   _dispose() {
@@ -279,8 +283,10 @@ export class RecipeOrchestration
         return false;
       }
 
+      this._isExecuting = true;
       const didExecute = await situation.execute();
       if (!didExecute) {
+        this._isExecuting = false;
         console.warn(
           "Failed to execute recipe",
           this._recipe.recipeId,
@@ -289,12 +295,8 @@ export class RecipeOrchestration
         return false;
       }
 
-      const ongoingOrchestration =
-        this._orchestrationFactory.createOngoingOrchestration(
-          situation,
-          this._replaceOrchestration
-        );
-      this._replaceOrchestration(ongoingOrchestration);
+      // Orchestrator will notice our state change and ask us what to do.
+      // We will tell it to replace us due to _isExecuting = true
       return true;
     } catch (e) {
       console.error("Failed to execute", situation.id, e);
@@ -302,9 +304,9 @@ export class RecipeOrchestration
     }
   }
 
-  protected _filterSlotCandidates(
-    spec: SphereSpec,
-    elementStack: ElementStackModel
+  protected _createSlotCandidateFilter(
+    elementStack: ElementStackModel,
+    spec: SphereSpec
   ): Observable<boolean> {
     const requirementKeys = Object.keys(this._recipe.requirements);
     // Our recipe is fixed, so filter candidates by its requirements.
@@ -317,12 +319,12 @@ export class RecipeOrchestration
     );
   }
 
-  protected _slotCandidateSortWeight(
+  protected _slotCandidateWeight(
     item: ElementStackModel,
     spec: SphereSpec
   ): number {
     if (this._desiredElements.some((x) => x.elementId === item.elementId)) {
-      // More important items are at the bottom of the array, which are reversed in the list.
+      // This is one of the elements we want, so mark it as more important.
       return 1;
     }
 

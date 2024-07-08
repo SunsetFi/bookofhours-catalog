@@ -9,7 +9,7 @@ import { useAspect } from "@/services/sh-compendium";
 import Tooltip from "../Tooltip";
 import ScreenReaderContent from "../ScreenReaderContent";
 
-const Img = styled("img")();
+const Img = styled("img")({});
 
 export interface AspectIconProps extends React.HTMLAttributes<HTMLSpanElement> {
   aspectId: string;

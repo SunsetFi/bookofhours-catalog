@@ -6,6 +6,7 @@
 - Unlock for various terrains have icons. Add iconUrl to terrain and show it in unlock menu.
   - Use this icon in Locations page.
 - Pinning for items in search dialog.
+- Recipe selector for freeform situation orchestrations. See the ambit properties.
 
 ## Maybe
 

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, ButtonGroup, Divider, Stack } from "@mui/material";
+import { Box, Button, ButtonGroup, Divider, Stack } from "@mui/material";
 
 import { Null$ } from "@/observables";
 
@@ -81,14 +81,11 @@ const OngoingOrchestrationContent = ({
     );
   } else if (description) {
     stackItems.push(
-      <GameTypography
-        component="div"
-        variant="body1"
-        sx={{ minHeight: 100 }}
-        aria-live="assertive"
-      >
-        {description}
-      </GameTypography>
+      <Box sx={{ minHeight: 100, flexShrink: 0 }}>
+        <GameTypography variant="body1" aria-live="assertive">
+          {description}
+        </GameTypography>
+      </Box>
     );
   }
 
