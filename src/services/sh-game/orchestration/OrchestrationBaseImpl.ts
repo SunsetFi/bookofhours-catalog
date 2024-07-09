@@ -133,7 +133,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return this._aspects$;
   }
 
-  async autofill() {
+  async autofill(dump: boolean = false) {
     // Autofill involves looking at the orchestration's stated requirements, and
     // choosing cards that meet those requirements.
     // The requirements might be whatever recipe the situation is proposing, or they might be fixed
@@ -173,6 +173,12 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         return;
       }
 
+      if (!situation.isOpen) {
+        await situation.open();
+      } else if (dump) {
+        await situation.dump();
+      }
+
       const assignments = { ...startingAssignments };
 
       let aspectContents: Aspects = {};
@@ -199,23 +205,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
         const stackAspects = elementStack.aspectsAndSelf;
 
-        const result = unsatisfiedAspects.some(
-          (aspect) => stackAspects[aspect] > 0
-        );
-
-        if (result) {
-          console.log(
-            "ElementStack",
-            elementStack.id,
-            stackAspects,
-            "contributes to",
-            unsatisfiedAspects.join(", "),
-            requirements,
-            aspectContents
-          );
-        }
-
-        return result;
+        return unsatisfiedAspects.some((aspect) => stackAspects[aspect] > 0);
       };
 
       const getNextUnfilledThreshold = () => {
@@ -320,7 +310,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
       //     continue;
       //   }
 
-      //   // TODO: Stop looking at aspects that are satisified.
       //   // Leave slots blank if the recipe is fully satisfied.
 
       //   const candidates = await firstValueFrom(

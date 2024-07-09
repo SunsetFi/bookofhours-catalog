@@ -2,6 +2,8 @@ import React from "react";
 import { firstValueFrom, map } from "rxjs";
 import { isNull, values } from "lodash";
 import { useTheme } from "@mui/material";
+import { aspectsMatchRequirements } from "secrethistories-api";
+import { useDrop } from "react-dnd";
 
 import {
   List,
@@ -25,6 +27,11 @@ import {
 
 import { useDIDependency } from "@/container";
 
+import { filterItemObservations } from "@/observables";
+import { tokenPathContainsChild } from "@/utils";
+
+import { ElementStackDraggable } from "@/draggables/element-stack";
+
 import { useObservation } from "@/hooks/use-observation";
 
 import {
@@ -39,11 +46,6 @@ import {
 import FocusIconButton from "../FocusIconButton";
 import ScreenReaderContent from "../ScreenReaderContent";
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
-import { tokenPathContainsChild } from "@/utils";
-import { useDrop } from "react-dnd";
-import { ElementStackDraggable } from "@/draggables/element-stack";
-import { aspectsMatchSphereSpec } from "secrethistories-api";
-import { filterItemObservations } from "@/observables";
 
 const OrchestrationListContent = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -188,7 +190,7 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
 
         // FIXME: Make sure there is a slot that is empty.
         return thresholds.some((spec) =>
-          aspectsMatchSphereSpec(item.elementStack.aspects, spec)
+          aspectsMatchRequirements(item.elementStack.aspects, spec)
         );
       },
       async drop(item, monitor) {
@@ -212,7 +214,7 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
           )
         );
         const match = values(slots).find((slot) =>
-          aspectsMatchSphereSpec(item.elementStack.aspects, slot.spec)
+          aspectsMatchRequirements(item.elementStack.aspects, slot.spec)
         );
         if (!match) {
           return;

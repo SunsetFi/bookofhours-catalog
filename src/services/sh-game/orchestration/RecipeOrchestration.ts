@@ -14,7 +14,7 @@ import {
   SphereSpec,
   Verb,
   actionIdMatches,
-  aspectsMatchSphereSpec,
+  aspectsMatchRequirements,
 } from "secrethistories-api";
 
 import { switchMapIfNotNull } from "@/observables";
@@ -34,12 +34,10 @@ import { SituationModel } from "../token-models/SituationModel";
 
 import {
   ExecutableOrchestration,
-  Orchestration,
   OrchestrationBase,
   VariableSituationOrchestration,
 } from "./types";
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
-import { OrchestrationFactory } from "./OrchestrationFactory";
 
 interface DesiredElementData {
   element: ElementModel;
@@ -60,8 +58,6 @@ export class RecipeOrchestration
   private readonly _availableSituations$: Observable<SituationModel[]>;
 
   private readonly _situationVerb$: Observable<Verb | null>;
-
-  private readonly _situationAutofillSubscription: Subscription;
 
   private _isExecuting = false;
 
@@ -109,16 +105,6 @@ export class RecipeOrchestration
 
       this._situation$.next(situation);
     });
-
-    // Note: debounceTime is a hack, as slots$ needs to update first, and it also depends on the situation.
-    this._situationAutofillSubscription = this._situation$
-      .pipe(debounceTime(10))
-      .subscribe((situation) => {
-        if (situation) {
-          // TODO: If we get a situation with stuff in it, the stuff needs to be emptied before we can auto-fill.
-          this.autofill();
-        }
-      });
   }
 
   _onSituationStateUpdated(situationState: SituationState) {
@@ -135,7 +121,6 @@ export class RecipeOrchestration
 
   _dispose() {
     this._situation$.value?.close();
-    this._situationAutofillSubscription.unsubscribe();
   }
 
   private _label$: Observable<string | null> | null = null;
@@ -367,7 +352,7 @@ export class RecipeOrchestration
       // As far as I can tell from the game code, only elements slotted into verb thresholds (situation thresholds in our case)
       // can provide slots
       if (
-        situation.thresholds.some((t) => aspectsMatchSphereSpec(aspects, t))
+        situation.thresholds.some((t) => aspectsMatchRequirements(aspects, t))
       ) {
         thresholds.push(...slots);
       }
@@ -377,7 +362,7 @@ export class RecipeOrchestration
     // We could probably do this in the loop above; im not sure if any recipe
     // requires putting a desired element in anything but a default threshold.
     for (const { aspects } of desiredElementData) {
-      if (!thresholds.some((t) => aspectsMatchSphereSpec(aspects, t))) {
+      if (!thresholds.some((t) => aspectsMatchRequirements(aspects, t))) {
         return false;
       }
     }

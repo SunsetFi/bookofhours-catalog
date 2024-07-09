@@ -26,10 +26,8 @@ import { SituationModel } from "../token-models/SituationModel";
 import { TokensSource } from "../sources/TokensSource";
 
 import { OrchestrationBaseImpl } from "./OrchestrationBaseImpl";
-import { OrchestrationFactory } from "./OrchestrationFactory";
 import {
   ExecutableOrchestration,
-  Orchestration,
   VariableSituationOrchestration,
 } from "./types";
 
@@ -190,36 +188,9 @@ export class FreeformUnstartedOrchestration
   private _canExecute$: Observable<boolean> | null = null;
   get canExecute$(): Observable<boolean> {
     if (!this._canExecute$) {
-      // FIXME: This mostly reproduces TryStart, but does not take into account
-      // global aspects as the game does.
-      // Create and use situation.canExecute from the api mod.
-      this._canExecute$ = combineLatest([
-        this._recipe$.pipe(
-          switchMapIfNotNull((recipe) => recipe.requirements$)
-        ),
-        this._recipe$.pipe(switchMapIfNotNull((recipe) => recipe?.craftable$)),
-        this.aspects$,
-      ]).pipe(
-        map(([requirements, craftable, aspects]) => {
-          if (!requirements || !craftable) {
-            return false;
-          }
-
-          for (const aspect of Object.keys(requirements)) {
-            const reqValue = requirements[aspect];
-            let required = Number(reqValue);
-
-            if (Number.isNaN(required)) {
-              required = aspects[reqValue] ?? 0;
-            }
-
-            if ((aspects[aspect] ?? 0) < required) {
-              return false;
-            }
-          }
-
-          return true;
-        }),
+      this._canExecute$ = this._situation$.pipe(
+        switchMapIfNotNull((s) => s.canExecute$),
+        map((x) => x ?? false),
         shareReplay(1)
       );
     }

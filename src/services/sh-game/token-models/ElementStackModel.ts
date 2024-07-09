@@ -314,7 +314,7 @@ export class ElementStackModel
     return this._scheduler.batchUpdate(async () => {
       try {
         const now = Date.now();
-        await this._api.updateTokenAtPath(this.path, {
+        await this._api.updateTokenById(this.id, {
           spherePath,
         });
         this._update(

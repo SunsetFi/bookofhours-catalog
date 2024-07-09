@@ -191,6 +191,23 @@ export class SituationModel extends TokenModel<Situation> {
     return this._hints$;
   }
 
+  get isOpen() {
+    return this._token.open;
+  }
+
+  private _isOpen$: Observable<boolean> | null = null;
+  get isOpen$() {
+    if (!this._isOpen$) {
+      this._isOpen$ = this._token$.pipe(
+        map((s) => s.open),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._isOpen$;
+  }
+
   private _thresholds$: Observable<readonly SphereSpec[]> | null = null;
   get thresholds$() {
     if (!this._thresholds$) {
@@ -205,15 +222,34 @@ export class SituationModel extends TokenModel<Situation> {
   }
 
   get thresholds() {
-    return this._token.thresholds;
+    return Object.freeze([...this._token.thresholds]);
   }
+
+  // We should probably build thresholdContents out of this, but I would like to
+  // get the token by id from the source, and we would need to observe the get in case
+  // the token hasnt been found yet.
+  // get thresholdContentIds() {
+  //   return Object.freeze({ ...this._token.thresholdContents });
+  // }
+
+  // private _thresholdContentIds$: Observable<readonly string[]> | null = null;
+  // get thresholdContentIds$() {
+  //   if (!this._thresholdContentIds$) {
+  //     this._thresholdContentIds$ = this._token$.pipe(
+  //       map((s) => Object.freeze({ ...s.thresholdContents })),
+  //       distinctUntilChanged(isEqual),
+  //       shareReplay(1)
+  //     );
+  //   }
+
+  //   return this._thresholdContentIds$;
+  // }
 
   private _thresholdContents$: Observable<
     Readonly<Record<string, ElementStackModel | null>>
   > | null = null;
   get thresholdContents$() {
     if (!this._thresholdContents$) {
-      // TODO: Use thresholdContents from the mod api and map it to elements by id
       this._thresholdContents$ = combineLatest([
         this.thresholds$,
         this._elementStacks$.pipe(
@@ -223,6 +259,8 @@ export class SituationModel extends TokenModel<Situation> {
         ),
       ]).pipe(
         map(([thresholds, elementPathPairs]) => {
+          // We should be using situation.thresholdContents for this, but what happens if the token id isnt known to us?
+          // We need to observe the get-by-id to make this work.
           const thresholdContents: Record<string, ElementStackModel | null> =
             {};
 
@@ -259,6 +297,23 @@ export class SituationModel extends TokenModel<Situation> {
 
   get state() {
     return this._token.state;
+  }
+
+  get openAmbitRecipeIds() {
+    return this._token.openAmbitRecipeIds;
+  }
+
+  private _openAmbitRecipeIds$: Observable<readonly string[]> | null = null;
+  get openAmbitRecipeIds$() {
+    if (!this._openAmbitRecipeIds$) {
+      this._openAmbitRecipeIds$ = this._token$.pipe(
+        map((s) => Object.freeze([...s.openAmbitRecipeIds])),
+        distinctUntilChanged(isEqual),
+        shareReplay(1)
+      );
+    }
+
+    return this._openAmbitRecipeIds$;
   }
 
   private _recipeId$: Observable<string | null> | null = null;
@@ -313,6 +368,23 @@ export class SituationModel extends TokenModel<Situation> {
     return this._currentRecipeLabel$;
   }
 
+  get canExecute() {
+    return this._token.canExecute;
+  }
+
+  private _canExecute$: Observable<boolean> | null = null;
+  get canExecute$() {
+    if (!this._canExecute$) {
+      this._canExecute$ = this._token$.pipe(
+        map((s) => s.canExecute),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._canExecute$;
+  }
+
   private _timeRemaining$: Observable<number> | null = null;
   get timeRemaining$(): Observable<number> {
     if (!this._timeRemaining$) {
@@ -355,7 +427,15 @@ export class SituationModel extends TokenModel<Situation> {
   }
 
   async open() {
-    await this._api.openTokenAtPath(this.path);
+    try {
+      const now = Date.now();
+      await this._api.openTokenAtPath(this.path);
+      this._update({ ...this._token, open: true }, now);
+      return true;
+    } catch (e) {
+      console.warn("Failed to open situation", this.id, e);
+      return false;
+    }
   }
 
   async setSlotContents(
@@ -473,6 +553,22 @@ export class SituationModel extends TokenModel<Situation> {
         console.warn("Failed to conclude situation", this.id, e);
         return false;
       }
+    });
+  }
+
+  async dump() {
+    return this._scheduler.batchUpdate(async () => {
+      const contents = await firstValueFrom(this.thresholdContents$);
+      await Promise.all(
+        Object.keys(contents).map((key) =>
+          this._api.evictTokensAtPath(`${this.path}/${key}`)
+        )
+      );
+      await Promise.all(
+        values(contents)
+          .map((card) => card?.refresh())
+          .filter(isNotNull)
+      );
     });
   }
 

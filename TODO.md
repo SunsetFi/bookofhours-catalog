@@ -7,6 +7,8 @@
   - Use this icon in Locations page.
 - Pinning for items in search dialog.
 - Recipe selector for freeform situation orchestrations. See the ambit properties.
+- use situation.canExecute in orchestrations
+- use situation.thresholdContents in orchestrations
 
 ## Maybe
 
