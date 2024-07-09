@@ -341,4 +341,20 @@ export class ElementStackModel
       }
     });
   }
+
+  async evict() {
+    return this._scheduler.batchUpdate(async () => {
+      const now = Date.now();
+      await this._api.evictTokenAtPath(this.path);
+      this._update(
+        {
+          ...this._token,
+          path: `~/unknown/${this.id}`,
+          spherePath: `~/unknown`,
+        },
+        now
+      );
+      await this.refresh();
+    });
+  }
 }

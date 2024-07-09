@@ -2,13 +2,13 @@
 
 - Wisdom Tree!
 - Show paginated notes for situations
-- Do greedy / locked slots get disabled properly? First incident arrival of game
 - Unlock for various terrains have icons. Add iconUrl to terrain and show it in unlock menu.
   - Use this icon in Locations page.
 - Pinning for items in search dialog.
 - Recipe selector for freeform situation orchestrations. See the ambit properties.
-- use situation.canExecute in orchestrations
-- use situation.thresholdContents in orchestrations
+- Allow master book recipe execution to be ok with not-quite-as-many-aspects recipe.
+- use situation.thresholdContents in SituationModel.thresholdContents$
+- Re-enable multithreaded reading. Currently off as situation.canExecute uses caches that can collide
 
 ## Maybe
 

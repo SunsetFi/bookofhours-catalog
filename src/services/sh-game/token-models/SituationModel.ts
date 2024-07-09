@@ -445,6 +445,12 @@ export class SituationModel extends TokenModel<Situation> {
     return this._scheduler.batchUpdate(async () => {
       const slotPath = `${this.path}/${slotId}`;
       const oldTokens = await firstValueFrom(this.thresholdContents$);
+      const oldInSlot = oldTokens[slotId];
+
+      if (oldInSlot) {
+        await oldInSlot.evict();
+      }
+
       if (token) {
         if (token.spherePath === slotPath) {
           // We are already there, so just say we succeeded.
@@ -455,19 +461,9 @@ export class SituationModel extends TokenModel<Situation> {
         if (!success) {
           return false;
         }
-      } else {
-        await this._api.evictTokenAtPath(slotPath);
       }
 
-      const followups: Promise<void>[] = [this.refresh()];
-
-      const oldInSlot = oldTokens[slotId];
-      if (oldInSlot) {
-        followups.push(oldInSlot.refresh());
-      }
-
-      await Promise.all(followups);
-
+      await this.refresh();
       return true;
     });
   }
@@ -560,13 +556,8 @@ export class SituationModel extends TokenModel<Situation> {
     return this._scheduler.batchUpdate(async () => {
       const contents = await firstValueFrom(this.thresholdContents$);
       await Promise.all(
-        Object.keys(contents).map((key) =>
-          this._api.evictTokensAtPath(`${this.path}/${key}`)
-        )
-      );
-      await Promise.all(
         values(contents)
-          .map((card) => card?.refresh())
+          .map((token) => token?.evict())
           .filter(isNotNull)
       );
     });
@@ -575,10 +566,16 @@ export class SituationModel extends TokenModel<Situation> {
   async close() {
     try {
       const now = Date.now();
-      const result = await this._api.updateTokenAtPath(this.path, {
+      const contents = await firstValueFrom(this.thresholdContents$);
+      const result = await this._api.updateTokenById(this.id, {
         open: false,
       });
       this._update(result as Situation, now);
+      await Promise.all(
+        values(contents)
+          .map((value) => value?.refresh())
+          .filter(isNotNull)
+      );
     } catch (e) {
       console.warn("Failed to close situation", this.id, e);
       return false;

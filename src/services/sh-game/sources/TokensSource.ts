@@ -295,7 +295,7 @@ export class TokensSource {
       // We can lower our query time like this, but we really should make
       // the actual endpoint faster and run in parallel.
       const brk = Math.round(this._tokenModels.size / 2);
-      // We used to read async, but I'm seeing threading issues, possibly due to caching on aspect dictionaries
+      // This used to be multithreaded, but we managed to corrupt the game state somehow doing reads.
       const shouldSplit = false; //brk > 100;
       const [first, second] = await Promise.all([
         this._api.getAllTokens({
