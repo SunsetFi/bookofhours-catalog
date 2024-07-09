@@ -8,7 +8,13 @@
 - Recipe selector for freeform situation orchestrations. See the ambit properties.
 - Allow master book recipe execution to be ok with not-quite-as-many-aspects recipe.
 - use situation.thresholdContents in SituationModel.thresholdContents$
-- Re-enable multithreaded reading. Currently off as situation.canExecute uses caches that can collide
+- Investigate why multithreaded reads in SHRestAPI cause state corruptions
+  - Iterators invalidated. GetAspectsInContext?
+  - Permenant state corruption from a null aspect name?
+  - Everything was fine before we added situation.canExecute
+- Orchestrations asynchronously close their situation on destroy, but a new orchestration might already have
+  claimed that situation and is trying to use it.
+  - Situations should have a task queue so they dont try to close and open simultaniously.
 
 ## Maybe
 

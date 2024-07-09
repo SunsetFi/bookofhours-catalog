@@ -1,5 +1,4 @@
 import {
-  BehaviorSubject,
   Observable,
   combineLatest,
   distinctUntilChanged,
@@ -12,7 +11,6 @@ import {
   Situation,
   SituationState,
   SphereSpec,
-  Token,
 } from "secrethistories-api";
 import { isEqual, values } from "lodash";
 

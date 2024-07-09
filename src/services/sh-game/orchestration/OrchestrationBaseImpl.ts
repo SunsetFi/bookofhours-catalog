@@ -158,15 +158,12 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     return this._scheduler.batchUpdate(async () => {
       const processedIds = new Set<string>();
 
-      const [situation, tokens, requirements, startingAssignments] =
-        await Promise.all([
-          firstValueFrom(this.situation$),
-          firstValueFrom(this._tokensSource.visibleElementStacks$),
-          // Autofill's prerequisites are that we have requirements, so we do not have
-          // a use case of requirements changing as we slot cards.
-          firstValueFrom(this.requirements$),
-          firstValueFrom(this.slotAssignments$),
-        ]);
+      const [situation, requirements] = await Promise.all([
+        firstValueFrom(this.situation$),
+        // Autofill's prerequisites are that we have requirements, so we do not have
+        // a use case of requirements changing as we slot cards.
+        firstValueFrom(this.requirements$),
+      ]);
 
       const requirementKeys = Object.keys(requirements);
       if (!situation || requirementKeys.length === 0) {
@@ -178,6 +175,12 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
       } else if (dump) {
         await situation.dump();
       }
+
+      // Wait to get these values until after the dump
+      const [tokens, startingAssignments] = await Promise.all([
+        firstValueFrom(this._tokensSource.visibleElementStacks$),
+        firstValueFrom(this.slotAssignments$),
+      ]);
 
       const assignments = { ...startingAssignments };
 

@@ -59,6 +59,8 @@ export class RecipeOrchestration
 
   private readonly _situationVerb$: Observable<Verb | null>;
 
+  private readonly _autofillSubscription: Subscription;
+
   private _isExecuting = false;
 
   constructor(
@@ -105,6 +107,14 @@ export class RecipeOrchestration
 
       this._situation$.next(situation);
     });
+
+    this._autofillSubscription = this._situation$
+      .pipe(debounceTime(700))
+      .subscribe((situation) => {
+        if (situation) {
+          this.autofill(true);
+        }
+      });
   }
 
   _onSituationStateUpdated(situationState: SituationState) {
