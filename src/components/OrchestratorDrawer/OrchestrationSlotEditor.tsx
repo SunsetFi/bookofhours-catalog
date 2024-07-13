@@ -57,7 +57,9 @@ const OrchestrationSlotEditor = React.memo(
           <Stack direction="column" gap={1}>
             {requiredAspects.length > 0 && (
               <Stack direction="row" gap={1}>
-                <Typography sx={{ mr: "auto" }}>Requires</Typography>
+                <Typography component="span" sx={{ mr: "auto" }}>
+                  Requires
+                </Typography>
                 {requiredAspects.map((aspectId) => (
                   <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
                 ))}
@@ -65,7 +67,9 @@ const OrchestrationSlotEditor = React.memo(
             )}
             {essentialAspects.length > 0 && (
               <Stack direction="row" gap={1}>
-                <Typography sx={{ mr: "auto" }}>Essential</Typography>
+                <Typography component="span" sx={{ mr: "auto" }}>
+                  Essential
+                </Typography>
                 {essentialAspects.map((aspectId) => (
                   <AspectIcon key={aspectId} aspectId={aspectId} size={30} />
                 ))}
@@ -73,7 +77,9 @@ const OrchestrationSlotEditor = React.memo(
             )}
             {Object.keys(slotContributingAspects).length > 0 && (
               <Stack direction="row" gap={1}>
-                <Typography sx={{ mr: "auto" }}>Contributes</Typography>
+                <Typography component="span" sx={{ mr: "auto" }}>
+                  Contributes
+                </Typography>
                 <AspectsList
                   sx={{ justifyContent: "flex-end" }}
                   aspects={slotContributingAspects}

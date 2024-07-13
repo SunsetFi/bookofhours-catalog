@@ -17,6 +17,8 @@ import { isEqual, values } from "lodash";
 import { isNotNull, tokenPathContainsChild } from "@/utils";
 
 import { filterItems, observeAllMap } from "@/observables";
+import { asyncThrottleOne } from "@/async-throttle";
+
 import { BatchingScheduler } from "@/services/scheduler";
 
 import { API } from "../../sh-api";
@@ -36,6 +38,8 @@ export function isSituationModel(model: TokenModel): model is SituationModel {
 export class SituationModel extends TokenModel<Situation> {
   private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
+
+  private readonly _actionThrottle = asyncThrottleOne();
 
   constructor(
     situation: Situation,
@@ -424,46 +428,77 @@ export class SituationModel extends TokenModel<Situation> {
     return this._output$;
   }
 
+  // HACK: Orchestrations close on dispose, but we often open orchestrations immediately.
+  // Let them wait on the situation settling before continuing to work with them.
+  awaitIdle() {
+    return this._actionThrottle(() => Promise.resolve(true));
+  }
+
   async open() {
-    try {
-      const now = Date.now();
-      await this._api.openTokenAtPath(this.path);
-      this._update({ ...this._token, open: true }, now);
-      return true;
-    } catch (e) {
-      console.warn("Failed to open situation", this.id, e);
-      return false;
-    }
+    return this._actionThrottle(async () => {
+      try {
+        const now = Date.now();
+        await this._api.openTokenAtPath(this.path);
+        this._update({ ...this._token, open: true }, now);
+        return true;
+      } catch (e) {
+        console.warn("Failed to open situation", this.id, e);
+        return false;
+      }
+    });
+  }
+
+  async close() {
+    return this._actionThrottle(async () => {
+      try {
+        const now = Date.now();
+        const contents = await firstValueFrom(this.thresholdContents$);
+        const result = await this._api.updateTokenById(this.id, {
+          open: false,
+        });
+        this._update(result as Situation, now);
+        await Promise.all(
+          values(contents)
+            .map((value) => value?.refresh())
+            .filter(isNotNull)
+        );
+      } catch (e) {
+        console.warn("Failed to close situation", this.id, e);
+        return false;
+      }
+    });
   }
 
   async setSlotContents(
     slotId: string,
     token: ElementStackModel | null
   ): Promise<boolean> {
-    return this._scheduler.batchUpdate(async () => {
-      const slotPath = `${this.path}/${slotId}`;
-      const oldTokens = await firstValueFrom(this.thresholdContents$);
-      const oldInSlot = oldTokens[slotId];
+    return this._actionThrottle(() =>
+      this._scheduler.batchUpdate(async () => {
+        const slotPath = `${this.path}/${slotId}`;
+        const oldTokens = await firstValueFrom(this.thresholdContents$);
+        const oldInSlot = oldTokens[slotId];
 
-      if (oldInSlot) {
-        await oldInSlot.evict();
-      }
-
-      if (token) {
-        if (token.spherePath === slotPath) {
-          // We are already there, so just say we succeeded.
-          return true;
+        if (oldInSlot) {
+          await oldInSlot.evict();
         }
 
-        const success = await token.moveToSphere(slotPath);
-        if (!success) {
-          return false;
-        }
-      }
+        if (token) {
+          if (token.spherePath === slotPath) {
+            // We are already there, so just say we succeeded.
+            return true;
+          }
 
-      await this.refresh();
-      return true;
-    });
+          const success = await token.moveToSphere(slotPath);
+          if (!success) {
+            return false;
+          }
+        }
+
+        await this.refresh();
+        return true;
+      })
+    );
   }
 
   async setRecipe(recipeId: string) {
@@ -559,24 +594,5 @@ export class SituationModel extends TokenModel<Situation> {
           .filter(isNotNull)
       );
     });
-  }
-
-  async close() {
-    try {
-      const now = Date.now();
-      const contents = await firstValueFrom(this.thresholdContents$);
-      const result = await this._api.updateTokenById(this.id, {
-        open: false,
-      });
-      this._update(result as Situation, now);
-      await Promise.all(
-        values(contents)
-          .map((value) => value?.refresh())
-          .filter(isNotNull)
-      );
-    } catch (e) {
-      console.warn("Failed to close situation", this.id, e);
-      return false;
-    }
   }
 }

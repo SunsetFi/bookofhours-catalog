@@ -28,58 +28,71 @@ import { isConnectedTerrainModel } from "./ConnectedTerrainModel";
 export class TokenVisibilityFactory {
   // We have a circular dependency here due to needing tokens from tokenSource, but tokenSource indirectly needing us to make the models.
   // Since we cannot inject TokensSource, just grab the container and get it later.
-  constructor(@inject(Container) private readonly _container: Container) {}
+  // constructor(@inject(Container) private readonly _container: Container) {}
 
-  private __visiblePaths$: Observable<readonly string[]> | null = null;
-  private get _visiblePaths$() {
-    if (!this.__visiblePaths$) {
-      this.__visiblePaths$ = this._container.get(TokensSource).tokens$.pipe(
-        filterItems(isConnectedTerrainModel),
-        distinctUntilShallowArrayChanged(),
-        filterItemObservations((t) =>
-          combineLatest([t.shrouded$, t.sealed$]).pipe(
-            // We can still see inside WisdomNodeTerrains that are shrouded.
-            map(
-              ([shrouded, sealed]) =>
-                (!shrouded || t.payloadType === "WisdomNodeTerrain") && !sealed
-            )
-          )
-        ),
-        observeAllMap((t) => t.path$),
-        shareReplay(1)
-      );
-    }
+  // private __visiblePaths$: Observable<readonly string[]> | null = null;
+  // private get _visiblePaths$() {
+  //   if (!this.__visiblePaths$) {
+  //     this.__visiblePaths$ = this._container.get(TokensSource).tokens$.pipe(
+  //       filterItems(isConnectedTerrainModel),
+  //       distinctUntilShallowArrayChanged(),
+  //       filterItemObservations((t) =>
+  //         combineLatest([t.shrouded$, t.sealed$]).pipe(
+  //           // We can still see inside WisdomNodeTerrains that are shrouded.
+  //           map(
+  //             ([shrouded, sealed]) =>
+  //               (!shrouded || t.payloadType === "WisdomNodeTerrain") && !sealed
+  //           )
+  //         )
+  //       ),
+  //       observeAllMap((t) => t.path$),
+  //       shareReplay(1)
+  //     );
+  //   }
 
-    return this.__visiblePaths$;
-  }
+  //   return this.__visiblePaths$;
+  // }
 
   createVisibilityObservable(token$: Observable<Token>): Observable<boolean> {
-    return combineLatest([token$, this._visiblePaths$]).pipe(
-      map(([token, visiblePaths]) => {
-        if (
-          alwaysVisibleSpherePaths.some((path) =>
-            tokenPathContainsChild(path, token.path)
-          )
-        ) {
+    return token$.pipe(
+      map((token) => {
+        // Wisdom tree nodes are accessible when shrouded.
+        if (token.path.startsWith("~/wisdomtreenodes/")) {
           return true;
         }
 
-        // FIXME: We might be in a shrouded sub-sphere.  Need to check that
-        // HACK: For now, the only case this shows up is christmas stuff
-        if (token.path.startsWith("~/library!brancrug/christmasslot.")) {
-          return false;
-        }
+        // We used to check to see if things were in visible terrains, but based on experimentation
+        // it seems things dont spawn into terrains that are not yet unlocked.
 
-        if (
-          visiblePaths.some((path) => tokenPathContainsChild(path, token.path))
-        ) {
-          return true;
-        }
-
-        return false;
-      }),
-      distinctUntilChanged(),
-      shareReplay(1)
+        return !token.inShroudedSphere;
+      })
     );
+    //   return combineLatest([token$, this._visiblePaths$]).pipe(
+    //     map(([token, visiblePaths]) => {
+    //       if (
+    //         alwaysVisibleSpherePaths.some((path) =>
+    //           tokenPathContainsChild(path, token.path)
+    //         )
+    //       ) {
+    //         return true;
+    //       }
+
+    //       // FIXME: We might be in a shrouded sub-sphere.  Need to check that
+    //       // HACK: For now, the only case this shows up is christmas stuff
+    //       if (token.path.startsWith("~/library!brancrug/christmasslot.")) {
+    //         return false;
+    //       }
+
+    //       if (
+    //         visiblePaths.some((path) => tokenPathContainsChild(path, token.path))
+    //       ) {
+    //         return true;
+    //       }
+
+    //       return false;
+    //     }),
+    //     distinctUntilChanged(),
+    //     shareReplay(1)
+    //   );
   }
 }

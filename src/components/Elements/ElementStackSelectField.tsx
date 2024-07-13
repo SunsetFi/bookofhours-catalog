@@ -162,6 +162,13 @@ const ElementStackSelectField = ({
           }}
           autoFocus={autoFocus}
           label={label}
+          // Hack: Orchestration slots need to put divs in helperText, and FormHelperText defaults to a p tag
+          // FIXME: We should accept the requirements data ourselves and render it in a standard way
+          // rather than having it passed in as helperText.
+          // This would be useful to reuse for unlock dialog.
+          FormHelperTextProps={{
+            component: "div",
+          }}
           helperText={helperText}
           InputProps={{
             ...params.InputProps,

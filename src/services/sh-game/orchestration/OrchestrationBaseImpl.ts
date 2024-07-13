@@ -170,6 +170,8 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         return;
       }
 
+      await situation.awaitIdle();
+
       if (!situation.isOpen) {
         await situation.open();
       } else if (dump) {

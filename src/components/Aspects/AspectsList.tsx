@@ -61,7 +61,7 @@ const AspectListItem = ({ aspectId, size, children }: AspectListItemProps) => {
     >
       <AspectIcon aspectId={aspectId} size={size} />
       {children && (
-        <Typography variant="body2" sx={{ pl: 1 }}>
+        <Typography component="span" variant="body2" sx={{ pl: 1 }}>
           {children}
         </Typography>
       )}

@@ -1,5 +1,6 @@
 import React from "react";
 
+import { Box } from "@mui/material";
 import { useDIDependency } from "@/container";
 
 import { PageManager } from "@/services/page";
@@ -19,7 +20,18 @@ const PageContainer = ({ title, children }: PageContainerProps) => {
     };
   }, [title]);
 
-  return children;
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+        overflow: "auto",
+        boxSizing: "border-box",
+      }}
+    >
+      {children}
+    </Box>
+  );
 };
 
 export default PageContainer;

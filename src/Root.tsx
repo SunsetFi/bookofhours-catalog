@@ -32,6 +32,10 @@ const Main = styled("main")({
   position: "relative",
   width: "100%",
   height: "100%",
+  // CHROME HACK: Chrome is expanding main's scroll area to fit the entire unscrolled table,
+  // even though the table is inside a flex container with overflow: auto.
+  // Firefox works fine...
+  overflow: "hidden",
   minWidth: 0,
   isolation: "isolate",
 });
@@ -108,7 +112,7 @@ const Root = () => {
               }}
             >
               <PageTabs />
-              <Main>
+              <Main aria-labelledby="page-title">
                 <SuspenseBoundary>
                   <AppRoutes />
                 </SuspenseBoundary>

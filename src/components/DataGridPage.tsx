@@ -24,12 +24,7 @@ function DataGridPage<T extends IdentifierItem>({
 
   return (
     <PageContainer title={title}>
-      <IdentifierItemDataGrid
-        aria-labelledby="page-title"
-        {...props}
-        {...settings}
-        sx={{ height: "100%", ...props.sx }}
-      />
+      <IdentifierItemDataGrid {...props} {...settings} />
     </PageContainer>
   );
 }
