@@ -11,7 +11,6 @@ import { TokenModel } from "./TokenModel";
 import { ElementStackModel } from "./ElementStackModel";
 import { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { SituationModel } from "./SituationModel";
-import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 import { WisdomNodeTerrainModel } from "./WisdomNodeTerrainModel";
 
@@ -27,7 +26,6 @@ export class TokenModelFactory {
           token,
           this._container.get(API),
           this._container.get(Compendium),
-          this._container.get(TokenVisibilityFactory),
           this._container.get(TokenParentTerrainFactory),
           this._container.get(BatchingScheduler)
         );
@@ -53,7 +51,6 @@ export class TokenModelFactory {
           token as Situation,
           this._container.get(API),
           this._container.get(TokensSource).visibleElementStacks$,
-          this._container.get(TokenVisibilityFactory),
           this._container.get(TokenParentTerrainFactory),
           this._container.get(BatchingScheduler)
         );

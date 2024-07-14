@@ -19,6 +19,8 @@ import { isNotNull, tokenPathContainsChild } from "@/utils";
 import { filterItems, observeAllMap } from "@/observables";
 import { asyncThrottleOne } from "@/async-throttle";
 
+import { alwaysVisibleSpherePaths } from "@/spheres";
+
 import { BatchingScheduler } from "@/services/scheduler";
 
 import { API } from "../../sh-api";
@@ -27,7 +29,6 @@ import { filterTokenInPath } from "../observables";
 
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
-import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 import { ElementStackModel } from "./ElementStackModel";
 
@@ -36,7 +37,6 @@ export function isSituationModel(model: TokenModel): model is SituationModel {
 }
 
 export class SituationModel extends TokenModel<Situation> {
-  private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
 
   private readonly _actionThrottle = asyncThrottleOne();
@@ -45,12 +45,10 @@ export class SituationModel extends TokenModel<Situation> {
     situation: Situation,
     api: API,
     private readonly _elementStacks$: Observable<readonly ElementStackModel[]>,
-    visibilityFactory: TokenVisibilityFactory,
     parentTerrainFactory: TokenParentTerrainFactory,
     private readonly _scheduler: BatchingScheduler
   ) {
     super(situation, api);
-    this._visible$ = visibilityFactory.createVisibilityObservable(this._token$);
     this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
       this._token$
     );
@@ -89,7 +87,26 @@ export class SituationModel extends TokenModel<Situation> {
     return this._token.verbId;
   }
 
+  private _visible$: Observable<boolean> | null = null;
   get visible$() {
+    if (!this._visible$) {
+      this._visible$ = this._token$.pipe(
+        map((token) => {
+          if (
+            alwaysVisibleSpherePaths.some((path) =>
+              tokenPathContainsChild(path, token.path)
+            )
+          ) {
+            return true;
+          }
+
+          return !token.inShroudedSphere;
+        }),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
     return this._visible$;
   }
 

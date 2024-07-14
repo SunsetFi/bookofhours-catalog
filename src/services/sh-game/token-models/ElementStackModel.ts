@@ -4,6 +4,7 @@ import {
   combineAspects,
   APINetworkError,
   ElementStack,
+  tokenPathContainsChild,
 } from "secrethistories-api";
 import {
   Observable,
@@ -13,6 +14,8 @@ import {
   combineLatest,
 } from "rxjs";
 import { isEqual, pickBy } from "lodash";
+
+import { alwaysVisibleSpherePaths } from "@/spheres";
 
 import { Compendium, ElementModel } from "@/services/sh-compendium";
 import { API } from "@/services/sh-api";
@@ -28,7 +31,6 @@ import {
 
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
 import { TokenModel } from "./TokenModel";
-import { TokenVisibilityFactory } from "./TokenVisibilityFactory";
 import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 
 export function isElementStackModel(
@@ -46,20 +48,16 @@ export class ElementStackModel
     ModelWithIconUrl,
     ModelWithParentTerrain
 {
-  private readonly _visible$: Observable<boolean>;
   private readonly _parentTerrain$: Observable<ConnectedTerrainModel | null>;
 
   constructor(
     elementStack: IElementStack,
     api: API,
     private readonly _compendium: Compendium,
-    visibilityFactory: TokenVisibilityFactory,
     parentTerrainFactory: TokenParentTerrainFactory,
     private readonly _scheduler: BatchingScheduler
   ) {
     super(elementStack, api);
-
-    this._visible$ = visibilityFactory.createVisibilityObservable(this._token$);
 
     this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
       this._token$
@@ -141,7 +139,26 @@ export class ElementStackModel
     return this._illuminations$;
   }
 
+  private _visible$: Observable<boolean> | null = null;
   get visible$() {
+    if (!this._visible$) {
+      this._visible$ = this._token$.pipe(
+        map((token) => {
+          if (
+            alwaysVisibleSpherePaths.some((path) =>
+              tokenPathContainsChild(path, token.path)
+            )
+          ) {
+            return true;
+          }
+
+          return !token.inShroudedSphere;
+        }),
+        distinctUntilChanged(),
+        shareReplay(1)
+      );
+    }
+
     return this._visible$;
   }
 
@@ -344,16 +361,8 @@ export class ElementStackModel
 
   async evict() {
     return this._scheduler.batchUpdate(async () => {
-      const now = Date.now();
+      // TODO: We should return the evicted token from this api call.
       await this._api.evictTokenAtPath(this.path);
-      this._update(
-        {
-          ...this._token,
-          path: `~/unknown/${this.id}`,
-          spherePath: `~/unknown`,
-        },
-        now
-      );
       await this.refresh();
     });
   }

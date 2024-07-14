@@ -170,6 +170,9 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         return;
       }
 
+      // HACK: We might be autofilling the same situation that is currently closing,
+      // if the user had a recipe for this situation open and tried to open another recipe
+      // that wants the same situation.
       await situation.awaitIdle();
 
       if (!situation.isOpen) {
