@@ -404,6 +404,10 @@ export class SituationModel extends TokenModel<Situation> {
     return this._canExecute$;
   }
 
+  get timeRemaining() {
+    return this._token.timeRemaining;
+  }
+
   private _timeRemaining$: Observable<number> | null = null;
   get timeRemaining$(): Observable<number> {
     if (!this._timeRemaining$) {

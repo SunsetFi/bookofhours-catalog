@@ -99,19 +99,21 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   };
 }
 
-export function observeAll<T>() {
-  return (source: Observable<readonly Observable<T>[]>) => {
-    return source.pipe(
-      switchMap((observables) => {
-        if (observables.length === 0) {
-          return observableOf([] as T[]);
-        }
+// In every case where we use this, we do a mapping on array items before it,
+// and observeAllMap is more efficient.
+// export function observeAll<T>() {
+//   return (source: Observable<readonly Observable<T>[]>) => {
+//     return source.pipe(
+//       switchMap((observables) => {
+//         if (observables.length === 0) {
+//           return observableOf([] as T[]);
+//         }
 
-        return combineLatest(observables);
-      })
-    );
-  };
-}
+//         return combineLatest(observables);
+//       })
+//     );
+//   };
+// }
 
 export function observeAllMap<T, K>(
   func: (value: T, index: number) => Observable<K>

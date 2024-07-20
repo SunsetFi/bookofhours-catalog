@@ -6,11 +6,12 @@ import { Box, Typography, Tooltip, SxProps } from "@mui/material";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 
 import { useDIDependency } from "@/container";
-import { observeAll } from "@/observables";
+import { observeAllMap } from "@/observables";
 
 import { useObservation } from "@/hooks/use-observation";
 
 import { TimeSource, TokensSource } from "@/services/sh-game";
+
 import ScreenReaderContent from "./ScreenReaderContent";
 
 export interface SeasonAndTimeHeaderProps {
@@ -33,8 +34,7 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
   const secondsToNextEvent =
     useObservation(() =>
       tokensSource.visibleSituations$.pipe(
-        map((situations) => situations.map((s) => s.timeRemaining$)),
-        observeAll(),
+        observeAllMap((s) => s.timeRemaining$),
         map((seconds) => Math.max(...seconds.filter((x) => x > 0)))
       )
     ) ?? Number.NaN;

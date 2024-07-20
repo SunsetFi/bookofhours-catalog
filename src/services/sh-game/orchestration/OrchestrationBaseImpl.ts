@@ -21,7 +21,7 @@ import {
   EmptyObject$,
   filterItemObservations,
   mapArrayItemsCached,
-  observeAll,
+  observeAllMap,
   True$,
 } from "@/observables";
 import { aspectsMagnitude } from "@/aspects";
@@ -105,16 +105,10 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   get aspects$() {
     if (!this._aspects$) {
       this._aspects$ = this.slotAssignments$.pipe(
-        map((slots) => {
-          if (!slots) {
-            return [];
-          }
-
-          return Object.values(slots).map((x) =>
-            x != null ? x.aspectsAndSelf$ : EmptyObject$
-          );
-        }),
-        observeAll(),
+        map((slots) => Object.values(slots)),
+        observeAllMap(
+          (elementStack) => elementStack?.aspectsAndSelf$ ?? EmptyObject$
+        ),
         map((aspectArray) => {
           // This looks like a simple reduce(), but vite throws baffling errors when we use reduce.
           // It also is totally happy to use it, but only the first time, and starts erroring on it when
@@ -156,8 +150,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
     // for some of the simpler crafting recipes.
 
     return this._scheduler.batchUpdate(async () => {
-      const processedIds = new Set<string>();
-
       const [situation, requirements] = await Promise.all([
         firstValueFrom(this.situation$),
         // Autofill's prerequisites are that we have requirements, so we do not have
@@ -216,17 +208,20 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         return unsatisfiedAspects.some((aspect) => stackAspects[aspect] > 0);
       };
 
+      const processedThresholdIds = new Set<string>();
       const getNextUnfilledThreshold = () => {
         // This will change as we slot cards through the process.
         const thresholds = situation.thresholds;
 
         while (true) {
-          const nextUnfilled = thresholds.find((x) => !processedIds.has(x.id));
+          const nextUnfilled = thresholds.find(
+            (x) => !processedThresholdIds.has(x.id)
+          );
           if (!nextUnfilled) {
             return null;
           }
 
-          processedIds.add(nextUnfilled.id);
+          processedThresholdIds.add(nextUnfilled.id);
 
           if (assignments[nextUnfilled.id] != null) {
             continue;
@@ -242,7 +237,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
         // Candidates must:
         // - not be in use by another slot
-        // - meaningfully contribute to an aspect that is not yet fulfulled.
+        // - contribute to an aspect that is not yet fulfulled.
         // Note: We have _filterSlotCandidate, but that returns an observable that would need to be awaited.
         // While from an abstract base class sense we should probably make use of that, in practice
         // this function is only used by RecipeOrchestration, and there it is only used to
@@ -302,32 +297,6 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           break;
         }
       }
-
-      // Old method constantly waiting on observable values.
-      // let unfilledSlot: OrchestrationSlot | null = null;
-      // while (
-      //   (unfilledSlot =
-      //     values(await firstValueFrom(this.slots$)).find(
-      //       (slot) => !processedIds.includes(slot.spec.id)
-      //     ) ?? null) != null
-      // ) {
-      //   processedIds.push(unfilledSlot.spec.id);
-
-      //   const existingValue = await firstValueFrom(unfilledSlot.assignment$);
-      //   if (existingValue) {
-      //     continue;
-      //   }
-
-      //   // Leave slots blank if the recipe is fully satisfied.
-
-      //   const candidates = await firstValueFrom(
-      //     unfilledSlot.availableElementStacks$
-      //   );
-      //   const candidate = first(candidates);
-      //   if (candidate) {
-      //     await unfilledSlot.assign(candidate);
-      //   }
-      // }
     });
   }
 

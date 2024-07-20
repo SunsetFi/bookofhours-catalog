@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, firstValueFrom } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { Aspects, SphereSpec } from "secrethistories-api";
 
 import { True$ } from "@/observables";
@@ -69,7 +69,7 @@ export class OngoingSituationOrchestration
     return this._situation.notes$;
   }
 
-  get content$(): Observable<readonly ElementStackModel[]> {
+  get content$() {
     return this._situation.content$;
   }
 
@@ -79,7 +79,7 @@ export class OngoingSituationOrchestration
 
   async passTime() {
     try {
-      const timer = await firstValueFrom(this._situation.timeRemaining$);
+      const timer = this._situation.timeRemaining;
       if (timer > 0) {
         await this._timeSource.passTime(timer + 0.1);
         return true;

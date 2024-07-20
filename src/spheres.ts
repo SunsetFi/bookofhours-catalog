@@ -6,6 +6,9 @@ export const portageSpherePaths = [
   "~/portage5",
 ];
 
+// FIXME: We might be missing something.  Maybe enroute isnt what I think it is.
+// Rapidly changing orchestration recipes and having cards fly back and forth ends up
+// thinking cards have retired when they havent.
 export const alwaysVisibleSpherePaths = [
   ...portageSpherePaths,
   "~/hand.abilities",
@@ -22,7 +25,7 @@ export const alwaysVisibleSpherePaths = [
   "~/enroute",
 ];
 
-export const applicableSpherePaths = [...alwaysVisibleSpherePaths, "~/library"];
+export const allSpherePaths = [...alwaysVisibleSpherePaths, "~/library"];
 
 export const brancrugTokens = [
   "~/library!brancrugbeach",

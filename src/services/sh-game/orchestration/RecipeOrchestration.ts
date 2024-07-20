@@ -90,11 +90,11 @@ export class RecipeOrchestration
       this._tokensSource.visibleSituations$,
       desiredElementData$,
     ]).pipe(
-      map(([situations, desiredElementData]) => {
-        return situations.filter((situation) =>
+      map(([situations, desiredElementData]) =>
+        situations.filter((situation) =>
           this._situationIsAvailable(situation, desiredElementData)
-        );
-      }),
+        )
+      ),
       shareReplay(1)
     );
 
@@ -131,6 +131,7 @@ export class RecipeOrchestration
 
   _dispose() {
     this._situation$.value?.close();
+    this._autofillSubscription.unsubscribe();
   }
 
   private _label$: Observable<string | null> | null = null;
@@ -143,7 +144,7 @@ export class RecipeOrchestration
         map(([verb, label]) => {
           if (label === ".") {
             if (verb) {
-              return verb.description;
+              return verb.label;
             }
 
             return null;
@@ -227,30 +228,9 @@ export class RecipeOrchestration
   private _canExecute$: Observable<boolean> | null = null;
   get canExecute$(): Observable<boolean> {
     if (!this._canExecute$) {
-      // FIXME: Get this from the game.
-      // There might be other cases where the execution cannot happen,
-      // such as one-off recipes.
-      // ...although those might have been a CS only thing.
-      this._canExecute$ = combineLatest([
-        this._recipe.requirements$,
-        this.aspects$,
-      ]).pipe(
-        map(([requirements, aspects]) => {
-          for (const aspect of Object.keys(requirements)) {
-            const reqValue = requirements[aspect];
-            let required = Number(reqValue);
-
-            if (Number.isNaN(required)) {
-              required = aspects[reqValue] ?? 0;
-            }
-
-            if ((aspects[aspect] ?? 0) < required) {
-              return false;
-            }
-          }
-
-          return true;
-        }),
+      this._canExecute$ = this._situation$.pipe(
+        switchMapIfNotNull((s) => s.canExecute$),
+        map((x) => x ?? false),
         shareReplay(1)
       );
     }
@@ -346,17 +326,7 @@ export class RecipeOrchestration
       return false;
     }
 
-    const thresholds = [
-      ...situation.thresholds,
-      // We need to assume that we will have thresholds from the desired cards we wish to slot in.
-      // // This is critical in many cases, such as books being readable in consider.
-      // ...additionalThresholds.filter(
-      //   (spec) => actionIdMatches(spec.actionId, situation.verbId)
-      //   // There is another threshold controller here: ifAspectsPresent.
-      //   // This changes based on slotted cards, and thus is impossible for us to factor in.
-      //   // Maybe in practice, we can use desiredElement aspects?
-      // ),
-    ];
+    const thresholds = [...situation.thresholds];
 
     for (const { aspects, slots } of desiredElementData) {
       // As far as I can tell from the game code, only elements slotted into verb thresholds (situation thresholds in our case)
@@ -380,12 +350,6 @@ export class RecipeOrchestration
     // Note: Specs have ifAspectsPresent, so they might not exist if some aspects are not present.
     // We should filter by that, but we don't really know what our final aspects will be at this point.
 
-    // I dont remember why I added this filter.  Let's try without it.
-    // const requiredAspects = [
-    //   ...Object.keys(this._recipe.requirements).filter((x) =>
-    //     workstationFilterAspects.includes(x)
-    //   ),
-    // ];
     const requiredAspects = Object.keys(this._recipe.requirements);
 
     // Let's let them through if any of the thresholds match any of the requirements.
@@ -402,23 +366,6 @@ export class RecipeOrchestration
     ) {
       return false;
     }
-
-    // This code was disabled, but re-enabling it now that we take into account element slots.
-    // TODO: In practice we can use situations that don't match this if alternate aspects on cards are accepted.
-    // This really is a special / edge case for skills, so maybe restrict the match to the skill card off-aspect.
-    // Interestingly enough, this is absolutely required to 'read' phonographs and films.
-    // for (const aspect of requiredAspects) {
-    //   if (
-    //     !thresholds.some(
-    //       (t) =>
-    //         (Object.keys(t.essential).includes(aspect) ||
-    //           Object.keys(t.required).includes(aspect)) &&
-    //         !Object.keys(t.forbidden).includes(aspect)
-    //     )
-    //   ) {
-    //     return false;
-    //   }
-    // }
 
     return true;
   }

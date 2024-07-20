@@ -18,7 +18,7 @@ import {
   firstOrDefault,
 } from "@/observables";
 
-import { applicableSpherePaths } from "@/spheres";
+import { allSpherePaths } from "@/spheres";
 
 import { UpdatePoller, TaskUnsubscriber } from "../../update-poller";
 import { API } from "../../sh-api";
@@ -298,13 +298,13 @@ export class TokensSource {
       const shouldSplit = brk > 100;
       const [first, second] = await Promise.all([
         this._api.getAllTokens({
-          fucinePath: applicableSpherePaths,
+          fucinePath: allSpherePaths,
           payloadType: supportedPayloadTypes,
           limit: shouldSplit ? brk : undefined,
         }),
         shouldSplit
           ? this._api.getAllTokens({
-              fucinePath: applicableSpherePaths,
+              fucinePath: allSpherePaths,
               payloadType: supportedPayloadTypes,
               skip: brk,
             })

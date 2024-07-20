@@ -14,13 +14,14 @@ import {
   observeAllMap,
 } from "@/observables";
 
+import { tokenPathContainsChild } from "@/utils";
+
 import { TokensSource } from "../sources/TokensSource";
 
 import {
   ConnectedTerrainModel,
   isConnectedTerrainModel,
 } from "./ConnectedTerrainModel";
-import { tokenPathContainsChild } from "@/utils";
 
 @injectable()
 @singleton()
@@ -56,10 +57,6 @@ export class TokenParentTerrainFactory {
             return terrainsByPath[path];
           }
         }
-
-        // FIXME: Don't consider cards in workstations of this terrain to be 'in' this terrain.
-        // This is really difficult, as workstations are not in a consistently named path.
-        // This is another instance where we really want to know the TokenModel path of the element.
 
         return null;
       }),

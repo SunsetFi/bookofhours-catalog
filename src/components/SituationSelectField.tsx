@@ -11,7 +11,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 
-import { observeAll } from "@/observables";
+import { observeAllMap } from "@/observables";
 
 import { SituationModel } from "@/services/sh-game";
 
@@ -59,11 +59,7 @@ const SituationSelectField = ({
 }: SituationSelectFieldProps) => {
   let situations =
     useObservation(
-      () =>
-        situations$.pipe(
-          map((items) => items.map(observeSituationAutocomplete)),
-          observeAll()
-        ),
+      () => situations$.pipe(observeAllMap(observeSituationAutocomplete)),
       [situations$]
     ) ?? null;
 

@@ -45,8 +45,8 @@ export class TokenModelFactory {
           this._container.get(BatchingScheduler)
         );
       case "Situation":
-      case "WorkstationSituation" as any:
-      case "RoomWorkSituation" as any:
+      case "WorkstationSituation":
+      case "RoomWorkSituation":
         return new SituationModel(
           token as Situation,
           this._container.get(API),

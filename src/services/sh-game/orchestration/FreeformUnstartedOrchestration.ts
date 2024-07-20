@@ -61,14 +61,14 @@ export class FreeformUnstartedOrchestration
     super(tokensSource, scheduler);
 
     this._situationStateSubscription = this._situation$
-      .pipe(switchMap((s) => s?.state$ ?? Null$))
+      .pipe(switchMapIfNotNull((s) => s.state$))
       .subscribe((state) => {
         if (this._isExecuting) {
           return;
         }
 
         // If we dont have a situation, state will be null.
-        // Do not loop inifnitely clearing the situation in this case.
+        // Do not loop inifunitly clearing the situation in this case.
         if (state && state !== "Unstarted") {
           this._situation$.next(null);
         }
@@ -77,16 +77,13 @@ export class FreeformUnstartedOrchestration
     this._situation$.next(situation);
 
     this._recipe$ = this._situation$.pipe(
-      switchMap((situation) => situation?.currentRecipeId$ ?? Null$),
+      switchMapIfNotNull((situation) => situation.currentRecipeId$),
       map((recipeId) =>
         recipeId ? this._compendium.getRecipeById(recipeId) : null
       ),
       // Non-craftable recipes don't count for our purposes.
-      switchMap(
-        (recipe) =>
-          recipe?.craftable$.pipe(
-            map((craftable) => (craftable ? recipe : null))
-          ) ?? Null$
+      switchMapIfNotNull((recipe) =>
+        recipe.craftable$.pipe(map((craftable) => (craftable ? recipe : null)))
       ),
       shareReplay(1)
     );

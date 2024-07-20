@@ -6,11 +6,11 @@ import {
   shareReplay,
 } from "rxjs";
 import { Token, SpaceOccupation } from "secrethistories-api";
+import { isEqual } from "lodash";
 
 import { API } from "@/services/sh-api";
 
 import type { ConnectedTerrainModel } from "./ConnectedTerrainModel";
-import { isEqual } from "lodash";
 
 export abstract class TokenModel<T extends Token = any> {
   private readonly _id: string;
