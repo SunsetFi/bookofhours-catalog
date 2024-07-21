@@ -64,9 +64,9 @@ function observeAutocompleteItem(
   );
 }
 
-const defaultFilterOptions = createFilterOptions<ElementStackAutocompleteItem>({
-  limit: 25,
-});
+const defaultFilterOptions = createFilterOptions<ElementStackAutocompleteItem>(
+  {}
+);
 
 const ElementStackSelectField = ({
   sx,
@@ -121,15 +121,15 @@ const ElementStackSelectField = ({
     [items, requireExterior]
   );
 
-  const [isLimited, setLimited] = React.useState(false);
+  const [matchCount, setMatchCount] = React.useState(0);
   const filterOptions = React.useCallback(
     (
       options: ElementStackAutocompleteItem[],
       state: FilterOptionsState<ElementStackAutocompleteItem>
     ) => {
       const result = defaultFilterOptions(options, state);
-      setLimited(result.length == 25);
-      return result;
+      setMatchCount(result.length);
+      return result.slice(0, 24);
     },
     []
   );
@@ -140,21 +140,21 @@ const ElementStackSelectField = ({
         (
           <Paper>
             {children}
-            {isLimited && (
+            {matchCount > 25 && (
               <Stack sx={{ width: "100%", p: 1 }} alignItems="center">
                 <Typography
                   sx={{ mx: "auto" }}
                   textAlign="center"
                   variant="caption"
                 >
-                  Showing 25 of {items?.length} cards. Use search to refine the
-                  results.
+                  Showing 25 of {matchCount} matching cards. Use search to
+                  refine the results.
                 </Typography>
               </Stack>
             )}
           </Paper>
         ),
-    [isLimited, items]
+    [matchCount, items]
   );
 
   if (!items) {
