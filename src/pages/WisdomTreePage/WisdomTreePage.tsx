@@ -85,7 +85,7 @@ const WisdomTreePage = () => {
             height: "100%",
           }}
         >
-          <CircularProgress />
+          <CircularProgress color="inherit" />
         </Box>
       )}
 

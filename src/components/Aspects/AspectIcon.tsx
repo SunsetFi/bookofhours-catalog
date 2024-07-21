@@ -11,11 +11,14 @@ import ScreenReaderContent from "../ScreenReaderContent";
 
 const Img = styled("img")({});
 
-export interface AspectIconProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface AspectIconProps
+  extends Omit<
+    React.HTMLAttributes<HTMLImageElement>,
+    "width" | "height" | "src"
+  > {
   aspectId: string;
   size?: number;
   sx?: SxProps;
-  onClick?(e: React.MouseEvent<HTMLElement>): void;
 }
 
 const AspectIcon = ({
@@ -46,10 +49,10 @@ const AspectIcon = ({
         tabIndex={onClick ? 0 : undefined}
         onClick={onClick}
         loading="lazy"
-        style={{ display: "block" }}
         src={iconUrl}
         width={size}
         height={size}
+        {...props}
       />
     </Tooltip>
   );

@@ -39,6 +39,7 @@ import ElementStackCard, {
 } from "@/components/Elements/ElementStackCard";
 import ElementStackTray from "@/components/Elements/ElementStackTray";
 import ElementIcon from "@/components/Elements/ElementIcon";
+import ElementStackIcon from "@/components/Elements/ElementStackIcon";
 
 export interface WisdomNodeSlotProps {
   sx?: SxProps;
@@ -97,12 +98,39 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
         <ElementStackCard elementStack={committed} interactable={false} />
       )}
       {committed == null && !sealed && possibilities.length > 0 && (
-        <Button
-          aria-description={wisdomLabel}
-          onClick={() => setChoosingCandidate(true)}
+        <Stack
+          direction="column"
+          sx={{ py: 2, height: "100%", justifyContent: "center" }}
         >
-          {possibilities.length} candidates
-        </Button>
+          <Box
+            gap={2}
+            sx={{
+              mx: "auto",
+              display: "grid",
+              // If there is only 1 possibility, we want to center it.
+              gridTemplateColumns: possibilities.length > 1 ? "1fr 1fr" : "1fr",
+            }}
+          >
+            {possibilities.slice(0, 3).map((elementStack) => (
+              <ElementStackIcon
+                key={elementStack.id}
+                elementStack={elementStack}
+                interactive={false}
+              />
+            ))}
+          </Box>
+          <Button
+            aria-description={wisdomLabel}
+            onClick={() => setChoosingCandidate(true)}
+            sx={{
+              // Button has a fontSize property, but that makes typescript angry.
+              // Strangely, it gets angry over the component property.
+              fontSize: "0.95rem",
+            }}
+          >
+            {possibilities.length} candidate{possibilities.length > 1 && "s"}
+          </Button>
+        </Stack>
       )}
       {choosingCandidate && (
         <ChooseWisdomCardDialog

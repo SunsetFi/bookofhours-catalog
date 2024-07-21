@@ -34,7 +34,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   const [escaped, setEscaped] = React.useState(false);
 
   const [immediateFocus, focusChange] = useDebounceCommitValue<boolean>(
-    900,
+    700,
     setDelayedFocus
   );
 

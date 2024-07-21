@@ -24,7 +24,7 @@ const AspectsList = ({ sx, aspects, iconSize }: AspectsListProps) => {
         display: "flex",
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 2,
+        gap: 1,
         ...sx,
       }}
     >
