@@ -3,8 +3,7 @@ import { Aspects } from "secrethistories-api";
 import { isEqual } from "lodash";
 import { Observable, distinctUntilChanged, map, shareReplay } from "rxjs";
 
-import { Box, IconButton, IconButtonProps } from "@mui/material";
-import { PlayCircle } from "@mui/icons-material";
+import { Box } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 import { mapArrayItemsCached } from "@/observables";
@@ -25,6 +24,7 @@ import {
   createSituationColumnHelper,
 } from "@/components/ObservableDataGrid";
 import DataGridPage from "@/components/DataGridPage";
+import OrchestrationIconButton from "@/components/OrchestrationIconButton";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
 interface WorkstationModelDecorators {
@@ -62,12 +62,6 @@ function situationToWorkstationModel(
   } satisfies WorkstationModelDecorators);
 }
 
-const OrchestrateIconButton = (props: IconButtonProps) => (
-  <IconButton title="Open Workstation" {...props}>
-    <PlayCircle />
-  </IconButton>
-);
-
 const WorkstationCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
   const orchestrator = useDIDependency(Orchestrator);
@@ -98,8 +92,10 @@ const WorkstationCatalogPage = () => {
             }}
           >
             <FocusIconButton token={row.original} />
-            {/* TODO: Not functional yet. */}
-            <OrchestrateIconButton onClick={() => row.original.orchestrate()} />
+            <OrchestrationIconButton
+              interactivity="minimal"
+              onClick={() => row.original.orchestrate()}
+            />
           </Box>
         ),
       }),

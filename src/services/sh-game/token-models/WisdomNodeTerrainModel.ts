@@ -191,6 +191,12 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     });
   }
 
+  async dump(): Promise<void> {
+    return this._scheduler.batchUpdate(async () => {
+      this._api.evictTokenAtPath(`${this._token.path}/input`);
+    });
+  }
+
   async commit(): Promise<boolean> {
     if (this._token.committed) {
       return false;

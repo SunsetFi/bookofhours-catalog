@@ -1,5 +1,4 @@
 import React from "react";
-import { PlayCircle } from "@mui/icons-material";
 
 import { Observable, combineLatest, filter, map, switchMap } from "rxjs";
 
@@ -17,6 +16,7 @@ import {
   getCraftablesObservable,
 } from "./crafting-data-source";
 import { isNotNull } from "@/utils";
+import OrchestrationIconButton from "@/components/OrchestrationIconButton";
 
 export const craftingSearchProvider: PageSearchProviderPipe = (
   query$,
@@ -70,10 +70,10 @@ function craftableModelToSearchItem(
           secondaryText: `Skill: ${skillLabel}`,
           pathQuery: `filter-label=\"${encodeURIComponent(label!)}\"`,
           actions: [
-            {
-              icon: <PlayCircle />,
-              onClick: () => craftable.craft(),
-            },
+            <OrchestrationIconButton
+              interactivity="full"
+              onClick={() => craftable.craft()}
+            />,
           ],
         } satisfies PageSearchItemResult)
     )

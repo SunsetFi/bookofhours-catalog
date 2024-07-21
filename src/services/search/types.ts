@@ -22,17 +22,12 @@ export interface AspectSearchQuery {
   aspect: string;
 }
 
-export interface SearchItemAction {
-  icon: React.ReactNode;
-  onClick(): void;
-}
-
 export interface SearchItemResult {
   iconUrl: string;
   label: string;
   secondaryText?: string;
   path: string;
-  actions?: SearchItemAction[];
+  actions?: React.ReactNode[];
 }
 
 export type SearchProviderPipe = (

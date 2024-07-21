@@ -6,7 +6,7 @@ import { powerAspects } from "@/aspects";
 import { useObservation } from "@/hooks/use-observation";
 
 import FocusIconButton from "@/components/FocusIconButton";
-import CraftIconButton from "@/components/CraftIconButton";
+import OrchestrationIconButton from "@/components/OrchestrationIconButton";
 import PinElementIconButton from "@/components/PinElementIconButton";
 import {
   ElementIconCell,
@@ -30,7 +30,10 @@ const BookCatalogPage = () => {
           return (
             <Stack direction="column" alignItems="center">
               <FocusIconButton token={props.row.original} />
-              <CraftIconButton onClick={() => props.row.original.read()} />
+              <OrchestrationIconButton
+                interactivity="full"
+                onClick={() => props.row.original.read()}
+              />
             </Stack>
           );
         },

@@ -26,6 +26,7 @@ import AspectsList from "../Aspects/AspectsList";
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
 
 import OrchestrationSlots from "./OrchestrationSlots";
+import RequireInteractivity from "../RequireInteractivity";
 
 export interface PendingOrchestrationContentProps {
   onBack(): void;
@@ -101,14 +102,16 @@ const PendingOrchestrationContent = ({
   stackItems.push(
     <Stack direction="row" sx={{ mt: "auto" }}>
       <ButtonGroup sx={{ ml: "auto" }}>
-        {canAutofill && (
-          <Button
-            disabled={!canAutofill}
-            onClick={() => orchestration.autofill()}
-          >
-            Autofill
-          </Button>
-        )}
+        <RequireInteractivity interactivity="full" compare="greater">
+          {canAutofill && (
+            <Button
+              disabled={!canAutofill}
+              onClick={() => orchestration.autofill()}
+            >
+              Autofill
+            </Button>
+          )}
+        </RequireInteractivity>
         <Button disabled={!canExecute} onClick={() => orchestration.execute()}>
           Start Recipe
         </Button>

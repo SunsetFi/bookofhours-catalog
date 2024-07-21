@@ -5,7 +5,6 @@ import {
   IconButton,
   List,
   ListItemButton,
-  ListItemText,
   Popover,
   Stack,
   Typography,
@@ -19,6 +18,7 @@ import { SaveManager } from "@/services/sh-game/SaveManager/SaveManager";
 
 import { useObservation } from "@/hooks/use-observation";
 import { DateTime } from "luxon";
+import { SettingsManager } from "@/services/settings";
 
 const GameMenuButton = () => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -43,6 +43,7 @@ interface GameMenuProps {
 }
 const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
   const saveManager = useDIDependency(SaveManager);
+  const settingsManager = useDIDependency(SettingsManager);
   const canSave = useObservation(saveManager.canSave$);
   const autosave = useObservation(saveManager.autosave$);
 
@@ -96,6 +97,10 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
         </ListItemButton>
         <Divider />
         <ListItemButton onClick={onNewGame}>New Game</ListItemButton>
+        <Divider />
+        <ListItemButton onClick={() => settingsManager.openSettingsDialog()}>
+          Settings
+        </ListItemButton>
       </List>
     </Popover>
   );

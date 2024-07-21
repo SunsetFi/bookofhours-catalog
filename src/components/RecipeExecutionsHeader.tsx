@@ -10,6 +10,8 @@ import { useObservation } from "@/hooks/use-observation";
 
 import { Orchestrator } from "@/services/sh-game";
 
+import RequireInteractivity from "./RequireInteractivity";
+
 interface RecipeExecutionsHeaderProps {
   sx?: SxProps;
 }
@@ -33,28 +35,30 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
   }
 
   return (
-    <Badge
-      role="region"
-      aria-label="Open Activities Drawer"
-      badgeContent={executingSituations.length}
-      color="primary"
-      sx={{
-        ["& .MuiBadge-badge"]: {
-          right: 10,
-          top: 10,
-        },
-        ...sx,
-      }}
-    >
-      <IconButton
-        aria-controls="orchestration-drawer"
-        aria-expanded={open}
-        title="Actions"
-        onClick={onClick}
+    <RequireInteractivity interactivity="minimal" compare="greater">
+      <Badge
+        role="region"
+        aria-label="Open Activities Drawer"
+        badgeContent={executingSituations.length}
+        color="primary"
+        sx={{
+          ["& .MuiBadge-badge"]: {
+            right: 10,
+            top: 10,
+          },
+          ...sx,
+        }}
       >
-        <PlayCircle />
-      </IconButton>
-    </Badge>
+        <IconButton
+          aria-controls="orchestration-drawer"
+          aria-expanded={open}
+          title="Actions"
+          onClick={onClick}
+        >
+          <PlayCircle />
+        </IconButton>
+      </Badge>
+    </RequireInteractivity>
   );
 };
 

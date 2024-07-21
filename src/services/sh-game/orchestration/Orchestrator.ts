@@ -16,6 +16,7 @@ import {
 } from "@/observables";
 
 import { Compendium } from "@/services/sh-compendium";
+import { SettingsManager } from "@/services/settings/SettingsManager";
 
 import { GameStateSource } from "../sources/GameStateSource";
 import { TokensSource } from "../sources/TokensSource";
@@ -31,6 +32,7 @@ import {
 
 import { OrchestrationFactory } from "./OrchestrationFactory";
 import { SituationStateChangedResponse } from "./internal";
+import { RecipeOrchestration } from "./RecipeOrchestration";
 
 // These states don't last long and seem to be stepping stones to other states.
 // We get them intermittently, but can't really act on them.
@@ -51,12 +53,25 @@ export class Orchestrator {
   private readonly _open$ = new BehaviorSubject<boolean>(false);
 
   constructor(
+    @inject(SettingsManager) private readonly _settings: SettingsManager,
     @inject(GameStateSource) runningSource: GameStateSource,
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(OrchestrationFactory)
     private readonly _orchestrationFactory: OrchestrationFactory,
     @inject(Compendium) private readonly _compendium: Compendium
   ) {
+    this._settings.getObservable("interactivity").subscribe((interactivity) => {
+      if (interactivity === "read-only") {
+        this._updateOrchestration(null);
+        this._open$.next(false);
+      } else if (
+        interactivity === "minimal" &&
+        this._orchestration$.value instanceof RecipeOrchestration
+      ) {
+        this._updateOrchestration(null);
+      }
+    });
+
     runningSource.isLegacyRunning$.subscribe((isRunning) => {
       if (!isRunning) {
         this._updateOrchestration(null);
@@ -151,6 +166,10 @@ export class Orchestrator {
   }
 
   toggleDrawer() {
+    if (this._settings.get("interactivity") === "read-only") {
+      return;
+    }
+
     if (this._open$.value) {
       this._open$.next(false);
     } else {
@@ -161,7 +180,16 @@ export class Orchestrator {
   async openOrchestration(
     request: OrchestrationRequest
   ): Promise<Orchestration | null> {
+    const interactivity = this._settings.get("interactivity");
+    if (interactivity === "read-only") {
+      return null;
+    }
+
     if (isRecipeOrchestrationRequest(request)) {
+      if (interactivity !== "full") {
+        return null;
+      }
+
       // FIXME: If another verb is open, we should close and wait first.
       // This is because we have a tendancy to try and snatch cards from other open verbs,
       // but the verbs will close as part of opening this orchestration.

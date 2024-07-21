@@ -21,6 +21,7 @@ import GameTypography from "../GameTypography";
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
 
 import OrchestrationSlots from "./OrchestrationSlots";
+import RequireInteractivity from "../RequireInteractivity";
 
 export interface OngoingOrchestrationContentProps {
   onBack(): void;
@@ -121,14 +122,16 @@ const OngoingOrchestrationContent = ({
         </GameTypography>
       )}
       <ButtonGroup sx={{ ml: "auto" }}>
-        {isThresholdedOrchestration(orchestration) && canAutofill && (
-          <Button
-            disabled={!canAutofill}
-            onClick={() => orchestration.autofill()}
-          >
-            Autofill
-          </Button>
-        )}
+        <RequireInteractivity interactivity="full" compare="greater">
+          {isThresholdedOrchestration(orchestration) && canAutofill && (
+            <Button
+              disabled={!canAutofill}
+              onClick={() => orchestration.autofill()}
+            >
+              Autofill
+            </Button>
+          )}
+        </RequireInteractivity>
         <Button onClick={() => orchestration.passTime()}>Pass Time</Button>
       </ButtonGroup>
     </Stack>

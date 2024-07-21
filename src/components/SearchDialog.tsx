@@ -203,18 +203,7 @@ const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
   if (item.actions) {
     actions = (
       <Stack direction="row" sx={{ ml: "auto" }}>
-        {item.actions.map((action, i) => (
-          <IconButton
-            key={i}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              action.onClick();
-            }}
-          >
-            {action.icon}
-          </IconButton>
-        ))}
+        {item.actions}
       </Stack>
     );
   }

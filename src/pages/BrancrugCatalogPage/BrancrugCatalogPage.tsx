@@ -3,8 +3,7 @@ import { Aspects } from "secrethistories-api";
 import { isEqual } from "lodash";
 import { Observable, distinctUntilChanged, map, shareReplay } from "rxjs";
 
-import { Box, IconButton, IconButtonProps } from "@mui/material";
-import { PlayCircle } from "@mui/icons-material";
+import { Box, IconButtonProps } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 import { mapArrayItemsCached } from "@/observables";
@@ -22,6 +21,7 @@ import {
 import FocusIconButton from "@/components/FocusIconButton";
 import { createSituationColumnHelper } from "@/components/ObservableDataGrid";
 import DataGridPage from "@/components/DataGridPage";
+import CraftIconButton from "@/components/OrchestrationIconButton";
 
 type WorkstationModel = SituationModel & WorkstationModelDecorators;
 interface WorkstationModelDecorators {
@@ -60,9 +60,11 @@ function situationToWorkstationModel(
 }
 
 const OrchestrateIconButton = (props: IconButtonProps) => (
-  <IconButton title="Open Workstation" {...props}>
-    <PlayCircle />
-  </IconButton>
+  <CraftIconButton
+    interactivity="minimal"
+    title="Open Workstation"
+    {...props}
+  />
 );
 
 const BrancrugCatalogPage = () => {

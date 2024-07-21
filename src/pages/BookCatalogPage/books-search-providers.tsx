@@ -1,6 +1,6 @@
 import React from "react";
 
-import { combineLatest, filter, map, merge, Observable, switchMap } from "rxjs";
+import { combineLatest, filter, map, Observable, switchMap } from "rxjs";
 
 import { filterItemObservations, observeAllMap } from "@/observables";
 import { isNotNull } from "@/utils";
@@ -14,8 +14,9 @@ import {
 
 import { ElementModel } from "@/services/sh-compendium";
 
+import OrchestrationIconButton from "@/components/OrchestrationIconButton";
+
 import { BookModel, getBooksObservable } from "./books-data-source";
-import { PlayCircle } from "@mui/icons-material";
 
 export const bookCatalogSearchProvider: PageSearchProviderPipe = (
   query$,
@@ -81,12 +82,10 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
                   secondaryText: `Book: ${bookLabel}`,
                   pathQuery: `filter-memory=\"${encodeURIComponent(label!)}\"`,
                   actions: [
-                    {
-                      icon: <PlayCircle />,
-                      onClick() {
-                        book.read();
-                      },
-                    },
+                    <OrchestrationIconButton
+                      interactivity="full"
+                      onClick={() => book.read()}
+                    />,
                   ],
                 } satisfies PageSearchItemResult;
               })

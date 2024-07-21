@@ -12,6 +12,10 @@ import {
   CircularProgress,
   InputAdornment,
   SxProps,
+  createFilterOptions,
+  FilterOptionsState,
+  Paper,
+  Stack,
 } from "@mui/material";
 
 import { observeAllMap } from "@/observables";
@@ -59,6 +63,10 @@ function observeAutocompleteItem(
     }))
   );
 }
+
+const defaultFilterOptions = createFilterOptions<ElementStackAutocompleteItem>({
+  limit: 25,
+});
 
 const ElementStackSelectField = ({
   sx,
@@ -113,6 +121,42 @@ const ElementStackSelectField = ({
     [items, requireExterior]
   );
 
+  const [isLimited, setLimited] = React.useState(false);
+  const filterOptions = React.useCallback(
+    (
+      options: ElementStackAutocompleteItem[],
+      state: FilterOptionsState<ElementStackAutocompleteItem>
+    ) => {
+      const result = defaultFilterOptions(options, state);
+      setLimited(result.length == 25);
+      return result;
+    },
+    []
+  );
+
+  const PaperComponent = React.useMemo(
+    () =>
+      ({ children }: React.HTMLAttributes<HTMLElement>) =>
+        (
+          <Paper>
+            {children}
+            {isLimited && (
+              <Stack sx={{ width: "100%", p: 1 }} alignItems="center">
+                <Typography
+                  sx={{ mx: "auto" }}
+                  textAlign="center"
+                  variant="caption"
+                >
+                  Showing 25 of {items?.length} cards. Use search to refine the
+                  results.
+                </Typography>
+              </Stack>
+            )}
+          </Paper>
+        ),
+    [isLimited, items]
+  );
+
   if (!items) {
     return <CircularProgress color="inherit" />;
   }
@@ -135,6 +179,7 @@ const ElementStackSelectField = ({
       sx={sx}
       fullWidth={fullWidth}
       options={items}
+      filterOptions={filterOptions}
       readOnly={readOnly}
       autoHighlight
       getOptionLabel={(option) => option.label!}
@@ -204,6 +249,7 @@ const ElementStackSelectField = ({
           {...option}
         />
       )}
+      PaperComponent={PaperComponent}
     />
   );
 };

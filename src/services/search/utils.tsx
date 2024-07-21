@@ -24,6 +24,7 @@ import {
 } from "./types";
 import { Compendium, ElementModel } from "../sh-compendium";
 import { Aspects } from "secrethistories-api";
+import { IconButton } from "@mui/material";
 
 export type QueryProducer = (
   elementStack: ElementStackModel
@@ -108,12 +109,11 @@ export function elementStackToSearchItem(
         secondaryText: location ?? undefined,
         pathQuery: pathQuery!,
         actions: [
-          location
-            ? {
-                icon: <VisibilityIcon />,
-                onClick: () => elementStack.focus(),
-              }
-            : null,
+          location ? (
+            <IconButton onClick={() => elementStack.focus()}>
+              <VisibilityIcon />
+            </IconButton>
+          ) : null,
         ].filter(isNotNull),
       } satisfies PageSearchItemResult;
     })

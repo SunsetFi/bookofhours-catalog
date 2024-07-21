@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import { aspectsMagnitude } from "@/aspects";
 
 import PinRecipeIconButton from "@/components/PinRecipeIconButton";
-import CraftIconButton from "@/components/CraftIconButton";
+import OrchestrationIconButton from "@/components/OrchestrationIconButton";
 import {
   ElementIconCell,
   AspectsListCell,
@@ -40,7 +40,10 @@ const CraftingCatalogPage = () => {
               }}
             >
               <PinRecipeIconButton recipeId={props.row.original.id} />
-              <CraftIconButton onClick={() => props.row.original.craft()} />
+              <OrchestrationIconButton
+                interactivity="full"
+                onClick={() => props.row.original.craft()}
+              />
             </Box>
           );
         },

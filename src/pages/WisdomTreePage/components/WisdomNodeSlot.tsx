@@ -40,6 +40,7 @@ import ElementStackCard, {
 import ElementStackTray from "@/components/Elements/ElementStackTray";
 import ElementIcon from "@/components/Elements/ElementIcon";
 import ElementStackIcon from "@/components/Elements/ElementStackIcon";
+import { useSetting } from "@/services/settings";
 
 export interface WisdomNodeSlotProps {
   sx?: SxProps;
@@ -53,6 +54,13 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
   const tokensSource = useDIDependency(TokensSource);
   const committed = useObservation(node.committed$);
   const sealed = useObservation(node.sealed$);
+
+  const editEnabled = useSetting("enableWisdomEditing");
+  React.useEffect(() => {
+    if (!editEnabled) {
+      setChoosingCandidate(false);
+    }
+  }, [editEnabled]);
 
   const requirements = useObservation(node.requirements$) ?? NeverMatch;
   const essentials = useObservation(node.essentials$) ?? NeverMatch;
@@ -119,17 +127,24 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
               />
             ))}
           </Box>
-          <Button
-            aria-description={wisdomLabel}
-            onClick={() => setChoosingCandidate(true)}
-            sx={{
-              // Button has a fontSize property, but that makes typescript angry.
-              // Strangely, it gets angry over the component property.
-              fontSize: "0.95rem",
-            }}
-          >
-            {possibilities.length} candidate{possibilities.length > 1 && "s"}
-          </Button>
+          {editEnabled && (
+            <Button
+              aria-description={wisdomLabel}
+              onClick={() => setChoosingCandidate(true)}
+              sx={{
+                // Button has a fontSize property, but that makes typescript angry.
+                // Strangely, it gets angry over the component property.
+                fontSize: "0.95rem",
+              }}
+            >
+              {possibilities.length} candidate{possibilities.length > 1 && "s"}
+            </Button>
+          )}
+          {!editEnabled && (
+            <Typography variant="caption">
+              {possibilities.length} candidate{possibilities.length > 1 && "s"}
+            </Typography>
+          )}
         </Stack>
       )}
       {choosingCandidate && (
@@ -188,6 +203,17 @@ const ChooseWisdomCardDialog = ({
     [committing, node]
   );
 
+  // We want do dump the node when we leave the page.
+  // Also dump it on startup just to be sure.
+  // Leaving cards in the input slot is risky as the wisdom tree is not designed
+  // to be puppeted this way outside of the main screen.
+  React.useEffect(() => {
+    node.dump();
+    return () => {
+      node.dump();
+    };
+  }, [node]);
+
   return (
     <Dialog
       open={true}
@@ -235,7 +261,6 @@ const ChooseWisdomCardDialog = ({
             variant="contained"
             disabled={input == null}
             onClick={async () => {
-              console.log("We are committing and setting commit to true.");
               setCommitting(true);
               try {
                 await node.commit();
