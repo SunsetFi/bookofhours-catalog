@@ -160,7 +160,9 @@ Players who use the catalogue as an addenda to the game's own UI should take car
 
 To search the entire catalogue, click the "Search" button at the top of the screen, or use it's shortcut, Ctrl+K. This will open a dialog in which you can type a search query to find any item across all pages of the catalogue.
 
-Typing a search query will attempt to find items matching the search. Generally, the search will take into account names, descriptions, and aspects of various items and recipes. When using multiple words, items will be returned that contain all words regardless of their order. Where words match aspect names, the search will look for items with that aspect, rather than searching for the aspect name in their text.
+Typing a search query will attempt to find items matching the search. Generally, the search will take into account names, descriptions, and aspects of various items and recipes. When using multiple words, items will be returned that contain all words regardless of their order.
+
+The search query can also contain aspect names. When the name of an aspect is searched for, the catalogue will search all cards that contain that aspect. This is most useful for when you want to quickly find cards of a certain type. For example, `memory knock` will list all existing memory cards with a knock aspect, and all known crafting recipes and books that yield such a card when crafted or read.
 
 Selecting search result items will open the containing page and filter it to only show that item.
 
