@@ -18,8 +18,6 @@ A significant focus is being put on screen reader compatibility, with the ultima
 
 ## Installation
 
-You can find bundled packages for this mod on the [Releases](https://github.com/SunsetFi/bookofhours-catalog/releases).
-
 This project provides two zip files depending on your situation:
 
 - If you have already installed BepInEx:
