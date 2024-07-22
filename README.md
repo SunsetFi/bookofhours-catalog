@@ -18,7 +18,7 @@ A significant focus is being put on screen reader compatibility, with the ultima
 
 ## Demos
 
-### Unlocking skills and Crafting
+### Unlocking skills and crafting recipes
 
 [https://youtu.be/CPCxDRMBN-E](https://youtu.be/CPCxDRMBN-E)
 
