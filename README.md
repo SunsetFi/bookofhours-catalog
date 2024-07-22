@@ -23,10 +23,10 @@ You can find bundled packages for this mod on the [Releases](https://github.com/
 This project provides two zip files depending on your situation:
 
 - If you have already installed BepInEx:
-  - Download Hush.House.Catalogue.BepInEx.Plugin.zip
+  - Download [Hush.House.Catalogue.BepInEx.Plugin.zip](https://github.com/SunsetFi/bookofhours-catalog/releases/download/1.0.0/Hush.House.Catalogue.BepInEx.Plugin.zip)
   - Extract the zip file into Book of Hours/BepInEx/plugins
 - If you have never installed BepInEx:
-  - Download Hush.House.Catalogue.Quickstart.zip
+  - Download [Hush.House.Catalogue.Quickstart.zip](https://github.com/SunsetFi/bookofhours-catalog/releases/download/1.0.0/Hush.House.Catalogue.QuickStart.zip)
   - Extract the zip file into the Book of Hours root directory.
 
 ## Usage
