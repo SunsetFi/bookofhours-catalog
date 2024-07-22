@@ -33,6 +33,21 @@ This project is best used in the browser of your choice while the game runs in w
 
 Regardless of the method you use, once the game is running, the interface will be available in your browser at http://localhost:8081/catalogue.
 
+### Interactivity Features
+
+By default, the Catalogue will run in a read-only mode. This lets it act as a reference without actually having any effect on the operations of the game.
+
+However, the Catalogue also has features that allow you interact with the game through the Catalogue itself, from directly executing recipes to fast forwarding time to specific events.
+
+To enable these features, click the `Settings` option under the menu, which is accessible at the top left of the page when a save is loaded.
+
+When enababled, there are two options for how much interactivity to provide:
+
+- Minimal
+  Minimal mode lets you control verbs and workstations and start recipes through the Activites Panel, but provides no help in doing so. To run a recipe, you need to choose the workstation and cards to do so.
+- Full
+  Full mode adds automatic recipe execution for things like reading books and crafting items from skills. With this mode, the Catalogue provides the option of automatically choosing an appropriate workstation and slotting the appropriate cards for the crafting recipe. It should be noted that the only crafting recipes it will let you autocomplete are the recipes you have already discovered and unlocked on your own.
+
 ## Features
 
 This mod provides a sortable, filterable interface for various items in the game. Where possible, it also provides a button to zoom the camera in on the item in question.
