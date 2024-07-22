@@ -15,21 +15,17 @@ import {
 
 import { useDIDependency } from "@/container";
 
-import { useObservation } from "@/hooks/use-observation";
-
-import { SettingsManager } from "@/services/settings";
+import { SettingsManager, useSetting } from "@/services/settings";
 
 const SettingsDialogContent = () => {
   const settingsManager = useDIDependency(SettingsManager);
-  const interactivity = useObservation(
-    () => settingsManager.getObservable("interactivity"),
-    [settingsManager]
-  );
+  const interactivity = useSetting("interactivity");
+  const enableWisdomEditing = useSetting("enableWisdomEditing");
 
   return (
     <>
       <DialogTitle>Settings</DialogTitle>
-      <DialogContent role="document" sx={{ width: "600px", height: "400px" }}>
+      <DialogContent role="document" sx={{ width: "600px", height: "425px" }}>
         <FormGroup>
           <FormControl sx={{ mb: 1 }}>
             <FormLabel>Interactivity</FormLabel>
@@ -53,42 +49,67 @@ const SettingsDialogContent = () => {
             </FormHelperText>
           </FormControl>
           {interactivity !== "read-only" && (
-            <FormControl>
-              <FormLabel id="setting-interactivity-mode-label">
-                Interactivity Level
-              </FormLabel>
-              <RadioGroup
-                aria-labelledby="setting-interactivity-mode-label"
-                name="setting-interactivity-mode"
-                value={interactivity}
-                onChange={(e) =>
-                  settingsManager.set("interactivity", e.target.value as any)
-                }
-              >
-                <FormControl>
-                  <FormControlLabel
-                    value="minimal"
-                    control={<Radio />}
-                    label="Minimal"
-                  />
-                  <FormHelperText>
-                    Allows the remote controlling of verbs and workstations, but
-                    provides no assistance to the card selection.
-                  </FormHelperText>
-                </FormControl>
-                <FormControl>
-                  <FormControlLabel
-                    value="full"
-                    control={<Radio />}
-                    label="Full"
-                  />
-                  <FormHelperText>
-                    Provides additional features such as guided crafting recipe
-                    execution and automatic card selection for known recipes.
-                  </FormHelperText>
-                </FormControl>
-              </RadioGroup>
-            </FormControl>
+            <>
+              <FormControl>
+                <FormLabel id="setting-interactivity-mode-label">
+                  Interactivity Level
+                </FormLabel>
+                <RadioGroup
+                  aria-labelledby="setting-interactivity-mode-label"
+                  name="setting-interactivity-mode"
+                  value={interactivity}
+                  onChange={(e) =>
+                    settingsManager.set("interactivity", e.target.value as any)
+                  }
+                >
+                  <FormControl>
+                    <FormControlLabel
+                      value="minimal"
+                      control={<Radio />}
+                      label="Minimal"
+                    />
+                    <FormHelperText>
+                      Allows the remote control of verbs and workstations and
+                      the ability to pass time, but provides no assistance with
+                      recipes and card selection.
+                    </FormHelperText>
+                  </FormControl>
+                  <FormControl>
+                    <FormControlLabel
+                      value="full"
+                      control={<Radio />}
+                      label="Full"
+                    />
+                    <FormHelperText>
+                      Provides additional features such as guided crafting
+                      recipe execution and automatic card selection for known
+                      recipes.
+                    </FormHelperText>
+                  </FormControl>
+                </RadioGroup>
+              </FormControl>
+              <FormControl>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={enableWisdomEditing}
+                      onChange={(e) =>
+                        settingsManager.set(
+                          "enableWisdomEditing",
+                          e.target.checked
+                        )
+                      }
+                    />
+                  }
+                  label="[ALPHA] Enable Wisdom Tree Interactions"
+                />
+                <FormHelperText>
+                  DANGER: Remote control of the Wisdom Tree is unstable and is
+                  in a prototype phase. Game corruptions may arise from use.
+                  Usage of this feature is not recommended.
+                </FormHelperText>
+              </FormControl>
+            </>
           )}
         </FormGroup>
       </DialogContent>

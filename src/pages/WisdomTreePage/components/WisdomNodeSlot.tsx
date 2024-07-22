@@ -55,7 +55,9 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
   const committed = useObservation(node.committed$);
   const sealed = useObservation(node.sealed$);
 
-  const editEnabled = useSetting("enableWisdomEditing");
+  const interactivity = useSetting("interactivity");
+  const editEnabled =
+    useSetting("enableWisdomEditing") && interactivity !== "read-only";
   React.useEffect(() => {
     if (!editEnabled) {
       setChoosingCandidate(false);
@@ -141,9 +143,12 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
             </Button>
           )}
           {!editEnabled && (
-            <Typography variant="caption">
-              {possibilities.length} candidate{possibilities.length > 1 && "s"}
-            </Typography>
+            <Stack sx={{ p: 1, width: "100%" }} alignItems="center">
+              <Typography>
+                {possibilities.length} candidate
+                {possibilities.length > 1 && "s"}
+              </Typography>
+            </Stack>
           )}
         </Stack>
       )}

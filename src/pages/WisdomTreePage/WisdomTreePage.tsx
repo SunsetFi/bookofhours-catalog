@@ -1,6 +1,13 @@
 import React from "react";
 
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 import { useDIDependency } from "@/container";
 
@@ -12,6 +19,7 @@ import PageContainer from "@/components/PageContainer";
 
 import WisdomNodeSlot from "./components/WisdomNodeSlot";
 import AspectIcon from "@/components/Aspects/AspectIcon";
+import { SettingsManager, useSetting } from "@/services/settings";
 
 interface WisdomDef {
   name: string;
@@ -88,7 +96,6 @@ const WisdomTreePage = () => {
           <CircularProgress color="inherit" />
         </Box>
       )}
-
       {nodes && (
         <Stack
           sx={{ width: "100%", height: "100%", pl: 2 }}

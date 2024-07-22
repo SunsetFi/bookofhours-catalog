@@ -72,6 +72,11 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
     onClose();
   }, [saveManager, onClose]);
 
+  const onSettings = React.useCallback(() => {
+    settingsManager.openSettingsDialog();
+    onClose();
+  }, [settingsManager, onClose]);
+
   return (
     <Popover open={anchorEl != null} anchorEl={anchorEl} onClose={onClose}>
       <List sx={{ width: 250 }}>
@@ -98,9 +103,7 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
         <Divider />
         <ListItemButton onClick={onNewGame}>New Game</ListItemButton>
         <Divider />
-        <ListItemButton onClick={() => settingsManager.openSettingsDialog()}>
-          Settings
-        </ListItemButton>
+        <ListItemButton onClick={onSettings}>Settings</ListItemButton>
       </List>
     </Popover>
   );

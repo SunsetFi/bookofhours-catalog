@@ -25,7 +25,7 @@ export interface SettingData {
 export type Setting = keyof SettingData;
 
 const DefaultSettings: SettingData = {
-  interactivity: "full",
+  interactivity: "read-only",
   enableWisdomEditing: false,
 };
 
@@ -35,7 +35,7 @@ const LocalStorageKey = "settings";
 @singleton()
 @provides(Initializable)
 export class SettingsManager implements Initializable {
-  private readonly _firstSetup = new BehaviorSubject<boolean>(false);
+  private readonly _firstSetup$ = new BehaviorSubject<boolean>(false);
   private readonly _settings = new Map<
     keyof SettingData,
     BehaviorSubject<any>
@@ -50,6 +50,10 @@ export class SettingsManager implements Initializable {
   onInitialize(): void {
     const settingsStr = window.localStorage.getItem(LocalStorageKey);
 
+    if (settingsStr) {
+      this._firstSetup$.next(true);
+    }
+
     const settings: SettingData = {
       ...DefaultSettings,
       ...JSON.parse(settingsStr ?? "{}"),
@@ -58,8 +62,6 @@ export class SettingsManager implements Initializable {
     for (const key of Object.keys(DefaultSettings) as (keyof SettingData)[]) {
       this._settings.set(key, new BehaviorSubject(settings[key]));
     }
-
-    this._firstSetup.next(true);
   }
 
   openSettingsDialog() {
