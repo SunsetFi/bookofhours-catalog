@@ -16,32 +16,24 @@ Additionally, it can interact with the game and perform various actions:
 
 A significant focus is being put on screen reader compatibility, with the ultimate goal of providing enough control over the game for an entirely screen reader assisted playthrough of the game. To this end, this project has ambitions to be an entire new UI into all aspects of the game. For more information, see [Accessibility and Screen Reader Support](#accessibility--screen-reader-support).
 
-## Dependencies
+## Installation
 
-This project requires [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) to be installed in Book of Hours. Without it, this project cannot access the game engine and will be unable
-to display any data.
+You can find bundled packages for this mod on the [Releases](https://github.com/SunsetFi/bookofhours-catalog/releases).
 
-## Building the project
+This project provides two zip files depending on your situation:
 
-This project uses [NodeJS](https://nodejs.org) as a build engine.
+- If you have already installed BepInEx:
+  - Download Hush.House.Catalogue.BepInEx.Plugin.zip
+  - Extract the zip file into Book of Hours/BepInEx/plugins
+- If you have never installed BepInEx:
+  - Download Hush.House.Catalogue.Quickstart.zip
+  - Extract the zip file into the Book of Hours root directory.
 
-Once installed, the project dependencies can be installed with `npm install`, and the project itself can be built with `npm run build`.
-
-## How to run
-
-This project can be ran in one of two ways:
-
-### From the dev server
-
-Run `npm start` in the root folder of the project to compile and run the webapp. It will then be available at `http://localhost:8080/catalogue`
-
-### From the Secret Histories API
-
-Once built, the project contents should be placed into the `/web-content/catalogue` folder of the Secret Histories API mod. This will cause the API to run the website on your local PC. Once done, the catalogue can be accessed from `http://localhost:8081/catalogue` while the game is running.
-
-## Notes on Usage
+## Usage
 
 This project is best used in the browser of your choice while the game runs in windowed mode. However, the website can also be accessed from the Steam Overlay if you prefer to run the game in fullscreen.
+
+Regardless of the method you use, once the game is running, the interface will be available in your browser at http://localhost:8081/catalogue.
 
 ## Features
 
@@ -401,8 +393,33 @@ Displays comforts and wall art around the house. This is an esoteric assortment 
 - Type (comfort or wall art)
 - Description
 
+## Building and Development
+
+### Dependencies
+
+This project requires [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) to be installed in Book of Hours. Without it, this project cannot access the game engine and will be unable
+to display any data.
+
+### Building the project
+
+This project uses [NodeJS](https://nodejs.org) as a build engine.
+
+Once installed, the project dependencies can be installed with `npm install`, and the project itself can be built with `npm run build`.
+
+### How to run locally
+
+This project can be ran in one of two ways:
+
+#### From the dev server
+
+Run `npm start` in the root folder of the project to compile and run the webapp. It will then be available at `http://localhost:8080/catalogue`
+
+#### From the Secret Histories API
+
+Once built, the project contents should be placed into the `/web-content/catalogue` folder of the Secret Histories API mod. This will cause the API to run the website on your local PC. Once done, the catalogue can be accessed from `http://localhost:8081/catalogue` while the game is running.
+
 ## Known Issues
 
 - Accessibility
-  - Firefox and Windows Narrator both struggle on the tables. NVDA with Chrome seems much more pleasent when navigating the data tables.
-  - In particular Narrator does not read out row or column headers in the table.
+  - Windows Narrator struggles with tables.
+  - NVDA often reads labels twice on Chrome
