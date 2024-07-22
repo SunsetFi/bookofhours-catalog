@@ -16,6 +16,16 @@ Additionally, it can interact with the game and perform various actions:
 
 A significant focus is being put on screen reader compatibility, with the ultimate goal of providing enough control over the game for an entirely screen reader assisted playthrough of the game. To this end, this project has ambitions to be an entire new UI into all aspects of the game. For more information, see [Accessibility and Screen Reader Support](#accessibility--screen-reader-support).
 
+## Demos
+
+### Unlocking skills and Crafting
+
+[https://youtu.be/CPCxDRMBN-E](https://youtu.be/CPCxDRMBN-E)
+
+### Starting the game
+
+[https://youtu.be/hzrwvGxUAKM](https://youtu.be/hzrwvGxUAKM)
+
 ## Installation
 
 This project provides two zip files depending on your situation:
@@ -408,7 +418,7 @@ Displays comforts and wall art around the house. This is an esoteric assortment 
 
 ### Dependencies
 
-This project requires [Secret Histories API](https://github.com/RoboPhred/secrethistories-api/tree/main/SHRestAPI) to be installed in Book of Hours. Without it, this project cannot access the game engine and will be unable
+This project requires [Secret Histories API](https://github.com/SunsetFi/secrethistories-api-mod/) to be installed in Book of Hours. Without it, this project cannot access the game engine and will be unable
 to display any data.
 
 ### Building the project
