@@ -4,9 +4,16 @@ import checker from "vite-plugin-checker";
 import svgr from "vite-plugin-svgr";
 
 const NamedChunks = {
-  react: ["react", "react-dom"],
-  material: ["@emotion/styled", "@mui/material", "@mui/icons-material"],
-  rxjs: ["rxjs", "scheduler"],
+  // These packages can create cirular references, so we need to give them their own files
+  shared: ["scheduler", "loose-envify", "js-tokens", "object-assign"],
+  "css-utils": ["clsx", "csstype"],
+  "babel-runtime": ["@babel/runtime"],
+  // End circular reference group
+  react: ["react", "react-dom", "react-is", "prop-types"],
+  emotion: ["@emotion"],
+  // Circular references in here...
+  mui: ["@mui", "@popperjs/core"],
+  rxjs: ["rxjs"],
   lodash: ["lodash"],
 };
 
@@ -26,26 +33,25 @@ export default defineConfig({
     },
   },
 
-  // FIXME: This breaks production build with a cryptic error message.
-  // build: {
-  //   rollupOptions: {
-  //     output: {
-  //       manualChunks: (id) => {
-  //         if (id.includes("/node_modules/")) {
-  //           // Check explicit groups
-  //           for (const [name, modules] of Object.entries(NamedChunks)) {
-  //             if (modules.some((x) => id.includes(`/node_modules/${x}/`))) {
-  //               return name;
-  //             }
-  //           }
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("/node_modules/")) {
+            // Check explicit groups
+            for (const [name, modules] of Object.entries(NamedChunks)) {
+              if (modules.some((x) => id.includes(`/node_modules/${x}/`))) {
+                return name;
+              }
+            }
 
-  //           // Everything else from node_modules is vendor
-  //           return "vendor";
-  //         }
-  //       },
-  //     },
-  //   },
-  // },
+            // Everything else from node_modules is vendor
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
 
   server: {
     port: 8080,
