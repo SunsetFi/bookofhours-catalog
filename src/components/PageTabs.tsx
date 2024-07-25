@@ -1,15 +1,18 @@
 import React from "react";
 import { useLocation } from "react-router";
 import { Link } from "react-router-dom";
-
 import {
   Divider,
   Box,
   Tooltip,
   Typography,
   Link as MuiLink,
+  SvgIcon,
+  IconButton,
 } from "@mui/material";
 import { GitHub as GithubIcon } from "@mui/icons-material";
+
+import SixthHistoryIcon from "@/assets/icons/sixthhistory.svg?react";
 
 import sitemap, {
   SiteMapNavItem,
@@ -17,8 +20,11 @@ import sitemap, {
   isSiteMapDividerItem,
   isSiteMapNavItem,
 } from "@/sitemap";
+import LicenseDialog from "./LicenseDialog";
 
 const PageTabs = () => {
+  const [licenseOpen, setLicenseOpen] = React.useState(false);
+
   return (
     <Box
       component="nav"
@@ -47,19 +53,40 @@ const PageTabs = () => {
           return null;
         }
       })}
-      <Box sx={{ mt: "auto" }}>
-        <Tooltip
-          title="View Project on Github"
-          PopperProps={{ sx: { pointerEvents: "none" }, placement: "right" }}
+      <Box sx={{ mt: "auto" }} />
+      <LicenseDialog open={licenseOpen} onClose={() => setLicenseOpen(false)} />
+      <Tooltip title="Released under the Sixth History License">
+        <IconButton
+          disableRipple
+          color="primary"
+          onClick={() => setLicenseOpen(true)}
         >
-          <MuiLink
-            href="https://github.com/SunsetFi/bookofhours-catalog"
-            target="_blank"
-          >
-            <GithubIcon fontSize="large" sx={{ mr: 1 }} />
-          </MuiLink>
-        </Tooltip>
-      </Box>
+          <SvgIcon
+            component={SixthHistoryIcon as React.ElementType}
+            sx={{
+              display: "block",
+            }}
+            alt="Sixth History License"
+            color="inherit"
+            fontSize="large"
+            viewBox="0 0 156 156"
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip
+        title="View Project on Github"
+        PopperProps={{ sx: { pointerEvents: "none" }, placement: "right" }}
+      >
+        <MuiLink
+          href="https://github.com/SunsetFi/bookofhours-catalog"
+          target="_blank"
+          sx={{
+            display: "block",
+          }}
+        >
+          <GithubIcon fontSize="large" />
+        </MuiLink>
+      </Tooltip>
     </Box>
   );
 };

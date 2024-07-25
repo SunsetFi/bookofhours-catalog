@@ -30,7 +30,7 @@
     "rimraf": "^3.0.0",
     "typescript": "^5.5.3",
     "vite": "^4.4.9",
-    "vite-plugin-checker": "^0.6.2"
+    "vite-plugin-checker": "^0.7.2"
   },
   "dependencies": {
     "@emotion/styled": "^11.8.1",
@@ -53,6 +53,7 @@
     "rxjs": "^7.5.5",
     "scheduler": "^0.23.0",
     "secrethistories-api": "^1.41.0",
-    "type-fest": "^2.13.0"
+    "type-fest": "^2.13.0",
+    "vite-plugin-svgr": "^4.2.0"
   }
 }
