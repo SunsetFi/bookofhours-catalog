@@ -32,16 +32,27 @@ This project provides two zip files depending on your situation:
 
 - If you have already installed BepInEx:
   - Download [Hush.House.Catalogue.BepInEx.Plugin.zip](https://github.com/SunsetFi/bookofhours-catalog/releases/download/1.0.0/Hush.House.Catalogue.BepInEx.Plugin.zip)
-  - Extract the zip file into Book of Hours/BepInEx/plugins
+  - Extract the zip file into `steamapps/common/Book of Hours/BepInEx/plugins`
 - If you have never installed BepInEx:
   - Download [Hush.House.Catalogue.Quickstart.zip](https://github.com/SunsetFi/bookofhours-catalog/releases/download/1.0.0/Hush.House.Catalogue.QuickStart.zip)
-  - Extract the zip file into the Book of Hours root directory.
+  - Extract the zip file into the `steamapps/common/Book of Hours` root directory.
+    - This should result in a BepInEx folder and a `winhttp.dll` file in your Book of Hours directory.
+    - You should NOT see a folder called "Hush.House.Catalogue.Quickstart" in your Book of Hours directory. Some zip tools will create this folder when extracting the zip. If you see this, copy the contents of that folder back into your Book of Hours folder, and delete the "Hush.House.Catalogue.Quickstart" folder afterwards.
 
 ## Usage
 
 This project is best used in the browser of your choice while the game runs in windowed mode. However, the website can also be accessed from the Steam Overlay if you prefer to run the game in fullscreen.
 
 Regardless of the method you use, once the game is running, the interface will be available in your browser at http://localhost:8081/catalogue.
+
+## Support
+
+If you are having issues getting this mod to work, support is offered in two places:
+
+- In the [Github Issues](https://github.com/SunsetFi/bookofhours-catalog/issues) page for this project.
+- In the [Cultist Simulator fan discord](https://discord.gg/KxyFTZkUbQ), by pinging me (SunsetFi) in the #mod-development channel.
+
+In order to diagnose issues, I will need the `Player.log` log file from your game. On Windows, this is found at `C:\Users\<username>\AppData\LocalLow\Weather Factory\Book of Hours\Player.log`
 
 ### Interactivity Features
 
