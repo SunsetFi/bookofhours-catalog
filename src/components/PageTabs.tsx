@@ -37,7 +37,7 @@ const PageTabs = () => {
         backgroundImage:
           "linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04))",
         height: "100%",
-        p: 2,
+        p: 1,
       }}
     >
       {sitemap.map((item, i) => {
