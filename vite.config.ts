@@ -11,7 +11,6 @@ const NamedChunks = {
   // End circular reference group
   react: ["react", "react-dom", "react-is", "prop-types"],
   emotion: ["@emotion"],
-  // Circular references in here...
   mui: ["@mui", "@popperjs/core"],
   rxjs: ["rxjs"],
   lodash: ["lodash"],

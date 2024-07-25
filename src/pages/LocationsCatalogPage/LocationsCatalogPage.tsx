@@ -40,6 +40,7 @@ import {
 } from "@/components/ObservableDataGrid/constants";
 import AspectsList from "@/components/Aspects/AspectsList";
 import DataGridPage from "@/components/DataGridPage";
+import { useSetting } from "@/services/settings";
 
 const columnHelper = createObservableColumnHelper<ConnectedTerrainModel>();
 
@@ -102,6 +103,7 @@ const LocationsCatalogPage = () => {
             );
           },
           cell: (props) => {
+            const interactivity = useSetting("interactivity");
             const unlocker = useDIDependency(TerrainUnlocker);
             const [shrouded, unlockEssentials, unlockRequirements] =
               props.getValue();
@@ -114,12 +116,15 @@ const LocationsCatalogPage = () => {
                   spacing={1}
                   sx={{ width: "100%" }}
                 >
-                  <IconButton
-                    onClick={() => unlocker.open(props.row.original)}
-                    aria-label="Unlock"
-                  >
-                    <LockIcon />
-                  </IconButton>
+                  {interactivity === "read-only" && <LockIcon />}
+                  {interactivity !== "read-only" && (
+                    <IconButton
+                      onClick={() => unlocker.open(props.row.original)}
+                      aria-label="Unlock"
+                    >
+                      <LockIcon />
+                    </IconButton>
+                  )}
                   <Stack direction="column" spacing={1} sx={{ width: "100%" }}>
                     <AspectsList aspects={unlockEssentials} />
                     <AspectsList aspects={unlockRequirements} />
