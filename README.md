@@ -462,4 +462,4 @@ Once built, the project contents should be placed into the `/web-content/catalog
 
 <img src="/src/assets/icons/sixthhistory.svg" align="left" width="150" height="150">
 
-Hush House Catalogue is an independent work by SunsetFi and is not affiliated with Weather Factory Ltd, Secret Histories or any related official content. It is published under Weather Factory’s Sixth History Community Licence.
+Hush House Catalogue is an independent work by SunsetFi and is not affiliated with Weather Factory Ltd, Secret Histories or any related official content. It is published under Weather Factory’s Sixth History Community License.
