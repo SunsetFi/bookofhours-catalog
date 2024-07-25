@@ -2,7 +2,7 @@
 
 This is a spoiler-free, automatically populating webapp that adds searching, sorting, and filtering capabilities to [Book of Hours](https://store.steampowered.com/app/1028310/BOOK_OF_HOURS/). It connects directly to the game, allowing it to always be fully up to date as gameplay progresses, and providing the ability to interact with the game itself.
 
-![ALT](/preview/preview.png)
+![Hush House Catalogue](/preview/preview.png)
 
 It has been designed to provide an automatic spreadsheet, akin to those we might make manually while playing the game. It can additionally interact with the game engine itself, to queue up recipes or focus the camera on in-game items.
 
@@ -457,3 +457,9 @@ Once built, the project contents should be placed into the `/web-content/catalog
 - Accessibility
   - Windows Narrator struggles with tables.
   - NVDA often reads labels twice on Chrome
+
+## License
+
+<img src="/src/assets/icons/sixthhistory.svg" width="150" height="150">
+
+Hush House Catalogue is an independent work by SunsetFi and is not affiliated with Weather Factory Ltd, Secret Histories or any related official content. It is published under Weather Factory’s Sixth History Community Licence.
