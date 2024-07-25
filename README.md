@@ -45,15 +45,6 @@ This project is best used in the browser of your choice while the game runs in w
 
 Regardless of the method you use, once the game is running, the interface will be available in your browser at http://localhost:8081/catalogue.
 
-## Support
-
-If you are having issues getting this mod to work, support is offered in two places:
-
-- In the [Github Issues](https://github.com/SunsetFi/bookofhours-catalog/issues) page for this project.
-- In the [Cultist Simulator fan discord](https://discord.gg/KxyFTZkUbQ), by pinging me (SunsetFi) in the #mod-development channel.
-
-In order to diagnose issues, I will need the `Player.log` log file from your game. On Windows, this is found at `C:\Users\<username>\AppData\LocalLow\Weather Factory\Book of Hours\Player.log`
-
 ### Interactivity Features
 
 By default, the Catalogue will run in a read-only mode. This lets it act as a reference without actually having any effect on the operations of the game.
@@ -66,6 +57,15 @@ When enababled, there are two options for how much interactivity to provide:
 
 - Minimal mode lets you control verbs and workstations and start recipes through the Activites Panel, but provides no help in doing so. To run a recipe, you need to choose the workstation and cards to do so.
 - Full mode adds automatic recipe execution for things like reading books and crafting items from skills. With this mode, the Catalogue provides the option of automatically choosing an appropriate workstation and slotting the appropriate cards for crafting the recipe. It should be noted that the only crafting recipes it will let you autocomplete are the recipes you have already discovered and unlocked on your own.
+
+## Support
+
+If you are having issues getting this mod to work, support is offered in two places:
+
+- In the [Github Issues](https://github.com/SunsetFi/bookofhours-catalog/issues) page for this project.
+- In the [Cultist Simulator fan discord](https://discord.gg/KxyFTZkUbQ), by pinging me (SunsetFi) in the #mod-development channel.
+
+In order to diagnose issues, I will need the `Player.log` log file from your game. On Windows, this is found at `C:\Users\<username>\AppData\LocalLow\Weather Factory\Book of Hours\Player.log`
 
 ## Features
 
