@@ -460,6 +460,6 @@ Once built, the project contents should be placed into the `/web-content/catalog
 
 ## License
 
-<img src="/src/assets/icons/sixthhistory.svg" align="left" width="150" height="150">
+<img src="/src/assets/icons/sixthhistory.svg" align="left" width="75" height="75">
 
 Hush House Catalogue is an independent work by SunsetFi and is not affiliated with Weather Factory Ltd, Secret Histories or any related official content. It is published under Weather Factory’s Sixth History Community License.
