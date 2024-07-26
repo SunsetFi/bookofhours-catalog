@@ -113,7 +113,7 @@ const LocationsCatalogPage = () => {
                 <Stack
                   direction="row"
                   alignItems="center"
-                  spacing={1}
+                  spacing={2}
                   sx={{ width: "100%" }}
                 >
                   {interactivity === "read-only" && <LockIcon />}

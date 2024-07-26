@@ -10,14 +10,25 @@ import {
   map,
   switchMap,
   shareReplay,
+  combineLatest,
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
-import { Null$, mapArrayItemsCached } from "@/observables";
+import {
+  Null$,
+  filterItemObservations,
+  mapArrayItemsCached,
+  observeAllMap,
+} from "@/observables";
 import { useDIContainer } from "@/container";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
-import { CharacterSource, Orchestrator } from "@/services/sh-game";
+import {
+  CharacterSource,
+  filterHasAnyAspect,
+  Orchestrator,
+  TokensSource,
+} from "@/services/sh-game";
 
 export interface CraftableModel {
   id: string;
@@ -79,6 +90,10 @@ function recipeToCraftableModel(
     description$: recipeModel.startDescription$,
     craft: async () => {
       const skill = await firstValueFrom(skill$);
+      if (!skill) {
+        return;
+      }
+
       orchestrator.openOrchestration({
         recipeId: recipeModel.recipeId,
         desiredElementIds: skill ? [skill.elementId] : [],
@@ -93,11 +108,32 @@ export function getCraftablesObservable(
   const compendium = container.get(Compendium);
   const orchestrator = container.get(Orchestrator);
   const characterSource = container.get(CharacterSource);
+  const tokensSource = container.get(TokensSource);
 
-  return characterSource.ambittableRecipes$.pipe(
-    mapArrayItemsCached((item) =>
-      recipeToCraftableModel(item, compendium, orchestrator)
-    )
+  // FIXME: Only show craftables that the player still has the skill for
+  const skillIds$ = React.useMemo(
+    () =>
+      tokensSource.visibleElementStacks$.pipe(
+        filterHasAnyAspect("skill"),
+        observeAllMap((s) => s.elementId$)
+      ),
+    [tokensSource.visibleElementStacks$]
+  );
+
+  return skillIds$.pipe(
+    switchMap((skills) => {
+      return characterSource.ambittableRecipes$.pipe(
+        // The skill might have been removed with Numa, so we need to remove recipes that dont have matching skills
+        filterItemObservations((item) =>
+          item.requirements$.pipe(
+            map((reqs) => Object.keys(reqs).some((req) => skills.includes(req)))
+          )
+        ),
+        mapArrayItemsCached((item) =>
+          recipeToCraftableModel(item, compendium, orchestrator)
+        )
+      );
+    })
   );
 }
 
