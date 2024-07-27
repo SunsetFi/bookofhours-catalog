@@ -4,6 +4,7 @@
 
 - Fix unlocking rooms appearing twice in the orchestration list.
 - Fix orchestration list showing "." for current recipe name in some cases.
+- Add "Period" to books page.
 
 ## 1.0.1
 
