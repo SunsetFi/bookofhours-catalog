@@ -1,7 +1,7 @@
 {
   "name": "bookofhours-catalog",
   "version": "1.0.1",
-  "description": "Frontend for various Book of Hours experiments",
+  "description": "Web frontend for Book of Hours",
   "scripts": {
     "clean": "rimraf dist",
     "postinstall": "rimraf node_modules/.vite",

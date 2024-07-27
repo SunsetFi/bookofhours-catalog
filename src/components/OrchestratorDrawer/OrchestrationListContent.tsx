@@ -124,10 +124,10 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
   const orchestrator = useDIDependency(Orchestrator);
 
   const timeSource = useDIDependency(TimeSource);
-  const label = useObservation(situation.verbLabel$);
+  const verbLabel = useObservation(situation.verbLabel$);
   // Some recipes have ".", which presumably means it inherits from something else.
   // What that is, I don't know, but the 'label' property is correct.
-  const recipeLabel = useObservation(situation.label$);
+  const situationLabel = useObservation(situation.label$);
   const state = useObservation(situation.state$);
   const output = useObservation(situation.output$) ?? [];
 
@@ -238,7 +238,8 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
     return null;
   }
 
-  const hasLabel = label !== "." && label !== situation.verbId;
+  const hasVerbLabel = verbLabel !== "." && verbLabel !== situation.verbId;
+  const hasSituationLabel = state !== "Unstarted";
 
   return (
     <ListItemButton
@@ -258,8 +259,12 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
       <ListItemText
         id={`situation-${situation.id}-label`}
         sx={{ ml: isFixed ? 0 : 1 }}
-        primary={!hasLabel ? recipeLabel : label}
-        secondary={!hasLabel ? null : recipeLabel}
+        primary={!hasVerbLabel ? situationLabel : verbLabel}
+        // This looks a little funny, to have situationLabel down here twice,
+        // but this SHOULD be recipeLabel, only recipeLabel is sometimes ".",
+        // im not sure what it resolves to in that case, and the situation label
+        // correctly reflects the recipe in this case.
+        secondary={state === "Unstarted" ? null : situationLabel}
       />
       <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
         {state === "Unstarted" && (
