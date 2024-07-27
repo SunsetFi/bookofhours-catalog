@@ -41,6 +41,12 @@ const BookCatalogPage = () => {
       columnHelper.elementStackIcon(),
       columnHelper.label(),
       columnHelper.location(),
+      columnHelper.aspectsList("period", (s) => s.startsWith("period."), {
+        size: 125,
+        header: "Period",
+        showLevel: false,
+        enableSorting: false,
+      }),
       columnHelper.aspectsList("mystery", (s) => s.startsWith("mystery."), {
         header: "Mystery",
         size: 175,
