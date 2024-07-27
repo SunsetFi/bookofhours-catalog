@@ -125,7 +125,9 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
 
   const timeSource = useDIDependency(TimeSource);
   const label = useObservation(situation.verbLabel$);
-  const recipeLabel = useObservation(situation.recipeLabel$);
+  // Some recipes have ".", which presumably means it inherits from something else.
+  // What that is, I don't know, but the 'label' property is correct.
+  const recipeLabel = useObservation(situation.label$);
   const state = useObservation(situation.state$);
   const output = useObservation(situation.output$) ?? [];
 

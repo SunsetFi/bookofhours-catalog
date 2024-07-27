@@ -233,6 +233,8 @@ export class TokensSource {
     if (!this._unlockedWorkstations$) {
       this._unlockedWorkstations$ = this._visibleTokens$.pipe(
         filterItems(isSituationModel),
+        // We also get RoomWorkSituation, which is the room unlocker.
+        filterItems((x) => x.payloadType === "WorkstationSituation"),
         filterTokenInPath("~/library"),
         map((situations) =>
           situations.filter(
