@@ -32,10 +32,10 @@ This project provides two zip files depending on your situation:
 
 - If you have already installed BepInEx:
   - Download `Hush.House.Catalogue.BepInEx.Plugin.zip` from the [Releases](https://github.com/SunsetFi/bookofhours-catalog/releases) page.
-  - Extract the zip file into `steamapps/common/Book of Hours/BepInEx/plugins`
+  - Copy the contents of the zip file into `steamapps/common/Book of Hours/BepInEx/plugins`
 - If you have never installed BepInEx:
   - Download `Hush.House.Catalogue.Quickstart.zip` from the [Releases](https://github.com/SunsetFi/bookofhours-catalog/releases) page.
-  - Extract the zip file into the `steamapps/common/Book of Hours` root directory.
+  - Copy the contents of the zip file into the `steamapps/common/Book of Hours` root directory.
     - This should result in a BepInEx folder and a `winhttp.dll` file in your Book of Hours directory.
     - You should NOT see a folder called "Hush.House.Catalogue.Quickstart" in your Book of Hours directory. Some zip tools will create this folder when extracting the zip. If you see this, copy the contents of that folder back into your Book of Hours folder, and delete the "Hush.House.Catalogue.Quickstart" folder afterwards.
 
