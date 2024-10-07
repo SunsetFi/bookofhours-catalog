@@ -111,13 +111,9 @@ export function getCraftablesObservable(
   const tokensSource = container.get(TokensSource);
 
   // FIXME: Only show craftables that the player still has the skill for
-  const skillIds$ = React.useMemo(
-    () =>
-      tokensSource.visibleElementStacks$.pipe(
-        filterHasAnyAspect("skill"),
-        observeAllMap((s) => s.elementId$)
-      ),
-    [tokensSource.visibleElementStacks$]
+  const skillIds$ = tokensSource.visibleElementStacks$.pipe(
+    filterHasAnyAspect("skill"),
+    observeAllMap((s) => s.elementId$)
   );
 
   return skillIds$.pipe(
