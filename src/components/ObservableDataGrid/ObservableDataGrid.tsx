@@ -67,7 +67,7 @@ export interface ObservableDataGridProps<T extends {}> {
 
 const initialState: InitialTableState = {
   pagination: {
-    pageSize: 25,
+    pageSize: 10,
   },
 };
 
