@@ -51,14 +51,6 @@ export function useObservation<T>(
   const subscriptionRef = React.useRef<null | { unsubscribe(): void }>(null);
 
   if (subscribedObservableRef.current !== observable$) {
-    if (hasMountedRef.current) {
-      console.error(
-        "Changing observable on a mounted component",
-        new Error().stack
-      );
-    }
-    if (profileName)
-      console.log("Observation changing observable", profileName);
     if (subscriptionRef.current) {
       subscriptionRef.current.unsubscribe();
       subscriptionRef.current = null;
@@ -67,8 +59,6 @@ export function useObservation<T>(
   }
 
   if (subscriptionRef.current == null) {
-    if (profileName)
-      console.log("Observation subscribing to observable", profileName);
     let seenFirstValue = false;
     const start = Date.now();
     const sub = observable$.subscribe({
@@ -84,17 +74,12 @@ export function useObservation<T>(
               "s"
             );
         }
-        if (profileName) console.log("Observation got value", value);
 
         if (!hasMountedRef.current) {
-          if (profileName)
-            console.log("Setting initial render value", profileName);
           initialValueRef.current = value;
           return;
         }
 
-        if (profileName)
-          console.log("Setting statefull render value", profileName);
         initialValueRef.current = undefined;
         setValue(value);
       },
@@ -133,22 +118,3 @@ function factoryToObservable<T>(
 
   return observable.pipe(publishOn(scheduler));
 }
-
-// function factoryToObservableResource<T>(
-//   factory: Observable<T> | (() => Observable<T>),
-//   scheduler: SchedulerLike
-// ): ObservableResource<T> {
-//   let observable: Observable<T>;
-//   if (typeof factory === "function") {
-//     observable = factory();
-//   } else {
-//     observable = factory;
-//   }
-
-//   return new ObservableResource(
-//     observable.pipe(
-//       publishOn(scheduler),
-//       tap((v) => console.log("Observable got value", v))
-//     )
-//   );
-// }

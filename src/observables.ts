@@ -249,3 +249,37 @@ export function publishOn(scheduler: SchedulerLike) {
     });
   };
 }
+
+export function delayFirstValue(delay: number) {
+  return <T>(source: Observable<T>): Observable<T> => {
+    return new Observable<T>((subscriber) => {
+      let firstValue: T | undefined;
+      let emittedFirstValue = false;
+      let createdTimeout = false;
+      const subscription = source.subscribe({
+        next: (value) => {
+          if (emittedFirstValue) {
+            subscriber.next(value);
+            return;
+          }
+
+          firstValue = value;
+
+          if (!createdTimeout) {
+            createdTimeout = true;
+            setTimeout(() => {
+              if (firstValue !== undefined) {
+                subscriber.next(firstValue);
+              }
+              emittedFirstValue = true;
+            }, delay);
+          }
+        },
+        error: (err) => subscriber.error(err),
+        complete: () => subscriber.complete(),
+      });
+
+      return () => subscription.unsubscribe();
+    });
+  };
+}

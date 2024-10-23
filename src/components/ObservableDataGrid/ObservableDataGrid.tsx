@@ -37,7 +37,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { Null$, observeAllMap } from "@/observables";
+import { delayFirstValue, Null$, observeAllMap } from "@/observables";
 import { decorateObjectInstance } from "@/object-decorator";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -135,7 +135,11 @@ function ObservableDataGrid<T extends {}>({
       items$.pipe(
         observeAllMap((item, index) =>
           itemToRow(item, index, columns, getItemKey)
-        )
+        ),
+        // Our data is huge and takes a while to render,
+        // so make the whole app more performant by waiting to render the first value
+        // until after the first render.
+        delayFirstValue(1)
       ),
     [items$, columns],
     {
