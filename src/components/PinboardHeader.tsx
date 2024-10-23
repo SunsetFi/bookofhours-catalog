@@ -24,8 +24,9 @@ export interface PinboardHeaderProps {
 
 const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
   const pinboard = useDIDependency(Pinboard);
-  const recipeLabel = useObservation(() =>
-    pinboard.pinnedRecipe$.pipe(switchMapIfNotNull((r) => r.label$))
+  const recipeLabel = useObservation(
+    () => pinboard.pinnedRecipe$.pipe(switchMapIfNotNull((r) => r.label$)),
+    [pinboard.pinnedRecipe$]
   );
   const pins = useObservation(pinboard.pins$) ?? [];
   const aspects = useObservation(pinboard.pinnedAspects$) ?? {};

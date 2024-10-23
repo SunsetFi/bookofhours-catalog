@@ -12,9 +12,10 @@ import {
   Stack,
   SxProps,
   TextField,
+  Skeleton,
 } from "@mui/material";
 
-import { EmptyArray$, filterItemObservations } from "@/observables";
+import { filterItemObservations } from "@/observables";
 
 import { AspectModel, useAspects } from "@/services/sh-compendium";
 
@@ -65,10 +66,14 @@ const AspectsMultiSelectList: React.FC<AspectsMultiSelectListProps> = ({
           itemModels$.pipe(
             filterItemObservations((item) =>
               item.label$.pipe(
-                map(
-                  (label) =>
-                    label?.toLowerCase().includes(search.toLowerCase()) ?? false
-                )
+                map((label) => {
+                  if (!label) {
+                    // Let null labels through so we show the skeletons
+                    return true;
+                  }
+
+                  return label.toLowerCase().includes(search.toLowerCase());
+                })
               )
             )
           )
@@ -128,7 +133,7 @@ const AspectsMultiSelectItem: React.FC<AspectsMultiSelectItemProps> = ({
   const label = useObservation(aspect.label$);
 
   if (!label) {
-    return null;
+    return <Skeleton variant="rectangular" width="100%" height="50px" />;
   }
 
   return (

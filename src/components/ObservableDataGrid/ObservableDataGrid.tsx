@@ -400,17 +400,15 @@ const ObservableTableHeader = React.memo(
   }
 );
 
-const ObservableTableRow = React.memo(
-  ({ row }: { row: Row<Record<string, any>> }) => {
-    return (
-      <TableRow>
-        {row.getVisibleCells().map((cell) => (
-          <ObservableTableCell key={cell.id} cell={cell} />
-        ))}
-      </TableRow>
-    );
-  }
-);
+const ObservableTableRow = ({ row }: { row: Row<Record<string, any>> }) => {
+  return (
+    <TableRow>
+      {row.getVisibleCells().map((cell) => (
+        <ObservableTableCell key={cell.id} cell={cell} />
+      ))}
+    </TableRow>
+  );
+};
 
 const ObservableTableCell = ({
   cell,

@@ -115,9 +115,11 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
           zIndex: 2000,
         }}
       >
-        <Box id={`${id}-tooltip`} ref={setContentRef}>
-          {title}
-        </Box>
+        {open && (
+          <Box id={`${id}-tooltip`} ref={setContentRef}>
+            {title}
+          </Box>
+        )}
       </Popper>
     </>
   );

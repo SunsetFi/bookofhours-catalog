@@ -16,7 +16,7 @@ export interface UseObservationOpts {
 export function useObservation<T>(observable: Observable<T>): T | undefined;
 export function useObservation<T>(
   factory: () => Observable<T>,
-  deps?: any[],
+  deps: any[],
   opts?: UseObservationOpts
 ): T | undefined;
 export function useObservation<T>(
@@ -26,28 +26,49 @@ export function useObservation<T>(
 ) {
   const scheduler = useDIDependency(BatchingScheduler);
 
-  // It turns out using suspense is unworkable because we rely on hooks to get the promise.
-  // Suspense only works with exterior resources.
-  // Technically, all of our stuff is exterior resources in our container,
-  // but we often create observables on the fly using hooks.
-  // const factory = React.useMemo(
-  //   () => factoryToObservableResource(observableOrFactory, scheduler),
-  //   deps ? [...deps] : [observableOrFactory]
-  // );
-
-  // return useObservableSuspense(factory);
-
   const observable$ = React.useMemo(
     () => factoryToObservable(observableOrFactory, scheduler),
     deps ? [...deps] : [observableOrFactory]
   );
 
+  // Do this in realtime, don't mess about with effects.
+  // This will get us the value for the very first render, if one is available.
+
   const [value, setValue] = React.useState<T | undefined>(undefined);
   const [err, setError] = React.useState<any>(null);
 
-  // Using LayoutEffect guarentees we get a value before render.
-  // This is useful when we know the observable is warmed up and we want the value on the very first render.
-  React.useLayoutEffect(() => {
+  const initialValueRef = React.useRef<T | undefined>(undefined);
+
+  const hasMountedRef = React.useRef(false);
+  React.useEffect(() => {
+    hasMountedRef.current = true;
+    return () => {
+      hasMountedRef.current = false;
+    };
+  }, []);
+
+  const subscribedObservableRef = React.useRef<Observable<T> | null>(null);
+  const subscriptionRef = React.useRef<null | { unsubscribe(): void }>(null);
+
+  if (subscribedObservableRef.current !== observable$) {
+    if (hasMountedRef.current) {
+      console.error(
+        "Changing observable on a mounted component",
+        new Error().stack
+      );
+    }
+    if (profileName)
+      console.log("Observation changing observable", profileName);
+    if (subscriptionRef.current) {
+      subscriptionRef.current.unsubscribe();
+      subscriptionRef.current = null;
+    }
+    subscribedObservableRef.current = observable$;
+  }
+
+  if (subscriptionRef.current == null) {
+    if (profileName)
+      console.log("Observation subscribing to observable", profileName);
     let seenFirstValue = false;
     const start = Date.now();
     const sub = observable$.subscribe({
@@ -64,18 +85,39 @@ export function useObservation<T>(
             );
         }
         if (profileName) console.log("Observation got value", value);
+
+        if (!hasMountedRef.current) {
+          if (profileName)
+            console.log("Setting initial render value", profileName);
+          initialValueRef.current = value;
+          return;
+        }
+
+        if (profileName)
+          console.log("Setting statefull render value", profileName);
+        initialValueRef.current = undefined;
         setValue(value);
       },
       error: onError ?? setError,
     });
-    return () => sub.unsubscribe();
-  }, [observable$, onError]);
+
+    subscriptionRef.current = sub;
+  }
+
+  React.useEffect(() => {
+    return () => {
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
+      }
+    };
+  }, []);
 
   if (err) {
     throw err;
   }
 
-  return value;
+  return initialValueRef.current ?? value;
 }
 
 function factoryToObservable<T>(

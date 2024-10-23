@@ -32,11 +32,13 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
   );
 
   const secondsToNextEvent =
-    useObservation(() =>
-      tokensSource.visibleSituations$.pipe(
-        observeAllMap((s) => s.timeRemaining$),
-        map((seconds) => Math.max(...seconds.filter((x) => x > 0)))
-      )
+    useObservation(
+      () =>
+        tokensSource.visibleSituations$.pipe(
+          observeAllMap((s) => s.timeRemaining$),
+          map((seconds) => Math.max(...seconds.filter((x) => x > 0)))
+        ),
+      [tokensSource.visibleSituations$]
     ) ?? Number.NaN;
   const secondsToNextEventStr = secondsToNextEvent.toFixed(
     secondsToNextEvent > 60 ? 0 : 1
