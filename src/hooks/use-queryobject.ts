@@ -34,6 +34,10 @@ export function useQueryObjectState(): [
       const newParams = new URLSearchParams();
 
       for (const key in value) {
+        if (value[key] === undefined) {
+          continue;
+        }
+
         newParams.set(key, JSON.stringify(value[key]));
       }
 

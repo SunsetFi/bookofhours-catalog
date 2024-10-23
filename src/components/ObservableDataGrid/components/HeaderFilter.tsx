@@ -7,10 +7,12 @@ import { FilterAlt } from "@mui/icons-material";
 
 const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [open, setOpen] = React.useState(false);
+
   const onOpen = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    setAnchorEl(e.currentTarget);
+    setOpen(true);
   }, []);
 
   const filterActive =
@@ -35,6 +37,7 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
   return (
     <>
       <IconButton
+        ref={setAnchorEl}
         size="small"
         aria-label={`Filter ${filterActive ? "active" : "inactive"}`}
         onClick={onOpen}
@@ -47,27 +50,25 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
           }}
         />
       </IconButton>
-      {anchorEl && (
-        <Popover
-          open={true}
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          onClose={() => {
-            setAnchorEl(null);
-          }}
-        >
-          {anchorEl != null && (
-            <Filter
-              columnValues={uniqueValues}
-              filterValue={column.getFilterValue() ?? null}
-              onChange={column.setFilterValue}
-            />
-          )}
-        </Popover>
-      )}
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        onClose={() => {
+          setOpen(false);
+        }}
+      >
+        {open && (
+          <Filter
+            columnValues={uniqueValues}
+            filterValue={column.getFilterValue() ?? null}
+            onChange={column.setFilterValue}
+          />
+        )}
+      </Popover>
     </>
   );
 };

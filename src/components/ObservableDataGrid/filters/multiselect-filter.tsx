@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Row } from "@tanstack/react-table";
+
 import {
   Box,
   TextField,
@@ -15,15 +17,45 @@ import {
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 
 import { FilterComponentProps } from "./types";
+import { isEqual } from "lodash";
+import MultiValueFilterHeader from "./MultiValueFilterHeader";
+
+export type MultiSelectFilterValue<T> = {
+  values: T[];
+  mode: "any" | "none";
+};
 
 export interface MultiselectOptionsFilterProps<T>
-  extends FilterComponentProps<T[], T> {
+  extends FilterComponentProps<MultiSelectFilterValue<T>, T> {
   allowedValues: any[];
 }
 
-const defaultFilterValue: any[] = [];
+const defaultFilterValue: MultiSelectFilterValue<any> = {
+  values: [],
+  mode: "any",
+};
 
-export function MultiselectOptionsFilter<T>({
+export function multiSelectFilter(
+  row: Row<any>,
+  columnId: string,
+  filterValue: MultiSelectFilterValue<any>
+): boolean {
+  if (!filterValue || filterValue.values.length === 0) {
+    return true;
+  }
+
+  const currentValue = row.getValue(columnId) as string | number;
+  switch (filterValue.mode) {
+    case "any":
+      return filterValue.values.includes(currentValue);
+    case "none":
+      return !filterValue.values.includes(currentValue);
+  }
+
+  return false;
+}
+
+export function MultiselectFilter<T>({
   allowedValues,
   filterValue,
   onChange,
@@ -39,7 +71,53 @@ export function MultiselectOptionsFilter<T>({
     currentValue = defaultFilterValue as any;
   }
 
+  const mode = currentValue?.mode ?? "any";
+  const desiredValues = currentValue?.values ?? [];
+
+  const onModeChanged = React.useCallback(
+    (mode: "any" | "none") => {
+      const newFilter = {
+        mode,
+        values: desiredValues,
+      };
+
+      if (isEqual(newFilter, defaultFilterValue)) {
+        setLocalValue(null);
+      } else {
+        setLocalValue(newFilter);
+      }
+    },
+    [desiredValues, setLocalValue]
+  );
+
+  const onValuesChanged = React.useCallback(
+    (values: T[]) => {
+      const newFilter = {
+        mode,
+        values,
+      };
+      if (isEqual(newFilter, defaultFilterValue)) {
+        setLocalValue(null);
+      } else {
+        setLocalValue(newFilter);
+      }
+    },
+    [mode, setLocalValue]
+  );
+
+  const toggleValue = React.useCallback(
+    (value: T) => {
+      if (desiredValues.includes(value)) {
+        onValuesChanged(desiredValues.filter((v) => v !== value));
+      } else {
+        onValuesChanged([...desiredValues, value]);
+      }
+    },
+    [onValuesChanged, desiredValues]
+  );
+
   const [search, setSearch] = React.useState<string>("");
+
   return (
     <Box
       sx={{
@@ -48,26 +126,14 @@ export function MultiselectOptionsFilter<T>({
         height: "100%",
       }}
     >
-      <Box
-        sx={{
-          pt: 1,
-          px: 1,
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-        }}
-      >
-        <Button size="small" onClick={() => setLocalValue(null)}>
-          Clear
-        </Button>
-        <Button
-          size="small"
-          sx={{ pl: 1, ml: "auto" }}
-          onClick={() => setLocalValue(allowedValues)}
-        >
-          Select All
-        </Button>
-      </Box>
+      <MultiValueFilterHeader
+        sx={{ pb: 1 }}
+        mode={mode}
+        onModeChange={onModeChanged}
+        itemsSelected={desiredValues.length > 0}
+        onClear={() => onValuesChanged([])}
+        onSelectAll={() => onValuesChanged(allowedValues)}
+      />
       <TextField
         sx={{ mx: 1, mt: 1 }}
         autoFocus
@@ -75,7 +141,14 @@ export function MultiselectOptionsFilter<T>({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <List sx={{ maxHeight: "600px", minHeight: 0, overflow: "auto" }}>
+      <List
+        sx={{
+          width: "300px",
+          minHeight: 0,
+          maxHeight: "600px",
+          overflow: "auto",
+        }}
+      >
         {allowedValues
           .filter(
             (item) =>
@@ -84,30 +157,11 @@ export function MultiselectOptionsFilter<T>({
           )
           .map((value) => (
             <ListItem key={value} disablePadding>
-              <ListItemButton
-                dense
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-
-                  let newValue = currentValue!;
-                  if (newValue.includes(value)) {
-                    newValue = newValue.filter((x) => x !== value);
-                  } else {
-                    newValue = [...newValue, value];
-                  }
-
-                  if (newValue.length === 0) {
-                    setLocalValue(null);
-                  } else {
-                    setLocalValue(newValue);
-                  }
-                }}
-              >
+              <ListItemButton dense onClick={() => toggleValue(value)}>
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    checked={currentValue!.includes(value)}
+                    checked={desiredValues.includes(value)}
                     tabIndex={-1}
                     disableRipple
                   />

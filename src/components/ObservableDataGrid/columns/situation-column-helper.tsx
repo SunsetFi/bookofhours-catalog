@@ -9,10 +9,11 @@ import { SituationModel } from "@/services/sh-game";
 import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
 
 import {
-  MultiselectOptionsFilter,
+  MultiselectFilter,
   AspectsFilter,
   aspectsFilter,
   TextFilter,
+  multiSelectFilter,
 } from "../filters";
 import { EnhancedColumnDefBase } from "../types";
 
@@ -115,16 +116,11 @@ export function createSituationColumnHelper<
           header: "Location",
           size: 170,
           cell: TextWrapCell,
-          filterFn: "arrIncludesSome",
+          filterFn: multiSelectFilter,
           meta: {
             filterComponent: (props) => {
               const locations = useUnlockedLocationLabels() ?? [];
-              return (
-                <MultiselectOptionsFilter
-                  allowedValues={locations}
-                  {...props}
-                />
-              );
+              return <MultiselectFilter allowedValues={locations} {...props} />;
             },
           },
         }

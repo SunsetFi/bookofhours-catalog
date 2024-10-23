@@ -13,9 +13,10 @@ import { useUnlockedLocationLabels } from "@/services/sh-game/hooks";
 import ElementStackIcon from "@/components/Elements/ElementStackIcon";
 
 import {
-  MultiselectOptionsFilter,
+  MultiselectFilter,
   AspectsFilter,
   aspectsFilter,
+  multiSelectFilter,
 } from "../filters";
 
 import { AspectsListCell, TextWrapCell } from "../cells";
@@ -119,16 +120,11 @@ export function createElementStackColumnHelper<
           header: "Location",
           size: 170,
           cell: TextWrapCell,
-          filterFn: "arrIncludesSome",
+          filterFn: multiSelectFilter,
           meta: {
             filterComponent: (props) => {
               const locations = useUnlockedLocationLabels() ?? [];
-              return (
-                <MultiselectOptionsFilter
-                  allowedValues={locations}
-                  {...props}
-                />
-              );
+              return <MultiselectFilter allowedValues={locations} {...props} />;
             },
           },
         }

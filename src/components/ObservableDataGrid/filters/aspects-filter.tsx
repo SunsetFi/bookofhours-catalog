@@ -3,16 +3,7 @@ import { Aspects } from "secrethistories-api";
 import { uniq, flatten, isEqual } from "lodash";
 import { Row } from "@tanstack/react-table";
 
-import {
-  Box,
-  Button,
-  Typography,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Stack,
-  Divider,
-} from "@mui/material";
+import { Button, Typography, Stack, Divider } from "@mui/material";
 
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 
@@ -21,6 +12,7 @@ import AspectSelectionGrid from "../../Aspects/AspectSelectionGrid";
 import { FilterComponentProps } from "./types";
 import AspectsMultiSelectList from "@/components/AspectsMultiselectList";
 import { useSetting, useSettingSetter } from "@/services/settings";
+import MultiValueFilterHeader from "./MultiValueFilterHeader";
 
 export type AspectsFilterValue = {
   [key: string]: string | number;
@@ -121,6 +113,7 @@ export function aspectsPresentFilter(
 const defaultFilterValue: AspectsFilterValue = {
   $mode: "any",
 } as any;
+
 export const AspectsFilter = ({
   allowedAspectIds,
   columnValues,
@@ -129,12 +122,13 @@ export const AspectsFilter = ({
 }: FilterComponentProps<AspectsFilterValue, Aspects> & {
   allowedAspectIds: readonly string[] | "auto";
 }) => {
-  let choices: readonly string[] = [];
-  if (allowedAspectIds === "auto") {
-    choices = uniq(flatten(columnValues.map((x) => Object.keys(x))));
-  } else {
-    choices = allowedAspectIds;
-  }
+  const choices = React.useMemo(() => {
+    if (allowedAspectIds === "auto") {
+      return uniq(flatten(columnValues.map((x) => Object.keys(x))));
+    }
+
+    return allowedAspectIds;
+  }, [allowedAspectIds, columnValues]);
 
   const [localValue, setLocalValue] = useDebounceCommitValue(onChange);
 
@@ -175,10 +169,7 @@ export const AspectsFilter = ({
       if (isEqual(newFilter, defaultFilterValue)) {
         setLocalValue(null);
       } else {
-        setLocalValue({
-          ...currentValue,
-          $mode: mode,
-        });
+        setLocalValue(newFilter);
       }
     },
     [setLocalValue, currentValue]
@@ -190,40 +181,20 @@ export const AspectsFilter = ({
   return (
     <Stack
       direction="column"
-      alignItems="center"
       sx={{
+        width: "300px",
         pt: 1,
       }}
     >
-      <Box
-        sx={{
-          px: 1,
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-        }}
-      >
-        <Button size="small" onClick={() => onChange(null)}>
-          Clear
-        </Button>
-        <Button
-          size="small"
-          sx={{ pl: 1, ml: "auto" }}
-          onClick={() => onAspectsChanged(choices)}
-        >
-          Select All
-        </Button>
-      </Box>
-      <RadioGroup
-        sx={{ px: 1, pb: 1 }}
-        row
-        value={matchMode}
-        onChange={(e) => onModeChanged(e.target.value as any)}
-      >
-        <FormControlLabel value="any" control={<Radio />} label="Any" />
-        <FormControlLabel value="all" control={<Radio />} label="All" />
-        <FormControlLabel value="none" control={<Radio />} label="None" />
-      </RadioGroup>
+      <MultiValueFilterHeader
+        sx={{ pb: 1 }}
+        mode={matchMode}
+        allowAll
+        itemsSelected={aspects.length > 0}
+        onModeChange={onModeChanged}
+        onClear={() => onAspectsChanged([])}
+        onSelectAll={() => onAspectsChanged(choices)}
+      />
       {widgetMode === "grid" && (
         <AspectSelectionGrid
           sx={{ justifyContent: "center" }}
