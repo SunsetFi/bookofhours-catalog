@@ -63,6 +63,7 @@ export function useObservation<T>(
               "s"
             );
         }
+        if (profileName) console.log("Observation got value", value);
         setValue(value);
       },
       error: onError ?? setError,

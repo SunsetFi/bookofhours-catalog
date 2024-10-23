@@ -1,6 +1,7 @@
 import React from "react";
 
-import IdentifierItemDataGrid, {
+import {
+  IdentifierItemDataGrid,
   IdentifierItemDataGridProps,
   IdentifierItem,
   useQuerySettings,

@@ -162,5 +162,7 @@ export function getBooksObservable(
 
 export function useBooks() {
   const container = useDIContainer();
-  return React.useMemo(() => getBooksObservable(container), [container]);
+  return React.useMemo(() => {
+    return getBooksObservable(container);
+  }, [container]);
 }

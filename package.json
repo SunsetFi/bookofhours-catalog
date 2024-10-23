@@ -28,6 +28,7 @@
     "@vitejs/plugin-react": "^4.0.4",
     "cross-env": "^6.0.3",
     "rimraf": "^3.0.0",
+    "rxjs-spy": "^8.0.2",
     "typescript": "^5.5.3",
     "vite": "^4.4.9",
     "vite-plugin-checker": "^0.7.2"

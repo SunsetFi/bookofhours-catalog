@@ -10,12 +10,14 @@ export type IdentifierItemDataGridProps<T extends IdentifierItem> = Omit<
   "getItemKey"
 >;
 
+function getItemKey<T extends IdentifierItem>(item: T) {
+  return String(item.id);
+}
+
 function IdentifierItemDataGrid<T extends { readonly id: string | number }>(
   props: IdentifierItemDataGridProps<T>
 ) {
-  return (
-    <ObservableDataGrid<T> {...props} getItemKey={(item) => String(item.id)} />
-  );
+  return <ObservableDataGrid<T> {...props} getItemKey={getItemKey} />;
 }
 
 export default IdentifierItemDataGrid;

@@ -21,18 +21,18 @@ import Root from "./Root";
 const rootEl = document.getElementById("root");
 const root = ReactDOM.createRoot(rootEl!);
 root.render(
-  <React.StrictMode>
-    <ContainerProvider>
-      <DndProvider backend={HTML5Backend}>
-        <AppRouter>
-          <Favicon />
-          <ThemeProvider>
-            <CssBaseline />
-            <DialogServiceDialog />
-            <Root />
-          </ThemeProvider>
-        </AppRouter>
-      </DndProvider>
-    </ContainerProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <ContainerProvider>
+    <DndProvider backend={HTML5Backend}>
+      <AppRouter>
+        <Favicon />
+        <ThemeProvider>
+          <CssBaseline />
+          <DialogServiceDialog />
+          <Root />
+        </ThemeProvider>
+      </AppRouter>
+    </DndProvider>
+  </ContainerProvider>
+  // </React.StrictMode>
 );

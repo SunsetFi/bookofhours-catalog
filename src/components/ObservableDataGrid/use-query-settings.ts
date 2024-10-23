@@ -1,6 +1,6 @@
 import React from "react";
 import { SortingState } from "@tanstack/react-table";
-import { omit, mapKeys, pickBy } from "lodash";
+import { mapKeys, pickBy } from "lodash";
 
 import { useQueryObjectState } from "@/hooks/use-queryobject";
 

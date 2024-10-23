@@ -384,33 +384,33 @@ function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
   return result;
 }
 
-const ObservableTableHeader = ({
-  headerGroups,
-}: {
-  headerGroups: HeaderGroup<Record<string, any>>[];
-}) => {
-  return (
-    <TableHead>
-      {headerGroups.map((group) => (
-        <TableRow key={group.id}>
-          {group.headers.map((header) => (
-            <HeaderCell key={header.id} header={header} />
-          ))}
-        </TableRow>
-      ))}
-    </TableHead>
-  );
-};
+const ObservableTableHeader = React.memo(
+  ({ headerGroups }: { headerGroups: HeaderGroup<Record<string, any>>[] }) => {
+    return (
+      <TableHead>
+        {headerGroups.map((group) => (
+          <TableRow key={group.id}>
+            {group.headers.map((header) => (
+              <HeaderCell key={header.id} header={header} />
+            ))}
+          </TableRow>
+        ))}
+      </TableHead>
+    );
+  }
+);
 
-const ObservableTableRow = ({ row }: { row: Row<Record<string, any>> }) => {
-  return (
-    <TableRow>
-      {row.getVisibleCells().map((cell) => (
-        <ObservableTableCell key={cell.id} cell={cell} />
-      ))}
-    </TableRow>
-  );
-};
+const ObservableTableRow = React.memo(
+  ({ row }: { row: Row<Record<string, any>> }) => {
+    return (
+      <TableRow>
+        {row.getVisibleCells().map((cell) => (
+          <ObservableTableCell key={cell.id} cell={cell} />
+        ))}
+      </TableRow>
+    );
+  }
+);
 
 const ObservableTableCell = ({
   cell,

@@ -1,8 +1,20 @@
 import React from "react";
+import { isEqual } from "lodash";
 
 import { useLocation } from "react-router";
 
 import { useHistory } from "@/services/history";
+
+function searchParamsToObject(): Record<string, any> {
+  const params = new URLSearchParams(location.search);
+  let obj: Record<string, any> = {};
+  for (const [key, value] of params.entries()) {
+    try {
+      obj[key] = JSON.parse(value);
+    } catch {}
+  }
+  return obj;
+}
 
 export type QueryObjectMapper = (
   value: Record<string, any>
@@ -15,18 +27,18 @@ export function useQueryObjectState(): [
 
   const location = useLocation();
 
-  const [obj, setObj] = React.useState<Record<string, any>>({});
+  // This means we compute the object every render, but it saves heavier components re-rendeirng.
+  const initial = searchParamsToObject();
+  const prevObjRef = React.useRef<Record<string, any>>(initial);
+  const [obj, setObj] = React.useState<Record<string, any>>(initial);
 
-  React.useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    let obj: Record<string, any> = {};
-    for (const [key, value] of params.entries()) {
-      try {
-        obj[key] = JSON.parse(value);
-      } catch {}
+  React.useLayoutEffect(() => {
+    const obj = searchParamsToObject();
+
+    if (!isEqual(obj, prevObjRef.current)) {
+      setObj(obj);
+      prevObjRef.current = obj;
     }
-
-    setObj(obj);
   }, [location.search]);
 
   const setValue = React.useCallback(
