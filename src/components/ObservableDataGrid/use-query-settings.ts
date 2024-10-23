@@ -30,7 +30,7 @@ export function useQuerySettings(): UseQuerySettings {
     (sorting: SortingState) => {
       setQueryObject({
         ...mapKeys(filters, (_, key) => `filter-${key}`),
-        ["sort-by"]: sorting,
+        ["sort-by"]: sorting ?? undefined,
       });
     },
     [setQueryObject, filters]
@@ -39,7 +39,7 @@ export function useQuerySettings(): UseQuerySettings {
   const onFiltersChanged = React.useCallback(
     (filters: Record<string, string>) => {
       setQueryObject({
-        ["sort-by"]: sorting,
+        ["sort-by"]: sorting ?? undefined,
         ...mapKeys(filters, (_, key) => `filter-${key}`),
       });
     },

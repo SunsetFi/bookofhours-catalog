@@ -10,10 +10,9 @@ import { useDIDependency } from "@/container";
 import { powerAspects, wisdomAspects } from "@/aspects";
 
 import {
+  CharacterSource,
   ElementStackModel,
   Orchestrator,
-  TokensSource,
-  filterHasAnyAspect,
 } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
@@ -55,7 +54,7 @@ const SkillUpgradeButton = ({ model }: { model: ElementStackModel }) => {
 };
 
 const SkillsCatalogPage = () => {
-  const tokensSource = useDIDependency(TokensSource);
+  const characterSource = useDIDependency(CharacterSource);
 
   const columns = React.useMemo(
     () => [
@@ -99,16 +98,10 @@ const SkillsCatalogPage = () => {
     []
   );
 
-  const skills$ = React.useMemo(
-    () =>
-      tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect(["skill"])),
-    [tokensSource]
-  );
-
   return (
     <DataGridPage
       title="Esoteric Wisdoms"
-      items$={skills$}
+      items$={characterSource.skills$}
       columns={columns}
       defaultSortColumn="label"
     />

@@ -1,33 +1,11 @@
 import { inject, injectable, provides, singleton } from "microinject";
 import { BehaviorSubject, Observable } from "rxjs";
 
-import { useDIDependency } from "@/container";
-
-import { useObservation } from "@/hooks/use-observation";
-
 import { Initializable } from "../Initializable";
 import { DialogService } from "../dialog";
 
 import SettingsDialogContent from "./SettingsDialogContent";
-
-export type InteractivityMode = "read-only" | "minimal" | "full";
-export const InteractivityPrecidence: Record<InteractivityMode, number> = {
-  "read-only": 0,
-  minimal: 1,
-  full: 2,
-};
-
-export interface SettingData {
-  interactivity: "read-only" | "minimal" | "full";
-  enableWisdomEditing: boolean;
-}
-
-export type Setting = keyof SettingData;
-
-const DefaultSettings: SettingData = {
-  interactivity: "read-only",
-  enableWisdomEditing: false,
-};
+import { DefaultSettings, Setting, SettingData } from "./settings";
 
 const LocalStorageKey = "settings";
 
@@ -116,12 +94,4 @@ export class SettingsManager implements Initializable {
 
     window.localStorage.setItem(LocalStorageKey, JSON.stringify(settings));
   }
-}
-
-export function useSetting<T extends Setting>(setting: T): SettingData[T] {
-  const settingsManager = useDIDependency(SettingsManager);
-  return (
-    useObservation(() => settingsManager.getObservable(setting), []) ??
-    settingsManager.get(setting)
-  );
 }

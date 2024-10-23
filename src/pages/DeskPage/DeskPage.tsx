@@ -12,6 +12,7 @@ import { useDIDependency } from "@/container";
 
 import { useObservation } from "@/hooks/use-observation";
 import {
+  CharacterSource,
   ElementStackModel,
   TokensSource,
   filterDoesNotOccupySpace,
@@ -25,6 +26,7 @@ import PageContainer from "@/components/PageContainer";
 
 const DeskPage = () => {
   const tokensSource = useDIDependency(TokensSource);
+  const characterSource = useDIDependency(CharacterSource);
   const tokens = useObservation(tokensSource.visibleTokens$);
 
   const notable$ = React.useMemo(
@@ -52,10 +54,7 @@ const DeskPage = () => {
     [tokensSource.visibleElementStacks$]
   );
 
-  const skills$ = React.useMemo(
-    () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("skill")),
-    [tokensSource.visibleElementStacks$]
-  );
+  const skills$ = characterSource.skills$;
 
   const misc$ = React.useMemo(
     () =>

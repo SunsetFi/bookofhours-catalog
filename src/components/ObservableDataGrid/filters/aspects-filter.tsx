@@ -6,10 +6,12 @@ import { Row } from "@tanstack/react-table";
 import {
   Box,
   Button,
+  Typography,
   RadioGroup,
   FormControlLabel,
   Radio,
   Stack,
+  Divider,
 } from "@mui/material";
 
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
@@ -17,6 +19,8 @@ import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 import AspectSelectionGrid from "../../Aspects/AspectSelectionGrid";
 
 import { FilterComponentProps } from "./types";
+import AspectsMultiSelectList from "@/components/AspectsMultiselectList";
+import { useSetting, useSettingSetter } from "@/services/settings";
 
 export type AspectsFilterValue = {
   [key: string]: string | number;
@@ -132,7 +136,7 @@ export const AspectsFilter = ({
     choices = allowedAspectIds;
   }
 
-  const [localValue, setLocalValue] = useDebounceCommitValue(700, onChange);
+  const [localValue, setLocalValue] = useDebounceCommitValue(onChange);
 
   // This nonsense is so null localValue is respected but undefined is delegated to filterValue.
   let currentValue = localValue;
@@ -180,16 +184,20 @@ export const AspectsFilter = ({
     [setLocalValue, currentValue]
   );
 
+  const widgetMode = useSetting("aspectFilterWidget");
+  const onChangeWidgetMode = useSettingSetter("aspectFilterWidget");
+
   return (
     <Stack
       direction="column"
       alignItems="center"
       sx={{
-        p: 1,
+        pt: 1,
       }}
     >
       <Box
         sx={{
+          px: 1,
           display: "flex",
           flexDirection: "row",
           width: "100%",
@@ -216,12 +224,38 @@ export const AspectsFilter = ({
         <FormControlLabel value="all" control={<Radio />} label="All" />
         <FormControlLabel value="none" control={<Radio />} label="None" />
       </RadioGroup>
-      <AspectSelectionGrid
-        sx={{ justifyContent: "center" }}
-        items={choices}
-        value={aspects}
-        onChange={onAspectsChanged}
-      />
+      {widgetMode === "grid" && (
+        <AspectSelectionGrid
+          sx={{ justifyContent: "center" }}
+          items={choices}
+          value={aspects}
+          onChange={onAspectsChanged}
+        />
+      )}
+      {widgetMode === "list" && (
+        <AspectsMultiSelectList
+          sx={{ maxHeight: "600px" }}
+          items={choices}
+          value={aspects}
+          onChange={onAspectsChanged}
+        />
+      )}
+      <Divider />
+      <Button
+        onClick={() =>
+          onChangeWidgetMode(widgetMode === "list" ? "grid" : "list")
+        }
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            textAlign: "center",
+          }}
+        >
+          Switch to {widgetMode === "list" ? "Grid" : "List"} View
+        </Typography>
+      </Button>
     </Stack>
   );
 };

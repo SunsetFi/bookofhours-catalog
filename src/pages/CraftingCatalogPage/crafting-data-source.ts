@@ -108,11 +108,8 @@ export function getCraftablesObservable(
   const compendium = container.get(Compendium);
   const orchestrator = container.get(Orchestrator);
   const characterSource = container.get(CharacterSource);
-  const tokensSource = container.get(TokensSource);
 
-  // FIXME: Only show craftables that the player still has the skill for
-  const skillIds$ = tokensSource.visibleElementStacks$.pipe(
-    filterHasAnyAspect("skill"),
+  const skillIds$ = characterSource.skills$.pipe(
     observeAllMap((s) => s.elementId$)
   );
 

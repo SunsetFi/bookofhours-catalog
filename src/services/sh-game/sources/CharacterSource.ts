@@ -16,6 +16,9 @@ import {
 import { API } from "@/services/sh-api";
 
 import { GameStateSource } from "./GameStateSource";
+import { ElementStackModel } from "../token-models/ElementStackModel";
+import { TokensSource } from "./TokensSource";
+import { filterHasAnyAspect, filterTokenNotInPath } from "../observables";
 
 @injectable()
 @singleton()
@@ -38,6 +41,7 @@ export class CharacterSource implements CharacterSource {
   constructor(
     @inject(UpdatePoller) scheduler: UpdatePoller,
     @inject(GameStateSource) runningSource: GameStateSource,
+    @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(API) private readonly _api: API
   ) {
@@ -94,6 +98,19 @@ export class CharacterSource implements CharacterSource {
     }
 
     return this._ambittableRecipes$;
+  }
+
+  private _skills: Observable<readonly ElementStackModel[]> | null = null;
+  get skills$() {
+    if (!this._skills) {
+      this._skills = this._tokensSource.visibleElementStacks$.pipe(
+        filterHasAnyAspect("skill"),
+        filterTokenNotInPath("~/wisdomtreenodes"),
+        shareReplay(1)
+      );
+    }
+
+    return this._skills;
   }
 
   private async _pollCharacter(): Promise<void> {

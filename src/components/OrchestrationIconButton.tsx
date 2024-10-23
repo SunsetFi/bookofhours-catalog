@@ -3,8 +3,9 @@ import React from "react";
 import { IconButton, IconButtonProps } from "@mui/material";
 import { PlayCircle } from "@mui/icons-material";
 
+import { SettingData } from "@/services/settings";
+
 import RequireInteractivity from "./RequireInteractivity";
-import { SettingData } from "@/services/settings/SettingsManager";
 
 interface OrchestrationIconButtonProps extends IconButtonProps {
   interactivity: SettingData["interactivity"];

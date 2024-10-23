@@ -28,7 +28,7 @@ export function MultiselectOptionsFilter<T>({
   filterValue,
   onChange,
 }: MultiselectOptionsFilterProps<T>) {
-  const [localValue, setLocalValue] = useDebounceCommitValue(700, onChange);
+  const [localValue, setLocalValue] = useDebounceCommitValue(onChange);
 
   // This nonsense is so null localValue is respected but undefined is delegated to filterValue.
   let currentValue = localValue;

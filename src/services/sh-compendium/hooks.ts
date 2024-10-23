@@ -15,6 +15,11 @@ export function useAspect(aspectId: string): AspectModel {
   return compendium.getAspectById(aspectId);
 }
 
+export function useAspects(aspectIds: readonly string[]): AspectModel[] {
+  const compendium = useDIDependency(Compendium);
+  return aspectIds.map((id) => compendium.getAspectById(id));
+}
+
 export function useRecipe(recipeId: string): RecipeModel {
   const compendium = useDIDependency(Compendium);
   return compendium.getRecipeById(recipeId);

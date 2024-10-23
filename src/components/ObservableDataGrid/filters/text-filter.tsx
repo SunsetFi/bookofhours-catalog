@@ -21,7 +21,7 @@ export const TextFilter = ({
     [onChange]
   );
 
-  const [localValue, setLocalValue] = useDebounceCommitValue(700, onCommit);
+  const [localValue, setLocalValue] = useDebounceCommitValue(onCommit);
 
   return (
     <Box
