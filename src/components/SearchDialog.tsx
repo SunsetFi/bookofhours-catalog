@@ -26,6 +26,12 @@ import { SearchService, SearchItemResult } from "@/services/search";
 
 import { useObservation } from "@/hooks/use-observation";
 
+function focusElement(ref: HTMLDivElement | null) {
+  if (ref) {
+    ref.focus();
+  }
+}
+
 const SearchDialog = () => {
   const navigate = useNavigate();
 
@@ -37,15 +43,6 @@ const SearchDialog = () => {
   const searchTotal = useObservation(searchService.searchTotal$) ?? null;
 
   const hasQuery = searchQuery != "";
-
-  const onTextFieldMount = React.useCallback(
-    (ref: HTMLDivElement) => {
-      if (isOpen && ref) {
-        ref.focus();
-      }
-    },
-    [isOpen]
-  );
 
   const firstItem = searchResults[0];
   const onTextFieldKeyDown = React.useCallback(
@@ -120,7 +117,7 @@ const SearchDialog = () => {
           )}
         </Box>
         <TextField
-          ref={onTextFieldMount}
+          ref={focusElement}
           onKeyDown={onTextFieldKeyDown}
           sx={{ ml: 1 }}
           autoFocus
@@ -213,8 +210,8 @@ const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
       <ListItemIcon>
         <img
           loading="lazy"
+          role="presentation"
           src={iconUrl}
-          alt={label}
           style={{
             display: "block",
             maxWidth: "40px",

@@ -79,7 +79,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   return (
     <>
       <Box
-        sx={sx}
+        sx={{ lineHeight: 0, ...sx }}
         component="span"
         role="none"
         id={id}

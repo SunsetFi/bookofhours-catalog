@@ -50,11 +50,11 @@ export function filterElementId(id: string | ((id: string) => boolean)) {
     return source.pipe(
       filterItemObservations((element) =>
         element.elementId$.pipe(
-          map((occupies) => {
+          map((elementId) => {
             if (typeof id === "string") {
-              return occupies === id;
+              return elementId === id;
             } else {
-              return id(occupies);
+              return id(elementId);
             }
           })
         )
