@@ -1,12 +1,12 @@
 import React from "react";
 import { isEqual } from "lodash";
 
-import { useLocation } from "react-router";
+import { Location, useLocation } from "react-router";
 
 import { useHistory } from "@/services/history";
 
-function searchParamsToObject(): Record<string, any> {
-  const params = new URLSearchParams(location.search);
+function searchParamsToObject(search: string): Record<string, any> {
+  const params = new URLSearchParams(search);
   let obj: Record<string, any> = {};
   for (const [key, value] of params.entries()) {
     try {
@@ -28,12 +28,12 @@ export function useQueryObjectState(): [
   const location = useLocation();
 
   // This means we compute the object every render, but it saves heavier components re-rendeirng.
-  const initial = searchParamsToObject();
+  const initial = searchParamsToObject(location.search);
   const prevObjRef = React.useRef<Record<string, any>>(initial);
   const [obj, setObj] = React.useState<Record<string, any>>(initial);
 
   React.useLayoutEffect(() => {
-    const obj = searchParamsToObject();
+    const obj = searchParamsToObject(location.search);
 
     if (!isEqual(obj, prevObjRef.current)) {
       setObj(obj);
