@@ -12,7 +12,9 @@
 ### Fixes
 
 - Performance improvements
-  - Restrict tables to showing 10 items per page for performance reasons.
+  - Reduced rerenders across various elements on page navigation, improving performance when switching pages.
+  - Improved render time for tables.
+  - Restrict tables to showing 10 items per page down from 25 for performance reasons.
 - Fix crash on crafting page when sorting.
 - Fix offcenter aspect images in tables.
 
