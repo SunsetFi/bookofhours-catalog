@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 import svgr from "vite-plugin-svgr";
 
+const { version } = require("./package.json");
+
 const NamedChunks = {
   // These packages can create cirular references, so we need to give them their own files
   shared: ["scheduler", "loose-envify", "js-tokens", "object-assign"],
@@ -30,6 +32,10 @@ export default defineConfig({
     alias: {
       "@": "/src",
     },
+  },
+
+  define: {
+    VERSION: JSON.stringify(version),
   },
 
   build: {

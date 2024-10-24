@@ -1,4 +1,5 @@
 import React from "react";
+import { DateTime } from "luxon";
 
 import {
   Divider,
@@ -15,10 +16,10 @@ import { Menu } from "@mui/icons-material";
 import { useDIDependency } from "@/container";
 
 import { SaveManager } from "@/services/sh-game/SaveManager/SaveManager";
+import { SettingsManager } from "@/services/settings";
+import { GithubUpdateService } from "@/services/github-updates";
 
 import { useObservation } from "@/hooks/use-observation";
-import { DateTime } from "luxon";
-import { SettingsManager } from "@/services/settings";
 
 const GameMenuButton = () => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -42,8 +43,12 @@ interface GameMenuProps {
   onClose(): void;
 }
 const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
-  const saveManager = useDIDependency(SaveManager);
   const settingsManager = useDIDependency(SettingsManager);
+
+  const updateManager = useDIDependency(GithubUpdateService);
+  const newVersion = useObservation(updateManager.newVersion$);
+
+  const saveManager = useDIDependency(SaveManager);
   const canSave = useObservation(saveManager.canSave$);
   const autosave = useObservation(saveManager.autosave$);
 
@@ -79,7 +84,7 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
 
   return (
     <Popover open={anchorEl != null} anchorEl={anchorEl} onClose={onClose}>
-      <List sx={{ width: 250 }}>
+      <List sx={{ minWidth: 225 }}>
         <ListItemButton disabled={!canSave} onClick={onSaveAs}>
           Save Game
         </ListItemButton>
@@ -104,6 +109,21 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
         <ListItemButton onClick={onNewGame}>New Game</ListItemButton>
         <Divider />
         <ListItemButton onClick={onSettings}>Settings</ListItemButton>
+        {newVersion && (
+          <>
+            <Divider />
+            <ListItemButton
+              component="a"
+              href={newVersion.html_url}
+              target="_blank"
+            >
+              <Stack direction="column">
+                <Typography variant="body2">An Update Is Available</Typography>
+                <Typography variant="caption">{newVersion.tag_name}</Typography>
+              </Stack>
+            </ListItemButton>
+          </>
+        )}
       </List>
     </Popover>
   );

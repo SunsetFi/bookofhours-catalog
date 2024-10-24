@@ -1,6 +1,7 @@
 import { composeModules } from "microinject";
 
 import dialogModule from "./dialog/module";
+import githubUpdatesModule from "./github-updates/module";
 import historyModule from "./history/module";
 import pageModule from "./page/module";
 import pinsModule from "./pins/module";
@@ -14,6 +15,7 @@ import updatePollerModule from "./update-poller/module";
 
 export default composeModules(
   dialogModule,
+  githubUpdatesModule,
   historyModule,
   pageModule,
   pinsModule,

@@ -18,3 +18,5 @@ export const OSType: OSType = OS_WINDOWS.test(osPlatform)
 export const isProd: boolean = process.env.NODE_ENV === "production";
 
 export const keyboardModifierUseMeta = osPlatform === "mac";
+
+export const version = (window as any).VERSION as string;

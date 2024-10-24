@@ -21,6 +21,7 @@ import UnlockTerrainDialog from "./components/UnlockTerrainDialog";
 import SearchDialog from "./components/SearchDialog";
 import OrchestratorDrawer from "./components/OrchestratorDrawer";
 import GameNotPausedWarning from "./components/GameNotPausedWarning";
+import UpdateAvailableNotification from "./components/UpdateAvailableNotification";
 import PageHeader from "./components/PageHeader";
 import PageTabs from "./components/PageTabs";
 
@@ -124,6 +125,7 @@ const Root = () => {
         <UnlockTerrainDialog />
         <SearchDialog />
         <GameNotPausedWarning />
+        <UpdateAvailableNotification />
       </Hotkeys>
     </SuspenseBoundary>
   );

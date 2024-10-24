@@ -114,7 +114,6 @@ function elementStackToBook(
 
       if (isMastered && xexts) {
         const firstKey = Object.keys(xexts).find((x) => xextIntroMatch.test(x));
-        console.log("Mastered book with xexts", xexts, "firstKey", firstKey);
         if (firstKey) {
           result = description + "\n\n" + xexts[firstKey];
         }

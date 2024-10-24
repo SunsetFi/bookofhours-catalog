@@ -66,7 +66,7 @@ export function useObservation<T>(
         if (!seenFirstValue) {
           seenFirstValue = true;
           if (profileName)
-            console.log(
+            console.trace(
               "PERF",
               profileName,
               "retrieved first value in ",

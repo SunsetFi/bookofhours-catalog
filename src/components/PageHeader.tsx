@@ -70,7 +70,7 @@ const PageHeader = () => {
           )}
           {!backTo && <GameMenuButton />}
         </Box>
-        <HandOverviewIcons sx={{ ml: 2 }} />
+        <HandOverviewIcons sx={{ ml: 3 }} />
         <Box sx={{ ml: "auto" }} />
         <PinboardHeader sx={{ py: 1 }} />
         <SearchButtonHeader sx={{ ml: 2 }} />

@@ -21,6 +21,7 @@ import sitemap, {
   isSiteMapNavItem,
 } from "@/sitemap";
 import LicenseDialog from "./LicenseDialog";
+import { repositoryUrl } from "@/github";
 
 const PageTabs = () => {
   const [licenseOpen, setLicenseOpen] = React.useState(false);
@@ -78,7 +79,7 @@ const PageTabs = () => {
         PopperProps={{ sx: { pointerEvents: "none" }, placement: "right" }}
       >
         <MuiLink
-          href="https://github.com/SunsetFi/bookofhours-catalog"
+          href={repositoryUrl}
           target="_blank"
           sx={{
             display: "block",
