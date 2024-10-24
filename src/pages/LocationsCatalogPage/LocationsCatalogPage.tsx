@@ -67,6 +67,7 @@ const LocationsCatalogPage = () => {
         ),
       }),
       columnHelper.observeText("label$", {
+        id: "label",
         header: "Location",
         rowHeader: true,
         size: 200,
@@ -79,6 +80,7 @@ const LocationsCatalogPage = () => {
             item.unlockRequirements$,
           ]),
         {
+          id: "locked",
           header: "Unlocked",
           size: 300,
           filterFn: (row, column, value) => {
@@ -159,6 +161,7 @@ const LocationsCatalogPage = () => {
       columnHelper.observe(
         (item) => item.children$.pipe(filterItems(isSituationModel)),
         {
+          id: "workstations",
           header: "Workstations",
           size: 700,
           enableSorting: false,
@@ -167,6 +170,7 @@ const LocationsCatalogPage = () => {
         }
       ),
       columnHelper.observeText("description$" as any, {
+        id: "description",
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
       }),

@@ -97,6 +97,7 @@ export function createSituationColumnHelper<
       ),
     description: () =>
       columnHelper.observe("verbDescription$" as any, {
+        id: "description",
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
         enableSorting: false,
@@ -113,6 +114,7 @@ export function createSituationColumnHelper<
             switchMapIfNotNull((terrain) => terrain.label$)
           ),
         {
+          id: "location",
           header: "Location",
           size: 170,
           cell: TextWrapCell,
