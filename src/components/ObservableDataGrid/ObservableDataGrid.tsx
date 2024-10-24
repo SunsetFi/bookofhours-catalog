@@ -7,7 +7,6 @@ import {
   CircularProgress,
   Table,
   TableContainer,
-  TableHead,
   TableBody,
   TableFooter,
   TableCell,
@@ -19,16 +18,13 @@ import {
 } from "@mui/material";
 
 import {
-  Cell,
   ColumnDef,
   ColumnFiltersState,
-  HeaderGroup,
   InitialTableState,
-  Row,
   SortingState,
+  VisibilityState,
   TableState,
   Updater,
-  flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -42,14 +38,15 @@ import { decorateObjectInstance } from "@/object-decorator";
 
 import { useObservation } from "@/hooks/use-observation";
 
-import HeaderCell from "./components/HeaderCell";
-
 import {
   ObservableColumnDef,
   isObservableAccessorFnColumnDef,
   isObservableAccessorKeyColumnDef,
-  isRowHeaderColumn,
 } from "./types";
+
+import ObservableTableHeader from "./components/ObservableTableHeader";
+import ObservableTableRow from "./components/ObservableTableRow";
+import ConfigureTableButton from "./components/ConfigureTableButton";
 
 export interface ObservableDataGridProps<T extends {}> {
   sx?: SxProps;
@@ -57,12 +54,14 @@ export interface ObservableDataGridProps<T extends {}> {
   defaultSortColumn?: string;
   sorting?: SortingState;
   columns: ObservableColumnDef<T, any>[];
+  visibleColumnIds?: string[];
   items$: Observable<readonly T[]>;
   autoFocus?: boolean;
   ["aria-labelledby"]?: string;
   getItemKey?(item: T, index: number): string;
   onFiltersChanged?(filters: Record<string, any>): void;
   onSortingChanged?(sorting: SortingState): void;
+  onVisibleColumnIdsChanged?(visibleColumnIds: string[]): void;
 }
 
 const initialState: InitialTableState = {
@@ -76,6 +75,7 @@ function ObservableDataGrid<T extends {}>({
   filters,
   defaultSortColumn,
   columns,
+  visibleColumnIds,
   sorting,
   items$,
   autoFocus,
@@ -83,6 +83,7 @@ function ObservableDataGrid<T extends {}>({
   getItemKey = (item, index) => String(index),
   onFiltersChanged,
   onSortingChanged,
+  onVisibleColumnIdsChanged,
 }: ObservableDataGridProps<T>) {
   const theme = useTheme();
 
@@ -104,12 +105,36 @@ function ObservableDataGrid<T extends {}>({
         : []
     );
 
+  const [uncontrolledVisibleColumnIds, setUncontrolledVisibleColumnIds] =
+    React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    setUncontrolledVisibleColumnIds(tableColumns.map((x) => x.id!));
+  }, [tableColumns]);
+
+  const allColumnIds = React.useMemo(
+    () => tableColumns.map((c) => c.id!),
+    [tableColumns]
+  );
+  const resolvedVisibleColumnIds =
+    visibleColumnIds ?? uncontrolledVisibleColumnIds;
+
   const state = React.useMemo<Partial<TableState>>(
     () => ({
       sorting: sorting ?? uncontrolledSorting,
       columnFilters: filters ? recordToFilter(filters) : undefined,
+      columnVisibility: allColumnIds.reduce((acc, id) => {
+        acc[id] = resolvedVisibleColumnIds.includes(id);
+        return acc;
+      }, {} as Record<string, boolean>),
     }),
-    [sorting, uncontrolledSorting, filters]
+    [
+      sorting,
+      uncontrolledSorting,
+      filters,
+      allColumnIds,
+      resolvedVisibleColumnIds,
+    ]
   );
 
   const setSorting = React.useCallback(
@@ -128,6 +153,36 @@ function ObservableDataGrid<T extends {}>({
       }
     },
     [sorting, uncontrolledSorting, onSortingChanged]
+  );
+
+  const setVisibility = React.useCallback(
+    (updater: Updater<VisibilityState>) => {
+      let previousValue = visibleColumnIds ?? uncontrolledVisibleColumnIds;
+
+      let newObject = allColumnIds.reduce((acc, id) => {
+        acc[id] = previousValue.includes(id);
+        return acc;
+      }, {} as Record<string, boolean>);
+      if (typeof updater === "function") {
+        newObject = updater(newObject);
+      } else {
+        newObject = updater;
+      }
+
+      const newValue = allColumnIds.filter((key) => newObject[key]);
+
+      if (onVisibleColumnIdsChanged) {
+        onVisibleColumnIdsChanged(newValue);
+      } else {
+        setUncontrolledVisibleColumnIds(newValue);
+      }
+    },
+    [
+      visibleColumnIds,
+      uncontrolledVisibleColumnIds,
+      allColumnIds,
+      onVisibleColumnIdsChanged,
+    ]
   );
 
   const data = useObservation(
@@ -173,6 +228,7 @@ function ObservableDataGrid<T extends {}>({
     onColumnFiltersChange: onTableFiltersChanged,
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
+    onColumnVisibilityChange: setVisibility,
     getPaginationRowModel: getPaginationRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
@@ -182,6 +238,8 @@ function ObservableDataGrid<T extends {}>({
   const headerGroups = table.getHeaderGroups();
 
   const rows = table.getRowModel().rows;
+
+  const totalColumns = table.getHeaderGroups()[0].headers.length;
 
   const tableBody = React.useMemo(() => {
     // FIXME: Because of the way firefox accessibility works, highlighting an item with a screen reader will scroll it to the top of its container.
@@ -195,8 +253,6 @@ function ObservableDataGrid<T extends {}>({
       </TableBody>
     );
   }, [rows, autoFocus]);
-
-  const totalColumns = table.getHeaderGroups()[0].headers.length;
 
   return (
     <TableContainer
@@ -221,6 +277,7 @@ function ObservableDataGrid<T extends {}>({
         <Table
           sx={{
             tableLayout: "fixed",
+            height: "100%",
           }}
           stickyHeader
         >
@@ -231,6 +288,11 @@ function ObservableDataGrid<T extends {}>({
               position: "sticky",
               bottom: 0,
               backgroundColor: theme.palette.background.default,
+              // I have no idea why the footer expands to fill the empty table.
+              // I also have no idea why this fixes it, or why the size is actually
+              // chosen to be greater than 1px.
+              // This 'works' in firefox and chrome.
+              height: "1px",
             }}
           >
             {rows.length > 0 && (
@@ -244,6 +306,7 @@ function ObservableDataGrid<T extends {}>({
                       position: "relative",
                     }}
                   >
+                    <ConfigureTableButton table={table} />
                     <Box
                       sx={{
                         position: "absolute",
@@ -277,16 +340,16 @@ function ObservableDataGrid<T extends {}>({
   );
 }
 
-function autoColumnProperty<T>(
+function autoColumnId<T>(
   column: ObservableColumnDef<T>,
   index: number
 ): string {
   if (column.id) {
-    return `col::${column.id}:${index}`;
+    return `col__${column.id}_${index}`;
   } else if (typeof column.header === "string") {
-    return `col::${column.header}:${index}`;
+    return `col__${column.header}_${index}`;
   } else {
-    return `col::unknown:${index}`;
+    return `col__unknown_${index}`;
   }
 }
 
@@ -294,12 +357,13 @@ function observableToColumnDef<T extends {}>(
   observableColumn: ObservableColumnDef<T>,
   index: number
 ): ColumnDef<Record<string, any>> {
+  let result = { ...observableColumn } as ColumnDef<Record<string, any>>;
   if (
     isObservableAccessorKeyColumnDef(observableColumn) ||
     isObservableAccessorFnColumnDef(observableColumn)
   ) {
-    const accessorKey = autoColumnProperty(observableColumn, index);
-    return {
+    const accessorKey = autoColumnId(observableColumn, index);
+    result = {
       ...omit(observableColumn, ["observationKey", "observationFn"]),
       accessorKey,
     } as any;
@@ -309,7 +373,12 @@ function observableToColumnDef<T extends {}>(
   // This will throw off our index, so we need to track index
   // externally.
 
-  return observableColumn as any;
+  if (!result.id) {
+    console.warn("Column has no id:", observableColumn);
+    result.id = autoColumnId(observableColumn, index);
+  }
+
+  return result;
 }
 
 function observeColumn<TData extends {}>(
@@ -361,7 +430,7 @@ function itemToRow<T extends {}>(
       };
 
       for (let i = 0; i < columns.length; i++) {
-        const property = autoColumnProperty(columns[i], i);
+        const property = autoColumnId(columns[i], i);
         const value = values[i];
         decoration[property] = value;
       }
@@ -387,51 +456,5 @@ function filterToRecord(filter: ColumnFiltersState): Record<string, any> {
 
   return result;
 }
-
-const ObservableTableHeader = React.memo(
-  ({ headerGroups }: { headerGroups: HeaderGroup<Record<string, any>>[] }) => {
-    return (
-      <TableHead>
-        {headerGroups.map((group) => (
-          <TableRow key={group.id}>
-            {group.headers.map((header) => (
-              <HeaderCell key={header.id} header={header} />
-            ))}
-          </TableRow>
-        ))}
-      </TableHead>
-    );
-  }
-);
-
-const ObservableTableRow = ({ row }: { row: Row<Record<string, any>> }) => {
-  return (
-    <TableRow>
-      {row.getVisibleCells().map((cell) => (
-        <ObservableTableCell key={cell.id} cell={cell} />
-      ))}
-    </TableRow>
-  );
-};
-
-const ObservableTableCell = ({
-  cell,
-}: {
-  cell: Cell<Record<string, any>, unknown>;
-}) => {
-  // The cells are not observable, so we need to rerender here when the value changes.
-  // There doesn't seem to be anything else in the context that we need to rerender for.
-  const value = cell.getContext().getValue();
-
-  const isRowHeader = isRowHeaderColumn(cell.column.columnDef);
-  return React.useMemo(
-    () => (
-      <TableCell component={isRowHeader ? "th" : "td"}>
-        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-      </TableCell>
-    ),
-    [cell.column.columnDef.cell, isRowHeader, value]
-  );
-};
 
 export default ObservableDataGrid;

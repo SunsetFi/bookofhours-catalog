@@ -106,6 +106,7 @@ export function createElementStackColumnHelper<
       ),
     description: () =>
       columnHelper.observeText("description$" as any, {
+        id: "description",
         size: Number.MAX_SAFE_INTEGER,
         header: "Description",
         enableSorting: false,
@@ -117,6 +118,7 @@ export function createElementStackColumnHelper<
             switchMapIfNotNull((terrain) => terrain.label$)
           ),
         {
+          id: "location",
           header: "Location",
           size: 170,
           cell: TextWrapCell,
