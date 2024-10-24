@@ -9,7 +9,12 @@ import { ObservableDataGridProps } from "./ObservableDataGrid";
 export type UseQuerySettings = Required<
   Pick<
     ObservableDataGridProps<any>,
-    "filters" | "sorting" | "onFiltersChanged" | "onSortingChanged"
+    | "filters"
+    | "sorting"
+    | "visibleColumnIds"
+    | "onFiltersChanged"
+    | "onSortingChanged"
+    | "onVisibleColumnIdsChanged"
   >
 >;
 
@@ -26,25 +31,47 @@ export function useQuerySettings(): UseQuerySettings {
     [queryObject]
   );
 
+  const visibleColumnIds = queryObject["columns"]?.split(",") ?? null;
+
   const onSortingChanged = React.useCallback(
     (sorting: SortingState) => {
       setQueryObject({
         ...mapKeys(filters, (_, key) => `filter-${key}`),
         ["sort-by"]: sorting ?? undefined,
+        columns: visibleColumnIds?.join(",") ?? undefined,
       });
     },
-    [setQueryObject, filters]
+    [setQueryObject, filters, visibleColumnIds]
   );
 
   const onFiltersChanged = React.useCallback(
     (filters: Record<string, string>) => {
       setQueryObject({
         ["sort-by"]: sorting ?? undefined,
+        columns: visibleColumnIds?.join(",") ?? undefined,
         ...mapKeys(filters, (_, key) => `filter-${key}`),
       });
     },
-    [setQueryObject, sorting]
+    [setQueryObject, sorting, visibleColumnIds]
   );
 
-  return { sorting, filters, onSortingChanged, onFiltersChanged };
+  const onVisibleColumnIdsChanged = React.useCallback(
+    (visibleColumnIds: string[]) => {
+      setQueryObject({
+        ["sort-by"]: sorting ?? undefined,
+        columns: visibleColumnIds.join(",") ?? undefined,
+        ...mapKeys(filters, (_, key) => `filter-${key}`),
+      });
+    },
+    [setQueryObject, sorting, filters]
+  );
+
+  return {
+    sorting,
+    filters,
+    visibleColumnIds,
+    onSortingChanged,
+    onFiltersChanged,
+    onVisibleColumnIdsChanged,
+  };
 }
