@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.0
+
+### Features
+
+- Improved searchable and screen reader friendly filter for aspects.
+  - You can switch between the new and old filter styles using the button on the bottom of the filter. Your choice will be remembered across sessions.
+- Allow sorting by "none of" for location filters.
+- Added book reading / mastering descriptions to the books table. They will show up as additional paragraphs under the description column.
+
+### Fixes
+
+- Performance improvements
+  - Restrict tables to showing 10 items per page for performance reasons.
+- Fix crash on crafting page when sorting.
+- Fix offcenter aspect images in tables.
+
 ## 1.1.0
 
 - Fix unlocking rooms appearing twice in the orchestration list.
