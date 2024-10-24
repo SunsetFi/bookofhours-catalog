@@ -22,6 +22,7 @@ const GameTypography = React.forwardRef<HTMLSpanElement, GameTypographyProps>(
     return (
       <Typography
         {...props}
+        sx={{ whiteSpace: "pre-line" }}
         className={clsx("game-typography", props.className)}
         ref={ref}
       >

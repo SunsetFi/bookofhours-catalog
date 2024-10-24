@@ -44,20 +44,30 @@ export interface BookModelDecorations {
 
 export type BookModel = ElementStackModel & BookModelDecorations;
 
+const xextIntroMatch = /^reading\.([^\.]+)\.intro$/;
+const xextFinalMatch = /^reading\.([^\.]+)$/;
+
 function elementStackToBook(
   elementStack: ElementStackModel,
   compendium: Compendium,
   orchestrator: Orchestrator
 ): BookModel {
-  const memory$ = combineLatest([
-    elementStack.aspects$,
-    elementStack.element$,
-  ]).pipe(
-    switchMap(([aspects, element]) => {
+  const isMastered$ = elementStack.aspects$.pipe(
+    map((aspects) => {
       const mastery = Object.keys(aspects).find((aspectId) =>
         aspectId.startsWith("mastery.")
       );
       if (!mastery || aspects[mastery] < 1) {
+        return false;
+      }
+
+      return true;
+    })
+  );
+
+  const memory$ = combineLatest([isMastered$, elementStack.element$]).pipe(
+    switchMap(([isMastered, element]) => {
+      if (!isMastered) {
         return Null$;
       }
 
@@ -91,6 +101,34 @@ function elementStackToBook(
     map((aspects) => pick(aspects ?? {}, powerAspects))
   );
 
+  const elementXexts$ = elementStack.element$.pipe(
+    switchMapIfNotNull((element) => element.xexts$)
+  );
+  const description$ = combineLatest([
+    elementStack.description$,
+    isMastered$,
+    elementXexts$,
+  ]).pipe(
+    map(([description, isMastered, xexts]) => {
+      let result = description;
+
+      if (isMastered && xexts) {
+        const firstKey = Object.keys(xexts).find((x) => xextIntroMatch.test(x));
+        console.log("Mastered book with xexts", xexts, "firstKey", firstKey);
+        if (firstKey) {
+          result = description + "\n\n" + xexts[firstKey];
+        }
+
+        const finalKey = Object.keys(xexts).find((x) => xextFinalMatch.test(x));
+        if (finalKey) {
+          result = description + "\n\n" + xexts[finalKey];
+        }
+      }
+
+      return result;
+    })
+  );
+
   return decorateObjectInstance(elementStack, {
     get id() {
       return elementStack.id;
@@ -99,6 +137,7 @@ function elementStackToBook(
     memoryElementId$,
     memoryLabel$,
     memoryAspects$,
+    description$,
     // Journal has a lot of complex unique recipes that we are not dealing with currently.
     read() {
       if (elementStack.elementId.startsWith("uncatbook.")) {
