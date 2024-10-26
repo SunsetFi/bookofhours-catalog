@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0
+
+- Allow controlling what columns are visible in table views.
+- Fix production build crash on load.
+
 ## 1.3.0
 
 - Update notifications
