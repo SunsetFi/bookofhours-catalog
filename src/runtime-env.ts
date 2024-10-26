@@ -19,4 +19,4 @@ export const isProd: boolean = process.env.NODE_ENV === "production";
 
 export const keyboardModifierUseMeta = osPlatform === "mac";
 
-export const version = (window as any).VERSION as string;
+export const version = __APP_VERSION__;

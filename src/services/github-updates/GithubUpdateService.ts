@@ -4,6 +4,7 @@ import { inject, injectable, singleton } from "microinject";
 import { version } from "@/runtime-env";
 import { GithubRelease, getGithubReleases } from "@/github";
 import { promiseFuncToObservable } from "@/observables";
+
 import { SettingsManager } from "../settings";
 
 @injectable()
@@ -28,6 +29,11 @@ export class GithubUpdateService {
         map((releases) => {
           const latestRelease = releases[0];
           if (!latestRelease) {
+            return null;
+          }
+
+          if (!version) {
+            console.error("No version found in runtime env.");
             return null;
           }
 
