@@ -1,6 +1,6 @@
 {
   "name": "bookofhours-catalog",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Web frontend for Book of Hours",
   "scripts": {
     "clean": "rimraf dist",
