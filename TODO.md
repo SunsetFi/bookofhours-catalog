@@ -31,7 +31,8 @@
 - List of salons (salon.\*)
   - venue.formal, venue.informal, venue.picnicking
   - Some require certain seasons
-  - Forbidden items (cant serve alchlohol with hall of voices afternoon tea)
+  - Forbidden items (cant serve intoxicating with hall of voices afternoon tea)
   - formal events need side dishes
-  - informal events cannot serve alchlohol
+  - informal events cannot serve intoxicating
   - Informal events must be in morning or afternoon.
+  - ...other rules
