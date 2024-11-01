@@ -250,6 +250,11 @@ function ObservableDataGrid<T extends {}>({
         {rows.map((row) => {
           return <ObservableTableRow key={row.id} row={row} />;
         })}
+        {/*
+        Create an empty row that takes up all space but collapses to nothing if needed.
+        This is to stop rows expanding equally to fill all space if there are not enough
+        items to fill the table.
+        */}
         <TableRow aria-hidden="true" sx={{ p: 0, height: "100%" }}>
           <TableCell sx={{ p: 0 }} colSpan={totalColumns} />
         </TableRow>
