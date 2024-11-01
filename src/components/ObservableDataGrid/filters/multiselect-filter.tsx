@@ -27,7 +27,7 @@ export type MultiSelectFilterValue<T> = {
 
 export interface MultiselectOptionsFilterProps<T>
   extends FilterComponentProps<MultiSelectFilterValue<T>, T> {
-  allowedValues: any[];
+  allowedValues: any[] | Record<any, string>;
 }
 
 const defaultFilterValue: MultiSelectFilterValue<any> = {
@@ -118,6 +118,22 @@ export function MultiselectFilter<T>({
 
   const [search, setSearch] = React.useState<string>("");
 
+  const allowedValueValues = React.useMemo(
+    () =>
+      Array.isArray(allowedValues) ? allowedValues : Object.keys(allowedValues),
+    [allowedValues]
+  );
+  const allowedValueLabels = React.useMemo(
+    () =>
+      Array.isArray(allowedValues)
+        ? allowedValues.reduce((acc, value) => {
+            acc[value] = value;
+            return acc;
+          }, {})
+        : allowedValues,
+    [allowedValues]
+  );
+
   return (
     <Box
       sx={{
@@ -132,7 +148,7 @@ export function MultiselectFilter<T>({
         onModeChange={onModeChanged}
         itemsSelected={desiredValues.length > 0}
         onClear={() => onValuesChanged([])}
-        onSelectAll={() => onValuesChanged(allowedValues)}
+        onSelectAll={() => onValuesChanged(allowedValueValues)}
       />
       <TextField
         sx={{ mx: 1, mt: 1 }}
@@ -149,11 +165,13 @@ export function MultiselectFilter<T>({
           overflow: "auto",
         }}
       >
-        {allowedValues
+        {allowedValueValues
           .filter(
             (item) =>
               search === "" ||
-              String(item).toLowerCase().includes(search.toLowerCase())
+              String(allowedValueLabels[item])
+                .toLowerCase()
+                .includes(search.toLowerCase())
           )
           .map((value) => (
             <ListItem key={value} disablePadding>
@@ -166,7 +184,7 @@ export function MultiselectFilter<T>({
                     disableRipple
                   />
                 </ListItemIcon>
-                <ListItemText primary={value} />
+                <ListItemText primary={allowedValueLabels[value]} />
               </ListItemButton>
             </ListItem>
           ))}

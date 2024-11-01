@@ -1,6 +1,7 @@
 import React from "react";
-import { combineLatest } from "rxjs";
+import { combineLatest, map } from "rxjs";
 import { Aspects } from "secrethistories-api";
+import { first, pick, values } from "lodash";
 
 import { Stack, Typography, IconButton, Box } from "@mui/material";
 
@@ -12,8 +13,11 @@ import {
 import { CellContext } from "@tanstack/react-table";
 
 import { useDIDependency } from "@/container";
-import { filterItems } from "@/observables";
+import { filterItems, switchMapIfNotNull } from "@/observables";
 
+import { venueAspectLabels, venueAspects } from "@/aspects";
+
+import { useSetting } from "@/services/settings";
 import {
   ConnectedTerrainModel,
   SituationModel,
@@ -33,6 +37,8 @@ import {
   AspectsFilter,
   FilterComponentProps,
   AspectsFilterValue,
+  multiSelectFilter,
+  MultiselectFilter,
 } from "@/components/ObservableDataGrid";
 import {
   RowHeight,
@@ -40,13 +46,20 @@ import {
 } from "@/components/ObservableDataGrid/constants";
 import AspectsList from "@/components/Aspects/AspectsList";
 import DataGridPage from "@/components/DataGridPage";
-import { useSetting } from "@/services/settings";
 
 const columnHelper = createObservableColumnHelper<ConnectedTerrainModel>();
 
+const WorkstationCellWidth = 425;
+
 const LocationsCatalogPage = () => {
   const tokensSource = useDIDependency(TokensSource);
-  const items$ = tokensSource.unsealedTerrains$;
+  const items$ = React.useMemo(
+    () =>
+      tokensSource.unsealedTerrains$.pipe(
+        filterItems((x) => x.id !== "!brancrug")
+      ),
+    []
+  );
 
   const columns = React.useMemo(
     () => [
@@ -163,10 +176,50 @@ const LocationsCatalogPage = () => {
         {
           id: "workstations",
           header: "Workstations",
-          size: 700,
+          size: WorkstationCellWidth,
           enableSorting: false,
           enableColumnFilter: false,
           cell: WorkstationsCell,
+        }
+      ),
+      // TODO: Only show if DLC is enabled.
+      columnHelper.observeText(
+        (item) =>
+          item.children$.pipe(
+            // TODO: Make a IsSalonSituation
+            filterItems(isSituationModel),
+            filterItems((x) => x.verbId.startsWith("salon.")),
+            map((x) => first(x) ?? null),
+            switchMapIfNotNull((x) =>
+              x.aspects$.pipe(
+                map((aspects) => first(Object.keys(aspects)) ?? null)
+              )
+            )
+          ),
+        {
+          id: "venue",
+          header: "Venue Type",
+          size: 175,
+          enableSorting: false,
+          enableColumnFilter: true,
+          cell: (props) => {
+            const aspect = props.getValue();
+            if (!aspect) {
+              return null;
+            }
+            return <Typography>{venueAspectLabels[aspect]}</Typography>;
+          },
+          filterFn: multiSelectFilter,
+          meta: {
+            filterComponent: (props) => {
+              return (
+                <MultiselectFilter
+                  allowedValues={venueAspectLabels}
+                  {...props}
+                />
+              );
+            },
+          },
         }
       ),
       columnHelper.observeText("description$" as any, {
@@ -188,11 +241,11 @@ const WorkstationsCell = (
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        flexWrap: "wrap",
-        justifyContent: "center",
+        display: "grid",
+        gridTemplateRows: "repeat(2, minmax(0px, 1fr))",
+        gridAutoFlow: "column",
         gap: 1,
+        maxWidth: WorkstationCellWidth,
         height: RowHeight - RowPaddingY * 2,
       }}
     >
@@ -225,7 +278,10 @@ const SituationLineItem = ({ situation }: SituationLineItemProps) => {
       }}
       onClick={() => orchestrator.openOrchestration({ situation })}
     >
-      <VerbIcon verbId={situation.verbId} />
+      <VerbIcon
+        sx={{ flexShrink: 0, width: "40px", height: "40px" }}
+        verbId={situation.verbId}
+      />
       <Typography variant="body2">{label}</Typography>
     </Box>
   );

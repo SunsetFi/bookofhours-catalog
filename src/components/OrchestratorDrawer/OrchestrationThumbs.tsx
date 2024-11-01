@@ -1,14 +1,18 @@
 import React from "react";
 import ReactDom from "react-dom";
 
-import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { map } from "rxjs";
+import { values } from "lodash";
+
+import { Box, Stack, Tooltip, Typography, useTheme } from "@mui/material";
+import { Error as ErrorIcon } from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
+import { formatSeconds } from "@/utils";
 
 import { Orchestrator, SituationModel } from "@/services/sh-game";
 
 import { useObservation } from "@/hooks/use-observation";
-import { formatSeconds } from "@/utils";
 
 const OrchestrationThumbs = () => {
   const orchestrator = useDIDependency(Orchestrator);
@@ -28,7 +32,7 @@ const OrchestrationThumbs = () => {
         pointerEvents: "none",
       }}
     >
-      <Stack direction="column" spacing={2} sx={{ m: 2 }}>
+      <Stack direction="column" spacing={3} sx={{ m: 2 }}>
         {executingSituations.map((situation) => (
           <SituationThumb key={situation.id} situation={situation} />
         ))}
@@ -55,19 +59,29 @@ const SituationThumb = ({ situation }: SituationThumbProps) => {
   const output = useObservation(situation.output$) ?? [];
   const timeRemaining = useObservation(situation.timeRemaining$) ?? Number.NaN;
 
+  const hasEmptyThresholds = useObservation(
+    () =>
+      situation.thresholdContents$.pipe(
+        map((contents) => values(contents).some((x) => x === null))
+      ),
+    [situation]
+  );
+
   if (!iconUrl) {
     return null;
   }
 
   let content: React.ReactNode = (
-    <img
-      style={{
-        width: ThumbSize,
-        height: ThumbSize,
-        borderRadius: ThumbSize / 2,
-      }}
-      src={iconUrl}
-    />
+    <Tooltip title={label}>
+      <img
+        style={{
+          width: ThumbSize,
+          height: ThumbSize,
+          borderRadius: ThumbSize / 2,
+        }}
+        src={iconUrl}
+      />
+    </Tooltip>
   );
 
   if (state === "Complete" && output.length > 0) {
@@ -121,6 +135,15 @@ const SituationThumb = ({ situation }: SituationThumbProps) => {
             zIndex: 1,
           }}
         >
+          {hasEmptyThresholds && (
+            <Tooltip title="Empty Card Slots" sx={{ mr: 1 }}>
+              <ErrorIcon
+                aria-hidden="false"
+                aria-label="Empty Card Slots"
+                fontSize="small"
+              />
+            </Tooltip>
+          )}
           {formatSeconds(timeRemaining)}
         </Typography>
       </>
@@ -129,7 +152,6 @@ const SituationThumb = ({ situation }: SituationThumbProps) => {
 
   return (
     <Box
-      title={label}
       sx={{
         width: 75,
         height: 75,

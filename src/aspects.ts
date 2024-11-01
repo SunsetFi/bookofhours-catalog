@@ -40,6 +40,29 @@ export const provisionsAspects = [
   "distributable",
 ] as const;
 
+export const courseAspects = [
+  "course.first",
+  "course.main",
+  "course.side",
+  "course.pudding",
+];
+
+export const venueAspects = [
+  "venue.formal",
+  "venue.informal",
+  "venue.picnicking",
+];
+
+// FIXME: Temp hack, we should probably pull this from the aspect model
+export const venueAspectLabels: Record<
+  ArrayItemOf<typeof venueAspects>,
+  string
+> = {
+  "venue.formal": "Formal",
+  "venue.informal": "Informal",
+  "venue.picnicking": "Picnicking",
+};
+
 export const workstationFilterAspects = [
   ...powerAspects,
   ...materialAspects,

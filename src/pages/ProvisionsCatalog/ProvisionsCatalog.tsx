@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 
 import { useDIDependency } from "@/container";
 
-import { powerAspects, provisionsAspects } from "@/aspects";
+import { courseAspects, powerAspects, provisionsAspects } from "@/aspects";
 
 import { TokensSource, filterHasAnyAspect } from "@/services/sh-game";
 
@@ -48,7 +48,13 @@ const ProvisionsCatalog = () => {
       columnHelper.location(),
       columnHelper.aspectsList("type", provisionsAspects, {
         header: "Type",
-        size: 200,
+        size: 150,
+        showLevel: false,
+      }),
+      // TODO: Only show if DLC is enabled
+      columnHelper.aspectsList("course", courseAspects, {
+        header: "Course",
+        size: 150,
         showLevel: false,
       }),
       columnHelper.aspectsList("power-aspects", powerAspects, {

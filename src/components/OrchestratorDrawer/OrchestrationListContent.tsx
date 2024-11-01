@@ -45,6 +45,7 @@ import {
 
 import FocusIconButton from "../FocusIconButton";
 import ScreenReaderContent from "../ScreenReaderContent";
+
 import OrchestrationContentHeader from "./OrchestratonContentHeader";
 
 const OrchestrationListContent = () => {
@@ -239,7 +240,6 @@ const SituationListItem = ({ situation }: SituationListItemProps) => {
   }
 
   const hasVerbLabel = verbLabel !== "." && verbLabel !== situation.verbId;
-  const hasSituationLabel = state !== "Unstarted";
 
   return (
     <ListItemButton

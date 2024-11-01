@@ -53,6 +53,7 @@ const supportedPayloadTypes: PayloadType[] = [
   "Situation",
   "WorkstationSituation",
   "RoomWorkSituation",
+  "SalonSituation" as any,
   "WisdomNodeTerrain",
 ];
 
@@ -167,28 +168,47 @@ export class TokensSource {
     return this._unlockingTerrainSituation$;
   }
 
+  private _salonSituations$: Observable<readonly SituationModel[]> | null =
+    null;
+  get salonSituations$() {
+    if (!this._salonSituations$) {
+      this._salonSituations$ = this._tokens$.pipe(
+        filterItems(isSituationModel),
+        filterItems((x) => x.verbId.startsWith("salon.")),
+        distinctUntilShallowArrayChanged(),
+        shareReplay(1)
+      );
+    }
+
+    return this._salonSituations$;
+  }
+
   private _visibleSituations$: Observable<SituationModel[]> | null = null;
   get visibleSituations$() {
     if (!this._visibleSituations$) {
       this._visibleSituations$ = combineLatest([
         this.fixedSituations$,
         this.arrivalSituations$,
+        this.salonSituations$,
         this.unlockingTerrainSituation$,
         this.unlockedWorkstations$,
         this.unlockedHarvestStations$,
       ]).pipe(
-        map(([fixed, arrival, unlock, workstations, harvestStations]) => {
-          const situations = [
-            ...fixed,
-            ...arrival,
-            ...workstations,
-            ...harvestStations,
-          ];
-          if (unlock) {
-            situations.push(unlock);
+        map(
+          ([fixed, arrival, salon, unlock, workstations, harvestStations]) => {
+            const situations = [
+              ...fixed,
+              ...arrival,
+              ...salon,
+              ...workstations,
+              ...harvestStations,
+            ];
+            if (unlock) {
+              situations.push(unlock);
+            }
+            return situations;
           }
-          return situations;
-        }),
+        ),
         shareReplay(1)
       );
     }

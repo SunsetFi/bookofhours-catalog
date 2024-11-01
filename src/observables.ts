@@ -159,7 +159,11 @@ export function switchMapIf<T, TM extends T, K>(
 export function switchMapIfNotNull<T, K>(
   mapping: (value: T) => Observable<K> | Promise<K>
 ) {
-  return switchMapIf<T | null, T, K | null>(isNotNull, mapping, Null$);
+  return switchMapIf<T | null | undefined, T, K | null>(
+    isNotNull,
+    mapping,
+    Null$
+  );
 }
 
 export function mapArrayItemsCached<T, R>(

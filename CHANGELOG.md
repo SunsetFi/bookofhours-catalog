@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0
+
+- DLC: Show salon verbs
+- DLC: Show Course type for food / provisions.
+- DLC: Show venue type for locations.
+- Show icon on ongoing verb thumbs when a card slot is unfulfilled
+
 ## 1.4.0
 
 - Allow controlling what columns are visible in table views.

@@ -11,9 +11,27 @@
 - Clean up awaitIdle hack with SituationModel
 - Show ElementStackIcon instead of ElementIcon for skills in crafting page, so tooltip is correct regarding aspects.
 
+- Orchestration autofill: Pick highest card that works without going over.
+
 ## Maybe
 
 - Turn unlock dialog into another orchestration type.
 - Prompt / toast the user for empty slots or new notes in recipes after time skip.
 - Flip over element stacks. Before using them? Automatically on finding them?
+
   - Recipe executor can make use of flipped over cards, confusing the game
+
+- Autofill orchestration for reading books doesnt pull in the language
+
+## DLC
+
+- Recipe list for foods and such
+  - show course of item
+- Only show provisions course if DLC is present.
+- List of salons (salon.\*)
+  - venue.formal, venue.informal, venue.picnicking
+  - Some require certain seasons
+  - Forbidden items (cant serve alchlohol with hall of voices afternoon tea)
+  - formal events need side dishes
+  - informal events cannot serve alchlohol
+  - Informal events must be in morning or afternoon.
