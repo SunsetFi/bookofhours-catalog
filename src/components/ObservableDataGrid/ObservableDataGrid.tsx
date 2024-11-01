@@ -250,8 +250,8 @@ function ObservableDataGrid<T extends {}>({
         {rows.map((row) => {
           return <ObservableTableRow key={row.id} row={row} />;
         })}
-        <TableRow aria-role="presentation" sx={{ height: "100%" }}>
-          <TableCell colSpan={totalColumns} />
+        <TableRow aria-hidden="true" sx={{ p: 0, height: "100%" }}>
+          <TableCell sx={{ p: 0 }} colSpan={totalColumns} />
         </TableRow>
       </TableBody>
     );
