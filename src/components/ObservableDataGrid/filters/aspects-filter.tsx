@@ -197,7 +197,7 @@ export const AspectsFilter = ({
       />
       {widgetMode === "grid" && (
         <AspectSelectionGrid
-          sx={{ justifyContent: "center" }}
+          sx={{ alignSelf: "center", justifyContent: "center" }}
           items={choices}
           value={aspects}
           onChange={onAspectsChanged}
@@ -211,7 +211,7 @@ export const AspectsFilter = ({
           onChange={onAspectsChanged}
         />
       )}
-      <Divider />
+      <Divider sx={{ pt: 1 }} />
       <Button
         onClick={() =>
           onChangeWidgetMode(widgetMode === "list" ? "grid" : "list")
