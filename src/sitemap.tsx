@@ -30,6 +30,7 @@ import ToolsCatalogPage, {
 } from "./pages/ToolsCatalogPage";
 import WisdomTreePage from "./pages/WisdomTreePage";
 import WorkstationCatalogPage from "./pages/WorkstationCatalogPage";
+import CookingCatalogPage from "./pages/CookingCatalogPage";
 
 export interface SiteMapNavItem {
   label: string;
@@ -130,6 +131,13 @@ const sitemap: SiteMapItem[] = [
     searchProvider: craftingSearchProvider,
     Component: CraftingCatalogPage,
   },
+  // {
+  //   label: "Cooking",
+  //   iconSource: "aspect",
+  //   iconName: "sustenance",
+  //   path: "/cooking",
+  //   Component: CookingCatalogPage,
+  // },
   {
     divider: true,
   },

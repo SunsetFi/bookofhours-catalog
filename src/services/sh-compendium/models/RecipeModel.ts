@@ -30,7 +30,7 @@ export class RecipeModel
     });
   }
 
-  get recipeId() {
+  get id() {
     return this._id;
   }
 

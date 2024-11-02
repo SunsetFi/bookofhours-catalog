@@ -20,10 +20,10 @@ const PinRecipeIconButton = ({ sx, recipeId }: PinElementIconButtonProps) => {
   const recipeLabel = useObservation(recipe.label$);
 
   const pinnedRecipe = useObservation(pinboard.pinnedRecipe$) ?? {
-    recipeId: null,
+    id: null,
   };
 
-  const isRecipePinned = pinnedRecipe.recipeId === recipeId;
+  const isRecipePinned = pinnedRecipe.id === recipeId;
 
   const onClick = React.useCallback(() => {
     if (isRecipePinned) {

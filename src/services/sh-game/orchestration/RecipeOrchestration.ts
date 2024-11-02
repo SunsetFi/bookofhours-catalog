@@ -249,10 +249,10 @@ export class RecipeOrchestration
     }
 
     try {
-      if (!(await situation.setRecipe(this._recipe.recipeId))) {
+      if (!(await situation.setRecipe(this._recipe.id))) {
         console.warn(
           "Failed to set recipe",
-          this._recipe.recipeId,
+          this._recipe.id,
           "for recipe orchestration"
         );
         return false;
@@ -264,7 +264,7 @@ export class RecipeOrchestration
         this._isExecuting = false;
         console.warn(
           "Failed to execute recipe",
-          this._recipe.recipeId,
+          this._recipe.id,
           "for recipe orchestration"
         );
         return false;

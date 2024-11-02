@@ -18,95 +18,92 @@ import { BookModel, useBooks } from "./books-data-source";
 
 const columnHelper = createElementStackColumnHelper<BookModel>();
 
+const columns = [
+  columnHelper.display({
+    id: "book-commands",
+    size: 50,
+    cell: (props) => {
+      return (
+        <Stack direction="column" alignItems="center">
+          <FocusIconButton token={props.row.original} />
+          <OrchestrationIconButton
+            interactivity="full"
+            onClick={() => props.row.original.read()}
+          />
+        </Stack>
+      );
+    },
+  }),
+  columnHelper.elementStackIcon(),
+  columnHelper.label(),
+  columnHelper.location(),
+  columnHelper.aspectsList("period", (s) => s.startsWith("period."), {
+    size: 125,
+    header: "Period",
+    showLevel: false,
+    enableSorting: false,
+  }),
+  columnHelper.aspectsList("mystery", (s) => s.startsWith("mystery."), {
+    header: "Mystery",
+    size: 175,
+  }),
+  columnHelper.aspectsList("mastery", (s) => s.startsWith("mastery."), {
+    header: "Mastery",
+    size: 125,
+    showLevel: false,
+    enableSorting: false,
+  }),
+  columnHelper.aspectsList("attributes", isBookAtributeAspect, {
+    header: "Attributes",
+    size: 200,
+    showLevel: false,
+    enableSorting: false,
+  }),
+  columnHelper.display({
+    id: "memory-commands",
+    size: 50,
+    cell: (props) => {
+      const memoryElementId = useObservation(
+        props.row.original.memoryElementId$
+      );
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {memoryElementId && (
+            <PinElementIconButton elementId={memoryElementId} />
+          )}
+        </Box>
+      );
+    },
+  }),
+  columnHelper.observe("memoryElementId$", {
+    id: "memory_icon",
+    header: "",
+    size: 100,
+    enableSorting: false,
+    enableColumnFilter: false,
+    cell: ElementIconCell,
+  }),
+  columnHelper.observeText("memoryLabel$", {
+    id: "memory",
+    header: "Memory",
+    size: 160,
+  }),
+  columnHelper.aspectsList("memory-aspects", powerAspects, {
+    header: "Memory Aspects",
+    size: 260,
+    aspectsSource: (model) => model.memoryAspects$,
+  }),
+  columnHelper.description(),
+];
+
 const BookCatalogPage = () => {
   const items$ = useBooks();
-
-  const columns = React.useMemo(
-    () => [
-      columnHelper.display({
-        id: "book-commands",
-        size: 50,
-        cell: (props) => {
-          return (
-            <Stack direction="column" alignItems="center">
-              <FocusIconButton token={props.row.original} />
-              <OrchestrationIconButton
-                interactivity="full"
-                onClick={() => props.row.original.read()}
-              />
-            </Stack>
-          );
-        },
-      }),
-      columnHelper.elementStackIcon(),
-      columnHelper.label(),
-      columnHelper.location(),
-      columnHelper.aspectsList("period", (s) => s.startsWith("period."), {
-        size: 125,
-        header: "Period",
-        showLevel: false,
-        enableSorting: false,
-      }),
-      columnHelper.aspectsList("mystery", (s) => s.startsWith("mystery."), {
-        header: "Mystery",
-        size: 175,
-      }),
-      columnHelper.aspectsList("mastery", (s) => s.startsWith("mastery."), {
-        header: "Mastery",
-        size: 125,
-        showLevel: false,
-        enableSorting: false,
-      }),
-      columnHelper.aspectsList("attributes", isBookAtributeAspect, {
-        header: "Attributes",
-        size: 200,
-        showLevel: false,
-        enableSorting: false,
-      }),
-      columnHelper.display({
-        id: "memory-commands",
-        size: 50,
-        cell: (props) => {
-          const memoryElementId = useObservation(
-            props.row.original.memoryElementId$
-          );
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              {memoryElementId && (
-                <PinElementIconButton elementId={memoryElementId} />
-              )}
-            </Box>
-          );
-        },
-      }),
-      columnHelper.observe("memoryElementId$", {
-        id: "memory_icon",
-        header: "",
-        size: 100,
-        enableSorting: false,
-        enableColumnFilter: false,
-        cell: ElementIconCell,
-      }),
-      columnHelper.observeText("memoryLabel$", {
-        id: "memory",
-        header: "Memory",
-        size: 160,
-      }),
-      columnHelper.aspectsList("memory-aspects", powerAspects, {
-        header: "Memory Aspects",
-        size: 260,
-        aspectsSource: (model) => model.memoryAspects$,
-      }),
-      columnHelper.description(),
-    ],
-    []
-  );
 
   return (
     <DataGridPage

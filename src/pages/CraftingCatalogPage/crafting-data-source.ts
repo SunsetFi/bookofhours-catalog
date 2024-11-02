@@ -69,7 +69,7 @@ function recipeToCraftableModel(
   );
 
   return {
-    id: recipeModel.recipeId,
+    id: recipeModel.id,
     iconUrl$: craftable$.pipe(
       switchMap((element) => element?.iconUrl$ ?? Null$)
     ),
@@ -95,7 +95,7 @@ function recipeToCraftableModel(
       }
 
       orchestrator.openOrchestration({
-        recipeId: recipeModel.recipeId,
+        recipeId: recipeModel.id,
         desiredElementIds: skill ? [skill.elementId] : [],
       });
     },
