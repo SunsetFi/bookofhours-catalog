@@ -14,6 +14,7 @@ import {
   EmptyObject$,
   Null$,
   filterItemObservations,
+  filterItems,
   switchMapIfNotNull,
 } from "@/observables";
 
@@ -162,6 +163,8 @@ export class FreeformUnstartedOrchestration
   get availableSituations$(): Observable<readonly SituationModel[]> {
     if (!this._availableSituations$) {
       this._availableSituations$ = this._tokensSource.visibleSituations$.pipe(
+        // Disallow salons for now.
+        filterItems((x) => x.payloadType !== "SalonSituation"),
         filterItemObservations((s) =>
           s.state$.pipe(map((s) => s === "Unstarted"))
         )

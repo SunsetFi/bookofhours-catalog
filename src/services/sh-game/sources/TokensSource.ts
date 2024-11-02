@@ -53,12 +53,12 @@ const supportedPayloadTypes: PayloadType[] = [
   "Situation",
   "WorkstationSituation",
   "RoomWorkSituation",
-  "SalonSituation" as any,
+  "SalonSituation",
   "WisdomNodeTerrain",
 ];
 
 const WisdomTreeCommittmentRegex =
-  /\~\/wisdomtreenodes\!([a-zA-Z0-9\.])+\/commitment/;
+  /^\~\/wisdomtreenodes\!([a-zA-Z0-9\.])+\/commitment/;
 
 @injectable()
 @singleton()
@@ -172,48 +172,15 @@ export class TokensSource {
     null;
   get salonSituations$() {
     if (!this._salonSituations$) {
-      this._salonSituations$ = this._tokens$.pipe(
+      this._salonSituations$ = this._visibleTokens$.pipe(
         filterItems(isSituationModel),
-        filterItems((x) => x.verbId.startsWith("salon.")),
+        filterItems((x) => x.payloadType === "SalonSituation"),
         distinctUntilShallowArrayChanged(),
         shareReplay(1)
       );
     }
 
     return this._salonSituations$;
-  }
-
-  private _visibleSituations$: Observable<SituationModel[]> | null = null;
-  get visibleSituations$() {
-    if (!this._visibleSituations$) {
-      this._visibleSituations$ = combineLatest([
-        this.fixedSituations$,
-        this.arrivalSituations$,
-        this.salonSituations$,
-        this.unlockingTerrainSituation$,
-        this.unlockedWorkstations$,
-        this.unlockedHarvestStations$,
-      ]).pipe(
-        map(
-          ([fixed, arrival, salon, unlock, workstations, harvestStations]) => {
-            const situations = [
-              ...fixed,
-              ...arrival,
-              ...salon,
-              ...workstations,
-              ...harvestStations,
-            ];
-            if (unlock) {
-              situations.push(unlock);
-            }
-            return situations;
-          }
-        ),
-        shareReplay(1)
-      );
-    }
-
-    return this._visibleSituations$;
   }
 
   private _unsealedTerrains$: Observable<
@@ -306,6 +273,39 @@ export class TokensSource {
     }
 
     return this._wisdomTreeNodes$;
+  }
+
+  private _visibleSituations$: Observable<SituationModel[]> | null = null;
+  get visibleSituations$() {
+    if (!this._visibleSituations$) {
+      this._visibleSituations$ = combineLatest([
+        this.fixedSituations$,
+        this.arrivalSituations$,
+        this.salonSituations$,
+        this.unlockingTerrainSituation$,
+        this.unlockedWorkstations$,
+        this.unlockedHarvestStations$,
+      ]).pipe(
+        map(
+          ([fixed, arrival, salon, unlock, workstations, harvestStations]) => {
+            const situations = [
+              ...fixed,
+              ...arrival,
+              ...salon,
+              ...workstations,
+              ...harvestStations,
+            ];
+            if (unlock) {
+              situations.push(unlock);
+            }
+            return situations;
+          }
+        ),
+        shareReplay(1)
+      );
+    }
+
+    return this._visibleSituations$;
   }
 
   private async _pollTokens() {

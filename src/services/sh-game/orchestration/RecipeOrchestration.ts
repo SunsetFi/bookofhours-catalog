@@ -310,6 +310,11 @@ export class RecipeOrchestration
     situation: SituationModel,
     desiredElementData: DesiredElementData[]
   ): boolean {
+    // Disallow salon situations for now
+    if (situation.payloadType === "SalonSituation") {
+      return false;
+    }
+
     // WARN: We rely on situation.thresholds, which is dependent on situation state and ongoing recipes.
     // We should be using verb thresholds, but we currently need to be synchronous here and cannot await the verb promise.
     // We might want to make this async to do that.

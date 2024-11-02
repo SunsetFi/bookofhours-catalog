@@ -186,9 +186,8 @@ const LocationsCatalogPage = () => {
       columnHelper.observeText(
         (item) =>
           item.children$.pipe(
-            // TODO: Make a IsSalonSituation
             filterItems(isSituationModel),
-            filterItems((x) => x.verbId.startsWith("salon.")),
+            filterItems((x) => x.payloadType === "SalonSituation"),
             map((x) => first(x) ?? null),
             switchMapIfNotNull((x) =>
               x.aspects$.pipe(
