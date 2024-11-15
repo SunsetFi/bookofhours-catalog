@@ -53,7 +53,7 @@ However, the Catalogue also has features that allow you interact with the game t
 
 To enable these features, click the `Settings` option under the menu, which is accessible at the top left of the page when a save is loaded.
 
-When enababled, there are two options for how much interactivity to provide:
+When enabled, there are two options for how much interactivity to provide:
 
 - Minimal mode lets you control verbs and workstations and start recipes through the Activites Panel, but provides no help in doing so. To run a recipe, you need to choose the workstation and cards to do so.
 - Full mode adds automatic recipe execution for things like reading books and crafting items from skills. With this mode, the Catalogue provides the option of automatically choosing an appropriate workstation and slotting the appropriate cards for crafting the recipe. It should be noted that the only crafting recipes it will let you autocomplete are the recipes you have already discovered and unlocked on your own.
