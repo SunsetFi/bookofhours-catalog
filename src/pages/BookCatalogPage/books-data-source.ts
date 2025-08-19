@@ -115,12 +115,12 @@ function elementStackToBook(
       if (isMastered && xexts) {
         const firstKey = Object.keys(xexts).find((x) => xextIntroMatch.test(x));
         if (firstKey) {
-          result = description + "\n\n" + xexts[firstKey];
+          result = result + "\n\n" + xexts[firstKey];
         }
 
         const finalKey = Object.keys(xexts).find((x) => xextFinalMatch.test(x));
         if (finalKey) {
-          result = description + "\n\n" + xexts[finalKey];
+          result = result + "\n\n" + xexts[finalKey];
         }
       }
 
