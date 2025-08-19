@@ -2,11 +2,13 @@
   "name": "bookofhours-catalog",
   "version": "1.4.0",
   "description": "Web frontend for Book of Hours",
+  "type": "module",
   "scripts": {
     "clean": "rimraf dist",
     "postinstall": "rimraf node_modules/.vite",
     "prebuild": "npm run clean",
     "build": "cross-env NODE_ENV=production vite build",
+    "typecheck": "tsc --noEmit",
     "preview": "cross-env NODE_ENV=development vite preview",
     "start": "cross-env NODE_ENV=development vite",
     "watch-errors": "tsc --noEmit --watch"
