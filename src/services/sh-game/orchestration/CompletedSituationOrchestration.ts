@@ -11,7 +11,11 @@ import { CompletedOrchestration, OrchestrationBase } from "./types";
 export class CompletedSituationOrchestration
   implements OrchestrationBase, CompletedOrchestration
 {
-  constructor(private readonly _situation: SituationModel) {}
+  private readonly _situation$: BehaviorSubject<SituationModel>;
+
+  constructor(private readonly _situation: SituationModel) {
+    this._situation$ = new BehaviorSubject(this._situation);
+  }
 
   _dispose() {}
 
@@ -36,7 +40,6 @@ export class CompletedSituationOrchestration
     return EmptyObject$;
   }
 
-  private readonly _situation$ = new BehaviorSubject(this._situation);
   get situation$(): Observable<SituationModel | null> {
     return this._situation$;
   }

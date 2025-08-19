@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2023",
     "jsx": "react",
 
     "module": "es2022",
@@ -13,7 +13,7 @@
 
     "downlevelIteration": true,
 
-    "lib": ["dom", "es2015"],
+    "lib": ["dom"],
 
     "strict": true,
 
