@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1
+
+- Fix book descriptions on mastered books not including the reading intro.
+
 ## 1.5.0
 
 - DLC: Show salon verbs
