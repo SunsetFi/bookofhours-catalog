@@ -70,14 +70,25 @@ When enabled, there are two options for how much interactivity to provide:
 - Minimal mode lets you control verbs and workstations and start recipes through the Activites Panel, but provides no help in doing so. To run a recipe, you need to choose the workstation and cards to do so.
 - Full mode adds automatic recipe execution for things like reading books and crafting items from skills. With this mode, the Catalogue provides the option of automatically choosing an appropriate workstation and slotting the appropriate cards for crafting the recipe. It should be noted that the only crafting recipes it will let you autocomplete are the recipes you have already discovered and unlocked on your own.
 
+## Troubleshooting
+
+Check the [Player.log](#playerlog):
+
+- If you do **not** see `[Message:   BepInEx] BepInEx 5.4.23.4 - bh (9/26/2025 5:17:09 PM)` or something similar, ensure BepInEx is installed correctly for your operating system.
+- If you see the above, but do **not** see `[Info   :Secret Histories RESTAPI] Secret Histories RESTAPI BepnEx plugin loaded.`, ensure this mod is properly installed in the right BepInEx plugin folder.
+  - Particularly, check for folders-in-folders; the dlls should be in `Book of Hours/BepInEx/plugins/SHRest`, not in sub-folders of that path.
+- If you see `SHRestAPI bep plugin destroyed`, set `HideManagerGameObject` to true in the BepInEx config.
+
 ## Support
 
 If you are having issues getting this mod to work, support is offered in two places:
 
 - In the [Github Issues](https://github.com/SunsetFi/bookofhours-catalog/issues) page for this project.
-- In the [Cultist Simulator fan discord](https://discord.gg/KxyFTZkUbQ), by pinging me (SunsetFi) in the #mod-development channel.
+- In the [Cultist Simulator fan discord](https://discord.gg/KxyFTZkUbQ), by pinging @SunsetFi in the #mod-development channel.
 
-In order to diagnose issues, I will need the `Player.log` log file from your game. On Windows, this is found at `C:\Users\<username>\AppData\LocalLow\Weather Factory\Book of Hours\Player.log`
+### Player.log
+
+In order to diagnose issues, I will need the `Player.log` log file from your game. On Windows, this is found at `C:\Users\<username>\AppData\LocalLow\Weather Factory\Book of Hours\Player.log`. On Linux, this is found at `~/.config/unity3d/Weather Factory/Book of Hours/Player.log`
 
 ## Features
 
