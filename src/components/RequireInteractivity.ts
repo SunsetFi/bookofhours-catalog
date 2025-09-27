@@ -11,18 +11,18 @@ export interface RequireInteractivityProps {
   compare: "equal" | "greater" | "less";
   children: React.ReactNode;
 }
-const RequireInteractivity = ({
+const RequireInteractivity: React.FC<RequireInteractivityProps> = ({
   interactivity,
   compare,
   children,
-}: RequireInteractivityProps) => {
+}) => {
   const value = useSetting("interactivity");
 
   const currentPrecidence = value ? InteractivityPrecidence[value] : -1;
   const requiredPrecidence = InteractivityPrecidence[interactivity];
 
   if (value === undefined) {
-    return;
+    return null;
   }
 
   const enabled = (() => {
