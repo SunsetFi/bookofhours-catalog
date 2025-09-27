@@ -57,7 +57,7 @@ export const ContainerProvider: React.FC<ContainerProviderProps> = ({
 };
 
 export function useDIContainer(): Container {
-  // Uised to use a context, but that caused the default value to get passed on hot reloads to components,
+  // Used to use a context, but that caused the default value to get passed on hot reloads to components,
   // erroring out as bindings are not found.
   return container;
 }
