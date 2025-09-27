@@ -41,7 +41,7 @@ This project provides two zip files depending on your situation:
 
 ### Linux and Mac users
 
-Do not use Quickstart. Install [BepInEx manually](https://docs.bepinex.dev/articles/user_guide/installation/index.html) according to your operating system, and use the BepInEx.Plugin package.
+Do not use Quickstart. Install the 64 bit version of BepInEx 5.x for your operating system [using the official instructions](https://docs.bepinex.dev/articles/user_guide/installation/index.html), and install the BepInEx.Plugin package from this mod.
 
 Note that some games require you to install the Windows version of BepInEx regardless of your operating system, but Book of Hours is not one of them.
 
