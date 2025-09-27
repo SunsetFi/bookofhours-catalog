@@ -44,7 +44,6 @@ const OrchestrationSlotEditor = React.memo(
       [recipeRequiredAspects]
     );
 
-    // Remove the power aspects from these since that will be displayed by the workstation hints.
     const requiredAspects = Object.keys(slot.spec.required);
     const essentialAspects = Object.keys(slot.spec.essential);
 
