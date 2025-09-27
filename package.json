@@ -39,8 +39,8 @@
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^5.18.0",
-    "@mui/material": "^5.18.0",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/material": "^7.3.2",
     "@popperjs/core": "^2.11.8",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/table-core": "^8.21.3",
