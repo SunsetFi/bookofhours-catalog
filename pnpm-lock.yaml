@@ -66,8 +66,8 @@ importers:
         specifier: ^7.8.2
         version: 7.8.2
       scheduler:
-        specifier: ^0.23.2
-        version: 0.23.2
+        specifier: ^0.26.0
+        version: 0.26.0
       secrethistories-api:
         specifier: ^1.42.0
         version: 1.42.0
@@ -1337,6 +1337,9 @@ packages:
 
   scheduler@0.23.2:
     resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
+
+  scheduler@0.26.0:
+    resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
 
   secrethistories-api@1.42.0:
     resolution: {integrity: sha512-9FIcFSSkQJxlGuIPCypU+Zw+kNbhQJsh9R4rVkfPfHSF+Bq8IJXNN3yFD66539i6KlkR+sZT8IMKYZcT7caoXA==}
@@ -2717,6 +2720,8 @@ snapshots:
   scheduler@0.23.2:
     dependencies:
       loose-envify: 1.4.0
+
+  scheduler@0.26.0: {}
 
   secrethistories-api@1.42.0:
     dependencies:
