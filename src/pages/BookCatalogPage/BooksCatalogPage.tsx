@@ -34,7 +34,7 @@ const columns = [
       );
     },
   }),
-  columnHelper.elementStackIcon(),
+  columnHelper.elementStackIcon("Book Icon"),
   columnHelper.label(),
   columnHelper.location(),
   columnHelper.aspectsList("period", (s) => s.startsWith("period."), {
@@ -62,6 +62,9 @@ const columns = [
   columnHelper.display({
     id: "memory-commands",
     size: 50,
+    meta: {
+      columnName: "Pin Memory",
+    },
     cell: (props) => {
       const memoryElementId = useObservation(
         props.row.original.memoryElementId$,
@@ -87,6 +90,9 @@ const columns = [
     size: 100,
     enableSorting: false,
     enableColumnFilter: false,
+    meta: {
+      columnName: "Memory Icon",
+    },
     cell: ElementIconCell,
   }),
   columnHelper.observeText("memoryLabel$", {

@@ -62,6 +62,9 @@ const SkillsCatalogPage = () => {
         id: "upgrade-button",
         header: "",
         size: 30,
+        meta: {
+          columnName: "Upgrade",
+        },
         cell: (context) => <SkillUpgradeButton model={context.row.original} />,
       }),
       columnHelper.elementStackIcon(),

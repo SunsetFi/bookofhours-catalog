@@ -40,7 +40,7 @@ export function createElementStackColumnHelper<
         rowHeader: true,
         ...def,
       }),
-    elementStackIcon: () =>
+    elementStackIcon: (columnName: string = "Icon") =>
       columnHelper.display({
         id: "icon",
         header: "",
@@ -56,6 +56,9 @@ export function createElementStackColumnHelper<
             elementStack={undecorateObjectInstance(context.row.original)}
           />
         ),
+        meta: {
+          columnName,
+        },
       }),
     aspectsList: (
       id: string,

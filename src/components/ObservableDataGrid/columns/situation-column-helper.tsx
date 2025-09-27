@@ -40,13 +40,16 @@ export function createSituationColumnHelper<
         },
         ...def,
       }),
-    verbIcon: () =>
+    verbIcon: (columnName: string = "Icon") =>
       columnHelper.observe("verbId$" as any, {
         id: "icon",
         header: "",
         size: 100,
         enableSorting: false,
         enableColumnFilter: false,
+        meta: {
+          columnName,
+        },
         cell: VerbIconCell,
       }),
     aspectsList: (

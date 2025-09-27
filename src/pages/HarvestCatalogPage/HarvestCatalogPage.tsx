@@ -21,6 +21,9 @@ const HarvestCatalogPage = () => {
         id: "focus-button",
         header: "",
         size: 50,
+        meta: {
+          columnName: "Focus",
+        },
         cell: ({ row }) => (
           <Box
             sx={{

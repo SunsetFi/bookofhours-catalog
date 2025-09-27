@@ -12,5 +12,6 @@ export interface FilterComponentProps<
 declare module "@tanstack/table-core" {
   interface ColumnMeta<TData extends RowData, TValue> {
     filterComponent?: React.ComponentType<FilterComponentProps>;
+    columnName?: string;
   }
 }
