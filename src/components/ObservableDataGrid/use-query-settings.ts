@@ -18,7 +18,7 @@ export type UseQuerySettings = Required<
   >
 >;
 
-export function useQuerySettings(): UseQuerySettings {
+export function useDataGridQuerySettings(): UseQuerySettings {
   const [queryObject, setQueryObject] = useQueryObjectState();
 
   const sorting = queryObject["sort-by"] ?? null;

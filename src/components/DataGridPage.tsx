@@ -4,7 +4,7 @@ import {
   IdentifierItemDataGrid,
   IdentifierItemDataGridProps,
   IdentifierItem,
-  useQuerySettings,
+  useDataGridQuerySettings,
 } from "./ObservableDataGrid";
 
 import PageContainer from "./PageContainer";
@@ -21,7 +21,7 @@ function DataGridPage<T extends IdentifierItem>({
   title,
   ...props
 }: DataGridPageProps<T>) {
-  const settings = useQuerySettings();
+  const settings = useDataGridQuerySettings();
 
   return (
     <PageContainer title={title}>
