@@ -73,7 +73,7 @@ const SearchDialog = () => {
     <Dialog
       open
       PaperProps={{
-        "aria-model": "true",
+        "aria-modal": "true",
         role: "document",
       }}
       aria-label="Search"
