@@ -1,5 +1,5 @@
 import React from "react";
-import { Router } from "react-router-dom";
+import { Router } from "react-router";
 
 import { useHistory } from "./hooks";
 
@@ -29,7 +29,6 @@ const AppRouter = ({ children }: AppRouterProps) => {
       location={state.location}
       navigationType={state.action}
       navigator={history}
-      future={{ v7_relativeSplatPath: true }}
     />
   );
 };

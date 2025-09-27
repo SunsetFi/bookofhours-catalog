@@ -1,6 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router";
-import { Link } from "react-router-dom";
+import { useLocation, Link } from "react-router";
 import {
   Divider,
   Box,
@@ -12,6 +11,8 @@ import {
 } from "@mui/material";
 import { GitHub as GithubIcon } from "@mui/icons-material";
 
+import { repositoryUrl } from "@/github";
+
 import SixthHistoryIcon from "@/assets/icons/sixthhistory.svg?react";
 
 import sitemap, {
@@ -20,8 +21,8 @@ import sitemap, {
   isSiteMapDividerItem,
   isSiteMapNavItem,
 } from "@/sitemap";
+
 import LicenseDialog from "./LicenseDialog";
-import { repositoryUrl } from "@/github";
 
 const PageTabs = () => {
   const [licenseOpen, setLicenseOpen] = React.useState(false);

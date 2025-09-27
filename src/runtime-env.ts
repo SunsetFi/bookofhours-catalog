@@ -10,10 +10,10 @@ const osPlatform = (platform.os && platform.os.family) || "unknown";
 export const OSType: OSType = OS_WINDOWS.test(osPlatform)
   ? "windows"
   : OS_MAC.test(osPlatform)
-  ? "mac"
-  : OS_LINUX.test(osPlatform)
-  ? "linux"
-  : "unknown";
+    ? "mac"
+    : OS_LINUX.test(osPlatform)
+      ? "linux"
+      : "unknown";
 
 export const isProd: boolean = import.meta.env.PROD;
 
