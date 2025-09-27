@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.5.1
+## 1.5.2
+
+- Fix certain table columns not having names in table settings.
+
+## 1.5.1 (Mislabeled as tag v1.4.1)
 
 - Fix book descriptions on mastered books not including the reading intro.
 

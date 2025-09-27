@@ -1,6 +1,6 @@
 {
   "name": "bookofhours-catalog",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Web frontend for Book of Hours",
   "type": "module",
   "scripts": {
