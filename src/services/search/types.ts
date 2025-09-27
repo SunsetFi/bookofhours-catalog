@@ -27,7 +27,7 @@ export interface SearchItemResult {
   label: string;
   secondaryText?: string;
   path: string;
-  actions?: React.ReactNode[];
+  actions?: React.ReactElement[];
 }
 
 export type SearchProviderPipe = (

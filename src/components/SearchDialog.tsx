@@ -200,7 +200,9 @@ const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
   if (item.actions) {
     actions = (
       <Stack direction="row" sx={{ ml: "auto" }}>
-        {item.actions}
+        {item.actions.map((action, i) =>
+          React.cloneElement(action, { key: i })
+        )}
       </Stack>
     );
   }
