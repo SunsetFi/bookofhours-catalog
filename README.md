@@ -45,7 +45,7 @@ Do not use the Quickstart.
 
 - Install the 64 bit version of BepInEx 5.x for your operating system [using the official instructions](https://docs.bepinex.dev/articles/user_guide/installation/index.html).
 - Run the game once, to generate the config file.
-  - Note: Linux users will need to run the game by the `run_bepinex.sh` script provided by BepInEx.
+  - Note: You will need to run the game by the `run_bepinex.sh` script provided by BepInEx.
 - Go to `steamapps/common/Book Of Hours/BepInEx/config`, edit `BepInEx.cfg`, and change `HideManagerGameObject = false` to `HideManagerGameObject = true`
 - Install the BepInEx.Plugin package from this mod.
 
