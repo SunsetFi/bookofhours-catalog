@@ -39,6 +39,12 @@ This project provides two zip files depending on your situation:
     - This should result in a BepInEx folder and a `winhttp.dll` file in your Book of Hours directory.
     - You should NOT see a folder called "Hush.House.Catalogue.Quickstart" in your Book of Hours directory. Some zip tools will create this folder when extracting the zip. If you see this, copy the contents of that folder back into your Book of Hours folder, and delete the "Hush.House.Catalogue.Quickstart" folder afterwards.
 
+### Linux and Mac users
+
+Do not use Quickstart. Install [BepInEx manually](https://docs.bepinex.dev/articles/user_guide/installation/index.html) according to your operating system, and use the BepInEx.Plugin package.
+
+Note that some games require you to install the Windows version of BepInEx on your native operating system, but Book of Hours is not one of them.
+
 ## Usage
 
 This project is best used in the browser of your choice while the game runs in windowed mode. However, the website can also be accessed from the Steam Overlay if you prefer to run the game in fullscreen.
