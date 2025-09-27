@@ -457,19 +457,23 @@ Displays comforts and wall art around the house. This is an esoteric assortment 
 This project requires [Secret Histories API](https://github.com/SunsetFi/secrethistories-api-mod/) to be installed in Book of Hours. Without it, this project cannot access the game engine and will be unable
 to display any data.
 
-### Building the project
-
 This project uses [NodeJS](https://nodejs.org) as a build engine.
 
-Once installed, the project dependencies can be installed with `npm install`, and the project itself can be built with `npm run build`.
+This project manages packages using [PNPM](https://pnpm.io/)
+
+### Building the project
+
+Use `pnpm build` to build the web portion of this project.
+
+Built content should be copied to `BepInEx/plugins/SHRest/web-content/catalogue`.
 
 ### How to run locally
 
-This project can be ran in one of two ways:
+This project can be ran locally in one of two ways:
 
 #### From the dev server
 
-Run `npm start` in the root folder of the project to compile and run the webapp. It will then be available at `http://localhost:8080/catalogue`
+Run `pnpm start` in the root folder of the project to compile and run the webapp. It will then be available at `http://localhost:8080/catalogue`
 
 #### From the Secret Histories API
 
