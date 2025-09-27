@@ -31,7 +31,7 @@ export class DialogService {
   }
 
   private readonly _currentDialog$ = this._currentDialogDetails$.pipe(
-    map((details) => details?.model ?? null)
+    map((details) => details?.model ?? null),
   );
   get currentDialog$() {
     return this._currentDialog$;
@@ -52,12 +52,12 @@ export class DialogService {
       model = new ActionPromptDialogModel(
         request.text,
         request.actions,
-        this._resolveDialog.bind(this)
+        this._resolveDialog.bind(this),
       );
     } else if (isComponentDialogRequest(request)) {
       model = new ComponentDialogModel(
         request.component,
-        this._resolveDialog.bind(this)
+        this._resolveDialog.bind(this),
       );
     }
 
@@ -79,7 +79,7 @@ export class DialogService {
 
   closeDialog(dialogPromise: Promise<string | null>) {
     const index = this._dialogDetailQueue.findIndex(
-      ({ promise }) => promise === dialogPromise
+      ({ promise }) => promise === dialogPromise,
     );
     if (index === -1) {
       return;

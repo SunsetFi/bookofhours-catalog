@@ -25,5 +25,5 @@ export default composeModules(
   shCompendiumModule,
   shMonitorModule,
   shApiModule,
-  updatePollerModule
+  updatePollerModule,
 );

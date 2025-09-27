@@ -139,7 +139,7 @@ const WisdomTreePage = () => {
                       <WisdomNodeSlot
                         sx={{ gridRow: i + 1, gridColumn: ni + 2 }}
                         wisdomLabel={`${wisdom.name} ${toRomanNumerals(
-                          ni + 1
+                          ni + 1,
                         )}`}
                         key={node.id}
                         node={node}

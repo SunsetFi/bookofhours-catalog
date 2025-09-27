@@ -32,37 +32,37 @@ export interface EnhancedColumnDefBase<TData extends RowData, TValue = unknown>
 
 export type EnhancedDisplayColumnDef<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > = EnhancedColumnDefBase<TData, TValue> & ColumnIdentifiers<TData, TValue>;
 
 interface EnhancedAccessorKeyColumnDefBase<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > extends EnhancedColumnDefBase<TData, TValue> {
   id?: string;
   accessorKey: (string & {}) | keyof TData;
 }
 export type EnhancedAccessorKeyColumnDef<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > = EnhancedAccessorKeyColumnDefBase<TData, TValue> &
   Partial<ColumnIdentifiers<TData, TValue>>;
 
 interface EnhancedAccessorFnColumnDefBase<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > extends EnhancedColumnDefBase<TData, TValue> {
   accessorFn: AccessorFn<TData, TValue>;
 }
 export type EnhancedAccessorFnColumnDef<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > = EnhancedAccessorFnColumnDefBase<TData, TValue> &
   ColumnIdentifiers<TData, TValue>;
 
 export type EnhancedAccessorColumnDef<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > =
   | EnhancedAccessorKeyColumnDef<TData, TValue>
   | EnhancedAccessorFnColumnDef<TData, TValue>;
@@ -73,47 +73,47 @@ export type EnhancedAccessorColumnDef<
 
 export type ObservableAccessorFn<TData extends RowData, TValue = unknown> = (
   originalRow: TData,
-  index: number
+  index: number,
 ) => Observable<TValue>;
 
 interface ObservableAccessorFnColumnDefBase<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > extends EnhancedColumnDefBase<TData, TValue> {
   observationFn: ObservableAccessorFn<TData, TValue>;
 }
 export type ObservableAccessorFnColumnDef<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > = ObservableAccessorFnColumnDefBase<TData, TValue> &
   ColumnIdentifiers<TData, TValue>;
 export function isObservableAccessorFnColumnDef<TData, TValue>(
-  column: ObservableColumnDef<TData, TValue>
+  column: ObservableColumnDef<TData, TValue>,
 ): column is ObservableAccessorFnColumnDef<TData, TValue> {
   return "observationFn" in column;
 }
 
 interface ObservableAccessorKeyColumnDefBase<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > extends EnhancedColumnDefBase<TData, TValue> {
   id?: string;
   observationKey: ObservableKeys<TData>;
 }
 export type ObservableAccessorKeyColumnDef<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > = ObservableAccessorKeyColumnDefBase<TData, TValue> &
   Partial<ColumnIdentifiers<TData, TValue>>;
 export function isObservableAccessorKeyColumnDef<TData, TValue>(
-  column: ObservableColumnDef<TData, TValue>
+  column: ObservableColumnDef<TData, TValue>,
 ): column is ObservableAccessorKeyColumnDef<TData, TValue> {
   return "observationKey" in column;
 }
 
 export type ObservableAccessorColumnDef<
   TData extends RowData,
-  TValue = unknown
+  TValue = unknown,
 > =
   | ObservableAccessorKeyColumnDef<TData, TValue>
   | ObservableAccessorFnColumnDef<TData, TValue>;

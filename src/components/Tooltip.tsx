@@ -27,7 +27,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
   const popperRef = React.useRef<PopperInstance>(null);
   const [anchorRef, setAnchorRef] = React.useState<HTMLDivElement | null>(null);
   const [contentRef, setContentRef] = React.useState<HTMLDivElement | null>(
-    null
+    null,
   );
 
   const [delayedFocus, setDelayedFocus] = React.useState(false);
@@ -35,7 +35,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
 
   const [immediateFocus, focusChange] = useDebounceCommitValue<boolean>(
     700,
-    setDelayedFocus
+    setDelayedFocus,
   );
 
   const open =
@@ -63,7 +63,7 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
         setEscaped(true);
       }
     },
-    [open]
+    [open],
   );
 
   const focusOff = React.useCallback(() => {

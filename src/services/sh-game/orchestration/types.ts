@@ -13,7 +13,7 @@ export interface RecipeOrchestrationRequest {
   desiredElementIds?: string[];
 }
 export function isRecipeOrchestrationRequest(
-  request: OrchestrationRequest
+  request: OrchestrationRequest,
 ): request is RecipeOrchestrationRequest {
   return "recipeId" in request;
 }
@@ -22,7 +22,7 @@ export interface SituationOrchestrationRequest {
   situation: SituationModel | null;
 }
 export function isSituationOrchestrationRequest(
-  request: OrchestrationRequest
+  request: OrchestrationRequest,
 ): request is SituationOrchestrationRequest {
   return "situation" in request;
 }
@@ -43,7 +43,7 @@ export interface OrchestrationBase {
    * @param situationState The current state of the orchestration's current situation.
    */
   _onSituationStateUpdated?(
-    situationState: SituationState
+    situationState: SituationState,
   ): SituationStateChangedResponse;
 
   _dispose(): void;
@@ -54,7 +54,7 @@ export interface VariableSituationOrchestration extends OrchestrationBase {
   selectSituation(situation: SituationModel | null): void;
 }
 export function isVariableSituationOrchestration(
-  orchestration: Orchestration
+  orchestration: Orchestration,
 ): orchestration is VariableSituationOrchestration {
   return "availableSituations$" in orchestration;
 }
@@ -65,7 +65,7 @@ export interface ThresholdedOrchestration extends OrchestrationBase {
   autofill(): Promise<void>;
 }
 export function isThresholdedOrchestration(
-  orchestration: Orchestration
+  orchestration: Orchestration,
 ): orchestration is ThresholdedOrchestration {
   return "slots$" in orchestration;
 }
@@ -75,7 +75,7 @@ export interface ContentContainingOrchestration extends OrchestrationBase {
   readonly content$: Observable<readonly ElementStackModel[]>;
 }
 export function isContentContainingOrchestration(
-  orchestration: Orchestration
+  orchestration: Orchestration,
 ): orchestration is ContentContainingOrchestration {
   return "content$" in orchestration;
 }
@@ -87,7 +87,7 @@ export interface ExecutableOrchestration
   execute(): Promise<boolean>;
 }
 export function isExecutableOrchestration(
-  orchestration: Orchestration
+  orchestration: Orchestration,
 ): orchestration is ExecutableOrchestration {
   return "canExecute$" in orchestration;
 }
@@ -99,7 +99,7 @@ export interface OngoingOrchestration
   passTime(): Promise<boolean>;
 }
 export function isOngoingOrchestration(
-  orchestration: Orchestration
+  orchestration: Orchestration,
 ): orchestration is OngoingOrchestration {
   return "passTime" in orchestration;
 }
@@ -109,7 +109,7 @@ export interface CompletedOrchestration extends ContentContainingOrchestration {
 }
 
 export function isCompletedOrchestration(
-  orchestration: Orchestration
+  orchestration: Orchestration,
 ): orchestration is CompletedOrchestration {
   return "conclude" in orchestration;
 }

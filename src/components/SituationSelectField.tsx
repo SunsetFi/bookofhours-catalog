@@ -37,14 +37,14 @@ interface SituationAutocompleteItem {
 }
 
 function observeSituationAutocomplete(
-  model: SituationModel
+  model: SituationModel,
 ): Observable<SituationAutocompleteItem> {
   return combineLatest([model.verbLabel$, model.state$]).pipe(
     map(([label, state]) => ({
       label,
       state,
       situation: model,
-    }))
+    })),
   );
 }
 
@@ -60,7 +60,7 @@ const SituationSelectField = ({
   let situations =
     useObservation(
       () => situations$.pipe(observeAllMap(observeSituationAutocomplete)),
-      [situations$]
+      [situations$],
     ) ?? null;
 
   if (!situations) {

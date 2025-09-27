@@ -34,7 +34,7 @@ export class Compendium {
       const model = new ElementModel(
         id,
         () => this._resolveElementById(id),
-        this._api
+        this._api,
       );
       this._elementModels.set(id, model);
     }
@@ -47,7 +47,7 @@ export class Compendium {
       const model = new AspectModel(
         id,
         () => this._resolveAspectById(id),
-        this._api
+        this._api,
       );
 
       this._aspectModels.set(id, model);

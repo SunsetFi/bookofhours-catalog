@@ -52,7 +52,7 @@ export class RecipeOrchestration
     VariableSituationOrchestration
 {
   private readonly _situation$ = new BehaviorSubject<SituationModel | null>(
-    null
+    null,
   );
 
   private readonly _availableSituations$: Observable<SituationModel[]>;
@@ -68,22 +68,22 @@ export class RecipeOrchestration
     private readonly _desiredElements: readonly ElementModel[],
     compendium: Compendium,
     tokensSource: TokensSource,
-    scheduler: BatchingScheduler
+    scheduler: BatchingScheduler,
   ) {
     super(tokensSource, scheduler);
 
     this._situationVerb$ = this._situation$.pipe(
       switchMapIfNotNull((situation) =>
-        compendium.getVerbById(situation.verbId)
-      )
+        compendium.getVerbById(situation.verbId),
+      ),
     );
 
     const desiredElementData$ = combineLatest(
       _desiredElements.map((element) =>
         combineLatest([element.aspects$, element.slots$]).pipe(
-          map(([aspects, slots]) => ({ element, aspects, slots }))
-        )
-      )
+          map(([aspects, slots]) => ({ element, aspects, slots })),
+        ),
+      ),
     ).pipe(shareReplay(1));
 
     this._availableSituations$ = combineLatest([
@@ -92,10 +92,10 @@ export class RecipeOrchestration
     ]).pipe(
       map(([situations, desiredElementData]) =>
         situations.filter((situation) =>
-          this._situationIsAvailable(situation, desiredElementData)
-        )
+          this._situationIsAvailable(situation, desiredElementData),
+        ),
       ),
-      shareReplay(1)
+      shareReplay(1),
     );
 
     // Select a default situation.
@@ -151,7 +151,7 @@ export class RecipeOrchestration
           }
 
           return label;
-        })
+        }),
       );
     }
 
@@ -180,7 +180,7 @@ export class RecipeOrchestration
 
           return null;
         }),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -210,7 +210,7 @@ export class RecipeOrchestration
           }
 
           return result;
-        })
+        }),
       );
     }
 
@@ -231,7 +231,7 @@ export class RecipeOrchestration
       this._canExecute$ = this._situation$.pipe(
         switchMapIfNotNull((s) => s.canExecute$),
         map((x) => x ?? false),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -253,7 +253,7 @@ export class RecipeOrchestration
         console.warn(
           "Failed to set recipe",
           this._recipe.id,
-          "for recipe orchestration"
+          "for recipe orchestration",
         );
         return false;
       }
@@ -265,7 +265,7 @@ export class RecipeOrchestration
         console.warn(
           "Failed to execute recipe",
           this._recipe.id,
-          "for recipe orchestration"
+          "for recipe orchestration",
         );
         return false;
       }
@@ -281,22 +281,22 @@ export class RecipeOrchestration
 
   protected _createSlotCandidateFilter(
     elementStack: ElementStackModel,
-    spec: SphereSpec
+    spec: SphereSpec,
   ): Observable<boolean> {
     const requirementKeys = Object.keys(this._recipe.requirements);
     // Our recipe is fixed, so filter candidates by its requirements.
     return elementStack.aspectsAndSelf$.pipe(
       map((aspects) => {
         return Object.keys(aspects).some((aspect) =>
-          requirementKeys.includes(aspect)
+          requirementKeys.includes(aspect),
         );
-      })
+      }),
     );
   }
 
   protected _slotCandidateWeight(
     item: ElementStackModel,
-    spec: SphereSpec
+    spec: SphereSpec,
   ): number {
     if (this._desiredElements.some((x) => x.elementId === item.elementId)) {
       // This is one of the elements we want, so mark it as more important.
@@ -308,7 +308,7 @@ export class RecipeOrchestration
 
   private _situationIsAvailable(
     situation: SituationModel,
-    desiredElementData: DesiredElementData[]
+    desiredElementData: DesiredElementData[],
   ): boolean {
     // Disallow salon situations for now
     if (situation.payloadType === "SalonSituation") {
@@ -365,8 +365,8 @@ export class RecipeOrchestration
           (t) =>
             Object.keys(t.essential).includes(aspect) ||
             (Object.keys(t.required).includes(aspect) &&
-              !Object.keys(t.forbidden).includes(aspect))
-        )
+              !Object.keys(t.forbidden).includes(aspect)),
+        ),
       )
     ) {
       return false;

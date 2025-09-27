@@ -66,8 +66,8 @@ const CraftingCatalogPage = () => {
         (item) =>
           item.aspects$.pipe(
             map((aspects) =>
-              pickBy(aspects, (_v, k) => filterCraftableAspect(k))
-            )
+              pickBy(aspects, (_v, k) => filterCraftableAspect(k)),
+            ),
           ),
         {
           id: "aspects",
@@ -83,7 +83,7 @@ const CraftingCatalogPage = () => {
             ),
           },
           cell: (props) => <AspectsListCell {...props} showLevel />,
-        }
+        },
       ),
       columnHelper.observe("skillElementId$", {
         id: "skill_icon",
@@ -119,7 +119,7 @@ const CraftingCatalogPage = () => {
         size: 300,
       }),
     ],
-    []
+    [],
   );
 
   return (

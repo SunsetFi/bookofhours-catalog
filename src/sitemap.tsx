@@ -49,7 +49,7 @@ export interface SiteMapDividerItem {
 }
 
 export function isSiteMapDividerItem(
-  item: SiteMapItem
+  item: SiteMapItem,
 ): item is SiteMapDividerItem {
   return (item as SiteMapDividerItem).divider === true;
 }

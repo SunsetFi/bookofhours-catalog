@@ -28,7 +28,7 @@ import { EnhancedColumnDefBase } from "../types";
 import { createObservableColumnHelper } from "./observable-column-helper";
 
 export function createElementStackColumnHelper<
-  T extends ElementStackModel = ElementStackModel
+  T extends ElementStackModel = ElementStackModel,
 >() {
   const columnHelper = createObservableColumnHelper<T>();
   return Object.assign(columnHelper, {
@@ -67,9 +67,9 @@ export function createElementStackColumnHelper<
       }: Partial<EnhancedColumnDefBase<T, Record<string, React.ReactNode>>> & {
         showLevel?: boolean;
         aspectsSource?: (
-          model: T
+          model: T,
         ) => Observable<Record<string, React.ReactNode>>;
-      } = {}
+      } = {},
     ) =>
       columnHelper.observe(
         (model) =>
@@ -81,7 +81,7 @@ export function createElementStackColumnHelper<
                 return pick(modelAspects, aspects);
               }
             }),
-            distinctUntilChanged(isEqual)
+            distinctUntilChanged(isEqual),
           ),
         {
           id,
@@ -103,7 +103,7 @@ export function createElementStackColumnHelper<
             ),
           },
           ...def,
-        }
+        },
       ),
     description: () =>
       columnHelper.observeText("description$" as any, {
@@ -116,7 +116,7 @@ export function createElementStackColumnHelper<
       columnHelper.observe(
         (item) =>
           item.parentTerrain$.pipe(
-            switchMapIfNotNull((terrain) => terrain.label$)
+            switchMapIfNotNull((terrain) => terrain.label$),
           ),
         {
           id: "location",
@@ -130,7 +130,7 @@ export function createElementStackColumnHelper<
               return <MultiselectFilter allowedValues={locations} {...props} />;
             },
           },
-        }
+        },
       ),
   });
 }

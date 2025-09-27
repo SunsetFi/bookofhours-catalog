@@ -17,7 +17,7 @@ const OrchestrationContentWidth = 650;
 
 const StyledDrawer = styled(
   Drawer,
-  {}
+  {},
 )<{ width: number }>(({ theme, open, width }) => ({
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,

@@ -22,7 +22,7 @@ const ObservableTableCell = ({
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
       </TableCell>
     ),
-    [cell.column.columnDef.cell, isRowHeader, value]
+    [cell.column.columnDef.cell, isRowHeader, value],
   );
 };
 

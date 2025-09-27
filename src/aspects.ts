@@ -98,7 +98,7 @@ export const wisdomAspects = [
 
 export function aspectsMagnitude(aspects: Aspects): number {
   return Math.sqrt(
-    Object.values(aspects).reduce((sum, value) => sum + value * value, 0)
+    Object.values(aspects).reduce((sum, value) => sum + value * value, 0),
   );
 }
 

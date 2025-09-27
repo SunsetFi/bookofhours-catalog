@@ -46,11 +46,11 @@ export class SituationModel extends TokenModel<Situation> {
     api: API,
     private readonly _elementStacks$: Observable<readonly ElementStackModel[]>,
     parentTerrainFactory: TokenParentTerrainFactory,
-    private readonly _scheduler: BatchingScheduler
+    private readonly _scheduler: BatchingScheduler,
   ) {
     super(situation, api);
     this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
-      this._token$
+      this._token$,
     );
   }
 
@@ -60,10 +60,10 @@ export class SituationModel extends TokenModel<Situation> {
       this._iconUrl$ = this._token$.pipe(
         map(
           (situation) =>
-            `${this._api.baseUrl}/api/compendium/verbs/${situation.verbId}/icon.png`
+            `${this._api.baseUrl}/api/compendium/verbs/${situation.verbId}/icon.png`,
         ),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -76,7 +76,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._verbId$ = this._token$.pipe(
         map((s) => s.verbId),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -94,7 +94,7 @@ export class SituationModel extends TokenModel<Situation> {
         map((token) => {
           if (
             alwaysVisibleSpherePaths.some((path) =>
-              tokenPathContainsChild(path, token.path)
+              tokenPathContainsChild(path, token.path),
             )
           ) {
             return true;
@@ -103,7 +103,7 @@ export class SituationModel extends TokenModel<Situation> {
           return !token.inShroudedSphere;
         }),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -120,7 +120,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._label$ = this._token$.pipe(
         map((s) => s.label),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -133,7 +133,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._verbLabel$ = this._token$.pipe(
         map((s) => s.verbLabel),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -150,7 +150,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._verbDescription$ = this._token$.pipe(
         map((s) => s.verbDescription),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -163,7 +163,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._description$ = this._token$.pipe(
         map((s) => s.description),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -177,7 +177,7 @@ export class SituationModel extends TokenModel<Situation> {
         // Notes never change their elementId, so its safe to not observe this.
         filterItems((item) => item.elementId === "tlg.note"),
         filterTokenInPath(`${this.path}/aureatenotessphere`),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -190,7 +190,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._aspects$ = this._token$.pipe(
         map((s) => Object.freeze({ ...s.aspects })),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -203,7 +203,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._hints$ = this._token$.pipe(
         map((s) => Object.freeze([...s.hints])),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -220,7 +220,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._isOpen$ = this._token$.pipe(
         map((s) => s.open),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -233,7 +233,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._thresholds$ = this._token$.pipe(
         map((s) => Object.freeze([...s.thresholds])),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -273,8 +273,8 @@ export class SituationModel extends TokenModel<Situation> {
         this.thresholds$,
         this._elementStacks$.pipe(
           observeAllMap((item) =>
-            item.path$.pipe(map((path) => ({ item, path })))
-          )
+            item.path$.pipe(map((path) => ({ item, path }))),
+          ),
         ),
       ]).pipe(
         map(([thresholds, elementPathPairs]) => {
@@ -286,7 +286,7 @@ export class SituationModel extends TokenModel<Situation> {
           for (const threshold of thresholds) {
             const searchPath = `${this.path}/${threshold.id}`;
             const element = elementPathPairs.find(({ path }) =>
-              tokenPathContainsChild(searchPath, path)
+              tokenPathContainsChild(searchPath, path),
             )?.item;
 
             thresholdContents[threshold.id] = element ?? null;
@@ -294,7 +294,7 @@ export class SituationModel extends TokenModel<Situation> {
 
           return Object.freeze(thresholdContents);
         }),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -307,7 +307,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._state$ = this._token$.pipe(
         map((s) => s.state),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -328,7 +328,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._openAmbitRecipeIds$ = this._token$.pipe(
         map((s) => Object.freeze([...s.openAmbitRecipeIds])),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -341,7 +341,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._recipeId$ = this._token$.pipe(
         map((s) => s.recipeId),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -354,7 +354,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._recipeLabel$ = this._token$.pipe(
         map((s) => s.recipeLabel),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -367,7 +367,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._currentRecipeId$ = this._token$.pipe(
         map((s) => s.currentRecipeId),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -380,7 +380,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._currentRecipeLabel$ = this._token$.pipe(
         map((s) => s.currentRecipeLabel),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -397,7 +397,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._canExecute$ = this._token$.pipe(
         map((s) => s.canExecute),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -414,7 +414,7 @@ export class SituationModel extends TokenModel<Situation> {
       this._timeRemaining$ = this._token$.pipe(
         map((s) => s.timeRemaining),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -428,7 +428,7 @@ export class SituationModel extends TokenModel<Situation> {
         // Filter out notes.
         filterItems((item) => item.elementId !== "tlg.note"),
         filterTokenInPath(`${this.path}/situationstoragesphere`),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -442,7 +442,7 @@ export class SituationModel extends TokenModel<Situation> {
         // Filter out notes.
         filterItems((item) => item.elementId !== "tlg.note"),
         filterTokenInPath(`${this.path}/outputsphere`),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -481,7 +481,7 @@ export class SituationModel extends TokenModel<Situation> {
         await Promise.all(
           values(contents)
             .map((value) => value?.refresh())
-            .filter(isNotNull)
+            .filter(isNotNull),
         );
       } catch (e) {
         console.warn("Failed to close situation", this.id, e);
@@ -492,7 +492,7 @@ export class SituationModel extends TokenModel<Situation> {
 
   async setSlotContents(
     slotId: string,
-    token: ElementStackModel | null
+    token: ElementStackModel | null,
   ): Promise<boolean> {
     return this._actionThrottle(() =>
       this._scheduler.batchUpdate(async () => {
@@ -518,7 +518,7 @@ export class SituationModel extends TokenModel<Situation> {
 
         await this.refresh();
         return true;
-      })
+      }),
     );
   }
 
@@ -532,7 +532,7 @@ export class SituationModel extends TokenModel<Situation> {
         recipeId,
         "for situation",
         this.id,
-        e
+        e,
       );
       return false;
     }
@@ -557,7 +557,7 @@ export class SituationModel extends TokenModel<Situation> {
             thresholds: [],
             state: "Ongoing",
           },
-          now
+          now,
         );
 
         const promises: Promise<void>[] = values(contents)
@@ -593,7 +593,7 @@ export class SituationModel extends TokenModel<Situation> {
             currentRecipeLabel: null,
             state: "Unstarted",
           },
-          now
+          now,
         );
 
         await Promise.all(output.map((o) => o.refresh()));
@@ -612,7 +612,7 @@ export class SituationModel extends TokenModel<Situation> {
       await Promise.all(
         values(contents)
           .map((token) => token?.evict())
-          .filter(isNotNull)
+          .filter(isNotNull),
       );
     });
   }

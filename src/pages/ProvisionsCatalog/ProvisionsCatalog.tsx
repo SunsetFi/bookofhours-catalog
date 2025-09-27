@@ -20,9 +20,9 @@ const ProvisionsCatalog = () => {
   const elements$ = React.useMemo(
     () =>
       tokensSource.visibleElementStacks$.pipe(
-        filterHasAnyAspect(provisionsAspects)
+        filterHasAnyAspect(provisionsAspects),
       ),
-    [tokensSource]
+    [tokensSource],
   );
 
   const columns = React.useMemo(
@@ -62,7 +62,7 @@ const ProvisionsCatalog = () => {
       }),
       columnHelper.description(),
     ],
-    []
+    [],
   );
 
   return (

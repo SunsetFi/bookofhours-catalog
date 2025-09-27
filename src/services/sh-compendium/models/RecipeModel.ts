@@ -22,7 +22,7 @@ export class RecipeModel
 
   constructor(
     private readonly _id: string,
-    resolve: (id: string) => Promise<Recipe | null>
+    resolve: (id: string) => Promise<Recipe | null>,
   ) {
     this._recipe$ = promiseFuncToObservable(async () => {
       this._recipe = await resolve(_id);
@@ -82,7 +82,7 @@ export class RecipeModel
   get description$() {
     if (this._description$ == null) {
       this._description$ = this._recipe$.pipe(
-        map((e) => e?.description ?? null)
+        map((e) => e?.description ?? null),
       );
     }
 
@@ -93,7 +93,7 @@ export class RecipeModel
   get aspects$() {
     if (this._aspects$ == null) {
       this._aspects$ = this._recipe$.pipe(
-        map((e) => Object.freeze({ ...e?.aspects }))
+        map((e) => Object.freeze({ ...e?.aspects })),
       );
     }
 
@@ -113,7 +113,7 @@ export class RecipeModel
   get startDescription$() {
     if (this._startDescription$ == null) {
       this._startDescription$ = this._recipe$.pipe(
-        map((e) => e?.startDescription ?? null)
+        map((e) => e?.startDescription ?? null),
       );
     }
 
@@ -124,7 +124,7 @@ export class RecipeModel
   get preSlots$() {
     if (this._preSlots$ == null) {
       this._preSlots$ = this._recipe$.pipe(
-        map((e) => Object.freeze([...(e?.preSlots ?? [])]))
+        map((e) => Object.freeze([...(e?.preSlots ?? [])])),
       );
     }
 
@@ -135,7 +135,7 @@ export class RecipeModel
   get slots$() {
     if (this._slots$ == null) {
       this._slots$ = this._recipe$.pipe(
-        map((e) => Object.freeze([...(e?.slots ?? [])]))
+        map((e) => Object.freeze([...(e?.slots ?? [])])),
       );
     }
 
@@ -155,7 +155,7 @@ export class RecipeModel
   get requirements$() {
     if (this._requirements$ == null) {
       this._requirements$ = this._recipe$.pipe(
-        map((e) => Object.freeze({ ...e?.requirements }))
+        map((e) => Object.freeze({ ...e?.requirements })),
       );
     }
 
@@ -171,7 +171,7 @@ export class RecipeModel
   get extantRequirements$() {
     if (this._extantRequirements$ == null) {
       this._extantRequirements$ = this._recipe$.pipe(
-        map((e) => Object.freeze({ ...e?.extantRequirements }))
+        map((e) => Object.freeze({ ...e?.extantRequirements })),
       );
     }
 
@@ -182,7 +182,7 @@ export class RecipeModel
   get effects$() {
     if (this._effects$ == null) {
       this._effects$ = this._recipe$.pipe(
-        map((e) => Object.freeze({ ...e?.effects }))
+        map((e) => Object.freeze({ ...e?.effects })),
       );
     }
 

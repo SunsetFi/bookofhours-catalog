@@ -27,32 +27,32 @@ import { Aspects } from "secrethistories-api";
 import { IconButton } from "@mui/material";
 
 export type QueryProducer = (
-  elementStack: ElementStackModel
+  elementStack: ElementStackModel,
 ) => Observable<string | null>;
 
 export function createElementStackSearchProvider(
   filterAspect: string,
-  produceQuery: QueryProducer
+  produceQuery: QueryProducer,
 ): PageSearchProviderPipe;
 export function createElementStackSearchProvider(
   filterAspects: readonly string[],
-  produceQuery: QueryProducer
+  produceQuery: QueryProducer,
 ): PageSearchProviderPipe;
 export function createElementStackSearchProvider(
   filterAspects: (elementStack: ElementStackModel) => Observable<boolean>,
-  produceQuery: QueryProducer
+  produceQuery: QueryProducer,
 ): PageSearchProviderPipe;
 export function createElementStackSearchProvider(
   filter:
     | string
     | readonly string[]
     | ((elementStack: ElementStackModel) => Observable<boolean>),
-  produceQuery: QueryProducer
+  produceQuery: QueryProducer,
 ): PageSearchProviderPipe {
   return (query$, container) => {
     const tokensSource = container.get(TokensSource);
     let filterPipe: (
-      source: Observable<readonly ElementStackModel[]>
+      source: Observable<readonly ElementStackModel[]>,
     ) => Observable<readonly ElementStackModel[]>;
     if (typeof filter === "string" || Array.isArray(filter)) {
       filterPipe = filterHasAnyAspect(filter);
@@ -65,42 +65,42 @@ export function createElementStackSearchProvider(
         tokensSource.visibleElementStacks$.pipe(
           filterPipe,
           filterItemObservations((item) =>
-            elementStackMatchesQuery(query, item)
+            elementStackMatchesQuery(query, item),
           ),
-          mapElementStacksToSearchItems(produceQuery)
-        )
-      )
+          mapElementStacksToSearchItems(produceQuery),
+        ),
+      ),
     );
   };
 }
 
 function mapElementStacksToSearchItems(
-  produceQuery: (elementStack: ElementStackModel) => Observable<string | null>
+  produceQuery: (elementStack: ElementStackModel) => Observable<string | null>,
 ) {
   return (source: Observable<ElementStackModel[]>) => {
     return source.pipe(
       observeAllMap((elementStack) =>
-        elementStackToSearchItem(elementStack, produceQuery)
-      )
+        elementStackToSearchItem(elementStack, produceQuery),
+      ),
     );
   };
 }
 
 export function elementStackToSearchItem(
   elementStack: ElementStackModel,
-  produceQuery: (elementStack: ElementStackModel) => Observable<string | null>
+  produceQuery: (elementStack: ElementStackModel) => Observable<string | null>,
 ): Observable<PageSearchItemResult> {
   return combineLatest([
     produceQuery(elementStack),
     elementStack.iconUrl$,
     elementStack.label$,
     elementStack.parentTerrain$.pipe(
-      switchMapIfNotNull((terrain) => terrain.label$)
+      switchMapIfNotNull((terrain) => terrain.label$),
     ),
   ]).pipe(
     filter(
       ([searchFragment, iconUrl, label]) =>
-        iconUrl != null && label != null && searchFragment != null
+        iconUrl != null && label != null && searchFragment != null,
     ),
     map(([pathQuery, iconUrl, label, location]) => {
       return {
@@ -116,13 +116,13 @@ export function elementStackToSearchItem(
           ) : null,
         ].filter(isNotNull),
       } satisfies PageSearchItemResult;
-    })
+    }),
   );
 }
 
 export function elementToSearchItem(
   element: ElementModel,
-  produceQuery: (element: ElementModel) => Observable<string | null>
+  produceQuery: (element: ElementModel) => Observable<string | null>,
 ): Observable<PageSearchItemResult> {
   return combineLatest([
     produceQuery(element),
@@ -131,7 +131,7 @@ export function elementToSearchItem(
   ]).pipe(
     filter(
       ([searchFragment, iconUrl, label]) =>
-        iconUrl != null && label != null && searchFragment != null
+        iconUrl != null && label != null && searchFragment != null,
     ),
     map(([pathQuery, iconUrl, label]) => {
       return {
@@ -139,13 +139,13 @@ export function elementToSearchItem(
         label: label!,
         pathQuery: pathQuery!,
       } satisfies PageSearchItemResult;
-    })
+    }),
   );
 }
 
 function elementStackMatchesQuery(
   query: SearchQuery,
-  elementStack: ElementStackModel
+  elementStack: ElementStackModel,
 ): Observable<boolean> {
   return combineLatest([
     elementStack.label$,
@@ -157,7 +157,7 @@ function elementStackMatchesQuery(
         freeText: [label, description].filter(isNotNull),
         aspects,
       });
-    })
+    }),
   );
 }
 
@@ -167,17 +167,17 @@ export interface ItemSearchFacets {
 }
 export function matchesSearchQuery(
   query: SearchQuery,
-  item: ItemSearchFacets
+  item: ItemSearchFacets,
 ): boolean {
   if (query.type === "and") {
     return query.queries.every((subQuery) =>
-      matchesSearchQuery(subQuery, item)
+      matchesSearchQuery(subQuery, item),
     );
   }
 
   if (query.type === "text" && item.freeText) {
     return item.freeText.some((text) =>
-      text.toLowerCase().includes(query.text)
+      text.toLowerCase().includes(query.text),
     );
   }
 

@@ -49,7 +49,7 @@ const ElementStackIcon = ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [elementStack, inExteriorSphere, interactive]
+    [elementStack, inExteriorSphere, interactive],
   );
 
   if (!label || !iconUrl) {

@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "preview": "cross-env NODE_ENV=development vite preview",
     "start": "cross-env NODE_ENV=development vite",
-    "watch-errors": "tsc --noEmit --watch"
+    "watch-errors": "tsc --noEmit --watch",
+    "format": "prettier --write src"
   },
   "private": true,
   "keywords": [

@@ -27,7 +27,7 @@ export function arrayShallowEquals<T extends readonly any[]>(a: T, b: T) {
 
 export function objectShallowEquals<T extends Record<string | symbol, any>>(
   a: T,
-  b: T
+  b: T,
 ): boolean {
   const aKeys = Object.keys(a) as (keyof T)[];
   const bKeys = Object.keys(b) as (keyof T)[];

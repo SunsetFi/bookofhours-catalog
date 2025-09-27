@@ -15,7 +15,7 @@ function getItemKey<T extends IdentifierItem>(item: T) {
 }
 
 function IdentifierItemDataGrid<T extends { readonly id: string | number }>(
-  props: IdentifierItemDataGridProps<T>
+  props: IdentifierItemDataGridProps<T>,
 ) {
   return <ObservableDataGrid<T> {...props} getItemKey={getItemKey} />;
 }

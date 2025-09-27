@@ -38,20 +38,20 @@ const DeskPage = () => {
           "incident",
           "correspondence",
           "form.order",
-        ])
+        ]),
       ),
-    [tokensSource.visibleElementStacks$]
+    [tokensSource.visibleElementStacks$],
   );
 
   const memories$ = React.useMemo(
     () => tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("memory")),
-    [tokensSource.visibleElementStacks$]
+    [tokensSource.visibleElementStacks$],
   );
 
   const abilities$ = React.useMemo(
     () =>
       tokensSource.visibleElementStacks$.pipe(filterHasAnyAspect("ability")),
-    [tokensSource.visibleElementStacks$]
+    [tokensSource.visibleElementStacks$],
   );
 
   const skills$ = characterSource.skills$;
@@ -72,9 +72,9 @@ const DeskPage = () => {
           "incident",
           "correspondence",
           "form.order",
-        ])
+        ]),
       ),
-    [tokensSource.visibleElementStacks$]
+    [tokensSource.visibleElementStacks$],
   );
 
   return (

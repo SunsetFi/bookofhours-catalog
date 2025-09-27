@@ -46,7 +46,7 @@ export class FreeformUnstartedOrchestration
   private readonly _situationStateSubscription: Subscription;
 
   private readonly _situation$ = new BehaviorSubject<SituationModel | null>(
-    null
+    null,
   );
 
   private readonly _recipe$: Observable<RecipeModel | null>;
@@ -57,7 +57,7 @@ export class FreeformUnstartedOrchestration
     situation: SituationModel | null,
     tokensSource: TokensSource,
     private readonly _compendium: Compendium,
-    scheduler: BatchingScheduler
+    scheduler: BatchingScheduler,
   ) {
     super(tokensSource, scheduler);
 
@@ -80,13 +80,13 @@ export class FreeformUnstartedOrchestration
     this._recipe$ = this._situation$.pipe(
       switchMapIfNotNull((situation) => situation.currentRecipeId$),
       map((recipeId) =>
-        recipeId ? this._compendium.getRecipeById(recipeId) : null
+        recipeId ? this._compendium.getRecipeById(recipeId) : null,
       ),
       // Non-craftable recipes don't count for our purposes.
       switchMapIfNotNull((recipe) =>
-        recipe.craftable$.pipe(map((craftable) => (craftable ? recipe : null)))
+        recipe.craftable$.pipe(map((craftable) => (craftable ? recipe : null))),
       ),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 
@@ -120,7 +120,7 @@ export class FreeformUnstartedOrchestration
   get description$(): Observable<string | null> {
     if (!this._description$) {
       this._description$ = this._situation$.pipe(
-        switchMapIfNotNull((s) => s.description$)
+        switchMapIfNotNull((s) => s.description$),
       );
     }
     return this._description$;
@@ -131,7 +131,7 @@ export class FreeformUnstartedOrchestration
     if (!this._requirements$) {
       this._requirements$ = combineLatest([
         this._recipe$.pipe(
-          switchMap((recipe) => recipe?.requirements$ ?? EmptyObject$)
+          switchMap((recipe) => recipe?.requirements$ ?? EmptyObject$),
         ),
         this.aspects$,
       ]).pipe(
@@ -151,7 +151,7 @@ export class FreeformUnstartedOrchestration
           }
 
           return result;
-        })
+        }),
       );
     }
 
@@ -166,8 +166,8 @@ export class FreeformUnstartedOrchestration
         // Disallow salons for now.
         filterItems((x) => x.payloadType !== "SalonSituation"),
         filterItemObservations((s) =>
-          s.state$.pipe(map((s) => s === "Unstarted"))
-        )
+          s.state$.pipe(map((s) => s === "Unstarted")),
+        ),
       );
     }
     return this._availableSituations$;
@@ -191,7 +191,7 @@ export class FreeformUnstartedOrchestration
       this._canExecute$ = this._situation$.pipe(
         switchMapIfNotNull((s) => s.canExecute$),
         map((x) => x ?? false),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 

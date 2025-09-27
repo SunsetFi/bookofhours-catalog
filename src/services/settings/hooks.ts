@@ -19,6 +19,6 @@ export function useSettingSetter<T extends Setting>(setting: T) {
   const settingsManager = useDIDependency(SettingsManager);
   return React.useCallback(
     (value: SettingData[T]) => settingsManager.set(setting, value),
-    [settingsManager, setting]
+    [settingsManager, setting],
   );
 }

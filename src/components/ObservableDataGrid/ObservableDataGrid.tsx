@@ -90,7 +90,7 @@ function ObservableDataGrid<T extends {}>({
   const tableColumns = React.useMemo(
     // FIXME: We need to process the observables in group columns too.
     () => columns.map(observableToColumnDef),
-    [columns]
+    [columns],
   );
 
   const [uncontrolledSorting, setUncontrolledSorting] =
@@ -102,7 +102,7 @@ function ObservableDataGrid<T extends {}>({
               desc: false,
             },
           ]
-        : []
+        : [],
     );
 
   const [uncontrolledVisibleColumnIds, setUncontrolledVisibleColumnIds] =
@@ -114,7 +114,7 @@ function ObservableDataGrid<T extends {}>({
 
   const allColumnIds = React.useMemo(
     () => tableColumns.map((c) => c.id!),
-    [tableColumns]
+    [tableColumns],
   );
   const resolvedVisibleColumnIds =
     visibleColumnIds ?? uncontrolledVisibleColumnIds;
@@ -123,10 +123,13 @@ function ObservableDataGrid<T extends {}>({
     () => ({
       sorting: sorting ?? uncontrolledSorting,
       columnFilters: filters ? recordToFilter(filters) : undefined,
-      columnVisibility: allColumnIds.reduce((acc, id) => {
-        acc[id] = resolvedVisibleColumnIds.includes(id);
-        return acc;
-      }, {} as Record<string, boolean>),
+      columnVisibility: allColumnIds.reduce(
+        (acc, id) => {
+          acc[id] = resolvedVisibleColumnIds.includes(id);
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      ),
     }),
     [
       sorting,
@@ -134,7 +137,7 @@ function ObservableDataGrid<T extends {}>({
       filters,
       allColumnIds,
       resolvedVisibleColumnIds,
-    ]
+    ],
   );
 
   const setSorting = React.useCallback(
@@ -152,17 +155,20 @@ function ObservableDataGrid<T extends {}>({
         setUncontrolledSorting(newValue);
       }
     },
-    [sorting, uncontrolledSorting, onSortingChanged]
+    [sorting, uncontrolledSorting, onSortingChanged],
   );
 
   const setVisibility = React.useCallback(
     (updater: Updater<VisibilityState>) => {
       let previousValue = visibleColumnIds ?? uncontrolledVisibleColumnIds;
 
-      let newObject = allColumnIds.reduce((acc, id) => {
-        acc[id] = previousValue.includes(id);
-        return acc;
-      }, {} as Record<string, boolean>);
+      let newObject = allColumnIds.reduce(
+        (acc, id) => {
+          acc[id] = previousValue.includes(id);
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
       if (typeof updater === "function") {
         newObject = updater(newObject);
       } else {
@@ -182,24 +188,24 @@ function ObservableDataGrid<T extends {}>({
       uncontrolledVisibleColumnIds,
       allColumnIds,
       onVisibleColumnIdsChanged,
-    ]
+    ],
   );
 
   const data = useObservation(
     () =>
       items$.pipe(
         observeAllMap((item, index) =>
-          itemToRow(item, index, columns, getItemKey)
+          itemToRow(item, index, columns, getItemKey),
         ),
         // Our data is huge and takes a while to render,
         // so make the whole app more performant by waiting to render the first value
         // until after the first render.
-        delayFirstValue(1)
+        delayFirstValue(1),
       ),
     [items$, columns],
     {
       profileName: "ObservableDataGrid.Data",
-    }
+    },
   );
 
   const onTableFiltersChanged = React.useCallback(
@@ -214,7 +220,7 @@ function ObservableDataGrid<T extends {}>({
 
       onFiltersChanged(filterToRecord(value));
     },
-    [onFiltersChanged, filters]
+    [onFiltersChanged, filters],
   );
 
   const table = useReactTable({
@@ -350,7 +356,7 @@ function ObservableDataGrid<T extends {}>({
 
 function autoColumnId<T>(
   column: ObservableColumnDef<T>,
-  index: number
+  index: number,
 ): string {
   if (column.id) {
     return `col__${column.id}_${index}`;
@@ -363,7 +369,7 @@ function autoColumnId<T>(
 
 function observableToColumnDef<T extends {}>(
   observableColumn: ObservableColumnDef<T>,
-  index: number
+  index: number,
 ): ColumnDef<Record<string, any>> {
   let result = { ...observableColumn } as ColumnDef<Record<string, any>>;
   if (
@@ -392,7 +398,7 @@ function observableToColumnDef<T extends {}>(
 function observeColumn<TData extends {}>(
   column: ObservableColumnDef<TData>,
   item: TData,
-  itemIndex: number
+  itemIndex: number,
 ): Observable<any> {
   if (isObservableAccessorFnColumnDef(column)) {
     return column.observationFn(item, itemIndex);
@@ -408,7 +414,7 @@ function observeColumn<TData extends {}>(
 }
 
 function flattenColumn<T>(
-  column: ObservableColumnDef<T>
+  column: ObservableColumnDef<T>,
 ): ObservableColumnDef<T>[] {
   if ("columns" in column && Array.isArray(column.columns)) {
     return column.columns.flatMap(flattenColumn);
@@ -421,12 +427,12 @@ function itemToRow<T extends {}>(
   item: T,
   itemIndex: number,
   columns: ObservableColumnDef<T>[],
-  getItemKey: (item: T, index: number) => string
+  getItemKey: (item: T, index: number) => string,
 ): Observable<Record<string, any>> {
   columns = columns.flatMap(flattenColumn);
 
   const observations = columns.map((column) =>
-    observeColumn(column, item, itemIndex)
+    observeColumn(column, item, itemIndex),
   );
 
   return combineLatest(observations).pipe(
@@ -444,7 +450,7 @@ function itemToRow<T extends {}>(
       }
 
       return decorateObjectInstance(item, decoration);
-    })
+    }),
   );
 }
 

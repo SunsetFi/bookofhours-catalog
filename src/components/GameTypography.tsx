@@ -16,7 +16,7 @@ const GameTypography = React.forwardRef<HTMLSpanElement, GameTypographyProps>(
             {typeof child === "string" ? parseGameText(child) : child}
           </React.Fragment>
         )),
-      [children]
+      [children],
     );
 
     return (
@@ -29,14 +29,14 @@ const GameTypography = React.forwardRef<HTMLSpanElement, GameTypographyProps>(
         {parts}
       </Typography>
     );
-  }
+  },
 );
 
 export default GameTypography;
 
 type TransformFunction = (
   match: RegExpExecArray,
-  index: number
+  index: number,
 ) => React.ReactNode;
 
 interface TransformRule {

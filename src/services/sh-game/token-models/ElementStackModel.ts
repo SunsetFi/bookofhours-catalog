@@ -34,7 +34,7 @@ import { TokenModel } from "./TokenModel";
 import { TokenParentTerrainFactory } from "./TokenParentTerrainFactory";
 
 export function isElementStackModel(
-  model: TokenModel
+  model: TokenModel,
 ): model is ElementStackModel {
   return model instanceof ElementStackModel;
 }
@@ -55,12 +55,12 @@ export class ElementStackModel
     api: API,
     private readonly _compendium: Compendium,
     parentTerrainFactory: TokenParentTerrainFactory,
-    private readonly _scheduler: BatchingScheduler
+    private readonly _scheduler: BatchingScheduler,
   ) {
     super(elementStack, api);
 
     this._parentTerrain$ = parentTerrainFactory.createParentTerrainObservable(
-      this._token$
+      this._token$,
     );
   }
 
@@ -70,7 +70,7 @@ export class ElementStackModel
       this._elementId$ = this._token$.pipe(
         map((e) => e.elementId),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -88,7 +88,7 @@ export class ElementStackModel
         map((elementStack) => elementStack.elementId),
         distinctUntilChanged(),
         map((elementId) => this._compendium.getElementById(elementId)),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -101,7 +101,7 @@ export class ElementStackModel
       this._label$ = this._token$.pipe(
         map((e) => e.label),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -118,7 +118,7 @@ export class ElementStackModel
       this._description$ = this._token$.pipe(
         map((e) => e.description),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -132,7 +132,7 @@ export class ElementStackModel
       this._illuminations$ = this._token$.pipe(
         map((e) => e.illuminations),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -146,7 +146,7 @@ export class ElementStackModel
         map((token) => {
           if (
             alwaysVisibleSpherePaths.some((path) =>
-              tokenPathContainsChild(path, token.path)
+              tokenPathContainsChild(path, token.path),
             )
           ) {
             return true;
@@ -155,7 +155,7 @@ export class ElementStackModel
           return !token.inShroudedSphere;
         }),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -172,7 +172,7 @@ export class ElementStackModel
       this._quantity$ = this._token$.pipe(
         map((e) => e.quantity),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -185,10 +185,10 @@ export class ElementStackModel
       this._iconUrl$ = this._token$.pipe(
         map(
           (stack) =>
-            `${this._api.baseUrl}/api/compendium/elements/${stack.elementId}/icon.png`
+            `${this._api.baseUrl}/api/compendium/elements/${stack.elementId}/icon.png`,
         ),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -201,7 +201,7 @@ export class ElementStackModel
       this._lifetimeRemaining$ = this._token$.pipe(
         map((e) => e.lifetimeRemaining),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -214,7 +214,7 @@ export class ElementStackModel
       this._elementAspects$ = this._token$.pipe(
         map((e) => e.elementAspects),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -230,7 +230,7 @@ export class ElementStackModel
       this._mutations$ = this._token$.pipe(
         map((e) => e.mutations),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -242,10 +242,10 @@ export class ElementStackModel
     if (!this._aspects$) {
       this._aspects$ = this._token$.pipe(
         map((e) =>
-          pickBy(combineAspects(e.elementAspects, e.mutations), (v) => v !== 0)
+          pickBy(combineAspects(e.elementAspects, e.mutations), (v) => v !== 0),
         ),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -272,7 +272,7 @@ export class ElementStackModel
           ...aspects,
           [elementId]: 1,
         })),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -294,7 +294,7 @@ export class ElementStackModel
       this._shrouded$ = this._token$.pipe(
         map((e) => e.shrouded),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -307,7 +307,7 @@ export class ElementStackModel
       this._decays$ = this._token$.pipe(
         map((e) => e.decays),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -320,7 +320,7 @@ export class ElementStackModel
       this._unique$ = this._token$.pipe(
         map((e) => e.unique),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -340,7 +340,7 @@ export class ElementStackModel
             path: `${spherePath}/${this.id}`,
             spherePath,
           },
-          now
+          now,
         );
         return true;
       } catch (e) {
@@ -349,7 +349,7 @@ export class ElementStackModel
             "Failed to move elementStack",
             this.id,
             "to path",
-            spherePath
+            spherePath,
           );
           return false;
         }

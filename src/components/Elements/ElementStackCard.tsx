@@ -63,7 +63,7 @@ const ElementStackCard = ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [elementStack, interactable]
+    [elementStack, interactable],
   );
 
   const onKeyDown = React.useCallback(
@@ -73,7 +73,7 @@ const ElementStackCard = ({
         onClick();
       }
     },
-    [onClick]
+    [onClick],
   );
 
   if (!iconUrl) {

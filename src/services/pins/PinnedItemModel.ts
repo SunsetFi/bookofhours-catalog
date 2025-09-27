@@ -18,7 +18,7 @@ export class PinnedElementItemModel implements PinnedItemModel {
 
   constructor(
     private readonly _item: ElementModel,
-    private readonly _remove: (item: PinnedItemModel) => void
+    private readonly _remove: (item: PinnedItemModel) => void,
   ) {
     this._item$ = new BehaviorSubject(_item);
     this._elementId$ = new BehaviorSubject<string | null>(_item.elementId);
@@ -54,7 +54,7 @@ export class PinnedElementItemModel implements PinnedItemModel {
 }
 
 export function isPinnedElementItemModel(
-  item: PinnedItemModel
+  item: PinnedItemModel,
 ): item is PinnedElementItemModel {
   return item instanceof PinnedElementItemModel;
 }

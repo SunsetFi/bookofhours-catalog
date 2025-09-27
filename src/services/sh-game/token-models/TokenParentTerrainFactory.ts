@@ -40,7 +40,7 @@ export class TokenParentTerrainFactory {
         distinctUntilShallowArrayChanged(),
         observeAllMap((t) => t.path$.pipe(map((path) => [path, t] as const))),
         map((items) => Object.fromEntries(items)),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -48,7 +48,7 @@ export class TokenParentTerrainFactory {
   }
 
   createParentTerrainObservable(
-    token$: Observable<Token>
+    token$: Observable<Token>,
   ): Observable<ConnectedTerrainModel | null> {
     return combineLatest([token$, this._terrainsByPath$]).pipe(
       map(([token, terrainsByPath]) => {
@@ -61,7 +61,7 @@ export class TokenParentTerrainFactory {
         return null;
       }),
       distinctUntilChanged(),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 }

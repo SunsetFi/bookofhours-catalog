@@ -49,7 +49,7 @@ const ElementDetails = React.forwardRef<HTMLDivElement, ElementDetailsProps>(
         <AspectsList aspects={aspects} />
       </Card>
     );
-  }
+  },
 );
 
 export default ElementDetails;

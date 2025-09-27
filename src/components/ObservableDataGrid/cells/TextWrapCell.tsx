@@ -13,7 +13,7 @@ import { RowHeight, RowPaddingY } from "../constants";
 
 function TextWrapCell<T extends RowData>(props: CellContext<T, string | null>) {
   const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(
-    null
+    null,
   );
   const [textRef, setTextRef] = React.useState<HTMLSpanElement | null>(null);
 

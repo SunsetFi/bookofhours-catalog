@@ -7,7 +7,7 @@ export interface ActionPromptDialogRequest<TResult = string> {
 }
 
 export function isTextDialogRequest(
-  request: DialogRequest
+  request: DialogRequest,
 ): request is ActionPromptDialogRequest {
   return request.type === "action-prompt";
 }
@@ -19,7 +19,7 @@ export interface ComponentDialogRequest {
 export type ComponentDialogProps = { model: DialogModel };
 
 export function isComponentDialogRequest(
-  request: DialogRequest
+  request: DialogRequest,
 ): request is ComponentDialogRequest {
   return request.type === "component";
 }

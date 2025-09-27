@@ -26,9 +26,9 @@ export function useQuerySettings(): UseQuerySettings {
     () =>
       mapKeys(
         pickBy(queryObject, (_, key) => key.startsWith("filter-")),
-        (_, key) => key.substring(7)
+        (_, key) => key.substring(7),
       ),
-    [queryObject]
+    [queryObject],
   );
 
   const visibleColumnIds = queryObject["columns"]?.split(",") ?? null;
@@ -41,7 +41,7 @@ export function useQuerySettings(): UseQuerySettings {
         columns: visibleColumnIds?.join(",") ?? undefined,
       });
     },
-    [setQueryObject, filters, visibleColumnIds]
+    [setQueryObject, filters, visibleColumnIds],
   );
 
   const onFiltersChanged = React.useCallback(
@@ -52,7 +52,7 @@ export function useQuerySettings(): UseQuerySettings {
         ...mapKeys(filters, (_, key) => `filter-${key}`),
       });
     },
-    [setQueryObject, sorting, visibleColumnIds]
+    [setQueryObject, sorting, visibleColumnIds],
   );
 
   const onVisibleColumnIdsChanged = React.useCallback(
@@ -63,7 +63,7 @@ export function useQuerySettings(): UseQuerySettings {
         ...mapKeys(filters, (_, key) => `filter-${key}`),
       });
     },
-    [setQueryObject, sorting, filters]
+    [setQueryObject, sorting, filters],
   );
 
   return {

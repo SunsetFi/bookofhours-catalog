@@ -2,7 +2,7 @@ import { DialogAction } from "./types";
 
 export class DialogModel<TResult = string> {
   constructor(
-    private readonly _resolveDialog: (completionResult: TResult | null) => void
+    private readonly _resolveDialog: (completionResult: TResult | null) => void,
   ) {}
 
   resolve(completionResult: TResult | null) {
@@ -13,12 +13,12 @@ export class DialogModel<TResult = string> {
 export class ActionDialogModel<TResult = string> extends DialogModel<TResult> {
   constructor(
     actions: DialogAction<TResult>[],
-    resolveDialog: (completionResult: TResult | null) => void
+    resolveDialog: (completionResult: TResult | null) => void,
   ) {
     super(resolveDialog);
 
     this.actions = actions.map(
-      (action) => new DialogActionModel<TResult>(action, this)
+      (action) => new DialogActionModel<TResult>(action, this),
     );
   }
 
@@ -26,12 +26,12 @@ export class ActionDialogModel<TResult = string> extends DialogModel<TResult> {
 }
 
 export class ActionPromptDialogModel<
-  TResult = string
+  TResult = string,
 > extends ActionDialogModel<TResult> {
   constructor(
     readonly text: string,
     actions: DialogAction<TResult>[],
-    resolveDialog: (completionResult: TResult | null) => void
+    resolveDialog: (completionResult: TResult | null) => void,
   ) {
     super(actions, resolveDialog);
   }
@@ -40,7 +40,7 @@ export class ActionPromptDialogModel<
 export class DialogActionModel<TResult = string> {
   constructor(
     private readonly _action: DialogAction<TResult>,
-    private readonly _model: DialogModel<TResult>
+    private readonly _model: DialogModel<TResult>,
   ) {}
 
   get label() {
@@ -68,7 +68,7 @@ export class DialogActionModel<TResult = string> {
 export class ComponentDialogModel extends DialogModel {
   constructor(
     private readonly _component: React.ComponentType<{ model: DialogModel }>,
-    resolveDialog: (completionResult: string | null) => void
+    resolveDialog: (completionResult: string | null) => void,
   ) {
     super(resolveDialog);
   }

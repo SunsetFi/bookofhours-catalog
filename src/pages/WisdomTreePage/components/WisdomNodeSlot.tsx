@@ -76,10 +76,10 @@ const WisdomNodeSlot = ({ node, wisdomLabel }: WisdomNodeSlotProps) => {
               filterMatchesEssentials(essentials),
               filterMatchesRequirements(requirements),
               filterMatchesForbiddens(forbiddens),
-              shareReplay(1)
+              shareReplay(1),
             )
           : EmptyArray$,
-      [committed, sealed, tokensSource, essentials, requirements, forbiddens]
+      [committed, sealed, tokensSource, essentials, requirements, forbiddens],
     ) ?? [];
 
   const [choosingCandidate, setChoosingCandidate] = React.useState(false);
@@ -186,15 +186,15 @@ const ChooseWisdomCardDialog = ({
   const description = useObservation(
     () =>
       node.wisdomRecipe$.pipe(
-        switchMapIfNotNull((recipe) => recipe.startDescription$)
+        switchMapIfNotNull((recipe) => recipe.startDescription$),
       ),
-    [node]
+    [node],
   );
 
   const effects = useObservation(
     () =>
       node.wisdomRecipe$.pipe(switchMapIfNotNull((recipe) => recipe.effects$)),
-    [node]
+    [node],
   );
 
   const [committing, setCommitting] = React.useState(false);
@@ -205,7 +205,7 @@ const ChooseWisdomCardDialog = ({
         node.slotInput(elementStack);
       }
     },
-    [committing, node]
+    [committing, node],
   );
 
   // We want do dump the node when we leave the page.

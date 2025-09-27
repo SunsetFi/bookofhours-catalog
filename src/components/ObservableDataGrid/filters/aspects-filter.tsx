@@ -29,7 +29,7 @@ export type AspectsFilterValue = {
 export function aspectsFilter(
   row: Row<any>,
   columnId: string,
-  filterValue: AspectsFilterValue
+  filterValue: AspectsFilterValue,
 ): boolean {
   if (!filterValue) {
     return true;
@@ -74,7 +74,7 @@ export function aspectsFilter(
 export function aspectsPresentFilter(
   row: Row<any>,
   columnId: string,
-  filterValue: AspectsFilterValue
+  filterValue: AspectsFilterValue,
 ) {
   if (!filterValue) {
     return true;
@@ -160,7 +160,7 @@ export const AspectsFilter = ({
         setLocalValue(newFilter);
       }
     },
-    [matchMode, setLocalValue]
+    [matchMode, setLocalValue],
   );
 
   const onModeChanged = React.useCallback(
@@ -172,7 +172,7 @@ export const AspectsFilter = ({
         setLocalValue(newFilter);
       }
     },
-    [setLocalValue, currentValue]
+    [setLocalValue, currentValue],
   );
 
   const widgetMode = useSetting("aspectFilterWidget");

@@ -10,13 +10,13 @@ export function useQueryString(query: string): string | null {
 }
 
 export function useQueryStringState(
-  query: string
+  query: string,
 ): [string | null, (value: string | null) => void] {
   const location = useLocation();
   const history = useHistory();
   const params = React.useMemo(
     () => new URLSearchParams(location.search),
-    [location.search]
+    [location.search],
   );
   const value = params.get(query);
   const setValue = React.useCallback(
@@ -28,7 +28,7 @@ export function useQueryStringState(
       }
       history.replace(`${location.pathname}?${params.toString()}`);
     },
-    [location.pathname, query, params]
+    [location.pathname, query, params],
   );
 
   return [value, setValue];

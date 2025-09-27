@@ -30,7 +30,7 @@ export class OngoingSituationOrchestration
     private readonly _situation: SituationModel,
     tokensSource: TokensSource,
     private readonly _timeSource: TimeSource,
-    scheduler: BatchingScheduler
+    scheduler: BatchingScheduler,
   ) {
     super(tokensSource, scheduler);
   }
@@ -58,7 +58,7 @@ export class OngoingSituationOrchestration
   get situation$(): Observable<SituationModel | null> {
     if (!this._situation$) {
       this._situation$ = new BehaviorSubject<SituationModel | null>(
-        this._situation
+        this._situation,
       );
     }
 
@@ -93,7 +93,7 @@ export class OngoingSituationOrchestration
 
   protected _createSlotCandidateFilter(
     elementStack: ElementStackModel,
-    spec: SphereSpec
+    spec: SphereSpec,
   ): Observable<boolean> {
     // We have no additional logic to add.
     // Let the base apply its own matching.

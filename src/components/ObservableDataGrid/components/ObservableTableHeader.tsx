@@ -18,7 +18,7 @@ const ObservableTableHeader = React.memo(
         ))}
       </TableHead>
     );
-  }
+  },
 );
 
 export default ObservableTableHeader;

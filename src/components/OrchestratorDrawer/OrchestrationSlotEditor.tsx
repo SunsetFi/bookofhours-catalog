@@ -29,19 +29,19 @@ const OrchestrationSlotEditor = React.memo(
       useObservation(
         () =>
           slot.assignment$.pipe(switchMap((stack) => stack?.aspects$ ?? Null$)),
-        [slot]
+        [slot],
       ) ?? {};
 
     const recipeRequirements =
       useObservation(orchestration.requirements$) ?? null;
     const recipeRequiredAspects = React.useMemo(
       () => Object.keys(recipeRequirements ?? {}),
-      [recipeRequirements]
+      [recipeRequirements],
     );
 
     const slotContributingAspects = React.useMemo(
       () => pick(assignmentAspects, recipeRequiredAspects),
-      [recipeRequiredAspects]
+      [recipeRequiredAspects],
     );
 
     const requiredAspects = Object.keys(slot.spec.required);
@@ -97,7 +97,7 @@ const OrchestrationSlotEditor = React.memo(
         autoFocus={autoFocus}
       />
     );
-  }
+  },
 );
 
 export default OrchestrationSlotEditor;

@@ -18,13 +18,13 @@ import { TokenModel } from "./TokenModel";
 import { ElementStackModel } from "./ElementStackModel";
 
 export function isConnectedTerrainModel(
-  model: TokenModel
+  model: TokenModel,
 ): model is ConnectedTerrainModel {
   return model instanceof ConnectedTerrainModel;
 }
 
 const nullTerrain = new BehaviorSubject<ConnectedTerrainModel | null>(
-  null
+  null,
 ).asObservable();
 
 export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
@@ -34,14 +34,14 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
     terrain: ConnectedTerrain,
     api: API,
     private readonly _infoRecipe: RecipeModel,
-    visibleTokens$: Observable<readonly TokenModel[]>
+    visibleTokens$: Observable<readonly TokenModel[]>,
   ) {
     super(terrain, api);
 
     this._childTokens$ = visibleTokens$.pipe(
       // Thankfully, terrains never move, so we don't have to observe our own path here.
       filterTokenInPath(this.path),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 
@@ -61,7 +61,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
 
           return terrain.label;
         }),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -82,7 +82,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
 
           return terrain.description;
         }),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -94,7 +94,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
     if (!this._visible$) {
       this._visible$ = this._token$.pipe(
         map((t) => !t.shrouded),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._visible$;
@@ -109,7 +109,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
     if (!this._sealed$) {
       this._sealed$ = this._token$.pipe(
         map((t) => t.sealed),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._sealed$;
@@ -120,7 +120,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
     if (!this._shrouded$) {
       this._shrouded$ = this._token$.pipe(
         map((t) => t.shrouded),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._shrouded$;
@@ -132,7 +132,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
       this._unlockEssentials$ = this._token$.pipe(
         map((t) => t.unlockEssentials),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -145,7 +145,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
       this._unlockRequirements$ = this._token$.pipe(
         map((t) => t.unlockRequirements),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -158,7 +158,7 @@ export class ConnectedTerrainModel extends TokenModel<ConnectedTerrain> {
       this._unlockForbiddens$ = this._token$.pipe(
         map((t) => t.unlockForbiddens),
         distinctUntilChanged(isEqual),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 

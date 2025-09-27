@@ -2,7 +2,7 @@ import React from "react";
 
 export function useMutationObserver(
   element: Element | null | undefined,
-  onMutation: () => void
+  onMutation: () => void,
 ) {
   const onMutationRef = React.useRef(onMutation);
   React.useEffect(() => {

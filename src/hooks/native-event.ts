@@ -2,15 +2,15 @@ import React from "react";
 
 export function useNativeEvent<
   T extends GlobalEventHandlers,
-  K extends keyof GlobalEventHandlersEventMap
+  K extends keyof GlobalEventHandlersEventMap,
 >(
   element: T,
   type: K,
   listener: (
     this: GlobalEventHandlers,
-    ev: GlobalEventHandlersEventMap[K]
+    ev: GlobalEventHandlersEventMap[K],
   ) => any,
-  options?: boolean | AddEventListenerOptions
+  options?: boolean | AddEventListenerOptions,
 ) {
   React.useEffect(() => {
     if (!element) {

@@ -20,7 +20,7 @@ const AppRouter = ({ children }: AppRouterProps) => {
           setState(state);
         });
       }),
-    [history]
+    [history],
   );
 
   return (

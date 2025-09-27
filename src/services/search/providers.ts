@@ -23,8 +23,8 @@ const pagesSearchProvider: SearchProviderPipe = (query) => {
           iconUrl: `http://localhost:8081/api/compendium/elements/${page.iconName}/icon.png`,
           label: page.label,
           path: page.path,
-        }))
-    )
+        })),
+    ),
   );
 };
 
@@ -38,14 +38,14 @@ const providers = [
 
 function pageProviderFromPath(
   pageProvider: PageSearchProviderPipe,
-  path: string
+  path: string,
 ) {
   return (query: Observable<SearchQuery>, container: Container) => {
     return pageProvider(query, container).pipe(
       mapArrayItems((item) => ({
         ...omit(item, "pathQuery"),
         path: `${path}?${item.pathQuery}`,
-      }))
+      })),
     );
   };
 }

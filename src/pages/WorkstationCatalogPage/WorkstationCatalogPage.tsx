@@ -36,7 +36,7 @@ const columnHelper = createSituationColumnHelper<WorkstationModel>();
 
 function situationToWorkstationModel(
   situation: SituationModel,
-  orchestrator: Orchestrator
+  orchestrator: Orchestrator,
 ): WorkstationModel {
   return decorateObjectInstance(situation, {
     thresholdAspects$: situation.thresholds$.pipe(
@@ -54,7 +54,7 @@ function situationToWorkstationModel(
         return slotTypes;
       }),
       distinctUntilChanged(isEqual),
-      shareReplay(1)
+      shareReplay(1),
     ),
     orchestrate: () => {
       orchestrator.openOrchestration({ situation });
@@ -71,10 +71,10 @@ const WorkstationCatalogPage = () => {
       tokensSource.unlockedWorkstations$.pipe(
         filterTokenNotInPath(brancrugTokens),
         mapArrayItemsCached((situation) =>
-          situationToWorkstationModel(situation, orchestrator)
-        )
+          situationToWorkstationModel(situation, orchestrator),
+        ),
       ),
-    [tokensSource]
+    [tokensSource],
   );
 
   const columns = React.useMemo(
@@ -114,9 +114,9 @@ const WorkstationCatalogPage = () => {
               h.reduce(
                 // Pass null as the aspect value to prevent rendering any value.
                 (obj, h) => ({ ...obj, [h]: null }),
-                {} as Record<string, React.ReactNode>
-              )
-            )
+                {} as Record<string, React.ReactNode>,
+              ),
+            ),
           ),
         // Because we only care about presence (and are using null values), we need to use the aspectsPresentFilter
         filterFn: aspectsPresentFilter,
@@ -134,11 +134,11 @@ const WorkstationCatalogPage = () => {
           header: "Accepts",
           size: 400,
           aspectsSource: (model) => model.thresholdAspects$,
-        }
+        },
       ),
       columnHelper.description(),
     ],
-    []
+    [],
   );
 
   return (

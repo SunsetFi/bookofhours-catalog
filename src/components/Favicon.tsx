@@ -9,14 +9,14 @@ const Favicon = () => {
   const { pathname } = useLocation();
   const icon = React.useMemo(
     () => document.querySelector<HTMLLinkElement>("link[rel~='icon']"),
-    []
+    [],
   );
 
   React.useEffect(() => {
     // Little hack since we have a "/" path now.
     const siteItem = sortBy(
       sitemap.filter(isSiteMapNavItem),
-      (x) => x.path.length
+      (x) => x.path.length,
     )
       .reverse()
       .find((x) => pathname.startsWith(x.path));

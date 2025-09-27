@@ -11,7 +11,7 @@ export class AspectModel {
   constructor(
     private readonly _aspectId: string,
     resolve: (id: string) => Promise<Element | null>,
-    private readonly _api: API
+    private readonly _api: API,
   ) {
     this._element$ = promiseFuncToObservable(() => resolve(_aspectId));
   }
@@ -51,7 +51,7 @@ export class AspectModel {
   get description$() {
     if (this._description$ == null) {
       this._description$ = this._element$.pipe(
-        map((e) => e?.description ?? null)
+        map((e) => e?.description ?? null),
       );
     }
 
@@ -62,7 +62,7 @@ export class AspectModel {
   get iconUrl$() {
     if (!this._iconUrl$) {
       this._iconUrl$ = new BehaviorSubject(
-        `${this._api.baseUrl}/api/compendium/elements/${this.aspectId}/icon.png`
+        `${this._api.baseUrl}/api/compendium/elements/${this.aspectId}/icon.png`,
       );
     }
 

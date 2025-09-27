@@ -22,7 +22,7 @@ export class SettingsManager implements Initializable {
   private _open = false;
 
   constructor(
-    @inject(DialogService) private readonly _dialogService: DialogService
+    @inject(DialogService) private readonly _dialogService: DialogService,
   ) {}
 
   onInitialize(): void {

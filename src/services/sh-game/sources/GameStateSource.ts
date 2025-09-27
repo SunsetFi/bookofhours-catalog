@@ -17,7 +17,7 @@ export class GameStateSource {
 
   constructor(
     @inject(UpdatePoller) scheduler: UpdatePoller,
-    @inject(API) private readonly _api: API
+    @inject(API) private readonly _api: API,
   ) {
     scheduler.addTask(() => this._pollRunning());
   }

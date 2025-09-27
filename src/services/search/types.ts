@@ -32,7 +32,7 @@ export interface SearchItemResult {
 
 export type SearchProviderPipe = (
   query: Observable<SearchQuery>,
-  container: Container
+  container: Container,
 ) => Observable<readonly SearchItemResult[]>;
 
 export interface PageSearchItemResult extends Omit<SearchItemResult, "path"> {
@@ -41,5 +41,5 @@ export interface PageSearchItemResult extends Omit<SearchItemResult, "path"> {
 
 export type PageSearchProviderPipe = (
   query: Observable<SearchQuery>,
-  container: Container
+  container: Container,
 ) => Observable<readonly PageSearchItemResult[]>;

@@ -20,14 +20,14 @@ import { BookModel, getBooksObservable } from "./books-data-source";
 
 export const bookCatalogSearchProvider: PageSearchProviderPipe = (
   query$,
-  container
+  container,
 ) => {
   const books$ = getBooksObservable(container);
   const memories$ = books$.pipe(
     observeAllMap((book) =>
-      book.memory$.pipe(map((memory) => ({ book, memory })))
+      book.memory$.pipe(map((memory) => ({ book, memory }))),
     ),
-    map((items) => items.filter((x) => x.memory != null))
+    map((items) => items.filter((x) => x.memory != null)),
   ) as Observable<readonly { book: BookModel; memory: ElementModel }[]>;
 
   return query$.pipe(
@@ -40,19 +40,21 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
                 matchesSearchQuery(query, {
                   freeText: [label, description].filter(isNotNull),
                   aspects,
-                })
-              )
-            )
+                }),
+              ),
+            ),
           ),
           observeAllMap((book) =>
             elementStackToSearchItem(book, (book) =>
               book.label$.pipe(
                 map((label) =>
-                  label ? `filter-label=\"${encodeURIComponent(label)}\"` : null
-                )
-              )
-            )
-          )
+                  label
+                    ? `filter-label=\"${encodeURIComponent(label)}\"`
+                    : null,
+                ),
+              ),
+            ),
+          ),
         ),
         memories$.pipe(
           filterItemObservations(({ memory }) =>
@@ -65,15 +67,15 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
                 matchesSearchQuery(query, {
                   freeText: [label, description].filter(isNotNull),
                   aspects,
-                })
-              )
-            )
+                }),
+              ),
+            ),
           ),
           observeAllMap(({ book, memory }) =>
             combineLatest([memory.iconUrl$, memory.label$, book.label$]).pipe(
               filter(
                 ([iconUrl, label, bookLabel]) =>
-                  iconUrl != null && label != null && bookLabel != null
+                  iconUrl != null && label != null && bookLabel != null,
               ),
               map(([iconUrl, label, bookLabel]) => {
                 return {
@@ -88,11 +90,11 @@ export const bookCatalogSearchProvider: PageSearchProviderPipe = (
                     />,
                   ],
                 } satisfies PageSearchItemResult;
-              })
-            )
-          )
+              }),
+            ),
+          ),
         ),
-      ]).pipe(map((results) => results.flat()))
-    )
+      ]).pipe(map((results) => results.flat())),
+    ),
   );
 };

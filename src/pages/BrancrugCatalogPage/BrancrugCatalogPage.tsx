@@ -33,7 +33,7 @@ const columnHelper = createSituationColumnHelper<WorkstationModel>();
 
 function situationToWorkstationModel(
   situation: SituationModel,
-  orchestrator: Orchestrator
+  orchestrator: Orchestrator,
 ): WorkstationModel {
   return decorateObjectInstance(situation, {
     thresholdAspects$: situation.thresholds$.pipe(
@@ -51,7 +51,7 @@ function situationToWorkstationModel(
         return slotTypes;
       }),
       distinctUntilChanged(isEqual),
-      shareReplay(1)
+      shareReplay(1),
     ),
     orchestrate: () => {
       orchestrator.openOrchestration({ situation });
@@ -76,10 +76,10 @@ const BrancrugCatalogPage = () => {
       tokensSource.unlockedWorkstations$.pipe(
         filterTokenInPath(brancrugTokens),
         mapArrayItemsCached((situation) =>
-          situationToWorkstationModel(situation, orchestrator)
-        )
+          situationToWorkstationModel(situation, orchestrator),
+        ),
       ),
-    [tokensSource]
+    [tokensSource],
   );
 
   const columns = React.useMemo(
@@ -112,9 +112,9 @@ const BrancrugCatalogPage = () => {
             map((h) =>
               h.reduce(
                 (obj, h) => ({ ...obj, [h]: null }),
-                {} as Record<string, React.ReactNode>
-              )
-            )
+                {} as Record<string, React.ReactNode>,
+              ),
+            ),
           ),
       }),
       columnHelper.aspectsList(
@@ -124,11 +124,11 @@ const BrancrugCatalogPage = () => {
           header: "Accepts",
           size: 400,
           aspectsSource: (model) => model.thresholdAspects$,
-        }
+        },
       ),
       columnHelper.description(),
     ],
-    []
+    [],
   );
 
   return (

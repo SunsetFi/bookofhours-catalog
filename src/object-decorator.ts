@@ -2,7 +2,7 @@ const Original = Symbol("Original");
 
 export function decorateObjectInstance<
   TClass extends object,
-  TAdditional extends Record<string | symbol, any>
+  TAdditional extends Record<string | symbol, any>,
 >(target: TClass, additional: TAdditional): TClass & TAdditional {
   return new Proxy(target, {
     get: (target, prop: string | symbol) => {
@@ -28,7 +28,7 @@ export function decorateObjectInstance<
 }
 
 export function undecorateObjectInstance<TClass extends object>(
-  target: TClass
+  target: TClass,
 ): TClass {
   // We can get wrapped in multiple layers, as we decorate both for
   // individual page data grids, and for ObservableDataGrid internals.

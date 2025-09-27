@@ -33,7 +33,7 @@ export class Pinboard {
     if (!this._pinnedRecipe$) {
       this._pinnedRecipe$ = this._pinnedRecipeId$.pipe(
         map((id) => (id ? this._compendium.getRecipeById(id) : null)),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -57,7 +57,7 @@ export class Pinboard {
           const result: Record<string, PinnedAspect> = {};
 
           const commonAspects = intersection(
-            ...aspectArray.map((x) => Object.keys(x))
+            ...aspectArray.map((x) => Object.keys(x)),
           );
 
           for (const aspects of aspectArray) {
@@ -99,7 +99,7 @@ export class Pinboard {
 
           return result;
         }),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -118,7 +118,7 @@ export class Pinboard {
     return this._pins$.pipe(
       observeAllMap((x) => x.elementId$),
       map((items) => items.includes(elementId)),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 
@@ -133,7 +133,7 @@ export class Pinboard {
 
   removeElementId(elementId: string) {
     this._pins$.next(
-      this._pins$.value.filter((x) => x.elementId !== elementId)
+      this._pins$.value.filter((x) => x.elementId !== elementId),
     );
   }
 

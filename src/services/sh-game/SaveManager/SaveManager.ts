@@ -33,10 +33,10 @@ export class SaveManager {
     @inject(API) private readonly _api: API,
     @inject(GameStateSource) private readonly _gameState: GameStateSource,
     @inject(UpdatePoller) private readonly _poller: UpdatePoller,
-    @inject(DialogService) private readonly _dialogService: DialogService
+    @inject(DialogService) private readonly _dialogService: DialogService,
   ) {
     this._saves$ = defer(() =>
-      from(this._api.getSaves()).pipe(retry(), shareReplay(1))
+      from(this._api.getSaves()).pipe(retry(), shareReplay(1)),
     );
   }
 
@@ -53,8 +53,8 @@ export class SaveManager {
     if (!this._autosave$) {
       this._autosave$ = this.saves$.pipe(
         map(
-          (saves) => saves.find((save) => save.saveName === "AUTOSAVE") ?? null
-        )
+          (saves) => saves.find((save) => save.saveName === "AUTOSAVE") ?? null,
+        ),
       );
     }
 

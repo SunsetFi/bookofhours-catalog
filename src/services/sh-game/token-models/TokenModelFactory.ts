@@ -27,14 +27,14 @@ export class TokenModelFactory {
           this._container.get(API),
           this._container.get(Compendium),
           this._container.get(TokenParentTerrainFactory),
-          this._container.get(BatchingScheduler)
+          this._container.get(BatchingScheduler),
         );
       case "ConnectedTerrain":
         return new ConnectedTerrainModel(
           token,
           this._container.get(API),
           this._container.get(Compendium).getRecipeById(token.infoRecipeId),
-          this._container.get(TokensSource).visibleTokens$
+          this._container.get(TokensSource).visibleTokens$,
         );
       case "WisdomNodeTerrain":
         return new WisdomNodeTerrainModel(
@@ -42,7 +42,7 @@ export class TokenModelFactory {
           this._container.get(API),
           this._container.get(TokensSource).tokens$,
           this._container.get(Compendium),
-          this._container.get(BatchingScheduler)
+          this._container.get(BatchingScheduler),
         );
       case "Situation":
       case "WorkstationSituation":
@@ -53,7 +53,7 @@ export class TokenModelFactory {
           this._container.get(API),
           this._container.get(TokensSource).visibleElementStacks$,
           this._container.get(TokenParentTerrainFactory),
-          this._container.get(BatchingScheduler)
+          this._container.get(BatchingScheduler),
         );
       default:
         throw new Error(`Unknown token type: ${(token as any).payloadType}`);

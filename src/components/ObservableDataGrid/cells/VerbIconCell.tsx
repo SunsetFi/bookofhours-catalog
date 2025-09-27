@@ -7,7 +7,7 @@ import VerbIcon from "../../VerbIcon";
 import { RowHeight, RowPaddingY } from "../constants";
 
 function ElementIconCell<T extends RowData>(
-  props: CellContext<T, string | null>
+  props: CellContext<T, string | null>,
 ) {
   return (
     <VerbIcon

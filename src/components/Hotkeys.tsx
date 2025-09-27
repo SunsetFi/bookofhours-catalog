@@ -31,7 +31,7 @@ const Hotkeys = ({ children }: HotkeysProps) => {
         }
       }
     },
-    [searchService, orchestrator]
+    [searchService, orchestrator],
   );
 
   useNativeEvent(document, "keydown", onKeyDown);

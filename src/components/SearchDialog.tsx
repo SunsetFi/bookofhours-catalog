@@ -62,7 +62,7 @@ const SearchDialog = () => {
 
       navigate(firstItem.path);
     },
-    [searchService, firstItem ?? null]
+    [searchService, firstItem ?? null],
   );
 
   if (!isOpen) {
@@ -193,7 +193,7 @@ const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
       searchService.close();
       navigate(path);
     },
-    [path, searchService, navigate]
+    [path, searchService, navigate],
   );
 
   let actions: React.ReactNode | null = null;
@@ -201,7 +201,7 @@ const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
     actions = (
       <Stack direction="row" sx={{ ml: "auto" }}>
         {item.actions.map((action, i) =>
-          React.cloneElement(action, { key: i })
+          React.cloneElement(action, { key: i }),
         )}
       </Stack>
     );

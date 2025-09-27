@@ -38,7 +38,7 @@ const defaultFilterValue: MultiSelectFilterValue<any> = {
 export function multiSelectFilter(
   row: Row<any>,
   columnId: string,
-  filterValue: MultiSelectFilterValue<any>
+  filterValue: MultiSelectFilterValue<any>,
 ): boolean {
   if (!filterValue || filterValue.values.length === 0) {
     return true;
@@ -87,7 +87,7 @@ export function MultiselectFilter<T>({
         setLocalValue(newFilter);
       }
     },
-    [desiredValues, setLocalValue]
+    [desiredValues, setLocalValue],
   );
 
   const onValuesChanged = React.useCallback(
@@ -102,7 +102,7 @@ export function MultiselectFilter<T>({
         setLocalValue(newFilter);
       }
     },
-    [mode, setLocalValue]
+    [mode, setLocalValue],
   );
 
   const toggleValue = React.useCallback(
@@ -113,7 +113,7 @@ export function MultiselectFilter<T>({
         onValuesChanged([...desiredValues, value]);
       }
     },
-    [onValuesChanged, desiredValues]
+    [onValuesChanged, desiredValues],
   );
 
   const [search, setSearch] = React.useState<string>("");
@@ -121,7 +121,7 @@ export function MultiselectFilter<T>({
   const allowedValueValues = React.useMemo(
     () =>
       Array.isArray(allowedValues) ? allowedValues : Object.keys(allowedValues),
-    [allowedValues]
+    [allowedValues],
   );
   const allowedValueLabels = React.useMemo(
     () =>
@@ -131,7 +131,7 @@ export function MultiselectFilter<T>({
             return acc;
           }, {})
         : allowedValues,
-    [allowedValues]
+    [allowedValues],
   );
 
   return (
@@ -171,7 +171,7 @@ export function MultiselectFilter<T>({
               search === "" ||
               String(allowedValueLabels[item])
                 .toLowerCase()
-                .includes(search.toLowerCase())
+                .includes(search.toLowerCase()),
           )
           .map((value) => (
             <ListItem key={value} disablePadding>

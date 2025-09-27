@@ -26,7 +26,7 @@ const HeaderFilter = ({ column }: { column: Column<any, unknown> }) => {
       column.id,
       "with def",
       column.columnDef,
-      "as filter component is null."
+      "as filter component is null.",
     );
     return null;
   }

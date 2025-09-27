@@ -52,19 +52,19 @@ interface ElementStackAutocompleteItem {
 }
 
 function observeAutocompleteItem(
-  model: ElementStackModel
+  model: ElementStackModel,
 ): Observable<ElementStackAutocompleteItem> {
   return combineLatest([model.label$, model.inExteriorSphere$]).pipe(
     map(([label, exterior]) => ({
       label,
       elementStack: model,
       exterior,
-    }))
+    })),
   );
 }
 
 const defaultFilterOptions = createFilterOptions<ElementStackAutocompleteItem>(
-  {}
+  {},
 );
 
 const ElementStackSelectField = ({
@@ -83,7 +83,7 @@ const ElementStackSelectField = ({
   let items =
     useObservation(
       () => elementStacks$.pipe(observeAllMap(observeAutocompleteItem)),
-      [elementStacks$]
+      [elementStacks$],
     ) ?? null;
 
   const [{ canDrop, isOver, dropElementStack }, drop] = useDrop(
@@ -91,7 +91,7 @@ const ElementStackSelectField = ({
       accept: ElementStackDraggable,
       canDrop: (draggable: ElementStackDraggable) => {
         const item = items?.find(
-          (x) => x.elementStack === draggable.elementStack
+          (x) => x.elementStack === draggable.elementStack,
         );
         if (!item) {
           return false;
@@ -117,43 +117,42 @@ const ElementStackSelectField = ({
           monitor.getItem<ElementStackDraggable>()?.elementStack,
       }),
     }),
-    [items, requireExterior]
+    [items, requireExterior],
   );
 
   const [matchCount, setMatchCount] = React.useState(0);
   const filterOptions = React.useCallback(
     (
       options: ElementStackAutocompleteItem[],
-      state: FilterOptionsState<ElementStackAutocompleteItem>
+      state: FilterOptionsState<ElementStackAutocompleteItem>,
     ) => {
       const result = defaultFilterOptions(options, state);
       setMatchCount(result.length);
       return result.slice(0, 24);
     },
-    []
+    [],
   );
 
   const PaperComponent = React.useMemo(
     () =>
-      ({ children }: React.HTMLAttributes<HTMLElement>) =>
-        (
-          <Paper>
-            {children}
-            {matchCount > 25 && (
-              <Stack sx={{ width: "100%", p: 1 }} alignItems="center">
-                <Typography
-                  sx={{ mx: "auto" }}
-                  textAlign="center"
-                  variant="caption"
-                >
-                  Showing 25 of {matchCount} matching cards. Use search to
-                  refine the results.
-                </Typography>
-              </Stack>
-            )}
-          </Paper>
-        ),
-    [matchCount, items]
+      ({ children }: React.HTMLAttributes<HTMLElement>) => (
+        <Paper>
+          {children}
+          {matchCount > 25 && (
+            <Stack sx={{ width: "100%", p: 1 }} alignItems="center">
+              <Typography
+                sx={{ mx: "auto" }}
+                textAlign="center"
+                variant="caption"
+              >
+                Showing 25 of {matchCount} matching cards. Use search to refine
+                the results.
+              </Typography>
+            </Stack>
+          )}
+        </Paper>
+      ),
+    [matchCount, items],
   );
 
   if (!items) {

@@ -27,7 +27,7 @@ const RecipeExecutionsHeader = ({ sx }: RecipeExecutionsHeaderProps) => {
       e.preventDefault();
       orchestrator.toggleDrawer();
     },
-    [orchestrator]
+    [orchestrator],
   );
 
   if (open) {

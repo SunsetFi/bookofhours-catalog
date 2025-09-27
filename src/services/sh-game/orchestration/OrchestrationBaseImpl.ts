@@ -38,7 +38,7 @@ import { OrchestrationBase, OrchestrationSlot } from "./types";
 export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   constructor(
     protected readonly _tokensSource: TokensSource,
-    private readonly _scheduler: BatchingScheduler
+    private readonly _scheduler: BatchingScheduler,
   ) {}
 
   abstract _dispose(): void;
@@ -62,7 +62,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           }
 
           return values(slots).some((x) => x == null);
-        })
+        }),
       );
     }
 
@@ -79,7 +79,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         switchMap((s) => s?.thresholds$ ?? EmptyArray$),
         distinctUntilChanged((a, b) => isEqual(a, b)),
         mapArrayItemsCached((spec) => this._createSlot(spec)),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -94,7 +94,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   > {
     if (!this._slotAssignments$) {
       this._slotAssignments$ = this.situation$.pipe(
-        switchMap((s) => s?.thresholdContents$ ?? EmptyObject$)
+        switchMap((s) => s?.thresholdContents$ ?? EmptyObject$),
       );
     }
 
@@ -107,7 +107,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
       this._aspects$ = this.slotAssignments$.pipe(
         map((slots) => Object.values(slots)),
         observeAllMap(
-          (elementStack) => elementStack?.aspectsAndSelf$ ?? EmptyObject$
+          (elementStack) => elementStack?.aspectsAndSelf$ ?? EmptyObject$,
         ),
         map((aspectArray) => {
           // This looks like a simple reduce(), but vite throws baffling errors when we use reduce.
@@ -120,7 +120,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
           return result;
         }),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -189,7 +189,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
         aspectContents = combineAspects(
           aspectContents,
-          elementStack.aspectsAndSelf
+          elementStack.aspectsAndSelf,
         );
       }
 
@@ -200,7 +200,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         // aspects that are already filled by other slotted cards.
 
         const unsatisfiedAspects = Object.keys(requirements).filter(
-          (aspect) => (aspectContents[aspect] ?? 0) < requirements[aspect]
+          (aspect) => (aspectContents[aspect] ?? 0) < requirements[aspect],
         );
 
         const stackAspects = elementStack.aspectsAndSelf;
@@ -215,7 +215,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
         while (true) {
           const nextUnfilled = thresholds.find(
-            (x) => !processedThresholdIds.has(x.id)
+            (x) => !processedThresholdIds.has(x.id),
           );
           if (!nextUnfilled) {
             return null;
@@ -248,7 +248,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           (x) =>
             !values(assignments).includes(x) &&
             aspectsMatchRequirements(x.aspectsAndSelf, spec) &&
-            elementStackContributes(x)
+            elementStackContributes(x),
         );
 
         if (candidates.length === 0) {
@@ -258,7 +258,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
         candidates = this._sortSlotAvailableStacks(
           spec,
           candidates,
-          requirementKeys
+          requirementKeys,
         );
 
         // Our sorting algorithm sorts the most desirable cards to the start of the list.
@@ -272,7 +272,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           // This will refresh the situation for us, so getNextUnfilledThreshold will have up to date thresholds.
           const slotSuccess = await situation.setSlotContents(
             spec.id,
-            candidate
+            candidate,
           );
 
           if (!slotSuccess) {
@@ -281,7 +281,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
                 candidate.id
               } into ${spec.id} failed.  Trying ${
                 SlotAttempts - (i + 1)
-              } more times.`
+              } more times.`,
             );
             continue;
           }
@@ -290,7 +290,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
           // This lets us prevent over-adding on a particular aspect.
           aspectContents = combineAspects(
             aspectContents,
-            candidate.aspectsAndSelf
+            candidate.aspectsAndSelf,
           );
           assignments[spec.id] = candidate;
 
@@ -307,7 +307,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
    */
   protected _createSlotCandidateFilter(
     elementStack: ElementStackModel,
-    spec: SphereSpec
+    spec: SphereSpec,
   ): Observable<boolean> {
     return True$;
   }
@@ -320,7 +320,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
    */
   protected _slotCandidateWeight(
     elementStack: ElementStackModel,
-    spec: SphereSpec
+    spec: SphereSpec,
   ) {
     return 0;
   }
@@ -328,18 +328,18 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   private _createSlot(spec: SphereSpec): OrchestrationSlot {
     const assignment$ = this.slotAssignments$.pipe(
       map((assignments) => assignments[spec.id] ?? null),
-      shareReplay(1)
+      shareReplay(1),
     );
     const availableElementStacks$ = combineLatest([
       this._tokensSource.visibleElementStacks$.pipe(
         filterItemObservations((item) =>
-          this._createSlotCandidateFilter(item, spec)
+          this._createSlotCandidateFilter(item, spec),
         ),
         filterItemObservations((item) =>
           item.aspects$.pipe(
-            map((aspects) => aspectsMatchRequirements(aspects, spec))
-          )
-        )
+            map((aspects) => aspectsMatchRequirements(aspects, spec)),
+          ),
+        ),
       ),
       this.slotAssignments$,
     ]).pipe(
@@ -359,10 +359,10 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
             }
 
             return this._sortSlotAvailableStacks(spec, stacks, requiredAspects);
-          })
-        )
+          }),
+        ),
       ),
-      shareReplay(1)
+      shareReplay(1),
     );
 
     return {
@@ -377,7 +377,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
   private _sortSlotAvailableStacks(
     spec: SphereSpec,
     stacks: ElementStackModel[],
-    requiredAspects: string[]
+    requiredAspects: string[],
   ): ElementStackModel[] {
     return sortBy(stacks, [
       (stack) => this._slotCandidateWeight(stack, spec),
@@ -388,7 +388,7 @@ export abstract class OrchestrationBaseImpl implements OrchestrationBase {
 
   private async _assignSlot(
     spec: SphereSpec,
-    element: ElementStackModel | null
+    element: ElementStackModel | null,
   ): Promise<void> {
     const situation = await firstValueFrom(this.situation$);
     if (!situation) {

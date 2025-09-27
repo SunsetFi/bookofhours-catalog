@@ -10,7 +10,7 @@ export class BatchingScheduler implements SchedulerLike {
   schedule<T>(
     work: (state?: T) => void,
     delay: number = 0,
-    state?: T
+    state?: T,
   ): Subscription {
     if (this._pauseDepth === 0) {
       work(state);

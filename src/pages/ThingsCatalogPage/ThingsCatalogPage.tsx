@@ -25,9 +25,9 @@ const ThingsCatalogPage = () => {
     () =>
       tokensSource.visibleElementStacks$.pipe(
         filterHasAnyAspect("thing"),
-        filterHasNoneOfAspect("readable")
+        filterHasNoneOfAspect("readable"),
       ),
-    [tokensSource]
+    [tokensSource],
   );
 
   const columns = React.useMemo(
@@ -56,7 +56,7 @@ const ThingsCatalogPage = () => {
       }),
       columnHelper.description(),
     ],
-    []
+    [],
   );
 
   return (

@@ -17,18 +17,18 @@ export function useObservation<T>(observable: Observable<T>): T | undefined;
 export function useObservation<T>(
   factory: () => Observable<T>,
   deps: any[],
-  opts?: UseObservationOpts
+  opts?: UseObservationOpts,
 ): T | undefined;
 export function useObservation<T>(
   observableOrFactory: Observable<T> | (() => Observable<T>),
   deps?: any[],
-  { onError, profileName }: UseObservationOpts = {}
+  { onError, profileName }: UseObservationOpts = {},
 ) {
   const scheduler = useDIDependency(BatchingScheduler);
 
   const observable$ = React.useMemo(
     () => factoryToObservable(observableOrFactory, scheduler),
-    deps ? [...deps] : [observableOrFactory]
+    deps ? [...deps] : [observableOrFactory],
   );
 
   // Do this in realtime, don't mess about with effects.
@@ -71,7 +71,7 @@ export function useObservation<T>(
               profileName,
               "retrieved first value in ",
               (Date.now() - start) / 1000,
-              "s"
+              "s",
             );
         }
 
@@ -107,7 +107,7 @@ export function useObservation<T>(
 
 function factoryToObservable<T>(
   factory: Observable<T> | (() => Observable<T>),
-  scheduler: SchedulerLike
+  scheduler: SchedulerLike,
 ): Observable<T> {
   let observable: Observable<T>;
   if (typeof factory === "function") {

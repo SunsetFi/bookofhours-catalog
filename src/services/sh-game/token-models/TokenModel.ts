@@ -21,7 +21,10 @@ export abstract class TokenModel<T extends Token = any> {
 
   private _lastUpdate: number = 0;
 
-  constructor(token: T, protected readonly _api: API) {
+  constructor(
+    token: T,
+    protected readonly _api: API,
+  ) {
     this._id = token.id;
     this._payloadType = token.payloadType;
     this._tokenSubject$ = new BehaviorSubject(token);
@@ -58,7 +61,7 @@ export abstract class TokenModel<T extends Token = any> {
       this._path$ = this._token$.pipe(
         map((t) => t.path),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -79,7 +82,7 @@ export abstract class TokenModel<T extends Token = any> {
       this._inExteriorSphere$ = this._token$.pipe(
         map((token) => token.inExteriorSphere),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -92,7 +95,7 @@ export abstract class TokenModel<T extends Token = any> {
       this._occupiesSpaceAs$ = this._token$.pipe(
         map((t) => t.occupiesSpaceAs),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -134,7 +137,7 @@ export abstract class TokenModel<T extends Token = any> {
         this.id,
         "refresh took",
         Date.now() - thisUpdate,
-        "ms"
+        "ms",
       );
     }
 
@@ -153,7 +156,7 @@ export abstract class TokenModel<T extends Token = any> {
 
     if (this._lastUpdate > timestamp) {
       console.warn(
-        "Skipping token update as a more recent update took its place."
+        "Skipping token update as a more recent update took its place.",
       );
       return;
     }

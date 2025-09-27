@@ -54,7 +54,7 @@ const AspectsMultiSelectList: React.FC<AspectsMultiSelectListProps> = ({
         onChange([...value, aspect]);
       }
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const itemModels$ = useValueObservation(itemModels);
@@ -73,13 +73,13 @@ const AspectsMultiSelectList: React.FC<AspectsMultiSelectListProps> = ({
                   }
 
                   return label.toLowerCase().includes(search.toLowerCase());
-                })
-              )
-            )
-          )
-        )
+                }),
+              ),
+            ),
+          ),
+        ),
       ),
-    [itemModels$, searchValue$]
+    [itemModels$, searchValue$],
   );
 
   const currentItemModels = useObservation(currentItemModels$) ?? EmptyArray;
@@ -94,7 +94,7 @@ const AspectsMultiSelectList: React.FC<AspectsMultiSelectListProps> = ({
           onClick={() => toggleAspect(aspect.aspectId)}
         />
       )),
-    [currentItemModels, value, toggleAspect]
+    [currentItemModels, value, toggleAspect],
   );
 
   return (

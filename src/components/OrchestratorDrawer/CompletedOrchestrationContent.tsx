@@ -43,7 +43,7 @@ const CompletedOrchestrationContent = ({
           },
         }}
         elementStack={notes[notes.length - 1]}
-      />
+      />,
     );
   } else if (description) {
     stackItems.push(
@@ -51,7 +51,7 @@ const CompletedOrchestrationContent = ({
         <GameTypography component="div" variant="body1" aria-live="assertive">
           {description}
         </GameTypography>
-      </Box>
+      </Box>,
     );
   }
 
@@ -63,7 +63,7 @@ const CompletedOrchestrationContent = ({
         alignContent: "center",
       }}
       elementStacks$={orchestration.content$}
-    />
+    />,
   );
 
   stackItems.push(
@@ -71,7 +71,7 @@ const CompletedOrchestrationContent = ({
       <ButtonGroup sx={{ ml: "auto" }}>
         <Button onClick={() => orchestration.conclude()}>Conclude</Button>
       </ButtonGroup>
-    </Stack>
+    </Stack>,
   );
 
   return (

@@ -23,7 +23,7 @@ import { AspectsListCell, TextWrapCell, VerbIconCell } from "../cells";
 import { createObservableColumnHelper } from "./observable-column-helper";
 
 export function createSituationColumnHelper<
-  T extends SituationModel = SituationModel
+  T extends SituationModel = SituationModel,
 >() {
   const columnHelper = createObservableColumnHelper<T>();
   return Object.assign(columnHelper, {
@@ -59,9 +59,9 @@ export function createSituationColumnHelper<
       }: Partial<EnhancedColumnDefBase<T, Record<string, React.ReactNode>>> & {
         showLevel?: boolean;
         aspectsSource?: (
-          model: T
+          model: T,
         ) => Observable<Record<string, React.ReactNode>>;
-      } = {}
+      } = {},
     ) =>
       columnHelper.observe(
         (model) =>
@@ -72,7 +72,7 @@ export function createSituationColumnHelper<
               } else {
                 return pick(modelAspects, aspects);
               }
-            })
+            }),
           ),
         {
           id,
@@ -94,7 +94,7 @@ export function createSituationColumnHelper<
             ),
           },
           ...def,
-        }
+        },
       ),
     description: () =>
       columnHelper.observe("verbDescription$" as any, {
@@ -112,7 +112,7 @@ export function createSituationColumnHelper<
       columnHelper.observe(
         (item) =>
           item.parentTerrain$.pipe(
-            switchMapIfNotNull((terrain) => terrain.label$)
+            switchMapIfNotNull((terrain) => terrain.label$),
           ),
         {
           id: "location",
@@ -126,7 +126,7 @@ export function createSituationColumnHelper<
               return <MultiselectFilter allowedValues={locations} {...props} />;
             },
           },
-        }
+        },
       ),
   });
 }

@@ -56,9 +56,9 @@ const LocationsCatalogPage = () => {
   const items$ = React.useMemo(
     () =>
       tokensSource.unsealedTerrains$.pipe(
-        filterItems((x) => x.id !== "!brancrug")
+        filterItems((x) => x.id !== "!brancrug"),
       ),
-    []
+    [],
   );
 
   const columns = React.useMemo(
@@ -101,7 +101,7 @@ const LocationsCatalogPage = () => {
             // We should make filters take values, not rows and columns
             // Or look into column groups?
             const [shrouded, essentials, requirements] = row.getValue(
-              column
+              column,
             ) as any;
 
             let aspects: Aspects = {};
@@ -114,7 +114,7 @@ const LocationsCatalogPage = () => {
                 getValue: () => aspects,
               } as any,
               column,
-              value
+              value,
             );
           },
           cell: (props) => {
@@ -155,7 +155,7 @@ const LocationsCatalogPage = () => {
               props: FilterComponentProps<
                 AspectsFilterValue,
                 [boolean, Aspects, Aspects]
-              >
+              >,
             ) => (
               <AspectsFilter
                 {...props}
@@ -164,12 +164,12 @@ const LocationsCatalogPage = () => {
                   ([_, essentials, requirements]) => ({
                     ...essentials,
                     ...requirements,
-                  })
+                  }),
                 )}
               />
             ),
           },
-        }
+        },
       ),
       columnHelper.observe(
         (item) => item.children$.pipe(filterItems(isSituationModel)),
@@ -180,7 +180,7 @@ const LocationsCatalogPage = () => {
           enableSorting: false,
           enableColumnFilter: false,
           cell: WorkstationsCell,
-        }
+        },
       ),
       // TODO: Only show if DLC is enabled.
       columnHelper.observeText(
@@ -191,9 +191,9 @@ const LocationsCatalogPage = () => {
             map((x) => first(x) ?? null),
             switchMapIfNotNull((x) =>
               x.aspects$.pipe(
-                map((aspects) => first(Object.keys(aspects)) ?? null)
-              )
-            )
+                map((aspects) => first(Object.keys(aspects)) ?? null),
+              ),
+            ),
           ),
         {
           id: "venue",
@@ -219,7 +219,7 @@ const LocationsCatalogPage = () => {
               );
             },
           },
-        }
+        },
       ),
       columnHelper.observeText("description$" as any, {
         id: "description",
@@ -227,14 +227,14 @@ const LocationsCatalogPage = () => {
         header: "Description",
       }),
     ],
-    []
+    [],
   );
 
   return <DataGridPage title="Locations" columns={columns} items$={items$} />;
 };
 
 const WorkstationsCell = (
-  props: CellContext<ConnectedTerrainModel, readonly SituationModel[]>
+  props: CellContext<ConnectedTerrainModel, readonly SituationModel[]>,
 ) => {
   const workstations: readonly SituationModel[] = props.getValue();
   return (

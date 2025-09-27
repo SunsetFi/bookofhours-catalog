@@ -28,7 +28,7 @@ export const EmptyArray$: Observable<[]> = new BehaviorSubject([]);
 export const EmptyObject$: Observable<{}> = new BehaviorSubject({});
 
 export function observableObjectOrEmpty<T extends {}>(
-  value: Observable<T> | null | undefined
+  value: Observable<T> | null | undefined,
 ): Observable<T> {
   if (value) {
     return value;
@@ -38,7 +38,7 @@ export function observableObjectOrEmpty<T extends {}>(
 }
 
 export function promiseFuncToObservable<T>(
-  func: () => Promise<T>
+  func: () => Promise<T>,
 ): Observable<T> {
   return defer(() => from(func())).pipe(shareReplay(1));
 }
@@ -50,10 +50,10 @@ export function distinctUntilShallowArrayChanged<T extends readonly any[]>() {
 }
 
 export function filterItems<T, K extends T>(
-  filter: (item: T) => item is K
+  filter: (item: T) => item is K,
 ): OperatorFunction<readonly T[], readonly K[]>;
 export function filterItems<T>(
-  filter: (item: T) => boolean
+  filter: (item: T) => boolean,
 ): OperatorFunction<readonly T[], readonly T[]>;
 export function filterItems(filter: (item: any) => boolean) {
   return (source: Observable<readonly any[]>): Observable<any[]> => {
@@ -62,33 +62,33 @@ export function filterItems(filter: (item: any) => boolean) {
 }
 
 export function firstOrDefault<TIn, TOut extends TIn>(
-  filter: (item: TIn) => item is TOut
+  filter: (item: TIn) => item is TOut,
 ): OperatorFunction<readonly TIn[], TOut | null>;
 export function firstOrDefault<TIn>(
-  filter: (item: TIn) => boolean
+  filter: (item: TIn) => boolean,
 ): OperatorFunction<readonly TIn[], TIn | null>;
 export function firstOrDefault<TIn, TOut extends TIn>(
-  filter: (item: TIn) => boolean
+  filter: (item: TIn) => boolean,
 ): OperatorFunction<readonly TIn[], any | null> {
   return (source: Observable<readonly TIn[]>): Observable<any | null> => {
     return source.pipe(
       map((items) => items.find(filter) ?? null),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     );
   };
 }
 
 export function filterItemObservations<T, K extends T>(
-  filter: (item: T) => Observable<boolean>
+  filter: (item: T) => Observable<boolean>,
 ) {
   return (source: Observable<readonly T[]>): Observable<K[]> => {
     return source.pipe(
       observeAllMap((item) =>
-        filter(item).pipe(map((isMatch) => ({ item, isMatch })))
+        filter(item).pipe(map((isMatch) => ({ item, isMatch }))),
       ),
       map((items) =>
-        items.filter(({ isMatch }) => isMatch).map(({ item }) => item as K)
-      )
+        items.filter(({ isMatch }) => isMatch).map(({ item }) => item as K),
+      ),
     );
   };
 }
@@ -116,7 +116,7 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
 // }
 
 export function observeAllMap<T, K>(
-  func: (value: T, index: number) => Observable<K>
+  func: (value: T, index: number) => Observable<K>,
 ): OperatorFunction<readonly T[], K[]> {
   return (source: Observable<readonly T[]>) => {
     return source.pipe(
@@ -124,7 +124,7 @@ export function observeAllMap<T, K>(
       // FIXME: Write our own observeAll and observeAllMap that doesn't have this issue.
       // We used to have our own, but it was buggy and got removed.
       mapArrayItemsCached((input, index) =>
-        func(input, index).pipe(shareReplay(1))
+        func(input, index).pipe(shareReplay(1)),
       ),
       distinctUntilShallowArrayChanged(),
       switchMap((observables) => {
@@ -133,7 +133,7 @@ export function observeAllMap<T, K>(
         }
 
         return combineLatest(observables);
-      })
+      }),
     );
   };
 }
@@ -147,27 +147,27 @@ export function mapArrayItems<T, K>(mapping: (item: T) => K) {
 export function switchMapIf<T, TM extends T, K>(
   condition: (value: T) => value is TM,
   mapping: (value: TM) => Observable<K> | Promise<K>,
-  ifFalse: Observable<K>
+  ifFalse: Observable<K>,
 ) {
   return (source: Observable<T>): Observable<K> => {
     return source.pipe(
-      switchMap((value) => (condition(value) ? mapping(value) : ifFalse))
+      switchMap((value) => (condition(value) ? mapping(value) : ifFalse)),
     );
   };
 }
 
 export function switchMapIfNotNull<T, K>(
-  mapping: (value: T) => Observable<K> | Promise<K>
+  mapping: (value: T) => Observable<K> | Promise<K>,
 ) {
   return switchMapIf<T | null | undefined, T, K | null>(
     isNotNull,
     mapping,
-    Null$
+    Null$,
   );
 }
 
 export function mapArrayItemsCached<T, R>(
-  fn: (value: T, index: number) => R
+  fn: (value: T, index: number) => R,
 ): OperatorFunction<readonly T[], R[]> {
   return (source: Observable<readonly T[]>): Observable<R[]> => {
     const cache = new Map<T, R>();
@@ -197,7 +197,7 @@ export function mapArrayItemsCached<T, R>(
         }
 
         return result;
-      })
+      }),
     );
   };
 }

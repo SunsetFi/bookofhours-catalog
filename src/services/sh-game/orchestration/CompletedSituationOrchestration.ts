@@ -50,7 +50,7 @@ export class CompletedSituationOrchestration
       this._aspects$ = this._situation.output$.pipe(
         observeAllMap((output) => output.aspects$),
         map((aspects) => aspects.reduce((a, b) => combineAspects(a, b), {})),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 

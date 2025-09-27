@@ -26,7 +26,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     api: API,
     private readonly _allTokens$: Observable<readonly TokenModel[]>,
     private readonly _compendium: Compendium,
-    private readonly _scheduler: BatchingScheduler
+    private readonly _scheduler: BatchingScheduler,
   ) {
     super(token, api);
   }
@@ -45,7 +45,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
       this._label$ = this.wisdomRecipe$.pipe(
         switchMapIfNotNull((t) => t.label$),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -58,7 +58,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
       this._description$ = this.wisdomRecipe$.pipe(
         switchMapIfNotNull((t) => t.description$),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -70,7 +70,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     if (!this._shrouded$) {
       this._shrouded$ = this._token$.pipe(
         map((t) => t.shrouded),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._shrouded$;
@@ -81,7 +81,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     if (!this._sealed$) {
       this._sealed$ = this._token$.pipe(
         map((t) => t.sealed),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._sealed$;
@@ -92,7 +92,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     if (!this._requirements$) {
       this._requirements$ = this._token$.pipe(
         map((t) => t.wisdomSkillRequirements),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._requirements$;
@@ -103,7 +103,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     if (!this._essentials$) {
       this._essentials$ = this._token$.pipe(
         map((t) => t.wisdomSkillEssentials),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._essentials$;
@@ -114,7 +114,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
     if (!this._forbiddens$) {
       this._forbiddens$ = this._token$.pipe(
         map((t) => t.wisdomSkillForbiddens),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._forbiddens$;
@@ -128,7 +128,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
         filterItems(isElementStackModel),
         map((tokens) => first(tokens) ?? null),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -147,7 +147,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
         filterItems(isElementStackModel),
         map((tokens) => first(tokens) ?? null),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -161,10 +161,10 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
         map((t) =>
           t.wisdomRecipeId
             ? this._compendium.getRecipeById(t.wisdomRecipeId)
-            : null
+            : null,
         ),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -222,7 +222,7 @@ export class WisdomNodeTerrainModel extends TokenModel<WisdomNodeTerrain> {
 }
 
 export function isWisdomNodeTerrainModel(
-  token: TokenModel
+  token: TokenModel,
 ): token is WisdomNodeTerrainModel {
   return token instanceof WisdomNodeTerrainModel;
 }

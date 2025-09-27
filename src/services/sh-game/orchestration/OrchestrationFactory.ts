@@ -25,7 +25,7 @@ export class OrchestrationFactory {
     @inject(Compendium) private readonly _compendium: Compendium,
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(TimeSource) private readonly _timeSource: TimeSource,
-    @inject(BatchingScheduler) private readonly _scheduler: BatchingScheduler
+    @inject(BatchingScheduler) private readonly _scheduler: BatchingScheduler,
   ) {}
 
   createUnstartedOrchestration(defaultSituation: SituationModel | null) {
@@ -33,20 +33,20 @@ export class OrchestrationFactory {
       defaultSituation ?? null,
       this._tokensSource,
       this._compendium,
-      this._scheduler
+      this._scheduler,
     );
   }
 
   createRecipeOrchestration(
     recipe: RecipeModel,
-    desiredElements: ElementModel[]
+    desiredElements: ElementModel[],
   ) {
     return new RecipeOrchestration(
       recipe,
       desiredElements,
       this._compendium,
       this._tokensSource,
-      this._scheduler
+      this._scheduler,
     );
   }
 
@@ -55,7 +55,7 @@ export class OrchestrationFactory {
       situation,
       this._tokensSource,
       this._timeSource,
-      this._scheduler
+      this._scheduler,
     );
   }
 

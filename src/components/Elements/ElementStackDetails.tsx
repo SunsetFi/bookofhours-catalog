@@ -27,7 +27,7 @@ const ElementStackDetails = React.forwardRef<
   const description = useObservation(
     () =>
       elementStack.element$.pipe(switchMap((element) => element.description$)),
-    [elementStack]
+    [elementStack],
   );
 
   if (!label) {

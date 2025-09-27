@@ -33,6 +33,6 @@ root.render(
         </ThemeProvider>
       </AppRouter>
     </DndProvider>
-  </ContainerProvider>
+  </ContainerProvider>,
   // </React.StrictMode>
 );

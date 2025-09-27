@@ -64,7 +64,7 @@ const columns = [
     size: 50,
     cell: (props) => {
       const memoryElementId = useObservation(
-        props.row.original.memoryElementId$
+        props.row.original.memoryElementId$,
       );
       return (
         <Box

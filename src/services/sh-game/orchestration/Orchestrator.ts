@@ -47,7 +47,7 @@ const TransientStates: SituationState[] = [
 @singleton()
 export class Orchestrator {
   private readonly _orchestration$ = new BehaviorSubject<Orchestration | null>(
-    null
+    null,
   );
 
   private readonly _open$ = new BehaviorSubject<boolean>(false);
@@ -58,7 +58,7 @@ export class Orchestrator {
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(OrchestrationFactory)
     private readonly _orchestrationFactory: OrchestrationFactory,
-    @inject(Compendium) private readonly _compendium: Compendium
+    @inject(Compendium) private readonly _compendium: Compendium,
   ) {
     this._settings.getObservable("interactivity").subscribe((interactivity) => {
       if (interactivity === "read-only") {
@@ -82,7 +82,7 @@ export class Orchestrator {
     // We monitor the situation state on behalf of orchestrations, as this logic
     // is common to all orchestrations.
     const currentSituation$ = this._orchestration$.pipe(
-      switchMapIfNotNull((o) => o.situation$)
+      switchMapIfNotNull((o) => o.situation$),
     );
 
     currentSituation$
@@ -90,10 +90,10 @@ export class Orchestrator {
         switchMap((situation) =>
           situation
             ? situation.state$.pipe(map((s) => [situation, s] as const))
-            : of([null, null])
+            : of([null, null]),
         ),
         // This is very important; do not allow infinite loops.
-        distinctUntilShallowArrayChanged()
+        distinctUntilShallowArrayChanged(),
       )
       .subscribe(([situation, situationState]) => {
         const orchestration = this._orchestration$.value;
@@ -158,8 +158,8 @@ export class Orchestrator {
     if (!this._executingSituations$) {
       this._executingSituations$ = this._tokensSource.visibleSituations$.pipe(
         filterItemObservations((s) =>
-          s.state$.pipe(map((s) => s !== "Unstarted"))
-        )
+          s.state$.pipe(map((s) => s !== "Unstarted")),
+        ),
       );
     }
     return this._executingSituations$;
@@ -178,7 +178,7 @@ export class Orchestrator {
   }
 
   async openOrchestration(
-    request: OrchestrationRequest
+    request: OrchestrationRequest,
   ): Promise<Orchestration | null> {
     const interactivity = this._settings.get("interactivity");
     if (interactivity === "read-only") {
@@ -202,13 +202,13 @@ export class Orchestrator {
       }
 
       const desiredElements = (desiredElementIds ?? []).map((id) =>
-        this._compendium.getElementById(id)
+        this._compendium.getElementById(id),
       );
 
       const orchestration =
         this._orchestrationFactory.createRecipeOrchestration(
           recipe,
-          desiredElements
+          desiredElements,
         );
 
       this._updateOrchestration(orchestration);

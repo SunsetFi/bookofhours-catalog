@@ -27,7 +27,7 @@ export async function getGithubReleases(): Promise<GithubRelease[]> {
         Accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
-    }
+    },
   );
 
   const body = await response.json();
@@ -35,7 +35,7 @@ export async function getGithubReleases(): Promise<GithubRelease[]> {
 }
 
 export function findBepInExPluginAsset(
-  release: GithubRelease
+  release: GithubRelease,
 ): GithubReleaseAsset | null {
   return release.assets.find((asset) => asset.name.includes("BepInEx")) ?? null;
 }

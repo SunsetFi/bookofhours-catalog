@@ -17,11 +17,11 @@ function searchParamsToObject(search: string): Record<string, any> {
 }
 
 export type QueryObjectMapper = (
-  value: Record<string, any>
+  value: Record<string, any>,
 ) => Record<string, any>;
 export function useQueryObjectState(): [
   obj: Record<string, any>,
-  setValue: (value: Record<string, any>) => void
+  setValue: (value: Record<string, any>) => void,
 ] {
   const history = useHistory();
 
@@ -55,7 +55,7 @@ export function useQueryObjectState(): [
 
       history.replace(`${location.pathname}?${newParams.toString()}`);
     },
-    [history]
+    [history],
   );
 
   return [obj, setValue];

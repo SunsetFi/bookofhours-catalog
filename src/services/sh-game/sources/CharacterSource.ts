@@ -29,7 +29,7 @@ export class CharacterSource implements CharacterSource {
   >();
   private readonly _uniqueElementIdsManifested$ =
     this._uniqueElementIdsManifestedSubject$.pipe(
-      distinctUntilShallowArrayChanged()
+      distinctUntilShallowArrayChanged(),
     );
 
   private readonly _ambittableRecipeIdsSubject$ = new Subject<
@@ -43,7 +43,7 @@ export class CharacterSource implements CharacterSource {
     @inject(GameStateSource) runningSource: GameStateSource,
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(Compendium) private readonly _compendium: Compendium,
-    @inject(API) private readonly _api: API
+    @inject(API) private readonly _api: API,
   ) {
     runningSource.isLegacyRunning$.subscribe((isRunning) => {
       if (!isRunning) {
@@ -54,7 +54,7 @@ export class CharacterSource implements CharacterSource {
       } else {
         if (!this._characterTaskSubscription) {
           this._characterTaskSubscription = scheduler.addTask(() =>
-            this._pollCharacter()
+            this._pollCharacter(),
           );
         }
       }
@@ -72,7 +72,7 @@ export class CharacterSource implements CharacterSource {
     if (!this._uniqueElementsManfiested$) {
       this._uniqueElementsManfiested$ = this._uniqueElementIdsManifested$.pipe(
         map((ids) => ids.map((id) => this._compendium.getElementById(id))),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -90,10 +90,10 @@ export class CharacterSource implements CharacterSource {
         // used to filter this for recipes starting with craft., but ambittables seem to be specific
         // opt-in recipes, so we might not need to do that.
         mapArrayItemsCached((recipeId) =>
-          this._compendium.getRecipeById(recipeId)
+          this._compendium.getRecipeById(recipeId),
         ),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -106,7 +106,7 @@ export class CharacterSource implements CharacterSource {
       this._skills = this._tokensSource.visibleElementStacks$.pipe(
         filterHasAnyAspect("skill"),
         filterTokenNotInPath("~/wisdomtreenodes"),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 

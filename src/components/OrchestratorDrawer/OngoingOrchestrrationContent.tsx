@@ -45,7 +45,7 @@ const OngoingOrchestrationContent = ({
         isContentContainingOrchestration(orchestration)
           ? orchestration.notes$
           : Null$,
-      [orchestration]
+      [orchestration],
     ) ?? [];
 
   const content =
@@ -54,7 +54,7 @@ const OngoingOrchestrationContent = ({
         isContentContainingOrchestration(orchestration)
           ? orchestration.content$
           : Null$,
-      [orchestration]
+      [orchestration],
     ) ?? [];
 
   const timeRemaining =
@@ -78,7 +78,7 @@ const OngoingOrchestrationContent = ({
           },
         }}
         elementStack={notes[notes.length - 1]}
-      />
+      />,
     );
   } else if (description) {
     stackItems.push(
@@ -86,7 +86,7 @@ const OngoingOrchestrationContent = ({
         <GameTypography variant="body1" aria-live="assertive">
           {description}
         </GameTypography>
-      </Box>
+      </Box>,
     );
   }
 
@@ -106,12 +106,15 @@ const OngoingOrchestrationContent = ({
             interactive={false}
           />
         ))}
-      </Stack>
+      </Stack>,
     );
   }
 
   stackItems.push(
-    <OrchestrationSlots sx={{ height: "100%" }} orchestration={orchestration} />
+    <OrchestrationSlots
+      sx={{ height: "100%" }}
+      orchestration={orchestration}
+    />,
   );
 
   stackItems.push(
@@ -134,7 +137,7 @@ const OngoingOrchestrationContent = ({
         </RequireInteractivity>
         <Button onClick={() => orchestration.passTime()}>Pass Time</Button>
       </ButtonGroup>
-    </Stack>
+    </Stack>,
   );
 
   return (

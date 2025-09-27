@@ -19,7 +19,7 @@ const SearchButtonHeader = ({ sx }: SearchButtonHeaderProps) => {
       e.stopPropagation();
       searchService.open();
     },
-    [searchService]
+    [searchService],
   );
 
   return (

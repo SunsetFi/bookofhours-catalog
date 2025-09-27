@@ -59,7 +59,7 @@ const PendingOrchestrationContent = ({
         <GameTypography variant="body1" aria-live="assertive">
           {description}
         </GameTypography>
-      </Box>
+      </Box>,
     );
   }
 
@@ -72,7 +72,7 @@ const PendingOrchestrationContent = ({
         situations$={orchestration.availableSituations$}
         value={situation ?? null}
         onChange={(s) => orchestration.selectSituation(s)}
-      />
+      />,
     );
   }
 
@@ -82,21 +82,24 @@ const PendingOrchestrationContent = ({
         sx={{ justifyContent: "center", height: 30 }}
         aspects={mapValues(
           requirements,
-          (value, key) => `${aspects[key] ?? 0} / ${value}`
+          (value, key) => `${aspects[key] ?? 0} / ${value}`,
         )}
         iconSize={30}
-      />
+      />,
     );
   } else {
     stackItems.push(
       <Typography sx={{ height: 30, textAlign: "center" }}>
         Slot enough cards for a recipe to see its requirements.
-      </Typography>
+      </Typography>,
     );
   }
 
   stackItems.push(
-    <OrchestrationSlots sx={{ height: "100%" }} orchestration={orchestration} />
+    <OrchestrationSlots
+      sx={{ height: "100%" }}
+      orchestration={orchestration}
+    />,
   );
 
   stackItems.push(
@@ -116,7 +119,7 @@ const PendingOrchestrationContent = ({
           Start Recipe
         </Button>
       </ButtonGroup>
-    </Stack>
+    </Stack>,
   );
 
   return (

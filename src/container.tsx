@@ -46,7 +46,7 @@ export function useDIDependency<T>(identifier: Identifier<T>): T {
 
 export function useDICreate<T>(
   identifier: Newable<T>,
-  parameters?: ParameterRecord
+  parameters?: ParameterRecord,
 ): T {
   const container = useDIContainer();
   const valRef = React.useRef<T>();

@@ -20,9 +20,9 @@ export function filterTokenInPath(path: string | string[]) {
             } else {
               return tokenPathContainsChild(path, elementPath);
             }
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   };
 }
@@ -38,9 +38,9 @@ export function filterTokenNotInPath(path: string | string[]) {
             } else {
               return !tokenPathContainsChild(path, elementPath);
             }
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   };
 }
@@ -56,9 +56,9 @@ export function filterElementId(id: string | ((id: string) => boolean)) {
             } else {
               return id(elementId);
             }
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   };
 }
@@ -70,15 +70,15 @@ export function filterOccupiesSpace(space: SpaceOccupation) {
         element.occupiesSpaceAs$.pipe(
           map((occupies) => {
             return occupies === space;
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   };
 }
 
 export function filterDoesNotOccupySpace(
-  space: SpaceOccupation | readonly SpaceOccupation[]
+  space: SpaceOccupation | readonly SpaceOccupation[],
 ) {
   return <T extends TokenModel>(source: Observable<readonly T[]>) => {
     return source.pipe(
@@ -90,18 +90,18 @@ export function filterDoesNotOccupySpace(
             } else {
               return occupies !== space;
             }
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   };
 }
 
 export function filterHasAnyAspect(
-  match: string | readonly string[] | ((aspectId: string) => boolean)
+  match: string | readonly string[] | ((aspectId: string) => boolean),
 ) {
   return <T extends ModelWithAspects>(
-    source: Observable<readonly T[]>
+    source: Observable<readonly T[]>,
   ): Observable<readonly T[]> => {
     return source.pipe(
       filterItemObservations((element) =>
@@ -122,9 +122,9 @@ export function filterHasAnyAspect(
             }
 
             return found;
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
   };
 }
@@ -141,11 +141,11 @@ export function filterHasNoneOfAspect(match: string | readonly string[]) {
           map((elementAspects) =>
             match.every(
               (item) =>
-                elementAspects[item] == null || elementAspects[item] === 0
-            )
-          )
-        )
-      )
+                elementAspects[item] == null || elementAspects[item] === 0,
+            ),
+          ),
+        ),
+      ),
     );
   };
 }
@@ -157,11 +157,11 @@ export function filterMatchesRequirements(requirements: Aspects) {
         element.aspects$.pipe(
           map((aspects) =>
             Object.keys(requirements).some(
-              (key) => aspects[key] >= requirements[key]
-            )
-          )
-        )
-      )
+              (key) => aspects[key] >= requirements[key],
+            ),
+          ),
+        ),
+      ),
     );
   };
 }
@@ -173,11 +173,11 @@ export function filterMatchesEssentials(essentials: Aspects) {
         element.aspects$.pipe(
           map((aspects) =>
             Object.keys(essentials).every(
-              (key) => aspects[key] >= essentials[key]
-            )
-          )
-        )
-      )
+              (key) => aspects[key] >= essentials[key],
+            ),
+          ),
+        ),
+      ),
     );
   };
 }
@@ -189,11 +189,11 @@ export function filterMatchesForbiddens(forbiddens: Aspects) {
         element.aspects$.pipe(
           map((aspects) =>
             Object.keys(forbiddens).every(
-              (key) => aspects[key] == null || aspects[key] === 0
-            )
-          )
-        )
-      )
+              (key) => aspects[key] == null || aspects[key] === 0,
+            ),
+          ),
+        ),
+      ),
     );
   };
 }

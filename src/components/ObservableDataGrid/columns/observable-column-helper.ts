@@ -18,24 +18,24 @@ export interface ObservableColumnHelper<TData extends RowData>
   extends BaseColumnHelper<TData> {
   observe<TProp extends ObservableKeys<TData>>(
     accessor: TProp,
-    column: EnhancedDisplayColumnDef<TData, Observation<TData[TProp]>>
+    column: EnhancedDisplayColumnDef<TData, Observation<TData[TProp]>>,
   ): ObservableColumnDef<TData, Observation<TData[TProp]>>;
   observe<TValue>(
     accessor: ObservableAccessorFn<TData, TValue>,
-    column: EnhancedDisplayColumnDef<TData, TValue>
+    column: EnhancedDisplayColumnDef<TData, TValue>,
   ): ObservableColumnDef<TData, TValue>;
 
   observeText<TProp extends ObservableKeys<TData>>(
     accessor: TProp,
-    column: EnhancedDisplayColumnDef<TData, Observation<TData[TProp]>>
+    column: EnhancedDisplayColumnDef<TData, Observation<TData[TProp]>>,
   ): ObservableColumnDef<TData, Observation<TData[TProp]>>;
   observeText<TValue>(
     accessor: ObservableAccessorFn<TData, TValue>,
-    column: EnhancedDisplayColumnDef<TData, TValue>
+    column: EnhancedDisplayColumnDef<TData, TValue>,
   ): ObservableColumnDef<TData, TValue>;
 }
 export function createObservableColumnHelper<
-  TData extends RowData
+  TData extends RowData,
 >(): ObservableColumnHelper<TData> {
   const base = createBase<TData>();
   return {

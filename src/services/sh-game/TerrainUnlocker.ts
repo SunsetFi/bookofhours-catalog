@@ -32,7 +32,7 @@ import { Orchestrator } from "./orchestration";
 @singleton()
 export class TerrainUnlocker {
   private readonly _target$ = new BehaviorSubject<ConnectedTerrainModel | null>(
-    null
+    null,
   );
 
   private readonly _selectedStack$ =
@@ -41,7 +41,7 @@ export class TerrainUnlocker {
   constructor(
     @inject(TokensSource) private readonly _tokensSource: TokensSource,
     @inject(UpdatePoller) private readonly _scheduler: UpdatePoller,
-    @inject(Orchestrator) private readonly _orchestrator: Orchestrator
+    @inject(Orchestrator) private readonly _orchestrator: Orchestrator,
   ) {
     this.unlockCandidateStacks$.subscribe((items) => {
       if (
@@ -68,7 +68,7 @@ export class TerrainUnlocker {
         firstOrDefault((situation) => situation.verbId === "terrain.unlock"),
         switchMapIfNotNull((situation) => situation.recipeId$),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -80,7 +80,7 @@ export class TerrainUnlocker {
     if (!this._unlockEssentials$) {
       this._unlockEssentials$ = this.target$.pipe(
         switchMapIfNotNull((target) => target.unlockEssentials$),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -92,7 +92,7 @@ export class TerrainUnlocker {
     if (!this._unlockRequirements$) {
       this._unlockRequirements$ = this.target$.pipe(
         switchMapIfNotNull((target) => target.unlockRequirements$),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -104,7 +104,7 @@ export class TerrainUnlocker {
     if (!this._unlockForbiddens$) {
       this._unlockForbiddens$ = this.target$.pipe(
         switchMapIfNotNull((target) => target.unlockForbiddens$),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -144,11 +144,11 @@ export class TerrainUnlocker {
                     return false;
                   }
                   return true;
-                })
-              )
-            )
+                }),
+              ),
+            ),
           );
-        })
+        }),
       );
     }
 
@@ -196,10 +196,10 @@ export class TerrainUnlocker {
       // Locate and open the situation for the unlock.
       await this._scheduler.updateNow();
       const situations = await firstValueFrom(
-        this._orchestrator.executingSituations$
+        this._orchestrator.executingSituations$,
       );
       const unlockSituation = situations.find(
-        (x) => x.verbId === "terrain.unlock"
+        (x) => x.verbId === "terrain.unlock",
       );
       if (unlockSituation) {
         this._orchestrator.openOrchestration({ situation: unlockSituation });

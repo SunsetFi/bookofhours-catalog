@@ -42,7 +42,7 @@ export class TimeSource {
   constructor(
     @inject(GameStateSource) runningSource: GameStateSource,
     @inject(API) private readonly _api: API,
-    @inject(UpdatePoller) private _scheduler: UpdatePoller
+    @inject(UpdatePoller) private _scheduler: UpdatePoller,
   ) {
     let schedulerSubscription: (() => void) | null = null;
     runningSource.isLegacyRunning$
@@ -50,7 +50,7 @@ export class TimeSource {
       .subscribe((isRunning) => {
         if (isRunning) {
           schedulerSubscription = this._scheduler.addTask(() =>
-            this._pollTime()
+            this._pollTime(),
           );
         } else if (schedulerSubscription) {
           schedulerSubscription();
@@ -64,7 +64,7 @@ export class TimeSource {
     if (!this._gameSpeed$) {
       this._gameSpeed$ = this._gameSpeedSource$.pipe(
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
     return this._gameSpeed$;
@@ -77,7 +77,7 @@ export class TimeSource {
         map((situation) => situation.currentRecipeId),
         filter(isNotNull),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -99,7 +99,7 @@ export class TimeSource {
           return timeRemaining;
         }),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -119,7 +119,7 @@ export class TimeSource {
           return Math.ceil(timeRemaining / secondsPerDay);
         }),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -133,7 +133,7 @@ export class TimeSource {
         map((situation) => situation.recipeLabel),
         filter(isNotNull),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -147,7 +147,7 @@ export class TimeSource {
         map((situation) => situation.description),
         filter(isNotNull),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -186,10 +186,10 @@ export class TimeSource {
     this._gameSpeedSource$.next(speed);
 
     const daySituation = dateTokens.find(
-      (token) => token.spherePath === "~/day"
+      (token) => token.spherePath === "~/day",
     );
     const yearSituation = dateTokens.find(
-      (token) => token.spherePath === "~/year"
+      (token) => token.spherePath === "~/year",
     );
 
     if (

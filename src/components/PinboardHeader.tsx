@@ -26,7 +26,7 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
   const pinboard = useDIDependency(Pinboard);
   const recipeLabel = useObservation(
     () => pinboard.pinnedRecipe$.pipe(switchMapIfNotNull((r) => r.label$)),
-    [pinboard.pinnedRecipe$]
+    [pinboard.pinnedRecipe$],
   );
   const pins = useObservation(pinboard.pins$) ?? [];
   const aspects = useObservation(pinboard.pinnedAspects$) ?? {};
@@ -82,7 +82,7 @@ const PinboardHeader = ({ sx }: PinboardHeaderProps) => {
             aspects={mapValues(aspects, (value) =>
               value.desired > 0
                 ? `${value.current} / ${value.desired}`
-                : value.current
+                : value.current,
             )}
             iconSize={30}
           />

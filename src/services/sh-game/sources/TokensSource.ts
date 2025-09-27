@@ -75,7 +75,7 @@ export class TokensSource {
     @inject(API) private readonly _api: API,
     @inject(TokenModelFactory)
     private readonly _tokenModelFactory: TokenModelFactory,
-    @inject(BatchingScheduler) private readonly _scheduler: BatchingScheduler
+    @inject(BatchingScheduler) private readonly _scheduler: BatchingScheduler,
   ) {
     runningSource.isLegacyRunning$.subscribe((isRunning) => {
       if (!isRunning) {
@@ -90,7 +90,7 @@ export class TokensSource {
       } else {
         if (!this._tokensTaskSubsciption) {
           this._tokensTaskSubsciption = poller.addTask(() =>
-            this._pollTokens()
+            this._pollTokens(),
           );
         }
       }
@@ -98,7 +98,7 @@ export class TokensSource {
   }
 
   private readonly _tokens$ = this._tokensSubject$.pipe(
-    distinctUntilShallowArrayChanged()
+    distinctUntilShallowArrayChanged(),
   );
   get tokens$(): Observable<readonly TokenModel[]> {
     return this._tokens$;
@@ -111,11 +111,11 @@ export class TokensSource {
     // WisdomNodeModel uses tokens$ directly and skips this, so it is unaffected.
     map((models) =>
       models.filter(
-        (model) => !WisdomTreeCommittmentRegex.test(model.spherePath)
-      )
+        (model) => !WisdomTreeCommittmentRegex.test(model.spherePath),
+      ),
     ),
     distinctUntilShallowArrayChanged(),
-    shareReplay(1)
+    shareReplay(1),
   );
   get visibleTokens$(): Observable<readonly TokenModel[]> {
     return this._visibleTokens$;
@@ -129,7 +129,7 @@ export class TokensSource {
         filterItems(isSituationModel),
         filterTokenInPath("~/fixedverbs"),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -144,7 +144,7 @@ export class TokensSource {
         filterItems(isSituationModel),
         filterTokenInPath("~/arrivalverbs"),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -161,7 +161,7 @@ export class TokensSource {
         // so this is safe.
         firstOrDefault((situation) => situation.verbId === "terrain.unlock"),
         distinctUntilChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -176,7 +176,7 @@ export class TokensSource {
         filterItems(isSituationModel),
         filterItems((x) => x.payloadType === "SalonSituation"),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -192,7 +192,7 @@ export class TokensSource {
         filterItems(isConnectedTerrainModel),
         filterItemObservations((t) => t.sealed$.pipe(map((sealed) => !sealed))),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -207,7 +207,7 @@ export class TokensSource {
       this._visibleElementStacks$ = this._visibleTokens$.pipe(
         filterItems(isElementStackModel),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -228,11 +228,11 @@ export class TokensSource {
             (x) =>
               !x.verbId.startsWith("library.bed.") &&
               !x.verbId.startsWith("garden.") &&
-              x.verbId != "world.beachcombing"
-          )
+              x.verbId != "world.beachcombing",
+          ),
         ),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -249,11 +249,12 @@ export class TokensSource {
         map((situations) =>
           situations.filter(
             (x) =>
-              x.verbId.startsWith("garden.") || x.verbId == "world.beachcombing"
-          )
+              x.verbId.startsWith("garden.") ||
+              x.verbId == "world.beachcombing",
+          ),
         ),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -268,7 +269,7 @@ export class TokensSource {
       this._wisdomTreeNodes$ = this._tokens$.pipe(
         filterItems(isWisdomNodeTerrainModel),
         distinctUntilShallowArrayChanged(),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -299,9 +300,9 @@ export class TokensSource {
               situations.push(unlock);
             }
             return situations;
-          }
+          },
         ),
-        shareReplay(1)
+        shareReplay(1),
       );
     }
 
@@ -358,7 +359,7 @@ export class TokensSource {
         prevTokens.length,
         "tokens, but only",
         tokens.length,
-        "were unique."
+        "were unique.",
       );
     }
 
@@ -377,7 +378,7 @@ export class TokensSource {
 
       const tokenModels = sortBy(
         tokens.map((token) => this._getOrUpdateTokenModel(token, thisUpdate)),
-        "id"
+        "id",
       );
 
       this._tokensSubject$.next(tokenModels);

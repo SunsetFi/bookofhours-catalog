@@ -12,7 +12,7 @@ function AspectsListCell<T extends RowData>({
   const value = props.getValue();
   const renderValue = React.useMemo(
     () => (showLevel ? value : mapValues(value, () => null)),
-    [value, showLevel]
+    [value, showLevel],
   );
 
   return <AspectsList aspects={renderValue} />;

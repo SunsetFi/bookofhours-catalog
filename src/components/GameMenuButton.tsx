@@ -99,7 +99,7 @@ const GameMenu = ({ anchorEl, onClose }: GameMenuProps) => {
             {autosave && (
               <Typography variant="caption">
                 {DateTime.fromISO(autosave.saveDate).toLocaleString(
-                  DateTime.DATETIME_SHORT
+                  DateTime.DATETIME_SHORT,
                 )}
               </Typography>
             )}

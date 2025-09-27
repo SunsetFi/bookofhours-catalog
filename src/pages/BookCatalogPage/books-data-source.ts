@@ -50,19 +50,19 @@ const xextFinalMatch = /^reading\.([^\.]+)$/;
 function elementStackToBook(
   elementStack: ElementStackModel,
   compendium: Compendium,
-  orchestrator: Orchestrator
+  orchestrator: Orchestrator,
 ): BookModel {
   const isMastered$ = elementStack.aspects$.pipe(
     map((aspects) => {
       const mastery = Object.keys(aspects).find((aspectId) =>
-        aspectId.startsWith("mastery.")
+        aspectId.startsWith("mastery."),
       );
       if (!mastery || aspects[mastery] < 1) {
         return false;
       }
 
       return true;
-    })
+    }),
   );
 
   const memory$ = combineLatest([isMastered$, elementStack.element$]).pipe(
@@ -74,7 +74,7 @@ function elementStackToBook(
       return element.xtriggers$.pipe(
         map((xtriggers) => {
           const readingTrigger = Object.keys(xtriggers).find((x) =>
-            x.startsWith("reading.")
+            x.startsWith("reading."),
           );
 
           if (readingTrigger) {
@@ -82,27 +82,27 @@ function elementStackToBook(
           }
 
           return null;
-        })
+        }),
       );
     }),
     distinctUntilChanged(),
-    map((memoryId) => (memoryId ? compendium.getElementById(memoryId) : null))
+    map((memoryId) => (memoryId ? compendium.getElementById(memoryId) : null)),
   );
 
   const memoryElementId$ = memory$.pipe(
-    map((memory) => memory?.elementId ?? null)
+    map((memory) => memory?.elementId ?? null),
   );
   const memoryLabel$ = memory$.pipe(
-    switchMapIfNotNull((memory) => memory.label$)
+    switchMapIfNotNull((memory) => memory.label$),
   );
 
   const memoryAspects$ = memory$.pipe(
     switchMapIfNotNull((memory) => memory?.aspects$),
-    map((aspects) => pick(aspects ?? {}, powerAspects))
+    map((aspects) => pick(aspects ?? {}, powerAspects)),
   );
 
   const elementXexts$ = elementStack.element$.pipe(
-    switchMapIfNotNull((element) => element.xexts$)
+    switchMapIfNotNull((element) => element.xexts$),
   );
   const description$ = combineLatest([
     elementStack.description$,
@@ -125,7 +125,7 @@ function elementStackToBook(
       }
 
       return result;
-    })
+    }),
   );
 
   return decorateObjectInstance(elementStack, {
@@ -152,7 +152,7 @@ function elementStackToBook(
         }
 
         const isMastered = Object.keys(elementStack.aspects).some((aspectId) =>
-          aspectId.startsWith("mastery.")
+          aspectId.startsWith("mastery."),
         );
 
         const recipeId = isMastered
@@ -169,7 +169,7 @@ function elementStackToBook(
 
 function extractMysteryAspect(aspects: Aspects): string | null {
   let mystery = Object.keys(aspects).find((aspectId) =>
-    aspectId.startsWith("mystery.")
+    aspectId.startsWith("mystery."),
   );
   if (!mystery) {
     return null;
@@ -179,7 +179,7 @@ function extractMysteryAspect(aspects: Aspects): string | null {
 }
 
 export function getBooksObservable(
-  container: Container
+  container: Container,
 ): Observable<BookModel[]> {
   const compendium = container.get(Compendium);
   const orchestrator = container.get(Orchestrator);
@@ -193,8 +193,8 @@ export function getBooksObservable(
     filterTokenNotInPath("~/arrivalverbs"),
     distinctUntilShallowArrayChanged(),
     mapArrayItemsCached((item) =>
-      elementStackToBook(item, compendium, orchestrator)
-    )
+      elementStackToBook(item, compendium, orchestrator),
+    ),
   );
 }
 

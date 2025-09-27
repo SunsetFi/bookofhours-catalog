@@ -27,7 +27,7 @@ const OrchestrationSlots = ({
         display: "grid",
         gridTemplateColumns: "repeat(2, 1fr)",
         gridTemplateRows: `repeat(${Math.ceil(
-          slots.length / 2
+          slots.length / 2,
         )}, fit-content(100px))`,
         rowGap: 5,
         columnGap: 3,

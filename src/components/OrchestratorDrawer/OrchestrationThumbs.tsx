@@ -62,9 +62,9 @@ const SituationThumb = ({ situation }: SituationThumbProps) => {
   const hasEmptyThresholds = useObservation(
     () =>
       situation.thresholdContents$.pipe(
-        map((contents) => values(contents).some((x) => x === null))
+        map((contents) => values(contents).some((x) => x === null)),
       ),
-    [situation]
+    [situation],
   );
 
   if (!iconUrl) {

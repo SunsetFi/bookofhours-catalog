@@ -95,7 +95,7 @@ const SkillsCatalogPage = () => {
       }),
       columnHelper.description(),
     ],
-    []
+    [],
   );
 
   return (

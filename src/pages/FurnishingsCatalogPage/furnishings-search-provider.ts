@@ -9,7 +9,7 @@ export const furnishingsSearchProvider = createElementStackSearchProvider(
   (element) =>
     element.label$.pipe(
       map((label) =>
-        label ? `filter-label=\"${encodeURIComponent(label)}\"` : null
-      )
-    )
+        label ? `filter-label=\"${encodeURIComponent(label)}\"` : null,
+      ),
+    ),
 );

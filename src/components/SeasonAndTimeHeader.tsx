@@ -28,7 +28,7 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
   const secondsToTomorrow =
     useObservation(timeSource.secondsUntilTomorrow$) ?? Number.NaN;
   const secondsToTomorrowStr = secondsToTomorrow.toFixed(
-    secondsToTomorrow > 60 ? 0 : 1
+    secondsToTomorrow > 60 ? 0 : 1,
   );
 
   const secondsToNextEvent =
@@ -36,12 +36,12 @@ const SeasonAndTimeHeader = ({ sx }: SeasonAndTimeHeaderProps) => {
       () =>
         tokensSource.visibleSituations$.pipe(
           observeAllMap((s) => s.timeRemaining$),
-          map((seconds) => Math.max(...seconds.filter((x) => x > 0)))
+          map((seconds) => Math.max(...seconds.filter((x) => x > 0))),
         ),
-      [tokensSource.visibleSituations$]
+      [tokensSource.visibleSituations$],
     ) ?? Number.NaN;
   const secondsToNextEventStr = secondsToNextEvent.toFixed(
-    secondsToNextEvent > 60 ? 0 : 1
+    secondsToNextEvent > 60 ? 0 : 1,
   );
 
   const hasSecondsToTomorrow = !Number.isNaN(secondsToTomorrow);

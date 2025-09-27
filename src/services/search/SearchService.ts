@@ -25,13 +25,13 @@ export class SearchService {
 
   private _searchQueryVersion = 0;
   private readonly _searchQueryInput$ = new BehaviorSubject<string | null>(
-    null
+    null,
   );
 
   private readonly _searchBusy$ = new BehaviorSubject(false);
 
   private readonly _searchQueryDebounced$ = this._searchQueryInput$.pipe(
-    debounceTime(500)
+    debounceTime(500),
   );
 
   private readonly _searchActiveQuery$: Observable<SearchQuery>;
@@ -41,29 +41,29 @@ export class SearchService {
 
   constructor(
     @inject(Container) private readonly _container: Container,
-    @inject(Compendium) private readonly _compendium: Compendium
+    @inject(Compendium) private readonly _compendium: Compendium,
   ) {
     this._searchActiveQuery$ = this._searchQueryDebounced$.pipe(
       filter(isNotNull),
       map((x) => x.trim()),
       filter((x) => x != ""),
       switchMap((x) => this._parseSearchQuery(x)),
-      shareReplay(1)
+      shareReplay(1),
     );
 
     const rawResults$ = combineLatest(
       providers.map((provider) =>
-        provider(this._searchActiveQuery$, this._container)
-      )
+        provider(this._searchActiveQuery$, this._container),
+      ),
     ).pipe(
       map((results) => results.flat()),
-      shareReplay(1)
+      shareReplay(1),
     );
 
     this._searchTotal$ = rawResults$.pipe(map((x) => x.length));
     this._searchResults$ = rawResults$.pipe(
       map((x) => take(x, 25)),
-      shareReplay(1)
+      shareReplay(1),
     );
 
     let listeningVersion: number | null = null;

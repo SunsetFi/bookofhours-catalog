@@ -23,7 +23,7 @@ export class ElementModel
   constructor(
     private readonly _elementId: string,
     resolve: (id: string) => Promise<Element | null>,
-    private readonly _api: API
+    private readonly _api: API,
   ) {
     this._element$ = promiseFuncToObservable(() => resolve(_elementId));
   }
@@ -63,7 +63,7 @@ export class ElementModel
   get description$() {
     if (this._description$ == null) {
       this._description$ = this._element$.pipe(
-        map((e) => e?.description ?? null)
+        map((e) => e?.description ?? null),
       );
     }
 
@@ -74,7 +74,7 @@ export class ElementModel
   get xexts$() {
     if (!this._xexts$) {
       this._xexts$ = this._element$.pipe(
-        map((e) => Object.freeze({ ...e?.xexts }))
+        map((e) => Object.freeze({ ...e?.xexts })),
       );
     }
 
@@ -85,7 +85,7 @@ export class ElementModel
   get iconUrl$() {
     if (!this._iconUrl$) {
       this._iconUrl$ = new BehaviorSubject(
-        `${this._api.baseUrl}/api/compendium/elements/${this.elementId}/icon.png`
+        `${this._api.baseUrl}/api/compendium/elements/${this.elementId}/icon.png`,
       );
     }
 
@@ -96,7 +96,7 @@ export class ElementModel
   get aspects$() {
     if (this._aspects$ == null) {
       this._aspects$ = this._element$.pipe(
-        map((e) => Object.freeze({ ...e?.aspects }))
+        map((e) => Object.freeze({ ...e?.aspects })),
       );
     }
 
@@ -107,7 +107,7 @@ export class ElementModel
   get slots$() {
     if (this._slots$ == null) {
       this._slots$ = this._element$.pipe(
-        map((e) => Object.freeze([...(e?.slots ?? [])]))
+        map((e) => Object.freeze([...(e?.slots ?? [])])),
       );
     }
 
@@ -119,7 +119,7 @@ export class ElementModel
     if (this._xtriggers$ == null) {
       this._xtriggers$ = this._element$.pipe(
         // TODO: Deep freeze
-        map((e) => Object.freeze({ ...e?.xtriggers }))
+        map((e) => Object.freeze({ ...e?.xtriggers })),
       );
     }
 

@@ -37,7 +37,7 @@ const SettingsDialogContent = () => {
                   onChange={(e) =>
                     settingsManager.set(
                       "interactivity",
-                      e.target.checked ? "minimal" : "read-only"
+                      e.target.checked ? "minimal" : "read-only",
                     )
                   }
                 />
@@ -96,7 +96,7 @@ const SettingsDialogContent = () => {
                       onChange={(e) =>
                         settingsManager.set(
                           "enableWisdomEditing",
-                          e.target.checked
+                          e.target.checked,
                         )
                       }
                     />

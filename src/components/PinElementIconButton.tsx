@@ -22,7 +22,7 @@ const PinElementIconButton = ({
 
   const isElementPinned = useObservation(
     () => (elementId ? pinboard.isElementPinned$(elementId) : False$),
-    [elementId, pinboard]
+    [elementId, pinboard],
   );
 
   const onClick = React.useCallback(() => {

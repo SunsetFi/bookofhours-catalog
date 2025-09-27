@@ -13,10 +13,10 @@ export function useUnlockedLocationLabels() {
     () =>
       tokensSource.unsealedTerrains$.pipe(
         filterItemObservations((terrain) =>
-          terrain.shrouded$.pipe(map((shrouded) => !shrouded))
+          terrain.shrouded$.pipe(map((shrouded) => !shrouded)),
         ),
-        observeAllMap((terrain) => terrain.label$)
+        observeAllMap((terrain) => terrain.label$),
       ),
-    [tokensSource]
+    [tokensSource],
   );
 }

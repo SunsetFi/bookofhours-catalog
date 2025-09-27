@@ -37,7 +37,7 @@ const HarvestCatalogPage = () => {
       columnHelper.location(),
       columnHelper.description(),
     ],
-    []
+    [],
   );
 
   return (

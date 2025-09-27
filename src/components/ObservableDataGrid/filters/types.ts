@@ -2,7 +2,7 @@ import { RowData } from "@tanstack/react-table";
 
 export interface FilterComponentProps<
   TFilterValue = any,
-  TItemValue = TFilterValue
+  TItemValue = TFilterValue,
 > {
   columnValues: TItemValue[];
   filterValue: TFilterValue | null;
