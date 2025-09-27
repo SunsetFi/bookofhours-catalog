@@ -15,7 +15,7 @@ export const OSType: OSType = OS_WINDOWS.test(osPlatform)
   ? "linux"
   : "unknown";
 
-export const isProd: boolean = process.env.NODE_ENV === "production";
+export const isProd: boolean = import.meta.env.PROD;
 
 export const keyboardModifierUseMeta = osPlatform === "mac";
 

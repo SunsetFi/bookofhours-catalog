@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "postinstall": "rimraf node_modules/.vite",
-    "prebuild": "npm run clean",
+    "prebuild": "pnpm run clean",
     "build": "cross-env NODE_ENV=production vite build",
     "typecheck": "tsc --noEmit",
     "preview": "cross-env NODE_ENV=development vite preview",
@@ -39,7 +39,9 @@
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.14.6",
     "@mui/material": "^5.8.2",
+    "@popperjs/core": "^2.11.8",
     "@tanstack/react-table": "^8.10.4",
+    "@tanstack/table-core": "^8.21.3",
     "clsx": "^2.1.1",
     "history": "^5.3.0",
     "http-status-codes": "^2.2.0",

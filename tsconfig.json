@@ -13,7 +13,8 @@
 
     "downlevelIteration": true,
 
-    "lib": ["dom"],
+    "lib": ["dom", "DOM.Iterable","ES2024"],
+    "types": ["vite/client"],
 
     "strict": true,
 

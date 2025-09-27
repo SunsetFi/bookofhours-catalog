@@ -210,7 +210,7 @@ const LocationsCatalogPage = () => {
           },
           filterFn: multiSelectFilter,
           meta: {
-            filterComponent: (props) => {
+            filterComponent: (props: FilterComponentProps) => {
               return (
                 <MultiselectFilter
                   allowedValues={venueAspectLabels}

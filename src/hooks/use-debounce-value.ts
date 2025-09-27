@@ -18,7 +18,7 @@ export function useDebounceCommitValue<T>(
 
   const [value, setValue] = React.useState<T | undefined>(undefined);
 
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<number>();
   const timeoutValue = React.useRef<T | undefined>(undefined);
 
   React.useEffect(() => {

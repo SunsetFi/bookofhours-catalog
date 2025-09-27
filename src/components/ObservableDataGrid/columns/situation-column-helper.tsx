@@ -14,6 +14,7 @@ import {
   aspectsFilter,
   TextFilter,
   multiSelectFilter,
+  FilterComponentProps,
 } from "../filters";
 import { EnhancedColumnDefBase } from "../types";
 
@@ -83,7 +84,7 @@ export function createSituationColumnHelper<
             aspectsMagnitude(b.getValue(columnId)),
           filterFn: aspectsFilter,
           meta: {
-            filterComponent: (props) => (
+            filterComponent: (props: FilterComponentProps) => (
               <AspectsFilter
                 allowedAspectIds={
                   typeof aspects === "function" ? "auto" : aspects
@@ -120,7 +121,7 @@ export function createSituationColumnHelper<
           cell: TextWrapCell,
           filterFn: multiSelectFilter,
           meta: {
-            filterComponent: (props) => {
+            filterComponent: (props: FilterComponentProps) => {
               const locations = useUnlockedLocationLabels() ?? [];
               return <MultiselectFilter allowedValues={locations} {...props} />;
             },

@@ -12,7 +12,7 @@ export type TaskUnsubscriber = () => void;
 export class UpdatePoller implements Initializable {
   private readonly _tasks: (() => Promise<void>)[] = [];
   private _currentTask = 0;
-  private _pollingTimeout: NodeJS.Timeout | null = null;
+  private _pollingTimeout: number | null = null;
 
   addTask(task: () => Promise<void>): () => void {
     this._tasks.push(task);
