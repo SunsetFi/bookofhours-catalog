@@ -137,7 +137,6 @@ function elementStackToBook(
     memoryLabel$,
     memoryAspects$,
     description$,
-    // Journal has a lot of complex unique recipes that we are not dealing with currently.
     read() {
       if (elementStack.elementId.startsWith("uncatbook.")) {
         const period = elementStack.elementId.substring(10);

@@ -22,6 +22,10 @@ const columns = [
   columnHelper.display({
     id: "book-commands",
     size: 50,
+    header: "",
+    meta: {
+      columnName: "Commands",
+    },
     cell: (props) => {
       return (
         <Stack direction="column" alignItems="center">
