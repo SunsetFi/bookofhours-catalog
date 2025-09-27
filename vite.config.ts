@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 import svgr from "vite-plugin-svgr";
 
-import * as pkg from "./package.json" with { type: "json" };
+import pkg from "./package.json" with { type: "json" };
 const { version } = pkg;
 
 const NamedChunks = {
