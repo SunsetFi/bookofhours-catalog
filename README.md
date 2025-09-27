@@ -43,7 +43,7 @@ This project provides two zip files depending on your situation:
 
 Do not use Quickstart. Install [BepInEx manually](https://docs.bepinex.dev/articles/user_guide/installation/index.html) according to your operating system, and use the BepInEx.Plugin package.
 
-Note that some games require you to install the Windows version of BepInEx on your native operating system, but Book of Hours is not one of them.
+Note that some games require you to install the Windows version of BepInEx regardless of your operating system, but Book of Hours is not one of them.
 
 ## Usage
 
