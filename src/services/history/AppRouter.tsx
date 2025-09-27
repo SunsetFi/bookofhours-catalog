@@ -21,6 +21,7 @@ const AppRouter = ({ children }: AppRouterProps) => {
       location={state.location}
       navigationType={state.action}
       navigator={history}
+      future={{ v7_relativeSplatPath: true }}
     />
   );
 };
