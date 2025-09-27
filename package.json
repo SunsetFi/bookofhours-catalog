@@ -20,7 +20,6 @@
   "author": "SunsetFi",
   "license": "ISC",
   "devDependencies": {
-    "@types/events": "^3.0.3",
     "@types/lodash": "^4.17.20",
     "@types/luxon": "^3.7.1",
     "@types/platform": "^1.3.6",

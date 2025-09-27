@@ -75,9 +75,6 @@ importers:
         specifier: ^2.19.0
         version: 2.19.0
     devDependencies:
-      '@types/events':
-        specifier: ^3.0.3
-        version: 3.0.3
       '@types/lodash':
         specifier: ^4.17.20
         version: 4.17.20
@@ -772,9 +769,6 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
-
-  '@types/events@3.0.3':
-    resolution: {integrity: sha512-trOc4AAUThEz9hapPtSd7wf5tiQKvTtu5b371UxXdTuqzIh0ArcRspRP0i0Viu+LXstIQ1z96t1nsPxT9ol01g==}
 
   '@types/history@4.7.11':
     resolution: {integrity: sha512-qjDJRrmvBMiTx+jyLxvLfJU7UznFuokDv4f3WRuriHKERccVpFU+8XMQUAbDzoiJCsmexxRExQeMwwCdamSKDA==}
@@ -2153,8 +2147,6 @@ snapshots:
   '@types/circular-json@0.4.0': {}
 
   '@types/estree@1.0.8': {}
-
-  '@types/events@3.0.3': {}
 
   '@types/history@4.7.11': {}
 
