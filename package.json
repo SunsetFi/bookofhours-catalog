@@ -41,7 +41,7 @@
     "@mui/icons-material": "^5.14.6",
     "@mui/material": "^5.8.2",
     "@popperjs/core": "^2.11.8",
-    "@tanstack/react-table": "^8.10.4",
+    "@tanstack/react-table": "^8.21.3",
     "@tanstack/table-core": "^8.21.3",
     "clsx": "^2.1.1",
     "history": "^5.3.0",

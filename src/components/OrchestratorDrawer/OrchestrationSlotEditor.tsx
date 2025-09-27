@@ -54,7 +54,7 @@ const OrchestrationSlotEditor = React.memo(
         fullWidth
         label={slot.spec.label}
         helperText={
-          <Stack direction="column" gap={1}>
+          <Stack direction="column" gap={1} sx={{ mt: 0.5 }}>
             {requiredAspects.length > 0 && (
               <Stack direction="row" gap={1}>
                 <Typography component="span" sx={{ mr: "auto" }}>
