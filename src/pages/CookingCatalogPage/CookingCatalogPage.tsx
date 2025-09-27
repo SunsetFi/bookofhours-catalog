@@ -3,9 +3,9 @@ import React from "react";
 import { RecipeModel } from "@/services/sh-compendium";
 
 import DataGridPage from "@/components/DataGridPage";
+import { createObservableColumnHelper } from "@/components/ObservableDataGrid";
 
 import { useCookables } from "./cooking-data-source";
-import { createObservableColumnHelper } from "@/components/ObservableDataGrid";
 
 const columnHelper = createObservableColumnHelper<RecipeModel>();
 
