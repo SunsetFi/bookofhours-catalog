@@ -1,5 +1,5 @@
 import React from "react";
-import { Router } from "react-router";
+import { Router } from "react-router-dom";
 
 import { useHistory } from "./hooks";
 
@@ -13,7 +13,15 @@ const AppRouter = ({ children }: AppRouterProps) => {
     location: history.location,
   });
 
-  React.useLayoutEffect(() => history.listen(setState), [history]);
+  React.useLayoutEffect(
+    () =>
+      history.listen((state) => {
+        React.startTransition(() => {
+          setState(state);
+        });
+      }),
+    [history]
+  );
 
   return (
     <Router
