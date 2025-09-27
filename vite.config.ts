@@ -3,7 +3,8 @@ import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 import svgr from "vite-plugin-svgr";
 
-const { version } = require("./package.json");
+import * as pkg from "./package.json" with { type: "json" };
+const { version } = pkg;
 
 const NamedChunks = {
   // These packages can create cirular references, so we need to give them their own files
