@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Box, TextField, Button } from "@mui/material";
+import { Box, TextField, Button, IconButton } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
 
 import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 
@@ -31,19 +32,6 @@ export const TextFilter = ({
         height: "100%",
       }}
     >
-      <Box
-        sx={{
-          pt: 1,
-          px: 1,
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-        }}
-      >
-        <Button size="small" onClick={() => onChange(null)}>
-          Clear
-        </Button>
-      </Box>
       <TextField
         sx={{ m: 1 }}
         autoFocus
@@ -51,6 +39,11 @@ export const TextFilter = ({
         slotProps={{
           input: {
             autoFocus: true,
+            endAdornment: (
+              <IconButton onClick={() => onChange(null)} size="small">
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            ),
           },
         }}
         value={localValue ?? filterValue ?? ""}

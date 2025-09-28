@@ -3,6 +3,8 @@
 ## 1.5.2
 
 - Fix certain table columns not having names in table settings.
+- Fix clicking the focus button in some search result items closing search results.
+- Fix screen reader role of some dialogs.
 
 ## 1.5.1 (Mislabeled as tag v1.4.1)
 
