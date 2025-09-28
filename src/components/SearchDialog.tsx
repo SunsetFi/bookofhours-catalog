@@ -72,9 +72,11 @@ const SearchDialog = () => {
   return (
     <Dialog
       open
-      PaperProps={{
-        "aria-modal": "true",
-        role: "document",
+      slotProps={{
+        paper: {
+          "aria-modal": "true",
+          role: "document",
+        },
       }}
       aria-label="Search"
       onClose={() => searchService.close()}

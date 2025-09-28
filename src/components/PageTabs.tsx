@@ -77,7 +77,12 @@ const PageTabs = () => {
       </Tooltip>
       <Tooltip
         title="View Project on Github"
-        PopperProps={{ sx: { pointerEvents: "none" }, placement: "right" }}
+        slotProps={{
+          popper: {
+            sx: { pointerEvents: "none" },
+            placement: "right",
+          },
+        }}
       >
         <MuiLink
           href={repositoryUrl}
@@ -105,7 +110,9 @@ const PageTab = ({ item }: PageTab) => {
   return (
     <Tooltip
       title={<Typography variant="body1">{label}</Typography>}
-      PopperProps={{ sx: { pointerEvents: "none" }, placement: "right" }}
+      slotProps={{
+        popper: { sx: { pointerEvents: "none" }, placement: "right" },
+      }}
     >
       <Link key={path} to={path}>
         <Box

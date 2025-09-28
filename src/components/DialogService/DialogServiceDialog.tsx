@@ -47,9 +47,11 @@ const TextDialog = ({ model }: TextDialogProps) => {
   return (
     <Dialog
       open
-      PaperProps={{
-        "aria-model": "true",
-        role: "alertdialog",
+      slotProps={{
+        paper: {
+          "aria-modal": "true",
+          role: "alertdialog",
+        },
       }}
       role="alertdialog"
       aria-describedby="dialog-content"
@@ -71,9 +73,11 @@ const ComponentDialog = ({ model }: ComponentDialogProps) => {
   return (
     <Dialog
       open
-      PaperProps={{
-        "aria-model": "true",
-        role: "document",
+      slotProps={{
+        paper: {
+          "aria-modal": "true",
+          role: "document",
+        },
       }}
       aria-labelledby="dialog-title"
       aria-describedby="dialog-content"

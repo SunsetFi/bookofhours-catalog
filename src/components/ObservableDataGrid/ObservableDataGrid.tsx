@@ -113,7 +113,7 @@ function ObservableDataGrid<T extends {}>({
   }, [tableColumns]);
 
   const allColumnIds = React.useMemo(
-    () => tableColumns.map((c) => c.id!),
+    () => tableColumns.map((c) => c.id),
     [tableColumns],
   );
   const resolvedVisibleColumnIds =
@@ -367,11 +367,12 @@ function autoColumnId<T>(
   }
 }
 
+type ColumnDefWithId<T> = ColumnDef<T> & { id: string };
 function observableToColumnDef<T extends {}>(
   observableColumn: ObservableColumnDef<T>,
   index: number,
-): ColumnDef<Record<string, any>> {
-  let result = { ...observableColumn } as ColumnDef<Record<string, any>>;
+): ColumnDefWithId<Record<string, any>> {
+  let result = { ...observableColumn } as ColumnDefWithId<Record<string, any>>;
   if (
     isObservableAccessorKeyColumnDef(observableColumn) ||
     isObservableAccessorFnColumnDef(observableColumn)

@@ -81,7 +81,7 @@ const SituationSelectField = ({
       getOptionDisabled={(option) =>
         requireUnstarted ? option.state !== "Unstarted" : false
       }
-      componentsProps={{
+      slotProps={{
         // Neither of these have titles, and NVDA reads both.
         // Not sure about other screen readers
         clearIndicator: { "aria-label": "" },
@@ -91,30 +91,32 @@ const SituationSelectField = ({
         <TextField
           {...params}
           label={label}
-          InputProps={{
-            ...params.InputProps,
-            autoFocus,
-            startAdornment: (
-              <InputAdornment position="start" aria-hidden="true">
-                <Box
-                  sx={{
-                    display: "flex",
-                    height: "100%",
-                    width: "30px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {selectedVerbId && (
-                    <VerbIcon
-                      maxWidth={30}
-                      maxHeight={30}
-                      verbId={selectedVerbId}
-                    />
-                  )}
-                </Box>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              autoFocus,
+              startAdornment: (
+                <InputAdornment position="start" aria-hidden="true">
+                  <Box
+                    sx={{
+                      display: "flex",
+                      height: "100%",
+                      width: "30px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {selectedVerbId && (
+                      <VerbIcon
+                        maxWidth={30}
+                        maxHeight={30}
+                        verbId={selectedVerbId}
+                      />
+                    )}
+                  </Box>
+                </InputAdornment>
+              ),
+            },
           }}
         />
       )}

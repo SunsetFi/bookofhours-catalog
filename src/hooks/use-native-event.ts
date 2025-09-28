@@ -17,7 +17,6 @@ export function useNativeEvent<
       return;
     }
 
-    // De-reference the target so we remove from the right element.
     element.addEventListener(type, listener, options);
     return () => {
       element.removeEventListener(type, listener, options);

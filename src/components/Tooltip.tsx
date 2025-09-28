@@ -5,7 +5,6 @@ import type { Instance as PopperInstance } from "@popperjs/core";
 import { Box, Popper, SxProps } from "@mui/material";
 
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
-import { useDebounceCommitValue } from "@/hooks/use-debounce-value";
 
 export interface TooltipProps {
   sx?: SxProps;
@@ -30,16 +29,43 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
     null,
   );
 
-  const [delayedFocus, setDelayedFocus] = React.useState(false);
-  const [escaped, setEscaped] = React.useState(false);
+  const [mouseFocusing, setMouseFocusing] = React.useState(false);
+  const mouseFocusingTimeoutRef = React.useRef<number | null>(null);
 
-  const [immediateFocus, focusChange] = useDebounceCommitValue<boolean>(
-    700,
-    setDelayedFocus,
-  );
+  const focusOff = React.useCallback(() => {
+    setMouseFocusing(false);
+    if (mouseFocusingTimeoutRef.current != null) {
+      clearTimeout(mouseFocusingTimeoutRef.current);
+      mouseFocusingTimeoutRef.current = null;
+    }
+  }, []);
 
-  const open =
-    !escaped && !disabled && ((immediateFocus && delayedFocus) || false);
+  const focusStart = React.useCallback(() => {
+    if (disabled) {
+      return;
+    }
+
+    if (mouseFocusingTimeoutRef.current != null) {
+      clearTimeout(mouseFocusingTimeoutRef.current);
+      mouseFocusingTimeoutRef.current = null;
+    }
+
+    mouseFocusingTimeoutRef.current = setTimeout(() => {
+      setMouseFocusing(true);
+    }, 400);
+  }, [disabled]);
+
+  React.useEffect(() => {
+    if (disabled) {
+      if (mouseFocusingTimeoutRef.current != null) {
+        clearTimeout(mouseFocusingTimeoutRef.current);
+        mouseFocusingTimeoutRef.current = null;
+      }
+      setMouseFocusing(false);
+    }
+  }, [disabled]);
+
+  const open = !disabled && mouseFocusing;
 
   useMutationObserver(contentRef, () => {
     if (popperRef.current == null) {
@@ -60,21 +86,11 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
         // We might be nested in other poppers, so stop propagation here.
         e.preventDefault();
         e.stopPropagation();
-        setEscaped(true);
+        focusOff();
       }
     },
-    [open],
+    [open, focusOff],
   );
-
-  const focusOff = React.useCallback(() => {
-    focusChange(false);
-    setDelayedFocus(false);
-    setEscaped(false);
-  }, [focusChange]);
-
-  const focusOn = React.useCallback(() => {
-    focusChange(true);
-  }, [focusChange]);
 
   return (
     <>
@@ -85,10 +101,12 @@ const Tooltip = ({ sx, children, title, disabled }: TooltipProps) => {
         id={id}
         aria-describedby={open ? `${id}-tooltip` : undefined}
         ref={setAnchorRef}
-        onMouseOver={focusOn}
-        onFocus={focusOn}
-        onMouseOut={focusOff}
+        onFocus={focusStart}
         onBlur={focusOff}
+        onMouseOver={focusStart}
+        // Reset the timer if the mouse moves.
+        onMouseMove={focusStart}
+        onMouseOut={focusOff}
         onKeyDown={onKeyDown}
       >
         {children}

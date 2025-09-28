@@ -184,7 +184,7 @@ const ElementStackSelectField = ({
       getOptionDisabled={(option) => requireExterior && !option.exterior}
       value={selectedValue}
       onChange={(_, value) => onChange(value?.elementStack ?? null)}
-      componentsProps={{
+      slotProps={{
         // Neither of these have titles, and NVDA reads both.
         // Not sure about other screen readers
         clearIndicator: { "aria-label": "" },
@@ -205,38 +205,38 @@ const ElementStackSelectField = ({
           }}
           autoFocus={autoFocus}
           label={label}
-          // Hack: Orchestration slots need to put divs in helperText, and FormHelperText defaults to a p tag
-          // FIXME: We should accept the requirements data ourselves and render it in a standard way
-          // rather than having it passed in as helperText.
-          // This would be useful to reuse for unlock dialog.
-          FormHelperTextProps={{
-            component: "div",
+          slotProps={{
+            // Hack: Orchestration slots need to put divs in helperText, and FormHelperText defaults to a p tag
+            // FIXME: We should accept the requirements data ourselves and render it in a standard way
+            // rather than having it passed in as helperText.
+            // This would be useful to reuse for unlock dialog.
+            formHelperText: { component: "div" },
+            input: {
+              ...params.InputProps,
+              startAdornment: (
+                <InputAdornment position="start" aria-hidden="true">
+                  <Box
+                    sx={{
+                      display: "flex",
+                      height: "100%",
+                      width: "30px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {selectedElementId && (
+                      <ElementIcon
+                        maxWidth={30}
+                        maxHeight={30}
+                        elementId={selectedElementId}
+                      />
+                    )}
+                  </Box>
+                </InputAdornment>
+              ),
+            },
           }}
           helperText={helperText}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position="start" aria-hidden="true">
-                <Box
-                  sx={{
-                    display: "flex",
-                    height: "100%",
-                    width: "30px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {selectedElementId && (
-                    <ElementIcon
-                      maxWidth={30}
-                      maxHeight={30}
-                      elementId={selectedElementId}
-                    />
-                  )}
-                </Box>
-              </InputAdornment>
-            ),
-          }}
         />
       )}
       renderOption={(props, option) => (

@@ -48,7 +48,11 @@ export const TextFilter = ({
         sx={{ m: 1 }}
         autoFocus
         label="Search"
-        InputProps={{ autoFocus: true }}
+        slotProps={{
+          input: {
+            autoFocus: true,
+          },
+        }}
         value={localValue ?? filterValue ?? ""}
         onChange={(e) => setLocalValue(e.target.value)}
       />

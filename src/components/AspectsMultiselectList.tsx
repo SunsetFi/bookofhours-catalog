@@ -145,7 +145,11 @@ const AspectsMultiSelectItem: React.FC<AspectsMultiSelectItemProps> = ({
             checked={selected}
             tabIndex={-1}
             disableRipple
-            inputProps={{ "aria-labelledby": id }}
+            slotProps={{
+              input: {
+                "aria-labelledby": id,
+              },
+            }}
           />
         </ListItemIcon>
         <ListItemText id={id} primary={label ?? aspect} />
