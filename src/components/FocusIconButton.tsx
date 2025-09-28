@@ -11,7 +11,6 @@ export interface FocusIconButtonProps {
 
 const FocusIconButton = ({ token }: FocusIconButtonProps) => {
   const onClick = React.useCallback((e: React.MouseEvent) => {
-    console.log("FOCUS CLICK");
     e.preventDefault();
     e.stopPropagation();
     token.focus();
