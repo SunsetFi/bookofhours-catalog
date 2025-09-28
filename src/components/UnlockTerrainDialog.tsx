@@ -50,7 +50,7 @@ const UnlockTerrainDialog = () => {
       open
       slotProps={{
         paper: {
-          "aria-model": "true",
+          "aria-modal": "true",
           role: "document",
         },
       }}

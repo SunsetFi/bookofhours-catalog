@@ -25,6 +25,7 @@ import {
 import { Compendium, ElementModel } from "../sh-compendium";
 import { Aspects } from "secrethistories-api";
 import { IconButton } from "@mui/material";
+import FocusIconButton from "@/components/FocusIconButton";
 
 export type QueryProducer = (
   elementStack: ElementStackModel,
@@ -109,11 +110,7 @@ export function elementStackToSearchItem(
         secondaryText: location ?? undefined,
         pathQuery: pathQuery!,
         actions: [
-          location ? (
-            <IconButton onClick={() => elementStack.focus()}>
-              <VisibilityIcon />
-            </IconButton>
-          ) : null,
+          location ? <FocusIconButton token={elementStack} /> : null,
         ].filter(isNotNull),
       } satisfies PageSearchItemResult;
     }),

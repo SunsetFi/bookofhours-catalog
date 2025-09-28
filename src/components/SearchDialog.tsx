@@ -190,6 +190,10 @@ const SearchResultListItem = ({ item }: { item: SearchItemResult }) => {
 
   const onClick = React.useCallback(
     (e: React.MouseEvent) => {
+      console.log("CLICK");
+      if (e.defaultPrevented) {
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       searchService.close();
