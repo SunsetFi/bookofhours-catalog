@@ -1,5 +1,6 @@
 import { injectable, singleton } from "microinject";
 import { SchedulerLike, Subscription, asyncScheduler } from "rxjs";
+import { startTransition } from "react";
 
 @injectable()
 @singleton()
@@ -73,11 +74,13 @@ export class BatchingScheduler implements SchedulerLike {
       return;
     }
 
-    while (this._queue.length > 0) {
-      const work = this._queue.shift();
-      if (work) {
-        work();
+    startTransition(() => {
+      while (this._queue.length > 0) {
+        const work = this._queue.shift();
+        if (work) {
+          work();
+        }
       }
-    }
+    });
   }
 }

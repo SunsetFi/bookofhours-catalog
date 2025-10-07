@@ -2,6 +2,8 @@ import React from "react";
 
 import { Observable, combineLatest, filter, map, switchMap } from "rxjs";
 
+import { isNotNull } from "@/utils";
+
 import { filterItemObservations, observeAllMap } from "@/observables";
 
 import {
@@ -11,12 +13,12 @@ import {
   SearchQuery,
 } from "@/services/search";
 
+import OrchestrationIconButton from "@/components/OrchestrationIconButton";
+
 import {
   CraftableModel,
   getCraftablesObservable,
 } from "./crafting-data-source";
-import { isNotNull } from "@/utils";
-import OrchestrationIconButton from "@/components/OrchestrationIconButton";
 
 export const craftingSearchProvider: PageSearchProviderPipe = (
   query$,

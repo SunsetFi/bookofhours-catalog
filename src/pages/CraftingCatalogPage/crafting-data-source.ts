@@ -10,7 +10,6 @@ import {
   map,
   switchMap,
   shareReplay,
-  combineLatest,
 } from "rxjs";
 import { Aspects } from "secrethistories-api";
 
@@ -23,12 +22,7 @@ import {
 import { useDIContainer } from "@/container";
 
 import { Compendium, RecipeModel } from "@/services/sh-compendium";
-import {
-  CharacterSource,
-  filterHasAnyAspect,
-  Orchestrator,
-  TokensSource,
-} from "@/services/sh-game";
+import { CharacterSource, Orchestrator } from "@/services/sh-game";
 
 export interface CraftableModel {
   id: string;
@@ -66,6 +60,7 @@ function recipeToCraftableModel(
     map((elementId) =>
       elementId ? compendium.getElementById(elementId) : null,
     ),
+    shareReplay(1),
   );
 
   return {

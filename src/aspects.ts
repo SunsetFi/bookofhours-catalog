@@ -94,7 +94,7 @@ export const wisdomAspects = [
   "w.birdsong",
   "w.bosk",
   "w.preservation",
-];
+] as const;
 
 export function aspectsMagnitude(aspects: Aspects): number {
   return Math.sqrt(
