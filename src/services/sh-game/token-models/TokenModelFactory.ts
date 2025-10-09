@@ -17,32 +17,40 @@ import { WisdomNodeTerrainModel } from "./WisdomNodeTerrainModel";
 @injectable()
 @singleton()
 export class TokenModelFactory {
-  constructor(@inject(Container) private readonly _container: Container) {}
+  constructor(
+    @inject(API) private readonly _api: API,
+    @inject(Compendium) private readonly _compendium: Compendium,
+    @inject(TokensSource) private readonly _tokensSource: TokensSource,
+    @inject(BatchingScheduler)
+    private readonly _batchingScheduler: BatchingScheduler,
+    @inject(TokenParentTerrainFactory)
+    private readonly _tokenParentTerrainFactory: TokenParentTerrainFactory,
+  ) {}
 
   create(token: Token): TokenModel {
     switch (token.payloadType) {
       case "ElementStack":
         return new ElementStackModel(
           token,
-          this._container.get(API),
-          this._container.get(Compendium),
-          this._container.get(TokenParentTerrainFactory),
-          this._container.get(BatchingScheduler),
+          this._api,
+          this._compendium,
+          this._tokenParentTerrainFactory,
+          this._batchingScheduler,
         );
       case "ConnectedTerrain":
         return new ConnectedTerrainModel(
           token,
-          this._container.get(API),
-          this._container.get(Compendium).getRecipeById(token.infoRecipeId),
-          this._container.get(TokensSource).visibleTokens$,
+          this._api,
+          this._compendium.getRecipeById(token.infoRecipeId),
+          this._tokensSource.visibleTokens$,
         );
       case "WisdomNodeTerrain":
         return new WisdomNodeTerrainModel(
           token,
-          this._container.get(API),
-          this._container.get(TokensSource).tokens$,
-          this._container.get(Compendium),
-          this._container.get(BatchingScheduler),
+          this._api,
+          this._tokensSource.tokens$,
+          this._compendium,
+          this._batchingScheduler,
         );
       case "Situation":
       case "WorkstationSituation":
@@ -50,10 +58,10 @@ export class TokenModelFactory {
       case "SalonSituation":
         return new SituationModel(
           token as Situation,
-          this._container.get(API),
-          this._container.get(TokensSource).visibleElementStacks$,
-          this._container.get(TokenParentTerrainFactory),
-          this._container.get(BatchingScheduler),
+          this._api,
+          this._tokensSource.visibleElementStacks$,
+          this._tokenParentTerrainFactory,
+          this._batchingScheduler,
         );
       default:
         throw new Error(`Unknown token type: ${(token as any).payloadType}`);

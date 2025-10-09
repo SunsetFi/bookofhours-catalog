@@ -1,8 +1,7 @@
 import React from "react";
 
+import { Aspects } from "secrethistories-api";
 import { Observable, combineLatest, map, filter, switchMap } from "rxjs";
-
-import { Visibility as VisibilityIcon } from "@mui/icons-material";
 
 import {
   filterItemObservations,
@@ -11,38 +10,26 @@ import {
 } from "@/observables";
 import { isNotNull } from "@/utils";
 
+import FocusIconButton from "@/components/FocusIconButton";
+
 import {
   ElementStackModel,
   filterHasAnyAspect,
   TokensSource,
 } from "../sh-game";
 
+import { ElementModel } from "../sh-compendium";
+
 import {
   PageSearchItemResult,
   PageSearchProviderPipe,
   SearchQuery,
 } from "./types";
-import { Compendium, ElementModel } from "../sh-compendium";
-import { Aspects } from "secrethistories-api";
-import { IconButton } from "@mui/material";
-import FocusIconButton from "@/components/FocusIconButton";
 
 export type QueryProducer = (
   elementStack: ElementStackModel,
 ) => Observable<string | null>;
 
-export function createElementStackSearchProvider(
-  filterAspect: string,
-  produceQuery: QueryProducer,
-): PageSearchProviderPipe;
-export function createElementStackSearchProvider(
-  filterAspects: readonly string[],
-  produceQuery: QueryProducer,
-): PageSearchProviderPipe;
-export function createElementStackSearchProvider(
-  filterAspects: (elementStack: ElementStackModel) => Observable<boolean>,
-  produceQuery: QueryProducer,
-): PageSearchProviderPipe;
 export function createElementStackSearchProvider(
   filter:
     | string
