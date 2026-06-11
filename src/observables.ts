@@ -31,6 +31,7 @@ export const False$: Observable<false> = new BehaviorSubject(false);
 export const EmptyArray$: Observable<[]> = new BehaviorSubject([]);
 export const EmptyObject$: Observable<{}> = new BehaviorSubject({});
 
+// TODO: Adjust typings so that the caller knows we can return an object with no properties.
 export function observableObjectOrEmpty<T extends {}>(
   value: Observable<T> | null | undefined,
 ): Observable<T> {
