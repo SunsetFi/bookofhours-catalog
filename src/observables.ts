@@ -24,6 +24,10 @@ export type Observation<T> = T extends Observable<infer K> ? K : never;
 export const Null$: Observable<null> = new BehaviorSubject(null);
 export const True$: Observable<true> = new BehaviorSubject(true);
 export const False$: Observable<false> = new BehaviorSubject(false);
+
+// TODO: Make these subjects that pass a one-time new instance on subscribe,
+// so mutations don't pollute.
+// Check to make sure this doesn't start causing re-renders.
 export const EmptyArray$: Observable<[]> = new BehaviorSubject([]);
 export const EmptyObject$: Observable<{}> = new BehaviorSubject({});
 
@@ -99,30 +103,11 @@ export function pickObservable<T, K extends ObservableKeys<T>>(key: K) {
   };
 }
 
-// In every case where we use this, we do a mapping on array items before it,
-// and observeAllMap is more efficient.
-// export function observeAll<T>() {
-//   return (source: Observable<readonly Observable<T>[]>) => {
-//     return source.pipe(
-//       switchMap((observables) => {
-//         if (observables.length === 0) {
-//           return observableOf([] as T[]);
-//         }
-
-//         return combineLatest(observables);
-//       })
-//     );
-//   };
-// }
-
 export function observeAllMap<T, K>(
   func: (value: T, index: number) => Observable<K>,
 ): OperatorFunction<readonly T[], K[]> {
   return (source: Observable<readonly T[]>) => {
     return source.pipe(
-      // HACK: Add a shareReplay because combineLatest will resubscribe every time the top level array changes.
-      // FIXME: Write our own observeAll and observeAllMap that doesn't have this issue.
-      // We used to have our own, but it was buggy and got removed.
       mapArrayItemsCached((input, index) =>
         func(input, index).pipe(shareReplay(1)),
       ),
