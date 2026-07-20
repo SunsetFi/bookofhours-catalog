@@ -3,7 +3,7 @@ import { inject, injectable, singleton } from "microinject";
 
 import { version } from "@/runtime-env";
 import { GithubRelease, getGithubReleases } from "@/github";
-import { promiseFuncToObservable } from "@/observables";
+import { EmptyArray$, promiseFuncToObservable } from "@/observables";
 
 import { SettingsManager } from "../settings";
 

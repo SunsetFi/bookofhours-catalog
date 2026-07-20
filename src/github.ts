@@ -20,18 +20,23 @@ export interface GithubReleaseAsset {
 }
 
 export async function getGithubReleases(): Promise<GithubRelease[]> {
-  const response = await fetch(
-    `${githubApiRoot}/repos/${owner}/${repository}/releases`,
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
+  try {
+    const response = await fetch(
+      `${githubApiRoot}/repos/${owner}/${repository}/releases`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
       },
-    },
-  );
+    );
 
-  const body = await response.json();
-  return body;
+    const body = await response.json();
+    return body;
+  } catch (error) {
+    console.error("Failed to fetch GitHub releases:", error);
+    return [];
+  }
 }
 
 export function findBepInExPluginAsset(
